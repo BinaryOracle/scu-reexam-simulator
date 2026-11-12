@@ -1,0 +1,23 @@
+[app]
+database = "data/app.db"
+upload_dir = "data/audio"
+session_hours = 12
+max_audio_mb = 20
+
+[ai]
+base_url = "https://api.deepseek.com/v1"
+model = "deepseek-chat"
+api_key_env = "DEEPSEEK_API_KEY"
+
+[asr]
+base_url = ""
+model = "whisper-1"
+api_key_env = "ASR_API_KEY"
+
+[judge]
+image = "scu-judge:1"
+timeout_seconds = 5
+memory_mb = 256
+
+[interview]
+questions = ["请进行中文自我介绍。", "请进行英文自我介绍。", "请介绍一个你参与过的项目。", "请回答：你选择计算机专业的原因是什么？"]
