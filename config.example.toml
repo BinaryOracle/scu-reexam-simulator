@@ -4,20 +4,128 @@ upload_dir = "data/audio"
 session_hours = 12
 max_audio_mb = 20
 
+[security]
+# 留空时默认与数据库同目录的 password-view.key；部署时可指定独立绝对路径。
+# 必须连同数据库备份此文件；不要提交到版本库。
+# password_key_file = "/private/path/password-view.key"
+
+[email_auth]
+enabled = false # 配置 SMTP 后开启；未配置时明确返回不可用，不生成演示验证码
+smtp_host = "smtp.qq.com" # 腾讯企业邮箱可使用 smtp.exmail.qq.com，其他服务商按其文档填写
+smtp_port = 465 # SSL 通常为 465；STARTTLS 通常为 587
+smtp_security = "ssl" # ssl 或 starttls；始终验证 TLS 证书
+smtp_username = "" # 发件邮箱完整地址
+smtp_password = "" # 建议留空，通过下方环境变量提供 QQ 邮箱授权码 / SMTP 密码
+smtp_password_env = "SCU_SMTP_PASSWORD"
+from_email = "" # 留空沿用 smtp_username；自定义发件地址须经服务商授权
+from_name = "复试模拟系统"
+timeout_seconds = 15 # 必须小于 resend_seconds
+code_ttl_seconds = 300 # 不能小于 resend_seconds
+resend_seconds = 60
+max_attempts = 5 # 单个验证码最多错误次数，最多可设为 10
+rate_window_seconds = 3600
+max_email_codes = 5 # 每个邮箱每窗口发送上限
+max_ip_codes = 30 # 每个请求来源 IP 每窗口发送上限
+max_ip_attempts = 60 # 每个请求来源 IP 每窗口校验上限；不信任转发头
+
+[credits]
+shop_url = "https://wzyp.cn/shop/E1GQFV0P" # 仅跳转独立店铺，不对接支付；留空隐藏购买入口
+default_credits = 1 # 首次初始化默认次数；后台可修改后续新用户的默认值
+max_voucher_batch = 500
+
+# 下列套餐仅在首次创建套餐表时导入；运行后请在后台新增套餐，配置不覆盖数据库。
+[credits.packages.three]
+credits = 3
+price_fen = 200
+
+[credits.packages.ten]
+credits = 10
+price_fen = 500
+
 [ai]
-base_url = "https://api.deepseek.com/v1"
-model = "deepseek-chat"
-api_key_env = "DEEPSEEK_API_KEY"
+base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+model = "qwen3.8-omni-flash"
+api_key = ""
+api_key_env = "DASHSCOPE_API_KEY"
+request_timeout_seconds = 90
+ffmpeg = "ffmpeg"
+conversion_timeout_seconds = 30
+include_audio = true
+include_slide_images = true
+max_audio_mb = 8 # 合并压缩后的单个音频上限
+max_slide_pages = 60
+slide_image_size = 768
+max_context_chars = 120000
+
+[tts]
+enabled = true
+provider = "dashscope"
+protocol = "dashscope_audio"
+base_url = "https://dashscope.aliyuncs.com/api/v1" # 已验证北京公共接口；也可配置同地域 Workspace 专属地址
+model = "qwen-audio-3.1-tts-plus"
+voice = "longanhuan_v3.1"
+format = "wav"
+sample_rate = 24000
+api_key = ""
+api_key_env = "DASHSCOPE_API_KEY"
+request_timeout_seconds = 60
+max_audio_mb = 12
+cache_lock_timeout_seconds = 90 # 并发请求等待同一语音缓存生成的最长时间
+download_hosts = ["dashscope-result-bj.oss-cn-beijing.aliyuncs.com"]
 
 [asr]
-base_url = ""
-model = "whisper-1"
+base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+model = "qwen3-asr-flash"
+api_key = ""
 api_key_env = "ASR_API_KEY"
+ffmpeg = "ffmpeg"
+conversion_timeout_seconds = 30
+request_timeout_seconds = 120
+max_segment_seconds = 30 # 长录音分段识别，避免整场音频超过单次 ASR 限制
 
 [judge]
 image = "scu-judge:1"
 timeout_seconds = 5
+cleanup_timeout_seconds = 5 # 超时后强制移除本次评测容器的等待上限
 memory_mb = 256
 
 [interview]
-questions = ["请进行中文自我介绍。", "请进行英文自我介绍。", "请介绍一个你参与过的项目。", "请回答：你选择计算机专业的原因是什么？"]
+duration_seconds = 600
+warning_seconds = 60
+questions = ["请结合自己的复试 PPT，放映并完成中文自我介绍。", "请进行英文自我介绍。", "请介绍一个你参与过的项目。", "请回答：你选择计算机专业的原因是什么？"]
+
+[presentation]
+directory = "data/presentations"
+max_mb = 25
+max_pages = 60
+converter = "soffice"
+timeout_seconds = 60
+render_size = 1440
+fontconfig_file = "config/fonts.conf"
+
+[presentation_template]
+directory = "app/assets/reexam-2026"
+year = 2026
+name = "附件2：研究生复试-个人情况简介模板（统考生）.pptx"
+source_url = "https://cs.scu.edu.cn/info/1266/19768.htm"
+
+[recording]
+bitrate = 64000
+checkpoint_seconds = 15
+finalize_grace_seconds = 120
+live_chunk_seconds = 5
+
+# 每日训练；后台管理的目标与默认每轮题数优先于此处初始值，用户可单次指定题量。
+[training]
+timezone = "Asia/Shanghai"
+daily_goal = 5
+round_size = 5
+# 随机无放回抽题的相对权重：还需练习 > 未自评 > 已掌握。
+weight_again = 4
+weight_unseen = 2
+weight_known = 1
+max_round_questions = 10000
+max_import_items = 100
+max_import_bytes = 1048576
+max_question_chars = 12000
+max_answer_chars = 60000

@@ -1,0 +1,2583 @@
+[
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:001",
+    "position": 1,
+    "question": "In this report, we introduce the Gemini 2.X model family: Gemini 2.5 Pro and Gemini 2.5 Flash, as well as our earlier Gemini 2.0 Flash and Flash-Lite models. Gemini 2.5 Pro is our most capable model yet, achieving SoTA performance on frontier coding and reasoning benchmarks. In addition to its incredible coding and reasoning skills, Gemini 2.5 Pro is a thinking model that excels at multimodal understanding and it is now able to process up to 3 hours of video content. Its unique combination of long context, multimodal and reasoning capabilities can be combined to unlock new agentic workflows. Gemini 2.5 Flash provides excellent reasoning abilities at a fraction of the compute and latency requirements and Gemini 2.0 Flash and Flash-Lite provide high performance at low latency and cost. Taken together, the Gemini 2.X model generation spans the full Pareto frontier of model capability vs cost, allowing users to explore the boundaries of what is possible with complex agentic problem solving.",
+    "answer": "在本报告中，我们介绍 Gemini 2.X 模型系列，包括 Gemini 2.5 Pro、Gemini 2.5 Flash，以及此前的 Gemini 2.0 Flash 和 Flash-Lite。Gemini 2.5 Pro 是我们迄今能力最强的模型，在前沿编程与推理基准上达到了当时的领先水平。除编程和推理能力外，它还是一个擅长多模态理解的思考型模型，目前能够处理长达 3 小时的视频。其长上下文、多模态和推理能力相结合，可以支持新的智能体工作流程。Gemini 2.5 Flash 以较少的计算量和较低的延迟提供出色的推理能力，而 Gemini 2.0 Flash 和 Flash-Lite 则以较低延迟和成本提供较高性能。整体而言，Gemini 2.X 这一代模型覆盖了模型能力与成本权衡的完整帕累托前沿，使用户能够探索利用复杂智能体解决问题的可能性。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "gemini25",
+      "article": "Gemini 2.5: Pushing the Frontier with Advanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 1,
+      "page_end": 2,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [
+        "https://arxiv.org/abs/2507.06261"
+      ],
+      "glossary": [
+        [
+          "thinking model",
+          "思考型模型"
+        ],
+        [
+          "long context",
+          "长上下文"
+        ],
+        [
+          "Pareto frontier",
+          "帕累托前沿"
+        ],
+        [
+          "latency",
+          "延迟"
+        ],
+        [
+          "agentic workflow",
+          "智能体工作流"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:002",
+    "position": 2,
+    "question": "We present our latest multimodal models from the Gemini line: Gemini 1.5 Pro and Gemini 1.5 Flash. They are members of Gemini 1.5, a new family of highly-capable multimodal models which incorporates our latest innovations in sparse and dense scaling as well as major advances in training, distillation and serving infrastructure that allow it to push the boundary of efficiency, reasoning, planning, multi-linguality, function calling and long-context performance. Gemini 1.5 models are built to handle extremely long contexts; they have the ability to recall and reason over fine-grained information from up to at least 10M tokens. This scale is unprecedented among contemporary large language models (LLMs), and enables the processing of long-form mixed-modality inputs including entire collections of documents, multiple hours of video, and almost five days long of audio.",
+    "answer": "我们介绍 Gemini 系列最新的多模态模型：Gemini 1.5 Pro 和 Gemini 1.5 Flash。它们属于 Gemini 1.5 这一高性能多模态模型家族。该系列融合了我们在稀疏和稠密规模扩展方面的最新创新，以及训练、蒸馏和服务基础设施方面的重要进展，从而在效率、推理、规划、多语言、函数调用和长上下文性能上进一步拓展能力。Gemini 1.5 专为处理极长上下文而构建，能够从至少长达 1000 万词元的上下文中回忆细粒度信息并进行推理。这样的规模在当时的大语言模型中前所未有，可以处理长篇、混合模态的输入，包括整套文档、数小时的视频以及接近五天时长的音频。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "gemini15",
+      "article": "Gemini 1.5: Unlocking multimodal understanding across millions of tokens of context",
+      "section": "引言选段",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 2,
+      "page_end": 2,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 资料将 Gemini 1.5 英文与 Gemini 2.5 中文错配；本题按英文重新翻译，并单独归属 Gemini 1.5。10M 指报告中的实验能力，不等同于所有产品的公开窗口上限。",
+      "references": [
+        "https://arxiv.org/abs/2403.05530"
+      ],
+      "glossary": [
+        [
+          "sparse and dense scaling",
+          "稀疏与稠密规模扩展"
+        ],
+        [
+          "distillation",
+          "蒸馏"
+        ],
+        [
+          "serving infrastructure",
+          "推理服务基础设施"
+        ],
+        [
+          "fine-grained information",
+          "细粒度信息"
+        ],
+        [
+          "mixed-modality input",
+          "混合模态输入"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:003",
+    "position": 3,
+    "question": "This addendum describes two new models in the Claude 3 family: an upgraded version of Claude 3.5 Sonnet and the new Claude 3.5 Haiku. These models advance capabilities in reasoning, coding, and visual processing and demonstrate new competencies and performance improvements. This addendum provides detailed discussion of the performance and safety considerations for these new models. It includes updated benchmark results, human feedback evaluations, and in-depth analyses of the models’ behavior in areas such as reasoning, coding, and visual processing.",
+    "answer": "本增补文件介绍 Claude 3 家族中的两个新模型：升级版 Claude 3.5 Sonnet 和新推出的 Claude 3.5 Haiku。这些模型提升了推理、编程和视觉处理能力，展现出新的能力和性能改进。文件详细讨论了这些新模型的性能与安全考量，包括更新后的基准测试结果、人类反馈评估，以及对模型在推理、编程、视觉处理等方面行为的深入分析。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "claude35",
+      "article": "Model Card Addendum: Claude 3.5 Haiku and Upgraded Claude 3.5 Sonnet",
+      "section": "引言·模型与安全",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 3,
+      "page_end": 3,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [],
+      "glossary": [
+        [
+          "model card addendum",
+          "模型卡增补文件"
+        ],
+        [
+          "visual processing",
+          "视觉处理"
+        ],
+        [
+          "computer use",
+          "计算机使用"
+        ],
+        [
+          "tool call",
+          "工具调用"
+        ],
+        [
+          "Graphical User Interface (GUI)",
+          "图形用户界面"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:004",
+    "position": 4,
+    "question": "The upgraded Claude 3.5 Sonnet model improves upon its predecessor’s capabilities and introduces new functionalities. Most notably it possesses the ability to use computers– allowing the model to interpret screenshots of a Graphical User Interface (GUI) and generate appropriate tool calls to perform requested tasks. This advancement enables Claude to navigate websites, interact with user interfaces, and complete complex multi-step processes. This opens up new possibilities for automation and task completion. With this nascent skill and other improvements, the upgraded Claude 3.5 Sonnet model sets new state-of-the-art standards in areas such as agentic coding (SWE-bench Verified [1]), agentic task completion (TAU-bench (τ-bench) [2]), and computer use from screenshots (OSWorld [3]).",
+    "answer": "升级版 Claude 3.5 Sonnet 改进了前代模型的能力，并引入新功能。最值得关注的是它能够使用计算机：模型可以解读图形用户界面（GUI）的截图，并生成适当的工具调用来完成用户要求的任务。这使 Claude 能够浏览网站、与用户界面交互并完成复杂的多步骤流程，也为自动化和任务执行带来了新的可能。凭借这一初步形成的能力及其他改进，升级版 Claude 3.5 Sonnet 在智能体编程（SWE-bench Verified）、智能体任务执行（TAU-bench，即 τ-bench）和基于截图的计算机使用（OSWorld）等领域达到了当时新的领先水平。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "claude35",
+      "article": "Model Card Addendum: Claude 3.5 Haiku and Upgraded Claude 3.5 Sonnet",
+      "section": "引言·计算机使用",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 4,
+      "page_end": 4,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 Computer use 是图形界面操作能力，不能将模型名称等同于 Claude Code 产品。",
+      "references": [],
+      "glossary": [
+        [
+          "model card addendum",
+          "模型卡增补文件"
+        ],
+        [
+          "visual processing",
+          "视觉处理"
+        ],
+        [
+          "computer use",
+          "计算机使用"
+        ],
+        [
+          "tool call",
+          "工具调用"
+        ],
+        [
+          "Graphical User Interface (GUI)",
+          "图形用户界面"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:005",
+    "position": 5,
+    "question": "In this report, we introduce Qwen2.5, a comprehensive series of large language models (LLMs) designed to meet diverse needs. Compared to previous iterations, Qwen 2.5 has been significantly improved during both the pre-training and post-training stages. In terms of pre-training, we have scaled the high-quality pre-training datasets from the previous 7 trillion tokens to 18 trillion tokens. This provides a strong foundation for commonsense, expert knowledge, and reasoning capabilities. In terms of post-training, we implement intricate supervised finetuning with over 1 million samples, as well as multistage reinforcement learning, including offline learning DPO and online learning GRPO. Post-training techniques significantly enhance human preference, and notably improve long text generation, structural data analysis, and instruction following.",
+    "answer": "在本报告中，我们介绍 Qwen2.5 这一旨在满足多样化需求的大语言模型系列。与此前版本相比，Qwen2.5 在预训练和后训练阶段都有显著改进。预训练方面，高质量预训练数据由原来的 7 万亿词元扩展到 18 万亿词元，为常识、专业知识和推理能力奠定了坚实基础。后训练方面，我们使用超过 100 万个样本开展精细的监督微调，并采用多阶段强化学习，其中包括离线偏好学习 DPO 和在线学习 GRPO。这些后训练技术显著提升了模型与人类偏好的契合程度，并改善了长文本生成、结构化数据分析和指令遵循能力。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "qwen25",
+      "article": "Qwen2.5 Technical Report",
+      "section": "训练与技术改进",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 5,
+      "page_end": 5,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 沿用报告对 DPO 与 GRPO 的分组表述；DPO 本身直接优化偏好目标，不需要像 PPO 那样显式在线策略采样。",
+      "references": [
+        "https://arxiv.org/abs/2412.15115"
+      ],
+      "original_english": "In this report, we introduce Qwen2.5, a comprehensive series of large language models (LLMs) \ndesigned to meet diverse needs. Compared to previous iterations, Qwen 2.5 has been \nsignificantly improved during both the pre-training and post-training stages. In terms of pre-\ntraining, we have scaled the high-quality pre-training datasets from the previous 7 trillion \ntokens to 18 trillion tokens. This provides a strong foundation for commonsense, expert \nknowledge, and reasoning capabilities. In terms of post-training, we implement intricate \nsupervised finetuning with over 1 million samples, as well as multistage reinforcement \nlearning, including offline learning DPO and online learning GRPO. Post-training techniques \nsignificantly enhance human preference, and notably improve long text generation, structural \ndata analysis, and instruction following.",
+      "glossary": [
+        [
+          "pre-training",
+          "预训练"
+        ],
+        [
+          "post-training",
+          "后训练"
+        ],
+        [
+          "supervised fine-tuning (SFT)",
+          "监督微调"
+        ],
+        [
+          "open-weight model",
+          "开放权重模型"
+        ],
+        [
+          "mixture of experts (MoE)",
+          "混合专家"
+        ],
+        [
+          "instruction following",
+          "指令遵循"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:006",
+    "position": 6,
+    "question": "To handle diverse and varied use cases effectively, we present Qwen2.5 LLM series in rich configurations. The open-weight offerings include base models and instruction-tuned models in sizes of 0.5B, 1.5B, 3B, 7B, 14B, 32B, and 72B parameters. Quantized versions of the instruction-tuned models are also provided. Over 100 models can be accessed from Hugging Face Hub, ModelScope, and Kaggle. In addition, for hosted solutions, the proprietary models currently include two mixture-of-experts (MoE) variants: Qwen2.5 Turbo and Qwen2.5-Plus, both available from Alibaba Cloud Model Studio.",
+    "answer": "为有效应对多样化的使用场景，我们提供了配置丰富的 Qwen2.5 大语言模型系列。开放权重的模型包括基础模型和指令微调模型，参数规模为 5 亿、15 亿、30 亿、70 亿、140 亿、320 亿和 720 亿；同时还提供指令微调模型的量化版本。用户可以通过 Hugging Face Hub、ModelScope 和 Kaggle 获取 100 多个模型。此外，在托管服务方面，当时的专有模型包括 Qwen2.5 Turbo 和 Qwen2.5-Plus 两个混合专家（MoE）变体，均可通过阿里云百炼获取。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "qwen25",
+      "article": "Qwen2.5 Technical Report",
+      "section": "模型规格与发布",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 6,
+      "page_end": 6,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 模型规模、数量和托管架构均为该报告的历史描述。B 表示十亿。",
+      "references": [
+        "https://arxiv.org/abs/2412.15115"
+      ],
+      "glossary": [
+        [
+          "pre-training",
+          "预训练"
+        ],
+        [
+          "post-training",
+          "后训练"
+        ],
+        [
+          "supervised fine-tuning (SFT)",
+          "监督微调"
+        ],
+        [
+          "open-weight model",
+          "开放权重模型"
+        ],
+        [
+          "mixture of experts (MoE)",
+          "混合专家"
+        ],
+        [
+          "instruction following",
+          "指令遵循"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:007",
+    "position": 7,
+    "question": "Qwen2.5 has demonstrated top-tier performance on a wide range of benchmarks evaluating language understanding, reasoning, mathematics, coding, human preference alignment, etc. Specifically, the open-weight flagship Qwen2.5-72B-Instruct outperforms a number of open and proprietary models and demonstrates competitive performance to the state-of-the-art open-weight model, Llama-3-405B-Instruct, which is around 5 times larger. Qwen2.5-Turbo and Qwen2.5-Plus offer superior cost-effectiveness while performing competitively against GPT-4o-mini and GPT-4o respectively. Additionally, as the foundation, Qwen2.5 models have been instrumental in training specialized models such as Qwen2.5-Math (Yang et al., 2024b), Qwen2.5-Coder (Hui et al., 2024), QwQ (Qwen Team, 2024d), and multimodal models.",
+    "answer": "Qwen2.5 在语言理解、推理、数学、编程和人类偏好对齐等多种基准测试中表现出较高水平。具体而言，开放权重的旗舰模型 Qwen2.5-72B-Instruct 超过了若干开放权重及专有模型，并在与当时领先、参数规模约为其五倍的开放权重模型 Llama-3-405B-Instruct 比较时展现出竞争力。Qwen2.5-Turbo 和 Qwen2.5-Plus 在分别与 GPT-4o-mini、GPT-4o 保持竞争力的同时，提供了较高的性价比。此外，Qwen2.5 还作为基础模型，为 Qwen2.5-Math、Qwen2.5-Coder、QwQ 等专用模型及多模态模型的训练发挥了重要作用。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "qwen25",
+      "article": "Qwen2.5 Technical Report",
+      "section": "性能表现",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 6,
+      "page_end": 6,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 competitive 表示具有竞争力，不应译为在所有任务上优于对方；405/72 约为 5.6，保留原文约五倍的说法。",
+      "references": [
+        "https://arxiv.org/abs/2412.15115"
+      ],
+      "glossary": [
+        [
+          "pre-training",
+          "预训练"
+        ],
+        [
+          "post-training",
+          "后训练"
+        ],
+        [
+          "supervised fine-tuning (SFT)",
+          "监督微调"
+        ],
+        [
+          "open-weight model",
+          "开放权重模型"
+        ],
+        [
+          "mixture of experts (MoE)",
+          "混合专家"
+        ],
+        [
+          "instruction following",
+          "指令遵循"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:008",
+    "position": 8,
+    "question": "The use of retrieval-augmented generation (RAG) to retrieve relevant information from an external knowledge source enables large language models (LLMs) to answer questions over private and/or previously unseen document collections. However, RAG fails on global questions directed at an entire text corpus, such as “What are the main themes in the dataset?”, since this is inherently a query focused summarization (QFS) task, rather than an explicit retrieval task. Prior QFS methods, meanwhile, do not scale to the quantities of text indexed by typical RAG systems. To combine the strengths of these contrasting methods, we propose GraphRAG, a graph-based approach to question answering over private text corpora that scales with both the generality of user questions and the quantity of source text.",
+    "answer": "检索增强生成（RAG）通过从外部知识源检索相关信息，使大语言模型能够回答关于私有文档集或此前未见文档集的问题。然而，针对整个文本语料库的全局性问题，例如“数据集的主要主题是什么？”，RAG 难以奏效，因为这本质上是面向查询的摘要（QFS）任务，而非直接的信息检索任务。与此同时，既有 QFS 方法又难以扩展到典型 RAG 系统索引的文本规模。为结合两类方法的优势，我们提出 GraphRAG：一种面向私有文本语料库的图式问答方法，能够适应问题范围的扩大和源文本量的增加。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "graphrag",
+      "article": "From Local to Global: A Graph RAG Approach to Query-Focused Summarization",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 7,
+      "page_end": 8,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 关于传统 RAG 全局查询局限的断言是该论文对所比较方法的论述；不推导为所有 RAG 均无法处理全局问题。",
+      "references": [
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "original_english": "The use of retrieval-augmented generation (RAG) to retrieve relevant information from an \nexternal knowledge source enables large language models (LLMs) to answer questions over \nprivate and/or previously unseen document collections. However, RAG fails on global \n\n\n=== PAGE 8 ===\nquestions directed at an entire text corpus, such as “What are the main themes in the \ndataset?”, since this is inherently a query focused summarization (QFS) task, rather than an \nexplicit retrieval task.Prior QFS methods, meanwhile, do not scale to the quantities of text \nindexed by typical RAG systems. To combine the strengths of these contrasting methods, we \npropose GraphRAG, a graph-based approach to question answering over private text corpora \nthat scales with both the generality of user questions and the quantity of source text.",
+      "glossary": [
+        [
+          "query-focused summarization (QFS)",
+          "面向查询的摘要"
+        ],
+        [
+          "entity knowledge graph",
+          "实体知识图谱"
+        ],
+        [
+          "community summary",
+          "社区摘要"
+        ],
+        [
+          "global sensemaking",
+          "对整体信息的理解与综合分析"
+        ],
+        [
+          "comprehensiveness",
+          "全面性"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:009",
+    "position": 9,
+    "question": "Our approach uses an LLM to build a graph index in two stages: first, to derive an entity knowledge graph from the source documents, then to pre-generate community summaries for all groups of closely related entities. Given a question, each community summary is used to generate a partial response, before all partial responses are again summarized in a final response to the user. For a class of global sensemaking questions over datasets in the 1 million token range, we show that GraphRAG leads to substantial improvements over a conventional RAG baseline for both the comprehensiveness and diversity of generated answers.",
+    "answer": "我们的方法使用大语言模型，分两步构建图索引：先从源文档中提取实体知识图谱，再为所有由紧密关联实体组成的群组预先生成社区摘要。对于给定的问题，先利用每份社区摘要生成局部回答，再将所有局部回答汇总为面向用户的最终回答。对于规模约为 100 万词元的数据集上的一类需要理解整体信息的问题，我们的结果表明，与传统 RAG 基线相比，GraphRAG 在生成回答的全面性和多样性上都有显著提升。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "graphrag",
+      "article": "From Local to Global: A Graph RAG Approach to Query-Focused Summarization",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 关于传统 RAG 全局查询局限的断言是该论文对所比较方法的论述；不推导为所有 RAG 均无法处理全局问题。",
+      "references": [
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "original_english": "Our \napproach uses an LLM to build a graph index in two stages: first, to derive an entity knowledge \ngraph from the source documents, then to pre-generate community summaries for all groups \nof closely related entities. Given a question, each community summary is used to generate a \npartial response, before all partial responses are again summarized in a final response to the \nuser.For a class of global sensemaking questions over datasets in the 1 million token range, we \nshow that GraphRAG leads to substantial improvements over a conventional RAG baseline for \nboth the comprehensiveness and diversity of generated answers.",
+      "glossary": [
+        [
+          "query-focused summarization (QFS)",
+          "面向查询的摘要"
+        ],
+        [
+          "entity knowledge graph",
+          "实体知识图谱"
+        ],
+        [
+          "community summary",
+          "社区摘要"
+        ],
+        [
+          "global sensemaking",
+          "对整体信息的理解与综合分析"
+        ],
+        [
+          "comprehensiveness",
+          "全面性"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:010",
+    "position": 10,
+    "question": "Retrieval augmented generation (RAG) (Lewis et al., 2020) is an established approach to using LLMs to answer queries based on data that is too large to contain in a language model’s context window, meaning the maximum number of tokens (units of text) that can be processed by the LLM at once (Kuratov et al., 2024; Liu et al., 2023).In the canonical RAG setup, the system has access to a large external corpus of text records and retrieves a subset of records that are individually relevant to the query and collectively small enough to fit into the context window of the LLM. The LLM then generates a response based on both the query and the retrieved records (Baumel et al., 2018; Dang, 2006; Laskar et al., 2020; Yao et al., 2017).This conventional approach, which we collectively call vector RAG, works well for queries that can be answered with information localized within a small set of records. However, vector RAG approaches do not support sensemaking queries, meaning queries that require global understanding of the entire dataset, such as ”What are the key trends in how scientific discoveries are influenced by interdisciplinary research over the past decade?”",
+    "answer": "检索增强生成（RAG）（Lewis 等，2020）是一种成熟方法，用于让大语言模型回答基于大规模数据的查询。这些数据无法全部放入语言模型的上下文窗口；上下文窗口指模型一次能够处理的最大词元数。在典型 RAG 设置中，系统可以访问大型外部文本记录库，并检索其中一个子集：每条记录都与查询相关，而它们的总长度足以容纳在模型的上下文窗口中。模型随后结合查询和检索记录生成回答。这种传统方法在本文中统称为向量 RAG，适合回答仅需少量记录中的局部信息的问题。然而，向量 RAG 方法难以支持需要理解整个数据集的综合分析类查询，例如：“过去十年中，跨学科研究影响科学发现的主要趋势是什么？”",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "graphrag",
+      "article": "From Local to Global: A Graph RAG Approach to Query-Focused Summarization",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 8,
+      "page_end": 9,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "glossary": [
+        [
+          "query-focused summarization (QFS)",
+          "面向查询的摘要"
+        ],
+        [
+          "entity knowledge graph",
+          "实体知识图谱"
+        ],
+        [
+          "community summary",
+          "社区摘要"
+        ],
+        [
+          "global sensemaking",
+          "对整体信息的理解与综合分析"
+        ],
+        [
+          "comprehensiveness",
+          "全面性"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:011",
+    "position": 11,
+    "question": "Making language models bigger does not inherently make them better at following a user’s intent. For example, large language models can generate outputs that are untruthful, toxic, or simply not helpful to the user. In other words, these models are not aligned with their users. In this paper, we show an avenue for aligning language models with user intent on a wide range of tasks by fine-tuning with human feedback. Starting with a set of labeler-written prompts and prompts submitted through a language model API, we collect a dataset of labeler demonstrations of the desired model behavior, which we use to fine-tune GPT-3 using supervised learning. We then collect a dataset of rankings of model outputs, which we use to further fine-tune this supervised model using reinforcement learning from human feedback. We call the resulting models InstructGPT.",
+    "answer": "扩大语言模型的规模，并不会自然使其更善于遵循用户意图。例如，大语言模型可能生成不真实、有害或对用户毫无帮助的输出。换言之，这些模型没有与用户需求对齐。本文展示了一条通过人类反馈微调，使语言模型在广泛任务上与用户意图对齐的途径。我们从标注员编写的提示和用户通过语言模型 API 提交的提示出发，收集标注员演示期望模型行为的数据，并用监督学习微调 GPT-3。随后，我们收集模型输出的排序数据，再通过基于人类反馈的强化学习，进一步微调监督学习得到的模型。所得模型称为 InstructGPT。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "instructgpt",
+      "article": "Training language models to follow instructions with human feedback",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 10,
+      "page_end": 10,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [
+        "https://arxiv.org/abs/2203.02155"
+      ],
+      "glossary": [
+        [
+          "user intent",
+          "用户意图"
+        ],
+        [
+          "alignment",
+          "对齐"
+        ],
+        [
+          "labeler demonstration",
+          "标注员示范"
+        ],
+        [
+          "reinforcement learning from human feedback (RLHF)",
+          "基于人类反馈的强化学习"
+        ],
+        [
+          "truthfulness",
+          "真实性"
+        ],
+        [
+          "toxic output",
+          "有害输出"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:012",
+    "position": 12,
+    "question": "In human evaluations on our prompt distribution, outputs from the 1.3B parameter InstructGPT model are preferred to outputs from the 175B GPT-3, despite having 100x fewer parameters. Moreover, InstructGPT models show improvements in truthfulness and reductions in toxic output generation while having minimal performance regressions on public NLP datasets. Even though InstructGPT still makes simple mistakes, our results show that fine-tuning with human feedback is a promising direction for aligning language models with human intent.",
+    "answer": "在基于本文提示分布的人类评估中，13 亿参数的 InstructGPT 输出比 1750 亿参数的 GPT-3 输出更受偏好，尽管前者的参数量约少两个数量级。此外，InstructGPT 的真实性有所改善，有害输出有所减少，同时在公开自然语言处理数据集上的性能仅有轻微下降。尽管它仍会犯简单的错误，结果表明，利用人类反馈进行微调，是使语言模型与人类意图对齐的一个有前景的方向。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "instructgpt",
+      "article": "Training language models to follow instructions with human feedback",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 10,
+      "page_end": 10,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 原文“100x fewer”为粗略数量级表述；175/1.3 约为 135。人类偏好结果不等于所有任务性能更好。",
+      "references": [
+        "https://arxiv.org/abs/2203.02155"
+      ],
+      "glossary": [
+        [
+          "user intent",
+          "用户意图"
+        ],
+        [
+          "alignment",
+          "对齐"
+        ],
+        [
+          "labeler demonstration",
+          "标注员示范"
+        ],
+        [
+          "reinforcement learning from human feedback (RLHF)",
+          "基于人类反馈的强化学习"
+        ],
+        [
+          "truthfulness",
+          "真实性"
+        ],
+        [
+          "toxic output",
+          "有害输出"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:013",
+    "position": 13,
+    "question": "Large language models (LMs) can be prompted to perform a range of natural language processing (NLP) tasks, given some examples of the task as input. However, these models often express unintended behaviors such as making up facts, generating biased or toxic text, or simply not following user instructions. This is because the language modeling objective used for many recent large LMs—predicting the next token on a webpage from the internet—is different from the objective “follow the user’s instructions helpfully and safely”. Thus, we say that the language modeling objective is misaligned. Averting these unintended behaviors is especially important for language models that are deployed and used in hundreds of applications.",
+    "answer": "给定若干任务示例作为输入，可以通过提示让大语言模型执行多种自然语言处理任务。然而，这些模型常出现非预期行为，例如捏造事实、生成带偏见或有害的文本，或不遵循用户指令。这是因为许多近期大语言模型使用的语言建模目标，即预测互联网网页中的下一个词元，与“以有帮助且安全的方式遵循用户指令”这一目标并不一致。因此，我们称这种语言建模目标存在不对齐。对于已经部署并用于数百种应用的语言模型，避免这些非预期行为尤其重要。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "instructgpt",
+      "article": "Training language models to follow instructions with human feedback",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 10,
+      "page_end": 11,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复资料译文中未翻译的 because。",
+      "references": [
+        "https://arxiv.org/abs/2203.02155"
+      ],
+      "glossary": [
+        [
+          "user intent",
+          "用户意图"
+        ],
+        [
+          "alignment",
+          "对齐"
+        ],
+        [
+          "labeler demonstration",
+          "标注员示范"
+        ],
+        [
+          "reinforcement learning from human feedback (RLHF)",
+          "基于人类反馈的强化学习"
+        ],
+        [
+          "truthfulness",
+          "真实性"
+        ],
+        [
+          "toxic output",
+          "有害输出"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:014",
+    "position": 14,
+    "question": "General reasoning represents a long-standing and formidable challenge in artificial intelligence (AI). Recent breakthroughs, exemplified by large language models (LLMs) and chain-of-thought (CoT) prompting, have achieved considerable success on foundational reasoning tasks. However, this success is heavily contingent on extensive human-annotated demonstrations and the capabilities of models are still insufficient for more complex problems. Here we show that the reasoning abilities of LLMs can be incentivized through pure reinforcement learning (RL), obviating the need for human-labelled reasoning trajectories. The proposed RL framework facilitates the emergent development of advanced reasoning patterns, such as self-reflection, verification and dynamic strategy adaptation.",
+    "answer": "通用推理长期以来一直是人工智能领域的一项艰巨挑战。以大语言模型和思维链（CoT）提示为代表的近期突破，在基础推理任务上取得了可观成果。但这种成功高度依赖大量由人类标注的示范，模型处理更复杂问题的能力仍显不足。这里，我们表明，可以通过纯强化学习激发大语言模型的推理能力，而无需人类标注的推理轨迹。所提出的强化学习框架促进了自我反思、验证和动态策略调整等高级推理模式的涌现。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "deepseekr1",
+      "article": "DeepSeek-R1 incentivizes reasoning in LLMs through reinforcement learning",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 12,
+      "page_end": 12,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 “纯强化学习”针对文中推理训练设置，不意味着没有预训练，也不意味着 DeepSeek-R1 完整训练流程不使用监督数据。",
+      "references": [],
+      "glossary": [
+        [
+          "reasoning trajectory",
+          "推理轨迹"
+        ],
+        [
+          "self-reflection",
+          "自我反思"
+        ],
+        [
+          "verification",
+          "验证"
+        ],
+        [
+          "emergent behaviour",
+          "涌现行为"
+        ],
+        [
+          "verifiable task",
+          "可验证任务"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:015",
+    "position": 15,
+    "question": "Consequently, the trained model achieves superior performance on verifiable tasks such as mathematics, coding competitions and STEM fields, surpassing its counterparts trained through conventional supervised learning on human demonstrations. Moreover, the emergent reasoning patterns exhibited by these large-scale models can be systematically used to guide and enhance the reasoning capabilities of smaller models.",
+    "answer": "因此，训练后的模型在数学、编程竞赛及科学、技术、工程和数学（STEM）等具有可验证结果的任务上表现出色，超过了通过人类示范进行常规监督学习的对照模型。此外，这些大模型展现出的涌现推理模式，可以被系统地用于指导和增强较小模型的推理能力。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "deepseekr1",
+      "article": "DeepSeek-R1 incentivizes reasoning in LLMs through reinforcement learning",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 12,
+      "page_end": 12,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 “纯强化学习”针对文中推理训练设置，不意味着没有预训练，也不意味着 DeepSeek-R1 完整训练流程不使用监督数据。",
+      "references": [],
+      "glossary": [
+        [
+          "reasoning trajectory",
+          "推理轨迹"
+        ],
+        [
+          "self-reflection",
+          "自我反思"
+        ],
+        [
+          "verification",
+          "验证"
+        ],
+        [
+          "emergent behaviour",
+          "涌现行为"
+        ],
+        [
+          "verifiable task",
+          "可验证任务"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:016",
+    "position": 16,
+    "question": "Reasoning capability, the cornerstone of human intelligence, enables complex cognitive tasks ranging from mathematical problem-solving to logical deduction and programming. Recent advances in AI have demonstrated that LLMs can exhibit emergent behaviours, including reasoning abilities, when scaled to a sufficient size.",
+    "answer": "推理能力是人类智能的基石，使数学问题求解、逻辑推演和编程等复杂认知任务成为可能。人工智能的近期进展表明，当规模扩展到足够大时，大语言模型可以表现出包括推理能力在内的涌现行为。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "deepseekr1",
+      "article": "DeepSeek-R1 incentivizes reasoning in LLMs through reinforcement learning",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 12,
+      "page_end": 12,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [],
+      "glossary": [
+        [
+          "reasoning trajectory",
+          "推理轨迹"
+        ],
+        [
+          "self-reflection",
+          "自我反思"
+        ],
+        [
+          "verification",
+          "验证"
+        ],
+        [
+          "emergent behaviour",
+          "涌现行为"
+        ],
+        [
+          "verifiable task",
+          "可验证任务"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:017",
+    "position": 17,
+    "question": "Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks. However, their ability to access and precisely manipulate knowledge is still limited, and hence on knowledge-intensive tasks, their performance lags behind task-specific architectures. Additionally, providing provenance for their decisions and updating their world knowledge remain open research problems. Pre-trained models with a differentiable access mechanism to explicit non-parametric memory can overcome this issue, but have so far been only investigated for extractive downstream tasks.",
+    "answer": "研究表明，大型预训练语言模型可以在参数中存储事实知识，并在对下游自然语言处理任务进行微调后取得当时领先的结果。但它们访问知识和精确运用知识的能力仍有限，因此在知识密集型任务上，其表现落后于专门设计的任务架构。此外，为模型决策提供可追溯依据，以及更新模型掌握的世界知识，仍是有待解决的研究问题。通过可微访问机制连接显式非参数记忆的预训练模型能够缓解这些问题，但此前这类模型仅在抽取式下游任务中得到研究。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "rag",
+      "article": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 13,
+      "page_end": 13,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [
+        "https://arxiv.org/abs/2005.11401"
+      ],
+      "glossary": [
+        [
+          "parametric memory",
+          "参数记忆"
+        ],
+        [
+          "non-parametric memory",
+          "非参数记忆"
+        ],
+        [
+          "dense vector index",
+          "稠密向量索引"
+        ],
+        [
+          "differentiable retriever",
+          "可微检索器"
+        ],
+        [
+          "extractive question answering",
+          "抽取式问答"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:018",
+    "position": 18,
+    "question": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) — models which combine pre-trained parametric and non-parametric memory for language generation. We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever. We compare two RAG formulations, one which conditions on the same retrieved passages across the whole generated sequence, and another which can use different passages per token. We fine-tune and evaluate our models on a wide range of knowledge-intensive NLP tasks and set the state of the art on three open domain QA tasks, outperforming parametric seq2seq models and task-specific retrieve-and-extract architectures. For language generation tasks, we find that RAG models generate more specific, diverse and factual language than a state-of-the-art parametric-only seq2seq baseline.",
+    "answer": "我们探索了一种用于检索增强生成（RAG）的通用微调方法，使模型结合预训练的参数记忆与非参数记忆来生成语言。在我们提出的 RAG 模型中，参数记忆是预训练的序列到序列模型，非参数记忆是通过预训练神经检索器访问的维基百科稠密向量索引。我们比较了两种 RAG 建模方式：一种在整个序列的生成过程中都以同一组检索段落为条件；另一种则可以在生成不同词元时使用不同段落。我们在多种知识密集型自然语言处理任务上微调和评估模型，并在三个开放域问答任务上取得了当时最优的结果，超过了参数化序列到序列模型及专门的检索加抽取架构。在语言生成任务中，与当时领先的纯参数化序列到序列基线相比，RAG 生成的语言更具体、更多样，也更符合事实。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "rag",
+      "article": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 13,
+      "page_end": 14,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [
+        "https://arxiv.org/abs/2005.11401"
+      ],
+      "original_english": "We explore a general-purpose fine-tuning recipe \nfor retrieval-augmented generation (RAG) — models which combine pre-trained parametric \nand non-parametric memory for language generation. We introduce RAG models where the \n\n\n=== PAGE 14 ===\nparametric memory is a pre-trained seq2seq model and the non-parametric memory is a \ndense vector index of Wikipedia, accessed with a pre-trained neural retriever. We compare two \nRAG formulations, one which conditions on the same retrieved passages across the whole \ngenerated sequence, and another which can use different passages per token. We fine-tune \nand evaluate our models on a wide range of knowledge-intensive NLP tasks and set the state \nof the art on three open domain QA tasks, outperforming parametric seq2seq models and task-\nspecific retrieve-and-extract architectures. For language generation tasks, we find that RAG \nmodels generate more specific, diverse and factual language than a state-of-the-art \nparametric-only seq2seq baseline.",
+      "glossary": [
+        [
+          "parametric memory",
+          "参数记忆"
+        ],
+        [
+          "non-parametric memory",
+          "非参数记忆"
+        ],
+        [
+          "dense vector index",
+          "稠密向量索引"
+        ],
+        [
+          "differentiable retriever",
+          "可微检索器"
+        ],
+        [
+          "extractive question answering",
+          "抽取式问答"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:019",
+    "position": 19,
+    "question": "Pre-trained neural language models have been shown to learn a substantial amount of in-depth knowledge from data. They can do so without any access to an external memory, as a parameterized implicit knowledge base. While this development is exciting, such models do have downsides: They cannot easily expand or revise their memory, can’t straightforwardly provide insight into their predictions, and may produce “hallucinations”. Hybrid models that combine parametric memory with non-parametric (i.e., retrieval-based) memories can address some of these issues because knowledge can be directly revised and expanded, and accessed knowledge can be inspected and interpreted. REALM and ORQA, two recently introduced models that combine masked language models with a differentiable retriever, have shown promising results, but have only explored open-domain extractive question answering. Here, we bring hybrid parametric and non-parametric memory to the “workhorse of NLP,” i.e. sequence-to-sequence (seq2seq) models.",
+    "answer": "研究表明，预训练神经语言模型可以从数据中学习大量深入的知识。它们无须访问外部记忆，就能充当参数化的隐式知识库。尽管这一进展令人振奋，这类模型也存在缺点：它们的记忆不易扩展或修订，难以直接解释预测依据，还可能产生幻觉。将参数记忆与非参数记忆（即基于检索的记忆）相结合的混合模型可以缓解其中一些问题，因为知识可以直接修订和扩展，访问到的知识也可被检查与解释。REALM 和 ORQA 将掩码语言模型与可微检索器结合，取得了有前景的结果，但只研究了开放域抽取式问答。在这里，我们把参数与非参数的混合记忆引入自然语言处理的常用架构，即序列到序列模型。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "rag",
+      "article": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 14,
+      "page_end": 14,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [
+        "https://arxiv.org/abs/2005.11401"
+      ],
+      "original_english": "Pre-trained neural language models have been shown to learn a substantial amount of in-\ndepth knowledge from data. They can do so without any access to an external memory, as a \nparameterized implicit knowledge base. While this development is exciting, such models do \nhave downsides: They cannot easily expand or revise their memory, can’t straightforwardly \nprovide insight into their predictions, and may produce “hallucinations”. Hybrid models \nthat combine parametric memory with non-parametric (i.e., retrieval-based) memories can \naddress some of these issues because knowledge can be directly revised and expanded, and \naccessed knowledge can be inspected and interpreted. REALM and ORQA, two recently \nintroduced models that combine masked language models with a differentiable retriever, \nhave shown promising results, but have only explored open-domain extractive question \nanswering. Here, we bring hybrid parametric and non-parametric memory to the “workhorse \nof NLP,” i.e. sequence-to-sequence (seq2seq) models.",
+      "glossary": [
+        [
+          "parametric memory",
+          "参数记忆"
+        ],
+        [
+          "non-parametric memory",
+          "非参数记忆"
+        ],
+        [
+          "dense vector index",
+          "稠密向量索引"
+        ],
+        [
+          "differentiable retriever",
+          "可微检索器"
+        ],
+        [
+          "extractive question answering",
+          "抽取式问答"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:020",
+    "position": 20,
+    "question": "While Large Language Models (LLMs) are revolutionary, their deployment is constrained by inherent limitations such as factual hallucination and static knowledge. This survey systematically reviews Retrieval-Augmented Generation (RAG), a key paradigm for addressing these challenges by grounding LLMs in external, verifiable knowledge. To overcome the flaws of standalone models, RAG integrates LLMs with updatable knowledge bases, a hybrid approach that significantly enhances output accuracy and trustworthiness. Our primary finding is the technology’s clear evolutionary trajectory, which we structure into three stages: Naive, Advanced, and Modular RAG. This progression demonstrates a shift away from monolithic parametric memory towards intelligent systems that interact with external data. By summarizing the field’s progression, key challenges like retriever-generator alignment, and future directions such as integration with agentic architectures, this work concludes that RAG is a crucial technology for propelling AI to be more evidence-based and capable of complex reasoning.",
+    "answer": "尽管大语言模型带来了重大变革，但事实性幻觉和知识静态等固有局限限制了它们的部署。本综述系统回顾检索增强生成（RAG）：这一重要范式通过让模型以外部可验证知识为依据，来应对上述挑战。为克服独立模型的不足，RAG 将大语言模型与可更新知识库结合，这种混合方式显著提升了输出的准确性和可信度。我们的主要发现是该技术具有清晰的演进轨迹，并将其组织为朴素 RAG、增强 RAG 和模块化 RAG 三个阶段。这一发展体现了从单一参数记忆向能与外部数据交互的智能系统的转变。通过总结领域进展、检索器与生成器对齐等关键挑战，以及与智能体架构结合等未来方向，本文认为，RAG 是推动人工智能更加依赖证据并支持复杂推理的一项关键技术。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "ragsurvey",
+      "article": "A Survey of Retrieval-Augmented Generation (RAG) for Large Language Models（资料标题）",
+      "section": "综述概述选段",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 15,
+      "page_end": 16,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 本段按上传资料的概述整理，未确认是某篇论文原摘要的逐字引文。Naive、Advanced、Modular 是综述组织方式，并非互斥的技术标准；RAG 不保证事实正确。",
+      "references": [],
+      "glossary": [
+        [
+          "grounding",
+          "使输出以外部依据为基础"
+        ],
+        [
+          "static knowledge",
+          "静态知识"
+        ],
+        [
+          "verifiable knowledge",
+          "可验证知识"
+        ],
+        [
+          "retriever-generator alignment",
+          "检索器与生成器对齐"
+        ],
+        [
+          "modular RAG",
+          "模块化检索增强生成"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:021",
+    "position": 21,
+    "question": "AutoGen is an open-source framework that allows developers to build LLM applications via multiple agents that can converse with each other to accomplish tasks. AutoGen agents are customizable, conversable, and can operate in various modes that employ combinations of LLMs, human inputs, and tools. Using AutoGen, developers can also flexibly define agent interaction behaviors. Both natural language and computer code can be used to program flexible conversation patterns for different applications. AutoGen serves as a generic framework for building diverse applications of various complexities and LLM capacities. Empirical studies demonstrate the effectiveness of the framework in many example applications, with domains ranging from mathematics, coding, question answering, operations research, online decision-making, entertainment, etc.",
+    "answer": "AutoGen 是一个开源框架，使开发者能够利用多个相互对话、协作完成任务的智能体构建大语言模型应用。AutoGen 智能体可以定制和对话，并支持将大语言模型、人类输入与工具以不同组合用于多种运行模式。开发者还可以灵活定义智能体间的交互行为，使用自然语言和计算机代码为不同应用编写灵活的对话模式。作为一个通用框架，AutoGen 支持构建复杂程度和模型能力要求各异的应用。实证研究展示了该框架在数学、编程、问答、运筹学、在线决策和娱乐等多种示例应用中的有效性。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "autogen",
+      "article": "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 17,
+      "page_end": 18,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 AutoGen2 中的 2 是混入正文的脚注编号，已还原为 AutoGen，并非名为 AutoGen2 的新版本。",
+      "references": [
+        "https://arxiv.org/abs/2308.08155"
+      ],
+      "original_english": "AutoGen2 is an open-source framework that allows developers to build LLM applications via \nmultiple agents that can converse with each other to accomplish tasks. AutoGen agents are \ncustomizable, conversable, and can operate in various modes that employ combinations of \nLLMs, human inputs, and tools. Using AutoGen, developers can also flexibly define agent \ninteraction behaviors. Both natural language and computer code can be used to program \nflexible conversation patterns for different applications. AutoGen serves as a generic \n\n\n=== PAGE 18 ===\nframework for building diverse applications of various complexities and LLM capacities. \nEmpirical studies demonstrate the effectiveness of the framework in many example \napplications, with domains ranging from mathematics, coding, question answering, \noperations research, online decision-making, entertainment, etc.",
+      "glossary": [
+        [
+          "conversable agent",
+          "可对话智能体"
+        ],
+        [
+          "conversation pattern",
+          "对话模式"
+        ],
+        [
+          "divergent thinking",
+          "发散思维"
+        ],
+        [
+          "factuality",
+          "事实准确性"
+        ],
+        [
+          "operations research",
+          "运筹学"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:022",
+    "position": 22,
+    "question": "Large language models (LLMs) are becoming a crucial building block in developing powerful agents that utilize LLMs for reasoning, tool usage, and adapting to new observations (Yao et al., 2022; Xi et al., 2023; Wang et al., 2023b) in many real-world tasks. Given the expanding tasks that could benefit from LLMs and the growing task complexity, an intuitive approach to scale up the power of agents is to use multiple agents that cooperate. Prior work suggests that multiple agents can help encourage divergent thinking (Liang et al., 2023), improve factuality and reasoning (Du et al., 2023), and provide validation (Wu et al., 2023). In light of the intuition and early evidence of promise, it is intriguing to ask the following question: how can we facilitate the development of LLM applications that could span a broad spectrum of domains and complexities based on the multi-agent approach?",
+    "answer": "大语言模型正成为构建强大智能体的重要基础；在许多现实任务中，这些智能体利用模型进行推理、使用工具，并适应新的观察结果。随着可受益于大语言模型的任务不断增多、任务复杂度持续上升，一种直观的智能体能力扩展方式是让多个智能体协作。既有工作表明，多智能体可能有助于促进发散思维、提升事实准确性和推理能力，并提供验证。基于这一思路及早期展现潜力的证据，一个值得研究的问题是：如何基于多智能体方法，促进覆盖广泛领域和复杂程度的大语言模型应用的开发？",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "autogen",
+      "article": "AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Conversation",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 18,
+      "page_end": 18,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [
+        "https://arxiv.org/abs/2308.08155"
+      ],
+      "glossary": [
+        [
+          "conversable agent",
+          "可对话智能体"
+        ],
+        [
+          "conversation pattern",
+          "对话模式"
+        ],
+        [
+          "divergent thinking",
+          "发散思维"
+        ],
+        [
+          "factuality",
+          "事实准确性"
+        ],
+        [
+          "operations research",
+          "运筹学"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:023",
+    "position": 23,
+    "question": "As enthusiasm for scaling computation (data and parameters) in the pretraining era gradually diminished, test-time scaling (TTS)—also referred to as “test-time computing”—has emerged as a prominent research focus. Recent studies demonstrate that TTS can further elicit the problem-solving capabilities of large language models (LLMs), enabling significant breakthroughs not only in specialized reasoning tasks, such as mathematics and coding, but also in general tasks like open-ended Q&A. However, despite the explosion of recent efforts in this area, there remains an urgent need for a comprehensive survey offering systemic understanding. To fill this gap, we propose a unified, hierarchical framework structured along four core dimensions of TTS research: what to scale, how to scale, where to scale, and how well to scale. Building upon this taxonomy, we conduct an extensive review of methods, application scenarios, and assessment aspects, and present an organized decomposition that highlights the unique contributions of individual techniques within the broader TTS landscape. From this analysis, we distill the major developmental trajectories of TTS to date and offer hands-on guidelines for practical deployment.",
+    "answer": "随着预训练时代对扩大计算投入（包括数据与参数规模）的热情逐渐减弱，推理时扩展（TTS），也称推理时计算，成为一个重要研究方向。近期研究表明，TTS 能够进一步激发大语言模型解决问题的能力，不仅在数学、编程等专门推理任务上，也在开放式问答等通用任务上取得显著突破。然而，尽管这一领域近期研究快速增长，仍迫切需要一份能提供系统认识的全面综述。为填补这一空白，我们提出统一的分层框架，围绕四个核心维度组织 TTS 研究：扩展什么、如何扩展、在哪里扩展，以及扩展效果如何。基于这一分类体系，我们广泛回顾方法、应用场景和评估方面的研究，并通过系统梳理揭示各项技术在整个 TTS 领域中的独特贡献。由此，我们提炼出该领域迄今的主要发展轨迹，并为实际部署提供实用指南。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "testtimescaling",
+      "article": "A Survey on Test-Time Scaling in Large Language Models",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 19,
+      "page_end": 20,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 TTS 在本文指推理时扩展，不是语音合成；对预训练扩展趋势的判断是作者观点。",
+      "references": [],
+      "glossary": [
+        [
+          "test-time scaling",
+          "推理时扩展"
+        ],
+        [
+          "training-time scaling",
+          "训练时扩展"
+        ],
+        [
+          "hierarchical framework",
+          "分层框架"
+        ],
+        [
+          "taxonomy",
+          "分类体系"
+        ],
+        [
+          "open-ended Q&A",
+          "开放式问答"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:024",
+    "position": 24,
+    "question": "Large language models (LLMs) have emerged in recent years as a transformative milestone toward artificial general intelligence (AGI). These models remarkably learn general intelligence by training-time scaling, where the models ingest more data and parameters. However, the progress of pretraining scaling has gradually slowed due to its resource-intensive nature and the bounded availability of human data, prompting researchers to shift their focus toward how to fully elicit the intelligence encoded in LLMs at test time to maximize their real-world effectiveness?",
+    "answer": "近年来，大语言模型被视为迈向通用人工智能的一项变革性进展。这些模型通过训练时扩展，即增加训练数据和模型参数，显著提升了通用智能表现。然而，预训练规模扩展需要大量资源，且人类产生的数据供给有限，因此其进展逐渐放缓。这促使研究者转向一个问题：如何在推理时充分激发大语言模型已经编码的能力，以最大化它们在现实应用中的有效性？",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "testtimescaling",
+      "article": "A Survey on Test-Time Scaling in Large Language Models",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 20,
+      "page_end": 20,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 “学习通用智能”为作者论述，不意味着 LLM 已实现 AGI。",
+      "references": [],
+      "glossary": [
+        [
+          "test-time scaling",
+          "推理时扩展"
+        ],
+        [
+          "training-time scaling",
+          "训练时扩展"
+        ],
+        [
+          "hierarchical framework",
+          "分层框架"
+        ],
+        [
+          "taxonomy",
+          "分类体系"
+        ],
+        [
+          "open-ended Q&A",
+          "开放式问答"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:025",
+    "position": 25,
+    "question": "In deep learning, models typically reuse the same parameters for all inputs. Mixture of Experts (MoE) models defy this and instead select different parameters for each incoming example. The result is a sparsely-activated model—with an outrageous number of parameters—but a constant computational cost. However, despite several notable successes of MoE, widespread adoption has been hindered by complexity, communication costs, and training instability. We address these with the introduction of the Switch Transformer. We simplify the MoE routing algorithm and design intuitive improved models with reduced communication and computational costs. Our proposed training techniques mitigate the instabilities, and we show large sparse models may be trained, for the first time, with lower precision (bfloat16) formats.",
+    "answer": "在深度学习中，模型通常对所有输入复用同一组参数。混合专家（MoE）模型则不同：它会针对不同输入样本选择不同参数。因此，模型虽然拥有极多的总参数，却以稀疏方式激活，并能维持固定的计算预算。然而，尽管 MoE 取得过一些显著成功，其广泛应用仍受到复杂性、通信成本和训练不稳定性的阻碍。我们引入 Switch Transformer 来应对这些问题，简化 MoE 路由算法，并设计直观的改进模型，以降低通信与计算成本。所提出的训练技术缓解了不稳定性；我们还首次展示了使用较低精度的 bfloat16 格式训练大型稀疏模型的可行性。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "switch",
+      "article": "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 21,
+      "page_end": 22,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 constant computational cost 指增加总专家参数时保持激活计算预算，不表示运行成本为零或不随序列长度变化；up to 7x 为最高加速结果。",
+      "references": [
+        "https://arxiv.org/abs/2101.03961"
+      ],
+      "glossary": [
+        [
+          "sparsely activated",
+          "稀疏激活的"
+        ],
+        [
+          "routing algorithm",
+          "路由算法"
+        ],
+        [
+          "communication cost",
+          "通信成本"
+        ],
+        [
+          "training instability",
+          "训练不稳定性"
+        ],
+        [
+          "bfloat16",
+          "一种 16 位浮点格式"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:026",
+    "position": 26,
+    "question": "We design models based off T5-Base and T5-Large (Raffel et al., 2019) to obtain up to 7x increases in pre-training speed with the same computational resources. These improvements extend into multilingual settings where we measure gains over the mT5-Base version across all 101 languages. Finally, we advance the current scale of language models by pre-training up to trillion parameter models on the “Colossal Clean Crawled Corpus”, and achieve a 4x speedup over the T5-XXL model.",
+    "answer": "我们基于 T5-Base 和 T5-Large 设计模型，在相同计算资源下获得了最高约 7 倍的预训练加速。这些改进也适用于多语言场景：在全部 101 种语言上，我们都测得了相对于 mT5-Base 的提升。最后，通过在“大型清洗网络爬取语料库”（C4）上预训练参数规模高达万亿的模型，我们进一步扩大了语言模型的规模，并相较于 T5-XXL 实现了约 4 倍加速。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "switch",
+      "article": "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 22,
+      "page_end": 22,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 constant computational cost 指增加总专家参数时保持激活计算预算，不表示运行成本为零或不随序列长度变化；up to 7x 为最高加速结果。",
+      "references": [
+        "https://arxiv.org/abs/2101.03961"
+      ],
+      "glossary": [
+        [
+          "sparsely activated",
+          "稀疏激活的"
+        ],
+        [
+          "routing algorithm",
+          "路由算法"
+        ],
+        [
+          "communication cost",
+          "通信成本"
+        ],
+        [
+          "training instability",
+          "训练不稳定性"
+        ],
+        [
+          "bfloat16",
+          "一种 16 位浮点格式"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:027",
+    "position": 27,
+    "question": "Large scale training has been an effective path towards flexible and powerful neural language models (Radford et al., 2018; Kaplan et al., 2020; Brown et al., 2020). Simple architectures— backed by a generous computational budget, data set size and parameter count—surpass more complicated algorithms (Sutton, 2019). An approach followed in Radford et al. (2018); Raffel et al. (2019); Brown et al. (2020) expands the model size of a densely-activated Transformer (Vaswani et al., 2017). While effective, it is also extremely computationally intensive (Strubell et al., 2019). Inspired by the success of model scale, but seeking greater computational efficiency, we instead propose a sparsely-activated expert model: the Switch Transformer. In our case the sparsity comes from activating a subset of the neural network weights for each incoming example.",
+    "answer": "大规模训练一直是构建灵活、强大神经语言模型的有效途径。在充足的计算预算、数据规模和参数数量支持下，简单架构可以超过更复杂的算法。Radford 等（2018）、Raffel 等（2019）和 Brown 等（2020）采用的方法，是扩大稠密激活 Transformer 的模型规模。虽然有效，但这种方法需要极高的计算开销。受扩大模型规模取得成功的启发，同时为了追求更高计算效率，我们转而提出一种稀疏激活的专家模型：Switch Transformer。在我们的设置中，稀疏性意味着每个输入样本只会激活神经网络权重的一个子集。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "switch",
+      "article": "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 22,
+      "page_end": 22,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。",
+      "references": [
+        "https://arxiv.org/abs/2101.03961"
+      ],
+      "glossary": [
+        [
+          "sparsely activated",
+          "稀疏激活的"
+        ],
+        [
+          "routing algorithm",
+          "路由算法"
+        ],
+        [
+          "communication cost",
+          "通信成本"
+        ],
+        [
+          "training instability",
+          "训练不稳定性"
+        ],
+        [
+          "bfloat16",
+          "一种 16 位浮点格式"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:028",
+    "position": 28,
+    "question": "We propose to synthesize high-quality and synchronized audio, given video and optional text conditions, using a novel multimodal joint training framework (MMAudio). In contrast to single-modality training conditioned on (limited) video data only, MMAudio is jointly trained with larger scale, readily available text-audio data to learn to generate semantically aligned high-quality audio samples. Additionally, we improve audio-visual synchrony with a conditional synchronization module that aligns video conditions with audio latents at the frame level. Trained with a flow matching objective, MMAudio achieves new video-to-audio state-of-the-art among public models in terms of audio quality, semantic alignment, and audio-visual synchronization, while having a low inference time (1.23s to generate an 8s clip) and just 157M parameters. MMAudio also achieves surprisingly competitive performance in text-to-audio generation, showing that joint training does not hinder single-modality performance.",
+    "answer": "我们提出一种新的多模态联合训练框架 MMAudio，在给定视频和可选文本条件时，合成高质量且与视频同步的音频。与仅利用有限视频数据、以视频为条件的单模态训练不同，MMAudio 联合使用规模更大且容易获取的文本音频数据，学习生成语义匹配的高质量音频样本。此外，我们通过条件同步模块，在帧级别对齐视频条件和音频潜变量，改善音视频同步。MMAudio 使用流匹配目标训练，在音频质量、语义对齐和音视频同步方面达到当时公开模型中的领先水平，同时推理耗时较低（生成 8 秒片段耗时 1.23 秒），参数量仅为 1.57 亿。它在文本到音频生成上也表现出较强竞争力，表明联合训练并未损害单模态性能。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "mmaudio",
+      "article": "MMAudio: Taming Multimodal Joint Training for High-Quality Video-to-Audio Synthesis",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 23,
+      "page_end": 24,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 推理耗时依赖论文测试硬件与设置；不应作为产品端的固定延迟保证。",
+      "references": [
+        "https://arxiv.org/abs/2412.15322"
+      ],
+      "glossary": [
+        [
+          "Foley",
+          "拟音"
+        ],
+        [
+          "flow matching",
+          "流匹配"
+        ],
+        [
+          "audio latent",
+          "音频潜变量"
+        ],
+        [
+          "semantic alignment",
+          "语义对齐"
+        ],
+        [
+          "audio-visual synchronization",
+          "音视频同步"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:029",
+    "position": 29,
+    "question": "We are interested in Foley, i.e., for a given video we want to synthesize ambient sound (e.g., rain, river flow) and sound effects induced by visible events (e.g., a dog barks, a racket hits a tennis ball). Note, Foley does not focus on synthesizing background music or human speech, which is often added in post-processing. Importantly, Foley requires to synthesize convincing high-quality audio that is 1) semantically and 2) temporally aligned to an input video. For semantic alignment, methods need to understand scene contexts and their association with audio– the visual concept of rain should be associated with the sound of splashing raindrops. For temporal alignment, methods need to understand audio-visual synchrony as humans can perceive audio-visual misalignment as slight as 25 ms. Inspired by the efficacy of training data scaling demonstrated by recent works, we pursue a data-driven approach to synthesize high-quality audio that respects these two types of alignment.",
+    "answer": "我们关注拟音，即为给定视频合成环境声（例如雨声、河流声），以及可见事件产生的音效（例如狗叫、球拍击中网球）。拟音不着重生成背景音乐或人声，这些通常在后期制作中添加。关键在于，拟音必须生成可信的高质量音频，并与输入视频在语义和时间两个方面对齐。对于语义对齐，方法需要理解场景及其与音频的联系，例如雨的视觉概念应对应雨滴飞溅声。对于时间对齐，方法需要理解音视频同步，因为人类能够察觉小至 25 毫秒的音画错位。受近期工作中扩大训练数据规模所取得效果的启发，我们采用数据驱动的方法，合成同时满足这两种对齐要求的高质量音频。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "mmaudio",
+      "article": "MMAudio: Taming Multimodal Joint Training for High-Quality Video-to-Audio Synthesis",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 24,
+      "page_end": 24,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 25 毫秒是资料引用的感知研究结论，感知阈值随条件变化，并非所有人和场景固定如此。",
+      "references": [
+        "https://arxiv.org/abs/2412.15322"
+      ],
+      "glossary": [
+        [
+          "Foley",
+          "拟音"
+        ],
+        [
+          "flow matching",
+          "流匹配"
+        ],
+        [
+          "audio latent",
+          "音频潜变量"
+        ],
+        [
+          "semantic alignment",
+          "语义对齐"
+        ],
+        [
+          "audio-visual synchronization",
+          "音视频同步"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:030",
+    "position": 30,
+    "question": "Large Language Models (LLMs) have revolutionized artificial intelligence (AI) by enabling humanlike text generation and natural language understanding. However, their reliance on static training data limits their ability to respond to dynamic, real-time queries, resulting in outdated or inaccurate outputs. Retrieval-Augmented Generation (RAG) has emerged as a solution, enhancing LLMs by integrating real-time data retrieval to provide contextually relevant and up-to-date responses. Despite its promise, traditional RAG systems are constrained by static workflows and lack the adaptability required for multi-step reasoning and complex task management.",
+    "answer": "大语言模型通过实现类人文本生成和自然语言理解，推动了人工智能的发展。然而，对静态训练数据的依赖限制了它们回答动态实时查询的能力，可能导致过时或不准确的输出。检索增强生成（RAG）通过结合实时数据检索来增强模型，使其提供与上下文相关且较新的回答。不过，传统 RAG 系统仍受到静态工作流的限制，缺乏多步推理和复杂任务管理所需的适应能力。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 25,
+      "page_end": 26,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 传统 RAG 也可检索离线知识库；实时性与可靠性依赖数据源和实现，原文的优势表述并非保证。",
+      "references": [],
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:031",
+    "position": 31,
+    "question": "Agentic Retrieval-Augmented Generation (Agentic RAG) transcends these limitations by embedding autonomous AI agents into the RAG pipeline. These agents leverage agentic design patterns reflection, planning, tool use, and multi-agent collaboration to dynamically manage retrieval strategies, iteratively refine contextual understanding, and adapt workflows through clearly defined operational structures ranging from sequential steps to adaptive collaboration. This integration enables Agentic RAG systems to deliver unparalleled flexibility, scalability, and context-awareness across diverse applications.",
+    "answer": "智能体检索增强生成（Agentic RAG）通过将自主人工智能智能体嵌入 RAG 流程，突破上述限制。这些智能体运用反思、规划、工具使用和多智能体协作等设计模式，动态管理检索策略，迭代深化对上下文的理解，并在从顺序步骤到自适应协作的明确运行结构下调整工作流。这种融合使 Agentic RAG 能够在多种应用中提供很强的灵活性、可扩展性和上下文感知能力。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 26,
+      "page_end": 26,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 传统 RAG 也可检索离线知识库；实时性与可靠性依赖数据源和实现，原文的优势表述并非保证。",
+      "references": [],
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:032",
+    "position": 32,
+    "question": "This survey provides a comprehensive exploration of Agentic RAG, beginning with its foundational principles and the evolution of RAG paradigms. It presents a detailed taxonomy of Agentic RAG architectures, highlights key applications in industries such as healthcare, finance, and education, and examines practical implementation strategies. Additionally, it addresses challenges in scaling these systems, ensuring ethical decision-making, and optimizing performance for real-world applications, while providing detailed insights into frameworks and tools for implementing Agentic RAG.",
+    "answer": "本综述全面探讨 Agentic RAG，从其基础原理和 RAG 范式演变入手，给出详细的架构分类，重点介绍医疗、金融和教育等行业的关键应用，并研究实际实施策略。此外，本文讨论扩大系统规模、确保决策符合伦理，以及优化现实应用性能等挑战，并深入介绍实现 Agentic RAG 所用的框架和工具。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 26,
+      "page_end": 26,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 传统 RAG 也可检索离线知识库；实时性与可靠性依赖数据源和实现，原文的优势表述并非保证。",
+      "references": [],
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:033",
+    "position": 33,
+    "question": "Large Language Models (LLMs) such as OpenAI’s GPT-4, Google’s PaLM, and Meta’s LLaMA, have significantly transformed artificial intelligence (AI) with their ability to generate human-like text and perform complex natural language processing tasks. These models have driven innovation across diverse domains, including conversational agents, automated content creation, and real-time translation. Recent advancements have extended their capabilities to multimodal tasks, such as text-to-image and text-to-video generation, enabling the creation and editing of videos and images from detailed prompts, which broadens the potential applications of generative AI.",
+    "answer": "以 OpenAI GPT-4、Google PaLM 和 Meta LLaMA 为代表的大语言模型，凭借生成类人文本和完成复杂自然语言处理任务的能力，显著改变了人工智能领域。这些模型推动了对话智能体、自动内容创作和实时翻译等领域的创新。近期进展把能力扩展到文本生成图像、文本生成视频等多模态任务，使根据详细提示创建和编辑图像及视频成为可能，从而拓宽了生成式人工智能的应用空间。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 27,
+      "page_end": 27,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 按原文保留作者对领域演变的论述。图与章节号仅对应原文，当前卡片不附论文图。",
+      "references": [],
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:034",
+    "position": 34,
+    "question": "Despite these advancements, LLMs face significant limitations due to their reliance on static pre-training data. This reliance often results in outdated information, hallucinated responses, and an inability to adapt to dynamic, real-world scenarios. These challenges emphasize the need for systems that can integrate real-time data and dynamically refine responses to maintain contextual relevance and accuracy.",
+    "answer": "尽管取得了上述进展，大语言模型仍因依赖静态预训练数据而面临明显局限。这种依赖常导致信息过时、回答出现幻觉，以及难以适应动态的现实场景。这些挑战凸显了对新系统的需求：系统需要整合实时数据，并动态改进回答，以保持上下文相关性和准确性。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 27,
+      "page_end": 27,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 按原文保留作者对领域演变的论述。图与章节号仅对应原文，当前卡片不附论文图。",
+      "references": [],
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:035",
+    "position": 35,
+    "question": "Retrieval-Augmented Generation (RAG) emerged as a promising solution to these challenges. By combining the generative capabilities of LLMs with external retrieval mechanisms, RAG systems enhance the relevance and timeliness of responses. These systems retrieve real-time information from sources such as knowledge bases, APIs, or the web, effectively bridging the gap between static training data and the demands of dynamic applications. However, traditional RAG workflows remain limited by their linear and static design, which restricts their ability to perform complex multi-step reasoning, integrate deep contextual understanding, and iteratively refine responses.",
+    "answer": "检索增强生成（RAG）作为应对这些挑战的一个有前景的方案出现。它结合大语言模型的生成能力与外部检索机制，提高回答的相关性与时效性。这类系统从知识库、API 或网络等来源检索实时信息，弥合静态训练数据与动态应用需求之间的差距。然而，传统 RAG 工作流仍受线性、静态设计限制，难以进行复杂多步推理、深入理解上下文或迭代改进回答。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 27,
+      "page_end": 28,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 按原文保留作者对领域演变的论述。图与章节号仅对应原文，当前卡片不附论文图。",
+      "references": [],
+      "original_english": "Retrieval-Augmented Generation (RAG)  emerged as a promising solution to these challenges. \nBy combining the generative capabilities of LLMs with external retrieval mechanisms , RAG \nsystems enhance the relevance and timeliness of responses. These systems retrieve real-time \ninformation from sources such as knowledge bases , APIs, or the web, effectively bridging the \ngap between static training data and the demands of dynamic applications. However, \ntraditional RAG workflows remain limited by their linear and static design, which restricts their \n\n\n=== PAGE 28 ===\nability to perform complex multi-step reasoning, integrate deep contextual understanding, \nand iteratively refine responses.",
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:036",
+    "position": 36,
+    "question": "The evolution of agents has significantly enhanced the capabilities of AI systems. Modern agents, including LLM-powered and mobile agents, are intelligent entities capable of perceiving, reasoning, and autonomously executing tasks. These agents leverage agentic patterns, such as reflection, planning, tool use, and multi-agent collaboration, to enhance decision-making and adaptability.",
+    "answer": "智能体的发展显著增强了人工智能系统的能力。现代智能体，包括大语言模型驱动的智能体和移动智能体，是能够感知、推理并自主执行任务的智能实体。它们利用反思、规划、工具使用和多智能体协作等模式，提升决策能力和适应能力。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 28,
+      "page_end": 28,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 按原文保留作者对领域演变的论述。图与章节号仅对应原文，当前卡片不附论文图。",
+      "references": [],
+      "original_english": "The evolution of agents has significantly enhanced the capabilities of AI systems. Modern \nagents, including LLM-powered and mobile agents , are intelligent entities capable of \nperceiving, reasoning, and autonomously executing tasks. These agents leverage agentic \npatterns, such as reflection , planning , tool use, and multi-agent collaboration , to enhance \ndecision-making and adaptability.",
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:037",
+    "position": 37,
+    "question": "Furthermore, these agents employ agentic workflow patterns, such as prompt chaining, routing, parallelization, orchestrator-worker models, and evaluator-optimizer, to structure and optimize task execution. By integrating these patterns, Agentic RAG systems can efficiently manage dynamic workflows and address complex problem-solving scenarios. The convergence of RAG and agentic intelligence has given rise to Agentic Retrieval-Augmented Generation (Agentic RAG), a paradigm that integrates agents into the RAG pipeline. Agentic RAG enables dynamic retrieval strategies, contextual understanding, and iterative refinement, allowing for adaptive and efficient information processing. Unlike traditional RAG, Agentic RAG employs autonomous agents to orchestrate retrieval, filter relevant information, and refine responses, excelling in scenarios requiring precision and adaptability. The overview of Agentic RAG is in figure 1.",
+    "answer": "此外，这些智能体采用提示链、路由、并行化、编排者与工作者、评估者与优化者等工作流模式，组织并优化任务执行。结合这些模式后，Agentic RAG 可以有效管理动态工作流并解决复杂问题。RAG 与智能体能力的融合催生了智能体检索增强生成：将智能体整合到 RAG 流程中，使动态检索、上下文理解和迭代改进成为可能，从而支持自适应且高效的信息处理。与传统 RAG 不同，它利用自主智能体编排检索、筛选相关信息并改进回答，在需要准确性和适应能力的场景中具有优势。原文图 1 给出了 Agentic RAG 的概览。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 28,
+      "page_end": 28,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 按原文保留作者对领域演变的论述。图与章节号仅对应原文，当前卡片不附论文图。",
+      "references": [],
+      "original_english": "Furthermore, these agents employ agentic workflow patterns , such as prompt chaining, \nrouting, parallelization, orchestrator-worker models, and evaluator-optimizer , to structure \nand optimize task execution. By integrating these patterns, Agentic RAG systems can efficiently \nmanage dynamic workflows and address complex problem-solving scenarios. The \nconvergence of RAG and agentic intelligence has given rise to Agentic Retrieval-Augmented \nGeneration (Agentic RAG) , a paradigm that integrates agents into the RAG pipeline. Agentic \nRAG enables dynamic retrieval strategies, contextual understanding, and iterative refinement , \nallowing for adaptive and efficient information processing. Unlike traditional RAG, Agentic RAG \nemploys autonomous agents to orchestrate retrieval, filter relevant information, and refine \nresponses, excelling in scenarios requiring precision and adaptability. The overview of Agentic \nRAGis in figure 1.",
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:038",
+    "position": 38,
+    "question": "This survey explores the foundational principles, taxonomy, and applications of Agentic RAG. It provides a comprehensive overview of RAG paradigms, such as Naïve RAG, Modular RAG, and Graph RAG, alongside their evolution into Agentic RAG systems. Key contributions include a detailed taxonomy of Agentic RAG frameworks, applications across domains such as healthcare, finance, and education, and insights into implementation strategies, benchmarks, and ethical considerations.",
+    "answer": "本综述探讨 Agentic RAG 的基础原理、分类及应用，全面介绍朴素 RAG、模块化 RAG 和图 RAG 等范式，以及它们向 Agentic RAG 系统的演变。主要贡献包括：详细的 Agentic RAG 框架分类、医疗金融和教育等领域的应用梳理，以及对实施策略、基准评测和伦理问题的分析。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 28,
+      "page_end": 28,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 按原文保留作者对领域演变的论述。图与章节号仅对应原文，当前卡片不附论文图。",
+      "references": [],
+      "original_english": "This survey explores the foundational principles, taxonomy, and applications of Agentic RAG. \nIt provides a comprehensive overview of RAG paradigms, such as Naïve RAG, Modular RAG, \nand Graph RAG , alongside their evolution into Agentic RAG systems. Key contributions include \na detailed taxonomy of Agentic RAG frameworks, applications across domains such as \nhealthcare , finance, and education , and insights into implementation strategies, \nbenchmarks, and ethical considerations.",
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:039",
+    "position": 39,
+    "question": "The structure of this paper is as follows: Section 2 introduces RAG and its evolution, highlighting the limitations of traditional approaches. Section 3 elaborates on the principles of agentic intelligence and agentic patterns. Section 4 elaborates agentic workflow patterns. Section 5 provides a taxonomy of Agentic RAG systems, including single-agent, multi-agent, and graph-based frameworks. Section 6 provides comparative analysis of Agentic RAG frameworks. Section 7 examines applications of Agentic RAG, while Section 8 discusses implementation tools and frameworks. Section 9 focuses on benchmarks and dataset, and Section 10 concludes with future directions for Agentic RAG systems.",
+    "answer": "本文结构如下：第 2 节介绍 RAG 及其演变，重点分析传统方法的局限；第 3 节阐述智能体能力的原理及相关模式；第 4 节介绍智能体工作流模式；第 5 节给出 Agentic RAG 系统的分类，包括单智能体、多智能体和基于图的框架；第 6 节比较不同框架；第 7 节研究应用；第 8 节讨论实现工具和框架；第 9 节关注基准与数据集；第 10 节总结并展望未来发展方向。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agenticrag",
+      "article": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 28,
+      "page_end": 28,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 按原文保留作者对领域演变的论述。图与章节号仅对应原文，当前卡片不附论文图。",
+      "references": [],
+      "glossary": [
+        [
+          "reflection",
+          "反思"
+        ],
+        [
+          "planning",
+          "规划"
+        ],
+        [
+          "multi-agent collaboration",
+          "多智能体协作"
+        ],
+        [
+          "prompt chaining",
+          "提示链"
+        ],
+        [
+          "orchestrator-worker",
+          "编排者与工作者"
+        ],
+        [
+          "evaluator-optimizer",
+          "评估者与优化者"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:040",
+    "position": 40,
+    "question": "Over more than a decade there has been an extensive research effort on how to effectively utilize recurrent models and attentions. While recurrent models aim to compress the data into a fixed-size memory (called hidden state), attention allows attending to the entire context window, capturing the direct dependencies of all tokens. This more accurate modeling of dependencies, however, comes with a quadratic cost, limiting the model to a fixed-length context. We present a new neural long-term memory module that learns to memorize historical context and helps an attention to attend to the current context while utilizing long past information. We show that this neural memory has the advantage of a fast parallelizable training while maintaining a fast inference.",
+    "answer": "十多年来，研究者一直在深入探索如何有效利用循环模型和注意力机制。循环模型把数据压缩到固定大小的记忆中，即隐藏状态；注意力机制则可以关注整个上下文窗口，捕捉所有词元之间的直接依赖关系。然而，这种更准确的依赖建模带来了随长度二次增长的成本，限制了模型可处理的上下文长度。我们提出一种新的神经长期记忆模块，使其学习记住历史上下文，并在利用久远信息的同时帮助注意力机制关注当前上下文。我们表明，这种神经记忆既能快速、并行地训练，又能保持较快推理。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "titans",
+      "article": "Titans: Learning to Memorize at Test Time",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 30,
+      "page_end": 30,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 二次复杂度描述标准全注意力随序列长度的开销；“上下文固定”与“优于”均按原文研究语境理解，不是所有架构的普遍定理。",
+      "references": [
+        "https://arxiv.org/abs/2501.00663"
+      ],
+      "original_english": "Over more than a decade there has been an extensive research effort of how effectively utilize \nrecurrent models and attentions. While recurrent models aim to compress the data into a \nfixed-size memory (called hidden state), attention allows attending to the entire context \nwindow, capturing the direct dependencies of all tokens. This more accurate modeling of \ndependencies, however, comes with a quadratic cost, limiting the model to a fixed-length \ncontext. We present a new neural long-term memory module that learns to memorize \nhistorical context and helps an attention to attend to the current context while utilizing long \npast information. We show that this neural memory has the advantage of a fast parallelizable \ntraining while maintaining a fast inference.",
+      "glossary": [
+        [
+          "associative memory",
+          "联想记忆"
+        ],
+        [
+          "hidden state",
+          "隐藏状态"
+        ],
+        [
+          "quadratic complexity",
+          "二次复杂度"
+        ],
+        [
+          "length extrapolation",
+          "长度外推"
+        ],
+        [
+          "meta-memory",
+          "元记忆"
+        ],
+        [
+          "needle-in-a-haystack task",
+          "大海捞针任务"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:041",
+    "position": 41,
+    "question": "From a memory perspective, we argue that attention due to its limited context but accurate dependency modeling performs as a short-term memory, while neural memory due to its ability to memorize the data, acts as a long-term, more persistent, memory. Based on these two modules, we introduce a new family of architectures, called Titans, and present three variants to address how one can effectively incorporate memory into this architecture. Our experimental results on language modeling, common-sense reasoning, genomics, and time series tasks show that Titans are more effective than Transformers and recent modern linear recurrent models. They further can effectively scale to larger than 2M context window size with higher accuracy in needle-in-haystack tasks compared to baselines.",
+    "answer": "从记忆角度看，我们认为，注意力机制的上下文范围有限，但依赖关系建模准确，因此相当于短期记忆；神经记忆具有记住数据的能力，因此相当于更持久的长期记忆。基于这两个模块，我们提出名为 Titans 的架构家族，并给出三种变体，研究如何有效地将记忆融入架构。我们在语言建模、常识推理、基因组学和时间序列任务上的实验表明，Titans 比 Transformer 和近期的线性循环模型更有效。与基线相比，它们还能够扩展到超过 200 万词元的上下文窗口，并在“大海捞针”任务上取得更高准确率。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "titans",
+      "article": "Titans: Learning to Memorize at Test Time",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 30,
+      "page_end": 30,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 二次复杂度描述标准全注意力随序列长度的开销；“上下文固定”与“优于”均按原文研究语境理解，不是所有架构的普遍定理。",
+      "references": [
+        "https://arxiv.org/abs/2501.00663"
+      ],
+      "original_english": "From a memory perspective, we argue that \nattention due to its limited context but accurate dependency modeling performs as a short-\nterm memory, while neural memory due to its ability to memorize the data, acts as a long-\nterm, more persistent, memory. Based on these two modules, we introduce a new family of \narchitectures, called Titans, and present three variants to address how one can effectively \nincorporate memory into this architecture. Our experimental results on language modeling, \ncommon-sense reasoning, genomics, and time series tasks show that Titans are more effective \nthan Transformers and recent modern linear recurrent models. They further can effectively \nscale to larger than 2M context window size with higher accuracy in needle-in-haystack tasks \ncompared to baselines.",
+      "glossary": [
+        [
+          "associative memory",
+          "联想记忆"
+        ],
+        [
+          "hidden state",
+          "隐藏状态"
+        ],
+        [
+          "quadratic complexity",
+          "二次复杂度"
+        ],
+        [
+          "length extrapolation",
+          "长度外推"
+        ],
+        [
+          "meta-memory",
+          "元记忆"
+        ],
+        [
+          "needle-in-a-haystack task",
+          "大海捞针任务"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:042",
+    "position": 42,
+    "question": "Transformers, pure attention-based architectures (Vaswani et al. 2017), have been firmly established as state-of-the-art models in sequence modeling, mainly due to their in-context learning and ability to learn at scale (Kaplan et al. 2020). The primary building blocks of Transformers–attention modules—function as associative memory blocks (Bietti et al. 2024), where they learn to store key-value associations and retrieve them by computing pairwise similarity between queries (i.e., search signals) and keys (i.e., contexts). Accordingly, by design, the output of a Transformer is exclusively conditioned on the direct dependencies of tokens in the current context window. This accurate modeling of dependencies, however, comes with quadratic time and memory complexity in terms of the context length. In complex real-world tasks (e.g., language modeling (N. F. Liu et al. 2024), video understanding (C.-Y. Wu et al. 2019), long-term time series forecasting (H. Zhou et al. 2021)), the context window can become extremely large, making the applicability of Transformers challenging in these downstream tasks.",
+    "answer": "Transformer 是一种纯注意力架构，凭借上下文学习和大规模学习能力，已经成为序列建模中广泛认可的先进模型。其核心构件注意力模块起到联想记忆的作用：学习存储键值关联，并通过计算查询（搜索信号）与键（上下文）之间的成对相似度来检索。因此，从设计上看，Transformer 的输出以当前上下文窗口中词元之间的直接依赖关系为条件。然而，这种精确依赖建模带来随上下文长度二次增长的时间和内存复杂度。在语言建模、视频理解、长期时间序列预测等复杂现实任务中，上下文可能极长，使 Transformer 在这些任务中的应用面临困难。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "titans",
+      "article": "Titans: Learning to Memorize at Test Time",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 32,
+      "page_end": 32,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 恢复 state-of-the-art 等拼写与连字；保留原文对固定状态压缩局限的研究动机，不视为对一切线性模型的性能结论。",
+      "references": [
+        "https://arxiv.org/abs/2501.00663"
+      ],
+      "original_english": "Transformers,pure attention-based architectures (Vaswani et al. 2017), have been firmly \nestablished as state-ofthe-art models in sequence modeling, mainly due to their in-context \nlearning and ability to learn at scale (Kaplan et al. 2020). The primary building blocks of \nTransformers–attention modules—function as associative memory blocks (Bietti et al. 2024), \nwhere they learn to store key-value associations and retrieve them by computing pairwise \nsimilarity between queries (i.e., search signals) and keys (i.e., contexts). Accordingly, by design, \nthe output of a Transformer is exclusively conditioned on the direct dependencies of tokens in \nthe current context window. This accurate modeling of dependencies, however, comes with \nquadratic time and memory complexity in terms of the context length. In complex real-world \ntasks (e.g., language modeling (N. F. Liu et al. 2024), video understanding (C.-Y. Wu et al. 2019), \nlong-term time series forecasting (H. Zhou et al. 2021)), the context window can become \nextremely large, making the applicability of Transformers challenging in these downstream \ntasks.",
+      "glossary": [
+        [
+          "associative memory",
+          "联想记忆"
+        ],
+        [
+          "hidden state",
+          "隐藏状态"
+        ],
+        [
+          "quadratic complexity",
+          "二次复杂度"
+        ],
+        [
+          "length extrapolation",
+          "长度外推"
+        ],
+        [
+          "meta-memory",
+          "元记忆"
+        ],
+        [
+          "needle-in-a-haystack task",
+          "大海捞针任务"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:043",
+    "position": 43,
+    "question": "To overcome the scalability issue of Transformers, recent studies aim to design different variants of linear Transformers (Kacham, Mirrokni, and P. Zhong 2024; Katharopoulos et al. 2020; S. Yang, B. Wang, Shen, et al. 2024), where softmax is replaced by a kernel function in the attention (see §2.1 for details), resulting in a significant drop in memory consumption. Despite efficiency and the ability to scale to longer context, linear Transformers do not show competitive performance compared to Transformers as the kernel trick makes the model a linear recurrent network, in which the data is compressed into a matrix-valued state (Katharopoulos et al. 2020). This, however, brings a contradictory fact about linear recurrent (or linear Transformers) models: On one hand, we use these linear models to enhance scalability and efficiency (linear vs. quadratic complexity), whose advantages appear for very long context; On the other hand, a very long context cannot be properly compressed in a small vector-valued or matrix-valued state (S. Wang 2024).",
+    "answer": "为克服 Transformer 的扩展性问题，近期研究设计了多种线性 Transformer，用核函数替代注意力中的 softmax，从而显著降低内存消耗。尽管它们效率高并能扩展到更长上下文，但相较于 Transformer，其性能仍缺乏竞争力，因为核技巧使模型成为把数据压缩到矩阵状态中的线性循环网络。这产生了一种矛盾：一方面，我们希望利用线性模型的线性复杂度，而非二次复杂度，来提升扩展性和效率，其优势在极长上下文下尤为明显；另一方面，极长上下文又难以被妥善压缩到较小的向量或矩阵状态中。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "titans",
+      "article": "Titans: Learning to Memorize at Test Time",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 32,
+      "page_end": 32,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 恢复 state-of-the-art 等拼写与连字；保留原文对固定状态压缩局限的研究动机，不视为对一切线性模型的性能结论。",
+      "references": [
+        "https://arxiv.org/abs/2501.00663"
+      ],
+      "original_english": "To overcome the scalability issue of Transformers, recent studies aim to design different \nvariants of linear Transformers (Kacham, Mirrokni, and P. Zhong 2024; Katharopoulos et al. \n2020; S. Yang, B. Wang, Shen, et al. 2024), where softmax is replaced by a kernel function in the \nattention (see §2.1 for details), resulting in a significant drop in memory consumption. \nDespite efficiency and the ability to scale to longer context, linear Transformers do not show \ncompetitive performance compared to Transformers as the kernel trick makes the model a \nlinear recurrent network, in which the data is compressed into a matrix-valued states \n(Katharopoulos et al. 2020). This, however, brings a contradictory fact about linear recurrent \n(or linear Transformers) models: On one hand, we use these linear models to enhance \nscalability and efficiency (linear vs. quadratic complexity), whose advantages is appeared for \nvery long context; On the other hand, a very long context cannot be properly compressed in a \nsmall vector-valued or matrix-valued states (S. Wang 2024).",
+      "glossary": [
+        [
+          "associative memory",
+          "联想记忆"
+        ],
+        [
+          "hidden state",
+          "隐藏状态"
+        ],
+        [
+          "quadratic complexity",
+          "二次复杂度"
+        ],
+        [
+          "length extrapolation",
+          "长度外推"
+        ],
+        [
+          "meta-memory",
+          "元记忆"
+        ],
+        [
+          "needle-in-a-haystack task",
+          "大海捞针任务"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:044",
+    "position": 44,
+    "question": "Furthermore, beyond efficiency, most existing architectures–ranging from Hopfield Networks (Hopfield 1982) to LSTMs (Jürgen Schmidhuber and Hochreiter 1997) and Transformers (Vaswani et al. 2017)–face challenges when dealing with generalization, length extrapolation, and/or reasoning (Anil et al. 2022; Qin, Y. Zhong, and Deng 2024), all of which are inseparable parts of many hard real-world tasks. Although these architectures draw inspiration from the human brain, each of which is missing: (1) a crucial component for learning process—such as short-term memory, long-term memory, meta-memory, attending to current context, etc. (Cowan 2008); (2) how these components are interconnected systems that can operate independently; and/or (3) the ability to actively learn from data and memorize the abstraction of past history. We argue that in an effective learning paradigm, similar to human brain, there are distinct yet interconnected modules, each of which is responsible for a component crucial to the learning process.",
+    "answer": "此外，除了效率问题，现有的大多数架构，从 Hopfield 网络、LSTM 到 Transformer，在泛化、长度外推或推理方面也面临挑战，而这些能力是许多困难现实任务的重要组成部分。尽管它们受到人脑启发，却各有缺失：可能缺少短期记忆、长期记忆、元记忆或关注当前上下文等学习关键组件；可能未能把这些组件组织成可以独立运作又彼此关联的系统；或者缺乏主动从数据中学习并记住历史抽象信息的能力。我们认为，有效的学习范式应像人脑一样，包含彼此不同但相互连接的模块，各自承担学习过程中的关键职责。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "titans",
+      "article": "Titans: Learning to Memorize at Test Time",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 32,
+      "page_end": 32,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 恢复 state-of-the-art 等拼写与连字；保留原文对固定状态压缩局限的研究动机，不视为对一切线性模型的性能结论。",
+      "references": [
+        "https://arxiv.org/abs/2501.00663"
+      ],
+      "original_english": "Furthermore, beyond efficiency, most existing architectures–ranging from Hopfield Networks \n(Hopfield 1982) to LSTMs (Jürgen Schmidhuber and Hochreiter 1997) and Transformers \n(Vaswani et al. 2017)–face challenges when dealing with generalization, length extrapolation, \nand/or reasoning (Anil et al. 2022; Qin, Y. Zhong, and Deng 2024), all of which are inseparable \nparts of many hard real-world tasks. Although these architectures draw inspiration from the \nhuman brain, each of which are missing: (1) a crucial component for learning process—such as \nshort-term memory, long-term memory, meta-memory, attending to current context, etc. \n(Cowan 2008); (2) how these components are interconnected systems that can operate \nindependently; and/or (3) the ability to actively learn from data and memorize the abstraction \nof past history. We argue that in an effective learning paradigm, similar to human brain, there \nare distinct yet interconnected modules, each of which is responsible for a component crucial \nto the learning process.",
+      "glossary": [
+        [
+          "associative memory",
+          "联想记忆"
+        ],
+        [
+          "hidden state",
+          "隐藏状态"
+        ],
+        [
+          "quadratic complexity",
+          "二次复杂度"
+        ],
+        [
+          "length extrapolation",
+          "长度外推"
+        ],
+        [
+          "meta-memory",
+          "元记忆"
+        ],
+        [
+          "needle-in-a-haystack task",
+          "大海捞针任务"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:045",
+    "position": 45,
+    "question": "Large reasoning models (LRMs) like OpenAI-o1 have demonstrated impressive long stepwise reasoning capabilities through large-scale reinforcement learning. However, their extended reasoning processes often suffer from knowledge insufficiency, leading to frequent uncertainties and potential errors. To address this limitation, we introduce Search-o1, a framework that enhances LRMs with an agentic retrieval-augmented generation (RAG) mechanism and a Reason-in-Documents module for refining retrieved documents. Search-o1 integrates an agentic search workflow into the reasoning process, enabling dynamic retrieval of external knowledge when LRMs encounter uncertain knowledge points.",
+    "answer": "以 OpenAI-o1 为代表的大型推理模型，通过大规模强化学习展现出出色的长程分步推理能力。然而，冗长的推理过程常受到知识不足的影响，导致不确定性和潜在错误。为解决这一问题，我们提出 Search-o1：通过智能体检索增强生成（RAG）机制，以及用于提炼检索文档的“文档内推理”模块，增强大型推理模型。Search-o1 将智能体搜索工作流融入推理过程，使模型遇到不确定知识点时能够动态检索外部知识。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 34,
+      "page_end": 34,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 统一 Reason-in-Documents 模块名称。长推理的机制性描述与实验优势按作者论述翻译。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "original_english": "Large reasoning models (LRMs) like OpenAI-o1 have demonstrated impressive long stepwise \nreasoning capabilities through large-scale reinforcement learning. However, their extended \nreasoning processes often suffer from knowledge insufficiency, leading to frequent \nuncertainties and potential errors. To address this limitation, we introduce Search-o1, a \nframework that enhances LRMs with an agentic retrieval-augmented generation (RAG) \nmechanism and a Reason-inDocuments module for refining retrieved documents. Search-o1 \nintegrates an agentic search workflow into the reasoning process, enabling dynamic retrieval \nof external knowledge when LRMs encounter uncertain knowledge points.",
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:046",
+    "position": 46,
+    "question": "Additionally, due to the verbose nature of retrieved documents, we design a separate Reason-in-Documents module to deeply analyze the retrieved information before injecting it into the reasoning chain, minimizing noise and preserving coherent reasoning flow. Extensive experiments on complex reasoning tasks in science, mathematics, and coding, as well as six open-domain QA benchmarks, demonstrate the strong performance of Search-o1. This approach enhances the trustworthiness and applicability of LRMs in complex reasoning tasks, paving the way for more reliable and versatile intelligent systems.",
+    "answer": "此外，检索文档往往较为冗长，因此我们设计了独立的“文档内推理”模块，在把信息注入推理链之前深入分析检索结果，减少噪声并保持推理流的连贯性。在科学、数学、编程等复杂推理任务及六个开放域问答基准上的大量实验，展示了 Search-o1 的较强表现。这一方法增强了大型推理模型在复杂任务中的可信度和适用性，为构建更可靠、更通用的智能系统提供了途径。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 34,
+      "page_end": 34,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 统一 Reason-in-Documents 模块名称。长推理的机制性描述与实验优势按作者论述翻译。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:047",
+    "position": 47,
+    "question": "Recently emerged large reasoning models (LRMs), exemplified by OpenAI’s o1, Qwen QwQ and DeepSeek-R1, employ large-scale reinforcement learning to foster impressive long-sequence stepwise reasoning capabilities, offering promising solutions to complex reasoning problems. This advancement has inspired a series of foundational efforts aimed at exploring and reproducing o1-like reasoning patterns, to broaden their application to a wider range of foundational models.",
+    "answer": "近期出现的大型推理模型，以 OpenAI o1、Qwen QwQ 和 DeepSeek-R1 为代表，通过大规模强化学习培养了出色的长序列分步推理能力，为解决复杂推理问题提供了有前景的方案。这一进展激发了一系列基础研究，探索并复现类 o1 的推理模式，以将其拓展到更多基础模型。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 35,
+      "page_end": 35,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复缺失的 to、LRMswith、Wepropose 等排版语法问题；具体统计、遗忘和首创性表述仅是文中报告，不推广为所有推理模型的性质。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "original_english": "Recently emerged large reasoning models (LRMs), exemplified by OpenAI’s o1 , QwenQwQ  \nand DeepSeek-R1 , employ large-scale reinforcement learning foster impressive long-\nsequence stepwise reasoning capabilities, offering promising solutions to complex reasoning \nproblems . This advancement has inspired a series of foundational efforts aimed at exploring \nand reproducing o1-like reasoning patterns, to broaden their application to a wider range of \nfoundational models .",
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:048",
+    "position": 48,
+    "question": "It is noteworthy that o1-like reasoning patterns guide LRMs to engage in a slower thinking process by implicitly breaking down complex problems, generating a long internal reasoning chain and then discovering suitable solutions step by step. While this characteristic enhances logical coherence and interpretability of reasoning, an extended chain of thought may cause overthinking and increased risks of knowledge insufficiency, where any knowledge gap can propagate errors and disrupt the entire reasoning chain.",
+    "answer": "值得注意的是，类 o1 推理模式引导大型推理模型进行较慢的思考：隐式分解复杂问题，生成较长的内部推理链，再逐步寻找合适解答。这有助于增强逻辑连贯性和推理的可解释性，但过长的思维链也可能造成过度思考，增加知识不足的风险；任何知识缺口都可能传播错误，打断整条推理链。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 35,
+      "page_end": 36,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复缺失的 to、LRMswith、Wepropose 等排版语法问题；具体统计、遗忘和首创性表述仅是文中报告，不推广为所有推理模型的性质。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "original_english": "It is noteworthy that o1-like reasoning patterns guide LRMs to engage in a slower thinking \nprocess by implicitly breaking down complex problems, generating a long internal reasoning \n\n\n=== PAGE 36 ===\nchain and then discovering suitable solutions step by step. While this characteristic enhances \nlogical coherence and interpretability of reasoning, an extended chain of thought may cause \noverthinking  and increased risks of knowledge insufficiency , where any knowledge gap can \npropagate errors and disrupt the entire reasoning chain .",
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:049",
+    "position": 49,
+    "question": "To address this limitation, we conduct preliminary experiments to assess the frequency of uncertain words decoded by the LRMs due to knowledge gaps. As shown in Figure 1, the extended thinking process leads LRM to frequently decode numerous uncertain terms in challenging reasoning problems, with “perhaps” averaging over 30 occurrences in each reasoning process. Notably, the high specialization of these problems also complicates manual reasoning verification, often incurring significant costs. Consequently, automating the supplementation of knowledge required for the o1-like reasoning process has become a significant challenge, limiting the progress of LRMs in achieving universally trustworthy reasoning.",
+    "answer": "为研究这一局限，我们开展初步实验，统计大型推理模型因知识缺口而生成不确定词语的频率。原文图 1 显示，在困难推理问题中，延长思考过程会使模型频繁生成不确定用语，其中每次推理中“perhaps”（也许）平均出现超过 30 次。这些问题的高度专业性也使人工核验推理变得困难且成本较高。因此，如何自动补充类 o1 推理过程所需的知识，成为一项重要挑战，也限制了大型推理模型向普遍可信推理的发展。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 36,
+      "page_end": 36,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复缺失的 to、LRMswith、Wepropose 等排版语法问题；具体统计、遗忘和首创性表述仅是文中报告，不推广为所有推理模型的性质。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "original_english": "To address this limitation, we conduct preliminary experiments to assess the frequency of \nuncertain words decoded by the LRMs due to knowledge gaps. As shown in Figure 1, the \nextended thinking process leads LRM to frequently decode numerous uncertain terms in \nchallenging reasoning problems, with “perhaps” averaging over 30 occurrences in each \nreasoning process. Notably, the high specialization of these problems also complicates \nmanual reasoning verification, often incurring significant costs . Consequently, automating \nthe supplementation of knowledge required for the o1-like reasoning process has become a \nsignificant challenge, limiting the progress of LRMs in achieving universally trustworthy \nreasoning.",
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:050",
+    "position": 50,
+    "question": "To shed light on this topic, our core motivation is to enhance the LRMs with o1-like reasoning pattern through autonomous retrieval. We propose Search-o1, which integrates the reasoning process of LRMs with two core components: an agentic retrieval-augmented generation (RAG) mechanism and a knowledge refinement module. This design aims to enable LRMs to incorporate the agentic search workflow into the reasoning process, retrieving external knowledge on demand to support step-wise reasoning while preserving coherence throughout.",
+    "answer": "为探索这一问题，我们的核心动机是通过自主检索，增强具有类 o1 推理模式的大型推理模型。我们提出 Search-o1，将模型的推理过程与两个核心组件结合：智能体检索增强生成机制和知识提炼模块。这一设计旨在把智能体搜索工作流融入模型推理，按需检索外部知识来支持分步推理，同时保持整个过程的连贯性。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 36,
+      "page_end": 36,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复缺失的 to、LRMswith、Wepropose 等排版语法问题；具体统计、遗忘和首创性表述仅是文中报告，不推广为所有推理模型的性质。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "original_english": "To shed light on this topic, our core motivation is to enhance the LRMs with o1-like reasoning \npattern through autonomous retrieval. We propose Search-o1, which integrates the reasoning \nprocess of LRMswith two core components: an agentic retrieval-augmented generation (RAG) \nmechanism and a knowledge refinement module. This design aims to enable LRMs to \nincorporate the agentic search workflow into the reasoning process, retrieving external \nknowledge on demand to support step-wise reasoning while preserving coherence \nthroughout.",
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:051",
+    "position": 51,
+    "question": "Specifically, our results in Figure 1 reveal that traditional problem-oriented RAG techniques do not effectively address the knowledge gaps compared to direct reasoning (Standard RAG vs. Direct Reasoning). This finding aligns with human intuition, as standard RAG retrieves relevant knowledge only once in a problem-oriented manner, while the knowledge required for each step in complex reasoning scenarios is often varied and diverse. Unlike them, Search-o1 employs an agentic RAG technique that guides the model to actively decode search queries when facing knowledge shortages, thereby triggering the retrieval mechanism to obtain relevant external knowledge. Owing to the benefits of this design, our retrieval mechanism can be triggered and iterated multiple times within a single reasoning session to fulfill the knowledge needs of various reasoning steps.",
+    "answer": "具体而言，原文图 1 表明，与直接推理相比，传统的面向问题的 RAG 技术未能有效弥补知识缺口。这符合直觉：标准 RAG 通常仅针对整个问题检索一次，而复杂推理各步骤所需的知识往往不同。与之不同，Search-o1 使用智能体 RAG，引导模型在缺少知识时主动生成搜索查询，触发检索以获取相关外部知识。借助这一设计，在一次推理中可以多次触发并迭代检索，满足不同推理步骤的知识需求。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 36,
+      "page_end": 36,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复缺失的 to、LRMswith、Wepropose 等排版语法问题；具体统计、遗忘和首创性表述仅是文中报告，不推广为所有推理模型的性质。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "original_english": "Specifically, our results in Figure 1 reveal that traditional problem-oriented RAG techniques do \nnot effectively address the knowledge gaps compared to direct reasoning (Standard RAG vs. \nDirect Reasoning). This finding aligns with human intuition, as standard RAG retrieves relevant \nknowledge only once in a problem-oriented manner, while the knowledge required for each \nstep in complex reasoning scenarios is often varied and diverse . Unlike them, Search-o1 \nemploys an agentic RAG technique that guides the model to actively decode search queries \nwhen facing knowledge shortages, thereby triggering the retrieval mechanism to obtain \nrelevant external knowledge. Owing to the benefits of this design, our retrieval mechanism \ncan be triggered and iterated multiple times within a single reasoning session to fulfill the \nknowledge needs of various reasoning steps.",
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:052",
+    "position": 52,
+    "question": "To effectively integrate retrieved knowledge into the LRM’s reasoning process, we further identify two key challenges when directly incorporating retrieved documents into the reasoning chain during practical experiments: (1) Redundant Information in Retrieved Documents. Retrieved documents are often lengthy and contain redundant information, directly inputting them into LRMs may disrupt the original coherence of reasoning and even introduce noise. (2) Limited Ability to Understand Long Documents. Most LRMs have been specifically aligned for complex reasoning tasks during the pre-training and fine-tuning stages. This focus has resulted in a degree of catastrophic forgetting in their general capabilities, ultimately limiting their long-context understanding of retrieved documents.",
+    "answer": "为有效地将检索知识融入大型推理模型的推理过程，我们在实际实验中发现，直接把检索文档插入推理链存在两个主要挑战。第一，检索文档含有冗余信息：文档通常很长，直接输入可能破坏原有推理连贯性，甚至引入噪声。第二，长文档理解能力有限：许多大型推理模型在预训练和微调中着重对齐复杂推理任务，这种侧重使其部分通用能力出现灾难性遗忘，进而限制了对检索文档长上下文的理解。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 36,
+      "page_end": 36,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复缺失的 to、LRMswith、Wepropose 等排版语法问题；具体统计、遗忘和首创性表述仅是文中报告，不推广为所有推理模型的性质。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "original_english": "To effectively integrate retrieved knowledge into the LRM’s reasoning process, we further \nidentify two key challenges when directly incorporating retrieved documents into the \nreasoning chain during practical experiments: (1) Redundant Information in Retrieved \nDocuments. Retrieved documents are often lengthy and contain redundant information, \ndirectly inputting them into LRMs may disrupt the original coherence of reasoning and even \nintroduce noise . (2) Limited Ability to Understand Long Documents. Most LRMs have been \nspecifically aligned for complex reasoning tasks during the pre-training and fine-tuning stages. \nThis focus has resulted in a degree of catastrophic forgetting in their general capabilities , \nultimately limiting their long-context understanding of retrieved documents.",
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:053",
+    "position": 53,
+    "question": "To address these challenges, we introduce the Reason-in-Documents module, which operates independently from the main reasoning chain. This module first conducts a thorough analysis of retrieved documents based on both the current search query and previous reasoning steps, and then produces refined information that seamlessly integrates with the prior reasoning chain.",
+    "answer": "为应对这些挑战，我们引入独立于主推理链运行的“文档内推理”模块。该模块首先根据当前搜索查询和先前的推理步骤，对检索文档进行全面分析，再生成可以与已有推理链自然衔接的提炼信息。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 37,
+      "page_end": 37,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复缺失的 to、LRMswith、Wepropose 等排版语法问题；具体统计、遗忘和首创性表述仅是文中报告，不推广为所有推理模型的性质。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:054",
+    "position": 54,
+    "question": "In summary, our contributions are as follows:\n\n• We propose Search-o1, the first framework that integrates the agentic search workflow into the o1-like reasoning process of LRM for achieving autonomous knowledge supplementation.\n\n• To effectively integrate external knowledge during reasoning, Search-o1 combines the reasoning process with an agentic RAG mechanism and a knowledge refinement module. This design enables the LRM to retrieve external knowledge on demand, seamlessly incorporating it into the reasoning chain while maintaining the original logical flow.\n\n• With five complex reasoning domains and six open-domain QA benchmarks, we demonstrate that Search-o1 achieves remarkable performance in the reasoning field while maintaining substantial improvements in the general knowledge. Further quantitative analysis confirms its efficiency and scalability, offering practical guidance for trustworthy reasoning in LRMs.",
+    "answer": "总而言之，我们的贡献如下：首先，我们提出 Search-o1，将智能体搜索工作流整合到大型推理模型的类 o1 推理过程中，以实现自主知识补充，并将其作为首个此类框架提出。其次，Search-o1 把推理过程与智能体 RAG 机制及知识提炼模块结合，使模型能够按需检索外部知识，并在保持原有逻辑流程的同时融入推理链。最后，在五个复杂推理领域及六个开放域问答基准上，我们展示了它在推理方面的突出表现，以及通用知识方面的显著提升。进一步定量分析证实了其效率和扩展性，为构建可信推理提供了实践指导。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "searcho1",
+      "article": "Search-o1: Agentic Search-Enhanced Large Reasoning Models",
+      "section": "引言",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 37,
+      "page_end": 37,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复缺失的 to、LRMswith、Wepropose 等排版语法问题；具体统计、遗忘和首创性表述仅是文中报告，不推广为所有推理模型的性质。",
+      "references": [
+        "https://arxiv.org/abs/2501.05366"
+      ],
+      "original_english": "In summary, our contributions are as follows:\n•\nWepropose Search-o1, the first framework that integrates the agentic search workflow into \nthe o1-like reasoning process of LRM for achieving autonomous knowledge \nsupplementation.\n•\nTo effectively integrate external knowledge during reasoning, Search-o1 combines the \nreasoning process with an agentic RAG mechanism and a knowledge refinement module. \nThis design enables the LRM to retrieve external knowledge on demand, seamlessly \nincorporating it into the reasoning chain while maintaining the original logical flow.\n•\nWith five complex reasoning domains and six open-domain QA benchmarks, we \ndemonstrate that Search-o1 achieves remarkable performance in the reasoning field while \nmaintaining substantial improvements in the general knowledge. Further quantitative \nanalysis confirms its efficiency and scalability, offering practical guidance for trustworthy \nreasoning in LRMs.",
+      "glossary": [
+        [
+          "knowledge insufficiency",
+          "知识不足"
+        ],
+        [
+          "knowledge refinement",
+          "知识提炼"
+        ],
+        [
+          "overthinking",
+          "过度思考"
+        ],
+        [
+          "catastrophic forgetting",
+          "灾难性遗忘"
+        ],
+        [
+          "Reason-in-Documents",
+          "文档内推理"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:055",
+    "position": 55,
+    "question": "Historically, scientific discovery has been a lengthy and costly process, demanding substantial time and resources from initial conception to final results. To accelerate scientific discovery, reduce research costs, and improve research quality, we introduce Agent Laboratory, an autonomous LLM-based framework capable of completing the entire research process. This framework accepts a human-provided research idea and progresses through three stages— literature review, experimentation, and report writing to produce comprehensive research outputs, including a code repository and a research report, while enabling users to provide feedback and guidance at each stage. We deploy Agent Laboratory with various state-of-the-art LLMs and invite multiple researchers to assess its quality by participating in a survey, providing human feedback to guide the research process, and then evaluate the final paper.",
+    "answer": "长期以来，科学发现是一个漫长且成本高昂的过程，从最初构思到最终结果都需要大量时间和资源。为加速科学发现、降低研究成本并提升研究质量，我们提出 Agent Laboratory：一种基于大语言模型的自主框架，能够完成完整研究流程。框架接收人类提供的研究想法，依次经过文献综述、实验和报告撰写三个阶段，产出包括代码仓库和研究报告在内的完整成果，同时允许用户在每个阶段提供反馈和指导。我们使用多种当时先进的大语言模型运行该框架，并邀请多位研究者参与调查、通过人类反馈指导研究过程，随后评估最终论文，以此评价其质量。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agentlaboratory",
+      "article": "Agent Laboratory: Using LLM Agents as Research Assistants",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 39,
+      "page_end": 39,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 “完成整个研究过程”和降低 84% 成本均为作者报告的设置与结果，不能保证生成研究有效或替代人工核验。",
+      "references": [
+        "https://arxiv.org/abs/2501.04227"
+      ],
+      "original_english": "Historically, scientific discovery has been a lengthy and costly process, demanding substantial \ntime and  resources from initial conception to final results. To accelerate scientific discovery, \nreduce research costs, and improve research quality, we introduce Agent Laboratory, an \nautonomous LLM-based framework capable of completing the entire research process. This \nframework accepts a human-provided research idea and progresses through three stages—\nliterature review, experimentation, and report writing to produce comprehensive research \noutputs, including a code repository and a research report, while enabling users to provide \nfeedback and guidance at each stage. We deploy Agent Laboratory with various state-of-the-\nart LLMs and invite multiple researchers to assess its quality by participating in a survey, \nproviding human feedback to guide the research process, and then evaluate the final paper.",
+      "glossary": [
+        [
+          "literature review",
+          "文献综述"
+        ],
+        [
+          "experimentation",
+          "实验"
+        ],
+        [
+          "code repository",
+          "代码仓库"
+        ],
+        [
+          "human involvement",
+          "人类参与"
+        ],
+        [
+          "creative ideation",
+          "创造性构思"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:056",
+    "position": 56,
+    "question": "We found that: (1) Agent Laboratory driven by o1-preview generates the best research outcomes; (2) The generated machine learning code is able to achieve state-of-the-art performance compared to existing methods; (3) Human involvement, providing feedback at each stage, significantly improves the overall quality of research; (4) Agent Laboratory significantly reduces research expenses, achieving an 84% decrease compared to previous autonomous research methods. We hope Agent Laboratory enables researchers to allocate more effort toward creative ideation rather than low-level coding and writing, ultimately accelerating scientific discovery.",
+    "answer": "我们发现：（1）由 o1-preview 驱动的 Agent Laboratory 获得了最佳研究结果；（2）生成的机器学习代码相较于现有方法能够达到当时领先的性能；（3）人类在每个阶段提供反馈，显著改善了研究的整体质量；（4）相较于先前的自主研究方法，该框架使研究开销降低了 84%。我们希望 Agent Laboratory 让研究者把更多精力用于创造性构思，而非底层编码和写作，从而加速科学发现。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "agentlaboratory",
+      "article": "Agent Laboratory: Using LLM Agents as Research Assistants",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 39,
+      "page_end": 39,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 “完成整个研究过程”和降低 84% 成本均为作者报告的设置与结果，不能保证生成研究有效或替代人工核验。",
+      "references": [
+        "https://arxiv.org/abs/2501.04227"
+      ],
+      "glossary": [
+        [
+          "literature review",
+          "文献综述"
+        ],
+        [
+          "experimentation",
+          "实验"
+        ],
+        [
+          "code repository",
+          "代码仓库"
+        ],
+        [
+          "human involvement",
+          "人类参与"
+        ],
+        [
+          "creative ideation",
+          "创造性构思"
+        ]
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_literature_translation",
+    "source_key": "written-ai-literature-v1:057",
+    "position": 57,
+    "question": "Unifying multimodal understanding and generation has shown impressive capabilities in cutting-edge proprietary systems. In this work, we introduce BAGEL, an open-source foundational model that natively supports multimodal understanding and generation. BAGEL is a unified, decoder-only model pretrained on trillions of tokens curated from large-scale interleaved text, image, video, and web data. When scaled with such diverse multimodal interleaved data, BAGEL exhibits emerging capabilities in complex multimodal reasoning. As a result, it significantly outperforms open-source unified models in both multimodal generation and understanding across standard benchmarks, while exhibiting advanced multimodal reasoning abilities such as free-form image manipulation, future frame prediction, 3D manipulation, and world navigation. In the hope of facilitating further opportunities for multimodal research, we share the key findings, pretraining details, data creation protocol, and release our code and checkpoints to the community.",
+    "answer": "统一多模态理解与生成，已在前沿专有系统中展示出令人瞩目的能力。本文介绍 BAGEL，一个原生支持多模态理解和生成的开源基础模型。BAGEL 是统一的纯解码器模型，使用从大规模交错文本、图像、视频和网页数据中整理出的数万亿词元进行预训练。在如此多样的多模态交错数据上扩大训练规模后，BAGEL 展现出复杂多模态推理的涌现能力。因此，在标准基准中，它在多模态生成与理解方面显著超过了其他开源统一模型，并表现出自由形式图像编辑、未来帧预测、三维操作和世界导航等高级多模态推理能力。为推动多模态研究，我们分享关键发现、预训练细节和数据构建规程，并向社区发布代码与模型检查点。",
+    "images": [],
+    "source": {
+      "kind": "translation",
+      "article_id": "bagel",
+      "article": "Emerging Properties in Unified Multimodal Pretraining",
+      "section": "摘要",
+      "revision": "2026-11-14-v1",
+      "file": "笔试文献翻译部分练习素材.pdf",
+      "page_start": 40,
+      "page_end": 41,
+      "editorial_note": "英文按资料完整语义选段，仅修复排版、脚注及明确拼写问题；中文重新校译。性能、成本和能力结论限于作者当时的实验与表述，不代表当前排名或普遍保证。 修复 BAGELexhibits 和 protocal 等拼写；checkpoints 译为模型检查点，不仅指代码。",
+      "references": [
+        "https://arxiv.org/abs/2505.14683"
+      ],
+      "original_english": "Unifying multimodal understanding and generation has shown impressive capabilities in \ncutting-edge proprietary systems. In this work, we introduce BAGEL, an open-source \n\n\n=== PAGE 41 ===\nfoundational model that natively supports multimodal understanding and generation. BAGEL \nis a unified, decoder-only model pretrained on trillions of tokens curated from large-scale \ninterleaved text, image, video, and web data. When scaled with such diverse multimodal \ninterleaved data, BAGELexhibits emerging capabilities in complex multimodal reasoning. As a \nresult, it significantly outperforms open-source unified models in both multimodal generation \nand understanding across standard benchmarks, while exhibiting advanced multimodal \nreasoning abilities such as free-form image manipulation, future frame prediction, 3D \nmanipulation, and world navigation. In the hope of facilitating further opportunities for \nmultimodal research, we share the key findings, pretraining details, data creation protocal, \nand release our code and checkpoints to the community.",
+      "glossary": [
+        [
+          "decoder-only",
+          "纯解码器的"
+        ],
+        [
+          "interleaved data",
+          "交错数据"
+        ],
+        [
+          "future frame prediction",
+          "未来帧预测"
+        ],
+        [
+          "world navigation",
+          "世界导航"
+        ],
+        [
+          "checkpoint",
+          "模型检查点"
+        ]
+      ]
+    }
+  }
+]

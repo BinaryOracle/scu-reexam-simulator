@@ -1,0 +1,138 @@
+[
+  {
+    "id": "computer_networks-01",
+    "question": "计算机网络的主要功能？"
+  },
+  {
+    "id": "computer_networks-02",
+    "question": "主机间的通信方式？"
+  },
+  {
+    "id": "computer_networks-03",
+    "question": "电路交换，报文交换和分组交换的区别？"
+  },
+  {
+    "id": "computer_networks-04",
+    "question": "计算机网络的主要性能指标？"
+  },
+  {
+    "id": "computer_networks-05",
+    "question": "计算机网络提供的服务的三种分类？"
+  },
+  {
+    "id": "computer_networks-06",
+    "question": "ISO/OSI参考模型和TCP/IP模型？"
+  },
+  {
+    "id": "computer_networks-07",
+    "question": "端到端通信和点到点通信的区别？"
+  },
+  {
+    "id": "computer_networks-08",
+    "question": "如何理解同步和异步？什么是同步通信和异步通信？"
+  },
+  {
+    "id": "computer_networks-09",
+    "question": "频分复用 时分复用 波分复用 码分复用"
+  },
+  {
+    "id": "computer_networks-10",
+    "question": "为什么要进行流量控制?"
+  },
+  {
+    "id": "computer_networks-11",
+    "question": "流量控制的常见方式？"
+  },
+  {
+    "id": "computer_networks-12",
+    "question": "可靠传输机制有哪些？"
+  },
+  {
+    "id": "computer_networks-13",
+    "question": "随机访问介质访问控制？"
+  },
+  {
+    "id": "computer_networks-14",
+    "question": "PPP协议？"
+  },
+  {
+    "id": "computer_networks-15",
+    "question": "HDLC协议？"
+  },
+  {
+    "id": "computer_networks-16",
+    "question": "试分析中继器、集线器、网桥和交换机这四种网络互联设备的区别与联系。"
+  },
+  {
+    "id": "computer_networks-17",
+    "question": "路由器的主要功能？"
+  },
+  {
+    "id": "computer_networks-18",
+    "question": "动态路由算法？"
+  },
+  {
+    "id": "computer_networks-19",
+    "question": "网络层转发分组的流程？"
+  },
+  {
+    "id": "computer_networks-20",
+    "question": "IP地址和MAC地址？"
+  },
+  {
+    "id": "computer_networks-21",
+    "question": "ARP地址解析协议？"
+  },
+  {
+    "id": "computer_networks-22",
+    "question": "DHCP动态主机配置协议？"
+  },
+  {
+    "id": "computer_networks-23",
+    "question": "ICMP网际控制报文协议？"
+  },
+  {
+    "id": "computer_networks-24",
+    "question": "传输层的功能？"
+  },
+  {
+    "id": "computer_networks-25",
+    "question": "UDP协议？"
+  },
+  {
+    "id": "computer_networks-26",
+    "question": "TCP协议？"
+  },
+  {
+    "id": "computer_networks-27",
+    "question": "拥塞控制的四种算法？"
+  },
+  {
+    "id": "computer_networks-28",
+    "question": "为何不采用“三次握手”释放连接，且发送最后一次握手报文后要等待 2MSL 的时间呢？"
+  },
+  {
+    "id": "computer_networks-29",
+    "question": "为什么不采用“两次握手”建立连接呢？"
+  },
+  {
+    "id": "computer_networks-30",
+    "question": "DNS域名解析协议？"
+  },
+  {
+    "id": "computer_networks-31",
+    "question": "FTP文件传输协议？"
+  },
+  {
+    "id": "computer_networks-32",
+    "question": "SMTP简单邮件传输协议？"
+  },
+  {
+    "id": "computer_networks-33",
+    "question": "POP3"
+  },
+  {
+    "id": "computer_networks-34",
+    "question": "HTTP超文本传输协议？"
+  }
+]

@@ -1,19 +1,424 @@
-let token=sessionStorage.getItem('token'), role='', active=null, recorder=null, chunks=[];
-const $=id=>document.getElementById(id);
-function el(tag,text){const e=document.createElement(tag);e.textContent=text;return e}
-function button(text,fn){const b=el('button',text);b.onclick=fn;return b}
-async function api(path,options={}){const headers={...(options.headers||{}),Authorization:'Bearer '+token};if(options.body && !(options.body instanceof FormData)) headers['Content-Type']='application/json';const r=await fetch('/api'+path,{...options,headers});const data=await r.json().catch(()=>({detail:'请求失败'}));if(!r.ok)throw Error(data.detail||'请求失败');return data}
-async function run(fn){try{$('message').textContent='';await fn()}catch(e){$('message').textContent=e.message}}
-async function login(){await run(async()=>{const x=await api('/login',{method:'POST',body:JSON.stringify({username:$('username').value,password:$('password').value})});token=x.token;sessionStorage.setItem('token',token);await init()})}
-function logout(){sessionStorage.removeItem('token');location.reload()}
-async function init(){if(!token)return;try{const u=await api('/me');role=u.role;$('identity').textContent=u.username+' · '+(role==='teacher'?'教师':'考生');$('login').hidden=true;$('app').hidden=false;$('teacherTools').hidden=role!=='teacher';$('newInterview').hidden=role!=='student';await refreshInterviews()}catch(e){logout()}}
-function show(id){$('interview').hidden=id!=='interview';$('contest').hidden=id!=='contest';run(id==='interview'?refreshInterviews:refreshContests)}
-async function refreshInterviews(){const items=await api('/interviews');const d=$('interviewList');d.replaceChildren(el('h3','面试记录'));for(const x of items)d.append(button(`#${x.id} ${x.username||''} ${x.status}`,()=>run(()=>openInterview(x.id))))}
-async function startInterview(){await run(async()=>{const x=await api('/interviews',{method:'POST'});await refreshInterviews();await openInterview(x.id)})}
-async function openInterview(id){active=id;const x=await api('/interviews/'+id);const d=$('interviewDetail');d.replaceChildren(el('h3',`面试 #${id} · ${x.status}`));for(const a of x.answers){const card=el('article','');card.append(el('strong',`${a.stage}. ${a.question}`));const input=el('textarea','');input.value=a.transcript;card.append(input);if(role==='student'&&x.status==='active'){card.append(button('保存转写',()=>run(async()=>{await api(`/interviews/${id}/answers/${a.stage}`,{method:'PUT',body:JSON.stringify({transcript:input.value})});$('message').textContent='已保存'})));card.append(button('开始录音',()=>run(async()=>{if(recorder)throw Error('已有录音进行中');const stream=await navigator.mediaDevices.getUserMedia({audio:true});chunks=[];recorder=new MediaRecorder(stream);recorder.ondataavailable=e=>chunks.push(e.data);recorder.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());recorder=null;await run(async()=>{const f=new FormData();f.append('file',new Blob(chunks,{type:'audio/webm'}),'answer.webm');await api(`/interviews/${id}/answers/${a.stage}/audio`,{method:'POST',body:f});$('message').textContent='录音已保存';await openInterview(id)})};recorder.start();$('message').textContent='正在录音，点击停止并保存'})));card.append(button('停止并保存',()=>{if(recorder)recorder.stop()}));if(a.has_audio)card.append(button('语音转写',()=>run(async()=>{const r=await api(`/interviews/${id}/answers/${a.stage}/transcribe`,{method:'POST'});input.value=r.transcript;$('message').textContent='转写已保存，请检查并修正'})))}else input.readOnly=true;if(a.has_audio)card.append(button('播放录音',()=>run(async()=>{const r=await fetch(`/api/interviews/${id}/answers/${a.stage}/audio`,{headers:{Authorization:'Bearer '+token}});if(!r.ok)throw Error('录音读取失败');const audio=document.createElement('audio');audio.controls=true;audio.src=URL.createObjectURL(await r.blob());card.append(audio)})));d.append(card)}if(role==='student'&&x.status==='active'){d.append(button('生成老师追问',()=>run(async()=>{await api(`/interviews/${id}/teacher-question`,{method:'POST'});await openInterview(id)})),button('结束并生成点评',()=>run(async()=>{await api(`/interviews/${id}/finish`,{method:'POST'});await openInterview(id)})))}if(x.feedback)d.append(el('h3','整场点评'),el('pre',x.feedback))}
-async function createContest(){await run(async()=>{await api('/contests',{method:'POST',body:JSON.stringify({title:$('contestTitle').value,starts:new Date($('starts').value).getTime()/1000,ends:new Date($('ends').value).getTime()/1000})});await refreshContests()})}
-async function createProblem(){await run(async()=>{await api(`/contests/${Number($('contestId').value)}/problems`,{method:'POST',body:JSON.stringify({title:$('problemTitle').value,statement:$('statement').value,sample_input:$('sampleInput').value,sample_output:$('sampleOutput').value,tests:JSON.parse($('tests').value)})});$('message').textContent='题目已添加'})}
-async function refreshContests(){const xs=await api('/contests');const d=$('contestList');d.replaceChildren(el('h3','比赛列表'));for(const c of xs)d.append(button(`#${c.id} ${c.title} · ${new Date(c.starts*1000).toLocaleString()} - ${new Date(c.ends*1000).toLocaleString()}`,()=>run(()=>openContest(c.id))));await refreshSubmissions()}
-async function openContest(id){const xs=await api(`/contests/${id}/problems`);const d=$('problemList');d.replaceChildren(el('h3','题目'));for(const p of xs){const card=el('article','');card.append(el('h4',p.title),el('pre',p.statement),el('small','样例输入'),el('pre',p.sample_input),el('small','样例输出'),el('pre',p.sample_output));if(role==='student'){const source=el('textarea','');source.placeholder='Python 3 代码';source.value=localStorage.getItem('draft-'+p.id)||'';source.oninput=()=>localStorage.setItem('draft-'+p.id,source.value);card.append(source,button('提交 Python 3',()=>run(async()=>{const r=await api(`/problems/${p.id}/submissions`,{method:'POST',body:JSON.stringify({source:source.value,language:'python3'})});$('message').textContent=`评测结果：${r.status}`;await refreshSubmissions()})))}d.append(card)}}
-async function refreshSubmissions(){const xs=await api('/submissions');const d=$('submissions');d.replaceChildren(el('h3','提交记录'));for(const x of xs)d.append(el('p',`#${x.id} ${x.username} · 题目 ${x.problem_id} · ${x.language} · ${x.status}`))}
-init();
+import { api, state } from "./api.js?v=20261114-ui-v17";
+import { $, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
+import {
+  refreshInterviews,
+  startInterview,
+  configureInterviewMode,
+  allowNavigation,
+  hasUnsavedWork,
+  pauseInterviewAudio,
+  clearInterviewState,
+} from "./interview.js?v=20261114-ui-v19";
+import {
+  refreshContests,
+  refreshSubmissions,
+  createContest,
+  clearContestState,
+  setupContestCreation,
+} from "./contest.js?v=20261114-oj-v3";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261114-ui-v23";
+import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261114-training-v9";
+import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
+
+import { refreshTraining, clearTraining } from "./training.js?v=20261114-training-v10";
+import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261114-training-v10";
+
+import { clearTransfers } from "./credit-transfers.js?v=20261114-training-v10";
+
+const views = {
+  training: { label: "每日训练", refresh: refreshTraining },
+  trainingAdmin: { label: "训练题库", refresh: refreshTrainingAdmin },
+  users: { label: "用户管理", refresh: refreshUsers },
+  questionBank: { label: "面试题库", refresh: refreshQuestionBank },
+  vouchers: { label: "卡密与次数", refresh: refreshVouchers },
+  systemSettings: { label: "系统设置", refresh: refreshLuoguSettings },
+  profile: { label: "个人主页", refresh: refreshProfile },
+  interview: {
+    label: state.adminMode ? "面试记录" : "模拟面试",
+    refresh: refreshInterviews,
+  },
+  contest: {
+    label: state.adminMode ? "考务管理" : "上机考试",
+    refresh: refreshContests,
+  },
+  submissions: {
+    label: state.adminMode ? "提交总览" : "提交记录",
+    refresh: refreshSubmissions,
+  },
+  adminDenied: { label: "后台管理", refresh: async () => {} },
+};
+let currentView = null;
+function configureSidebar() {
+  let collapsed = false;
+  try { collapsed = localStorage.getItem("scu-sidebar-collapsed") === "1"; }
+  catch (error) { /* Storage may be disabled; the current page still supports toggling. */ }
+  document.body.classList.toggle("sidebar-collapsed", collapsed);
+  syncSidebarToggle();
+  window.addEventListener("interview-layout-changed", syncSidebarToggle);
+  $("sidebarToggle").addEventListener("click", () => {
+    if (document.body.classList.contains("interview-immersive")) {
+      return;
+    }
+    const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
+    try { localStorage.setItem("scu-sidebar-collapsed", isCollapsed ? "1" : "0"); }
+    catch (error) { /* Keep the current layout when browser storage is unavailable. */ }
+    syncSidebarToggle();
+  });
+  for (const item of document.querySelectorAll(".nav-item")) {
+    item.title = item.querySelector(".nav-label")?.textContent || "";
+    item.setAttribute("aria-label", item.title);
+  }
+}
+function syncSidebarToggle() {
+  const collapsed = document.body.classList.contains("interview-immersive")
+    ? !document.body.classList.contains("interview-shell-open")
+    : document.body.classList.contains("sidebar-collapsed");
+  const control = $("sidebarToggle");
+  control.hidden = document.body.classList.contains("interview-immersive");
+  control.textContent = collapsed ? "›" : "‹";
+  control.title = collapsed ? "展开侧边栏" : "收起侧边栏";
+  control.setAttribute("aria-label", control.title);
+  control.setAttribute("aria-expanded", String(!collapsed));
+}
+
+function allowedViews() {
+  if (state.adminMode)
+    return state.user.is_admin
+      ? ["users", "questionBank", "trainingAdmin", "vouchers", "systemSettings", "interview", "contest", "submissions", "profile"]
+      : ["adminDenied"];
+  return ["training", "interview", "contest", "submissions", "profile"];
+}
+function configureAccess() {
+  const allowed = allowedViews();
+  for (const item of document.querySelectorAll("[data-view]"))
+    item.hidden = !allowed.includes(item.dataset.view);
+  $("managementTools").hidden = !(state.adminMode && state.user.is_admin);
+  $("frontendEntry").hidden = !state.adminMode;
+  $("identity").textContent = state.user.username;
+  $("avatar").textContent = state.user.username.slice(0, 1).toUpperCase();
+  $("roleLabel").textContent = state.adminMode
+    ? state.user.is_admin
+      ? state.user.is_superadmin ? "超级管理员" : "后台管理员"
+      : "普通用户"
+    : "用户工作台";
+  return allowed;
+}
+async function show(view, force = false) {
+  if (!force && !allowNavigation()) return;
+  clearVisiblePasswords();
+  clearProfilePassword();
+  clearTransfers();
+  const user = await api("/me");
+  state.user = user;
+  const allowed = configureAccess();
+  const selected = allowed.includes(view) ? view : allowed[0];
+  document.body.classList.toggle("interview-immersive", selected === "interview" && !$("interviewDetail").hidden && $("interviewDetail").dataset.immersive === "true");
+  document.body.classList.remove("interview-shell-open");
+  syncSidebarToggle();
+  if (selected !== currentView) { pauseInterviewAudio(); clearTraining(); clearTrainingAdmin(); }
+  currentView = selected;
+  for (const [key, value] of Object.entries(views)) {
+    $(key).hidden = key !== selected;
+    const item = document.querySelector(`[data-view="${key}"]`);
+    item?.classList.toggle("active", key === selected);
+    if (key === selected) item?.setAttribute("aria-current", "page");
+    else item?.removeAttribute("aria-current");
+    if (key === selected) {
+      $("pageLabel").textContent = value.label;
+      document.title = `${value.label} · 知序${state.adminMode ? "后台" : ""}`;
+    }
+  }
+  window.scrollTo({ top: 0, behavior: "instant" });
+  await views[selected].refresh();
+}
+async function enterWorkspace() {
+  state.user = await api("/me");
+  clearInterviewState();
+  clearContestState();
+  clearTraining();
+  clearTrainingAdmin();
+  $("login").hidden = true;
+  $("app").hidden = false;
+  $("today").textContent = new Date().toLocaleDateString("zh-CN", {
+    month: "long",
+    day: "numeric",
+    weekday: "long",
+  });
+  configureInterviewMode();
+  configureAccess();
+  await show(currentView);
+}
+function configureShell() {
+  document.body.classList.toggle("admin-mode", state.adminMode);
+  if (!state.adminMode) return;
+  document.querySelector(".sidebar-caption").textContent = "管理与配置";
+  document.querySelector(".sidebar .brand").href = "/admin";
+  document.querySelector(".sidebar .brand-subtitle").textContent =
+    "后台管理系统";
+  document.querySelector(".breadcrumb").textContent = "管理工作台";
+  $("workspaceLabel").textContent = "平台管理空间";
+  document.querySelector(".sidebar-tip .eyebrow").textContent =
+    "账号有序，练习从容";
+  document.querySelector(".sidebar-tip p").textContent =
+    "统一管理账号与次数，让每位用户专注自己的练习。";
+  document.querySelector(".login-card h2").textContent = "登录管理后台";
+  document.querySelector(".login-description").textContent =
+    "使用管理员账号，管理用户、题库与考务。";
+  document.querySelector(".login-story .brand-subtitle").textContent =
+    "后台管理系统";
+  for (const item of document.querySelectorAll("[data-view]")) {
+    // The icon and arrow keep their own elements; labels use a text node or span.
+    const label = [...item.childNodes].find(
+      (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
+    );
+    if (label) label.textContent = views[item.dataset.view].label;
+    const span = item.querySelector(".nav-label");
+    if (span) span.textContent = views[item.dataset.view].label;
+  }
+  $("contestTitleHeading").replaceChildren(
+    document.createTextNode("考务管理"),
+    Object.assign(document.createElement("span"), {
+      textContent: ".",
+      className: "heading-dot",
+    }),
+  );
+}
+let loginMethod = state.adminMode ? "password" : "email";
+let codeRequestPending = false;
+let codeCooldownUntil = 0;
+let emailCooldownTimer = null;
+function selectLoginMethod(method) {
+  loginMethod = method;
+  const email = method === "email";
+  $("loginForm").dataset.loginMethod = method;
+  $("emailLoginFields").hidden = !email;
+  $("emailLoginFields").disabled = !email;
+  $("passwordLoginFields").hidden = email;
+  $("passwordLoginFields").disabled = email;
+  $("emailLoginMethod").setAttribute("aria-pressed", String(email));
+  $("passwordLoginMethod").setAttribute("aria-pressed", String(!email));
+  $("loginError").hidden = true;
+}
+function syncCodeButton() {
+  const seconds = Math.max(0, Math.ceil((codeCooldownUntil - Date.now()) / 1000));
+  $("sendEmailCode").disabled = codeRequestPending || seconds > 0;
+  $("sendEmailCode").textContent = codeRequestPending ? "发送中…" : seconds ? `${seconds} 秒后重发` : "获取验证码";
+  if (!seconds && emailCooldownTimer) {
+    clearInterval(emailCooldownTimer);
+    emailCooldownTimer = null;
+  }
+}
+function startCodeCooldown(seconds) {
+  codeCooldownUntil = Date.now() + seconds * 1000;
+  clearInterval(emailCooldownTimer);
+  emailCooldownTimer = setInterval(syncCodeButton, 1000);
+}
+for (const [id, method] of [["emailLoginMethod", "email"], ["passwordLoginMethod", "password"]])
+  $(id).addEventListener("click", () => selectLoginMethod(method));
+$("sendEmailCode").addEventListener("click", async () => {
+  const email = $("loginEmail");
+  if (!email.reportValidity() || codeRequestPending || codeCooldownUntil > Date.now()) return;
+  const requestedEmail = email.value.trim();
+  codeRequestPending = true;
+  email.readOnly = true;
+  syncCodeButton();
+  $("loginError").hidden = true;
+  $("emailCodeStatus").hidden = true;
+  try {
+    const result = await api("/auth/email/code", { method: "POST", body: JSON.stringify({ email: requestedEmail }) });
+    startCodeCooldown(result.retry_after || 60);
+    $("emailCodeStatus").textContent = `验证码已发送至 ${requestedEmail}，请查收邮件。`;
+    $("emailCodeStatus").hidden = false;
+    if (loginMethod === "email") $("loginCode").focus();
+  } catch (error) {
+    if (error.retryAfterSeconds) startCodeCooldown(error.retryAfterSeconds);
+    $("loginError").textContent = error.retryAfterSeconds
+      ? `请求过于频繁，请在 ${error.retryAfterSeconds} 秒后重试`
+      : error.message;
+    $("loginError").hidden = false;
+  } finally {
+    codeRequestPending = false;
+    email.readOnly = false;
+    syncCodeButton();
+  }
+});
+selectLoginMethod(loginMethod);
+if (state.adminMode) {
+  $("loginMethods").hidden = true;
+  $("loginAccountNote").textContent = "请使用管理员用户名与密码登录。普通用户请返回前台。";
+}
+
+$("loginForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const control = $("loginButton");
+  if (control.disabled) return;
+  control.disabled = true;
+  control.classList.add("busy-label");
+  $("loginError").hidden = true;
+  $("loginMethods").querySelectorAll("button").forEach(button => { button.disabled = true; });
+  try {
+    const email = loginMethod === "email";
+    const result = await api(email ? "/auth/email/login" : "/login", {
+      method: "POST",
+      body: JSON.stringify(email ? {
+        email: $("loginEmail").value.trim(),
+        code: $("loginCode").value,
+      } : {
+        username: $("username").value,
+        password: $("password").value,
+      }),
+    });
+    if (state.adminMode && !result.is_admin)
+      throw new Error("当前账号没有后台管理权限，请返回前台登录。");
+    state.token = result.token;
+    sessionStorage.setItem("token", state.token);
+    $("password").value = "";
+    $("loginCode").value = "";
+    $("notification").hidden = true;
+    await enterWorkspace();
+  } catch (error) {
+    $("loginError").textContent = error.message;
+    $("loginError").hidden = false;
+  } finally {
+    control.disabled = false;
+    control.classList.remove("busy-label");
+    $("loginMethods").querySelectorAll("button").forEach(button => { button.disabled = false; });
+  }
+});
+$("togglePassword").addEventListener("click", () => {
+  const visible = $("password").type === "password";
+  $("password").type = visible ? "text" : "password";
+  $("togglePassword").textContent = visible ? "隐藏" : "显示";
+  $("togglePassword").setAttribute(
+    "aria-label",
+    visible ? "隐藏密码" : "显示密码",
+  );
+});
+async function logout() {
+  if (!allowNavigation()) return;
+  if (hasUnsavedWork() && !await confirmAction("有尚未保存的面试文本，退出后将丢失这些修改。", { title: "退出登录？", confirmText: "退出登录" })) return;
+  await api("/logout", { method: "POST" });
+  clearProfilePassword();
+  clearTransfers();
+  clearInterviewState();
+  clearContestState();
+  clearTraining();
+  clearTrainingAdmin();
+  sessionStorage.removeItem("token");
+  state.token = null;
+  location.reload();
+}
+for (const id of ["logout", "profileLogout"]) $(id).addEventListener("click", event => run(logout, event.currentTarget));
+for (const item of document.querySelectorAll("[data-view]"))
+  item.addEventListener("click", () =>
+    run(() => show(item.dataset.view), item),
+  );
+$("newInterview").addEventListener("click", (event) =>
+  run(startInterview, event.currentTarget),
+);
+for (const [id, action] of [
+  ["refreshInterviews", refreshInterviews],
+  ["refreshContests", refreshContests],
+  ["refreshSubmissions", refreshSubmissions],
+  ["refreshUsers", refreshUsers],
+]) {
+  $(id).addEventListener("click", (event) => run(action, event.currentTarget));
+}
+setupContestCreation();
+document.querySelectorAll("#luoguTutorial .dialog-close").forEach(button => button.addEventListener("click", () => $("luoguTutorial").close()));
+$("contestForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+  run(createContest, $("contestForm").querySelector('[type="submit"]'));
+});
+window.addEventListener("beforeunload", (event) => {
+  if (hasUnsavedWork()) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+});
+window.addEventListener("account-access-updated", () =>
+  run(() => show(currentView)),
+);
+let updatingAccess = false;
+window.addEventListener("session-expired", () => {
+  clearProfilePassword();
+  clearTransfers();
+  state.token = null;
+  state.user = null;
+  sessionStorage.removeItem("token");
+  clearInterviewState();
+  clearContestState();
+  clearTraining();
+  clearTrainingAdmin();
+  for (const dialog of document.querySelectorAll("dialog[open]"))
+    dialog.close();
+  $("app").hidden = true;
+  $("login").hidden = false;
+  document.title = "登录 · 知序";
+  $("emailCodeStatus").hidden = true;
+  $("loginError").textContent = "登录已过期或账号已停用，请重新登录。";
+  $("loginError").hidden = false;
+});
+window.addEventListener("account-session-ended", event => {
+  clearProfilePassword();
+  clearTransfers();
+  $("loginEmail").value = event.detail.deleted ? "" : state.user?.email || "";
+  $("username").value = event.detail.deleted ? "" : state.user?.username || "";
+  if (event.detail.deleted && state.user) {
+    const prefix = `scu:${state.user.id}:`;
+    try {
+      for (const storage of [localStorage, sessionStorage]) {
+        const keys = [];
+        for (let index = 0; index < storage.length; index++) {
+          const key = storage.key(index);
+          if (key?.startsWith(prefix)) keys.push(key);
+        }
+        for (const key of keys) storage.removeItem(key);
+      }
+    } catch (error) { /* Restricted browser storage does not prevent clearing the authenticated page. */ }
+  }
+  state.token = null;
+  state.user = null;
+  sessionStorage.removeItem("token");
+  clearInterviewState();
+  clearContestState();
+  clearTraining();
+  clearTrainingAdmin();
+  for (const dialog of document.querySelectorAll("dialog[open]")) dialog.close();
+  currentView = null;
+  $("app").hidden = true;
+  $("login").hidden = false;
+  $("loginError").hidden = true;
+  $("password").value = "";
+  $("loginCode").value = "";
+  $("emailCodeStatus").hidden = true;
+  document.title = "登录 · 知序";
+  notify(event.detail.message);
+});
+window.addEventListener("access-denied", async () => {
+  if (updatingAccess || !state.user) return;
+  updatingAccess = true;
+  try {
+    await show(currentView, true);
+  } catch (error) {
+    notify(error.message, "error");
+  } finally {
+    updatingAccess = false;
+  }
+});
+configureShell();
+configureSidebar();
+setupAdmin();
+setupCredits();
+$("avatar").addEventListener("click", () => run(() => show("profile")));
+$("openRedeemProfile").addEventListener("click", () => run(() => show("profile")));
+$("profileBack").addEventListener("click", event => run(() => show(null), event.currentTarget));
+window.addEventListener("open-profile", () => run(() => show("profile")));
+if (state.token)
+  enterWorkspace().catch((error) => {
+    notify(`无法恢复工作台：${error.message}。请重新登录。`, "error");
+    state.token = null;
+    sessionStorage.removeItem("token");
+    $("app").hidden = true;
+    $("login").hidden = false;
+  });

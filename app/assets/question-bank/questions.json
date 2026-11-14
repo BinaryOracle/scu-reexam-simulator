@@ -1,0 +1,392 @@
+{
+  "data_structures": [
+    {
+      "id": "data_structures-01",
+      "question": "时间复杂度"
+    },
+    {
+      "id": "data_structures-02",
+      "question": "空间复杂度"
+    },
+    {
+      "id": "data_structures-03",
+      "question": "数据的逻辑结构"
+    },
+    {
+      "id": "data_structures-04",
+      "question": "数据的存储结构"
+    },
+    {
+      "id": "data_structures-05",
+      "question": "用循环比递归的效率高吗？"
+    },
+    {
+      "id": "data_structures-06",
+      "question": "贪心算法和动态规划以及分治法的区别？"
+    },
+    {
+      "id": "data_structures-07",
+      "question": "顺序表和链表的比较"
+    },
+    {
+      "id": "data_structures-08",
+      "question": "头指针和头结点的区别？"
+    },
+    {
+      "id": "data_structures-09",
+      "question": "栈和队列的区别？"
+    },
+    {
+      "id": "data_structures-10",
+      "question": "共享栈"
+    },
+    {
+      "id": "data_structures-11",
+      "question": "如何区分循环队列是队空还是队满？"
+    },
+    {
+      "id": "data_structures-12",
+      "question": "栈在括号匹配中的算法思想？"
+    },
+    {
+      "id": "data_structures-13",
+      "question": "栈在通过后缀表达式求值的算法思想？"
+    },
+    {
+      "id": "data_structures-14",
+      "question": "栈在递归中的应用？"
+    },
+    {
+      "id": "data_structures-15",
+      "question": "队列在层次遍历中的作用？"
+    },
+    {
+      "id": "data_structures-16",
+      "question": "队列在计算机系统中的应用？"
+    },
+    {
+      "id": "data_structures-17",
+      "question": "矩阵的压缩存储"
+    },
+    {
+      "id": "data_structures-18",
+      "question": "串的模式匹配"
+    },
+    {
+      "id": "data_structures-19",
+      "question": "树与二叉树的相关概念？"
+    },
+    {
+      "id": "data_structures-20",
+      "question": "如何由遍历序列构造一棵二叉树？"
+    },
+    {
+      "id": "data_structures-21",
+      "question": "线索二叉树的概念？"
+    },
+    {
+      "id": "data_structures-22",
+      "question": "树的存储结构？"
+    },
+    {
+      "id": "data_structures-23",
+      "question": "二叉排序树："
+    },
+    {
+      "id": "data_structures-24",
+      "question": "哈夫曼树和哈夫曼编码："
+    },
+    {
+      "id": "data_structures-25",
+      "question": "图的一些相关定义"
+    },
+    {
+      "id": "data_structures-26",
+      "question": "图的存储结构:"
+    },
+    {
+      "id": "data_structures-27",
+      "question": "图的遍历"
+    },
+    {
+      "id": "data_structures-28",
+      "question": "最小生成树和最短路径："
+    },
+    {
+      "id": "data_structures-29",
+      "question": "关键路径："
+    },
+    {
+      "id": "data_structures-30",
+      "question": "对各种查找方法的概括？"
+    },
+    {
+      "id": "data_structures-31",
+      "question": "B树和B+树："
+    },
+    {
+      "id": "data_structures-32",
+      "question": "哈希表的概念、哈希函数的构造方法、哈希冲突的解决办法？"
+    },
+    {
+      "id": "data_structures-33",
+      "question": "对各种内部排序的概括与总结？"
+    }
+  ],
+  "operating_systems": [
+    {
+      "id": "operating_systems-01",
+      "question": "操作系统的目标和功能？（什么是操作系统？）"
+    },
+    {
+      "id": "operating_systems-02",
+      "question": "操作系统的运行机制?"
+    },
+    {
+      "id": "operating_systems-03",
+      "question": "中断和异常？"
+    },
+    {
+      "id": "operating_systems-04",
+      "question": "系统调用？"
+    },
+    {
+      "id": "operating_systems-05",
+      "question": "大内核和微内核"
+    },
+    {
+      "id": "operating_systems-06",
+      "question": "进程与线程？"
+    },
+    {
+      "id": "operating_systems-07",
+      "question": "进程的通信方式？"
+    },
+    {
+      "id": "operating_systems-08",
+      "question": "进程的5种状态及转换过程？"
+    },
+    {
+      "id": "operating_systems-09",
+      "question": "进程的调度算法有哪些？"
+    },
+    {
+      "id": "operating_systems-10",
+      "question": "同步和互斥？"
+    },
+    {
+      "id": "operating_systems-11",
+      "question": "进程同步相关概念"
+    },
+    {
+      "id": "operating_systems-12",
+      "question": "死锁"
+    },
+    {
+      "id": "operating_systems-13",
+      "question": "什么是饥饿？与死锁有什么差别？"
+    },
+    {
+      "id": "operating_systems-14",
+      "question": "银行家算法"
+    },
+    {
+      "id": "operating_systems-15",
+      "question": "死锁定理"
+    },
+    {
+      "id": "operating_systems-16",
+      "question": "存储器管理应具有的功能？"
+    },
+    {
+      "id": "operating_systems-17",
+      "question": "将用户程序变为可在内存中执行的程序的步骤？"
+    },
+    {
+      "id": "operating_systems-18",
+      "question": "程序的链接方式有哪些？"
+    },
+    {
+      "id": "operating_systems-19",
+      "question": "程序的装入方式有哪些？"
+    },
+    {
+      "id": "operating_systems-20",
+      "question": "覆盖技术和交换技术？"
+    },
+    {
+      "id": "operating_systems-21",
+      "question": "内存连续分配管理方式有哪些？"
+    },
+    {
+      "id": "operating_systems-22",
+      "question": "基本分页和请求分页内存管理方式？"
+    },
+    {
+      "id": "operating_systems-23",
+      "question": "页面置换算法有哪些？"
+    },
+    {
+      "id": "operating_systems-24",
+      "question": "什么是页表和快表，有什么作用？"
+    },
+    {
+      "id": "operating_systems-25",
+      "question": "地址翻译的过程？"
+    },
+    {
+      "id": "operating_systems-26",
+      "question": "文件的基本操作？"
+    },
+    {
+      "id": "operating_systems-27",
+      "question": "磁盘调度算法有哪些？"
+    },
+    {
+      "id": "operating_systems-28",
+      "question": "I/O控制方式有哪些？"
+    },
+    {
+      "id": "operating_systems-29",
+      "question": "Spooling技术？"
+    }
+  ],
+  "computer_networks": [
+    {
+      "id": "computer_networks-01",
+      "question": "计算机网络的主要功能？"
+    },
+    {
+      "id": "computer_networks-02",
+      "question": "主机间的通信方式？"
+    },
+    {
+      "id": "computer_networks-03",
+      "question": "电路交换，报文交换和分组交换的区别？"
+    },
+    {
+      "id": "computer_networks-04",
+      "question": "计算机网络的主要性能指标？"
+    },
+    {
+      "id": "computer_networks-05",
+      "question": "计算机网络提供的服务的三种分类？"
+    },
+    {
+      "id": "computer_networks-06",
+      "question": "ISO/OSI参考模型和TCP/IP模型？"
+    },
+    {
+      "id": "computer_networks-07",
+      "question": "端到端通信和点到点通信的区别？"
+    },
+    {
+      "id": "computer_networks-08",
+      "question": "如何理解同步和异步？什么是同步通信和异步通信？"
+    },
+    {
+      "id": "computer_networks-09",
+      "question": "频分复用 时分复用 波分复用 码分复用"
+    },
+    {
+      "id": "computer_networks-10",
+      "question": "为什么要进行流量控制?"
+    },
+    {
+      "id": "computer_networks-11",
+      "question": "流量控制的常见方式？"
+    },
+    {
+      "id": "computer_networks-12",
+      "question": "可靠传输机制有哪些？"
+    },
+    {
+      "id": "computer_networks-13",
+      "question": "随机访问介质访问控制？"
+    },
+    {
+      "id": "computer_networks-14",
+      "question": "PPP协议？"
+    },
+    {
+      "id": "computer_networks-15",
+      "question": "HDLC协议？"
+    },
+    {
+      "id": "computer_networks-16",
+      "question": "试分析中继器、集线器、网桥和交换机这四种网络互联设备的区别与联系。"
+    },
+    {
+      "id": "computer_networks-17",
+      "question": "路由器的主要功能？"
+    },
+    {
+      "id": "computer_networks-18",
+      "question": "动态路由算法？"
+    },
+    {
+      "id": "computer_networks-19",
+      "question": "网络层转发分组的流程？"
+    },
+    {
+      "id": "computer_networks-20",
+      "question": "IP地址和MAC地址？"
+    },
+    {
+      "id": "computer_networks-21",
+      "question": "ARP地址解析协议？"
+    },
+    {
+      "id": "computer_networks-22",
+      "question": "DHCP动态主机配置协议？"
+    },
+    {
+      "id": "computer_networks-23",
+      "question": "ICMP网际控制报文协议？"
+    },
+    {
+      "id": "computer_networks-24",
+      "question": "传输层的功能？"
+    },
+    {
+      "id": "computer_networks-25",
+      "question": "UDP协议？"
+    },
+    {
+      "id": "computer_networks-26",
+      "question": "TCP协议？"
+    },
+    {
+      "id": "computer_networks-27",
+      "question": "拥塞控制的四种算法？"
+    },
+    {
+      "id": "computer_networks-28",
+      "question": "为何不采用“三次握手”释放连接，且发送最后一次握手报文后要等待 2MSL 的时间呢？"
+    },
+    {
+      "id": "computer_networks-29",
+      "question": "为什么不采用“两次握手”建立连接呢？"
+    },
+    {
+      "id": "computer_networks-30",
+      "question": "DNS域名解析协议？"
+    },
+    {
+      "id": "computer_networks-31",
+      "question": "FTP文件传输协议？"
+    },
+    {
+      "id": "computer_networks-32",
+      "question": "SMTP简单邮件传输协议？"
+    },
+    {
+      "id": "computer_networks-33",
+      "question": "POP3"
+    },
+    {
+      "id": "computer_networks-34",
+      "question": "HTTP超文本传输协议？"
+    }
+  ]
+}

@@ -1,0 +1,4357 @@
+[
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:001",
+    "position": 1,
+    "question": "监督学习、无监督学习、半监督学习和强化学习分别解决什么问题？",
+    "answer": "监督学习利用带标签样本学习预测函数；无监督学习从无标签数据发现结构或表示；半监督学习联合少量带标签与大量无标签数据；强化学习通过与环境交互、根据奖励学习策略。它们的训练信号不同，不能仅按算法名称机械归类。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "学习范式",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 1,
+      "page_end": 2,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:002",
+    "position": 2,
+    "question": "线性回归的模型、目标函数与适用任务是什么？",
+    "answer": "线性回归以 ŷ=wᵀx+b 预测连续值，常用最小二乘最小化预测残差平方和。可用正规方程或迭代优化求解；特征可经过非线性变换，但模型对参数仍为线性。异常值、共线性和分布漂移会影响效果。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "线性回归",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 2,
+      "page_end": 2,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:003",
+    "position": 3,
+    "question": "逻辑回归为什么用于分类？它与线性回归有什么区别？",
+    "answer": "二分类逻辑回归对线性得分使用 sigmoid，得到条件概率 p(y=1∣x)，通常以交叉熵训练，再按阈值分类。它是分类模型；线性回归直接预测连续值。逻辑回归在原始特征空间的决策边界是线性的，概率阈值不必固定为0.5。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "逻辑回归",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 2,
+      "page_end": 2,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:004",
+    "position": 4,
+    "question": "决策树由哪些部分组成？所有决策树都是二叉树吗？",
+    "answer": "决策树由根节点、内部划分节点和叶节点组成，可用于分类或回归。CART 通常使用二叉划分，ID3 等方法可对离散属性产生多分支，因此并非所有决策树都是二叉树。叶节点输出类别、概率或连续预测值。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "决策树",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 2,
+      "page_end": 3,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:005",
+    "position": 5,
+    "question": "什么是熵与信息增益？信息增益选择特征有什么偏好？",
+    "answer": "熵 H(Y)=−Σp(y)log p(y) 描述标签不确定性；信息增益为划分前熵减去按子集比例加权的划分后熵。它偏好多取值属性；增益率用划分信息归一化以缓解该偏好，但仍需结合最小叶样本量与验证结果。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "信息增益",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 3,
+      "page_end": 3,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:006",
+    "position": 6,
+    "question": "回归树如何选择划分？方差与分类树的划分指标有什么区别？",
+    "answer": "平方损失回归树通常选取使子节点残差平方和最小、或相对父节点误差下降最大的划分，叶值是子集目标均值。分类树常用基尼不纯度或熵。这里比较的是目标值的离散程度，而非所有输入特征的方差。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "回归树",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 3,
+      "page_end": 3,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:007",
+    "position": 7,
+    "question": "Bagging 如何构建集成？为什么可以降低方差？",
+    "answer": "对训练集做多次有放回抽样，分别训练基学习器，预测时分类投票或平均概率、回归取均值。平均多个误差不完全相关的模型可降低方差；基模型高度相关时收益有限。每轮样本量通常与原训练集相同。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "集成与Bagging",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/modules/ensemble.html",
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 3,
+      "page_end": 3,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:008",
+    "position": 8,
+    "question": "随机森林相对 Bagging 决策树增加了什么随机性？",
+    "answer": "除样本的自助采样外，随机森林在各节点只从随机选取的特征子集中寻找划分，降低树之间的相关性。分类常用投票或平均概率，回归取均值。可利用袋外样本估计误差，但特征重要性仍可能存在偏差。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "随机森林",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/modules/ensemble.html",
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 4,
+      "page_end": 4,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:009",
+    "position": 9,
+    "question": "GBDT 的基本思想是什么？它与 AdaBoost 的样本重加权有何不同？",
+    "answer": "GBDT 逐轮拟合当前目标函数对预测值的负梯度；平方损失下等价于拟合残差，再按学习率加入新树。AdaBoost 典型做法是提高误分样本的权重。不能把“更高概率抽取错样本”作为所有梯度提升树的定义。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "梯度提升",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/modules/ensemble.html",
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 4,
+      "page_end": 4,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:010",
+    "position": 10,
+    "question": "XGBoost 在梯度提升框架上有哪些重要改进？",
+    "answer": "XGBoost 常利用损失的一阶与二阶导数构建近似目标，引入叶权重及树复杂度正则化，并支持行列采样、缺失值分支和高效分裂查找。它是梯度提升实现，具体目标和算法受配置影响；并非简单地对错误样本重复抽样。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "XGBoost",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/modules/ensemble.html",
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 4,
+      "page_end": 4,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:011",
+    "position": 11,
+    "question": "支持向量机如何确定决策边界？什么是支持向量？",
+    "answer": "线性 SVM 在分类约束下最大化几何间隔；软间隔使用松弛变量和惩罚系数 C 折中间隔与违例。支持向量对应非零对偶系数，不只包括恰好位于间隔边界的点，也可能包含间隔内及误分类点。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "SVM",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 4,
+      "page_end": 5,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:012",
+    "position": 12,
+    "question": "硬间隔与软间隔 SVM 的适用条件是什么？",
+    "answer": "硬间隔要求样本线性可分且无间隔违例，对噪声敏感；软间隔允许间隔违例，通过 C 控制惩罚。C 较大通常更强调训练违例，较小允许更强正则化。是否过拟合还取决于核、数据和其他超参数。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "SVM间隔",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 4,
+      "page_end": 5,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:013",
+    "position": 13,
+    "question": "SVM 的核技巧是什么？使用核函数就一定能线性可分吗？",
+    "answer": "核函数隐式计算特征映射后的内积，避免显式构造高维表示。常见核有线性核、RBF 和多项式核。核方法增强表达能力，但不保证任意数据都能合理地线性分开，更不保证泛化；核参数与 C 应在验证集调优。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "核方法",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 4,
+      "page_end": 5,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:014",
+    "position": 14,
+    "question": "朴素贝叶斯的“朴素”假设是什么？如何避免零概率？",
+    "answer": "它假设给定类别后各特征条件独立，而非无条件独立。根据 p(y∣x)∝p(y)∏p(xⱼ∣y) 预测类别。对离散计数可做拉普拉斯或更一般的加性平滑，避免未出现事件导致乘积为零；实现时通常累加对数概率。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "朴素贝叶斯",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 5,
+      "page_end": 6,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:015",
+    "position": 15,
+    "question": "KNN 如何进行分类与回归？K 值及特征尺度有什么影响？",
+    "answer": "预测时寻找距离最近的 K 个训练样本，分类按投票或距离加权投票，回归取均值或加权均值。小 K 方差较大，大 K 偏差可能较大。应在训练数据上拟合缩放器，合理选择距离度量；高维与大样本会增加计算和统计困难。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "KNN",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 6,
+      "page_end": 6,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:016",
+    "position": 16,
+    "question": "神经网络怎样用于监督学习？训练目标是什么？",
+    "answer": "网络将输入经多层仿射变换和非线性激活映射为预测，利用标签构造损失，通过反向传播计算梯度，再由优化器更新参数。分类常用交叉熵、回归可用均方误差。网络也可用于自监督、无监督及强化学习，不能仅归为监督算法。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "神经网络",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:017",
+    "position": 17,
+    "question": "K-Means 的优化目标与基本步骤是什么？",
+    "answer": "目标是最小化样本到所属中心的平方欧氏距离之和。反复执行分配样本到最近中心、将中心更新为簇均值，直到目标变化很小或达到迭代上限。通常只能保证收敛到局部解，需多次初始化；异常值和特征尺度会影响结果。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "K-Means",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 7,
+      "page_end": 8,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:018",
+    "position": 18,
+    "question": "PCA 的原理及计算步骤是什么？为什么它不是线性回归？",
+    "answer": "先对数据按训练集均值中心化，再对协方差矩阵做特征分解或对数据矩阵做 SVD，选最大特征值对应方向投影。主成分正交并依次最大化投影方差。PCA 无需标签，关注低维表示与重构；线性回归用标签最小化预测误差。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "PCA",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 8,
+      "page_end": 9,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:019",
+    "position": 19,
+    "question": "如何选择 PCA 主成分数？标准化与去噪应注意什么？",
+    "answer": "可按累计解释方差、验证集任务性能或计算预算选择维数。量纲不同且尺度不应主导时先标准化；拟合均值、尺度和主成分均只能使用训练集。PCA 保留大方差方向不等于必然保留判别信息，也不保证低方差成分全是噪声。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "PCA应用",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 9,
+      "page_end": 9,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:020",
+    "position": 20,
+    "question": "自编码器的结构、训练目标及应用是什么？",
+    "answer": "编码器将输入映射为潜在表示，解码器尝试重构输入，训练时优化重构损失，也可增加稀疏、去噪等约束。可用于表示学习、降维和异常检测；潜在维数不一定更低，若无适当约束，高容量网络可能仅记忆训练数据。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "自编码器",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 9,
+      "page_end": 10,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:021",
+    "position": 21,
+    "question": "半监督学习为何可能有效？使用伪标签有什么风险？",
+    "answer": "在类簇、平滑性等假设成立时，无标签数据可辅助学习数据结构，并与少量标签联合训练。常见方法包括伪标签和一致性正则化。错误伪标签会被反复强化，应控制置信度、类别平衡与分布差异；加入无标签数据不保证性能提升。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "半监督分类",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 10,
+      "page_end": 10,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:022",
+    "position": 22,
+    "question": "监督学习、无监督学习与半监督学习怎样选择？GAN 必然属于半监督吗？",
+    "answer": "根据标签成本、任务目标和可用数据选择范式；有标签预测用监督，结构探索用无监督，少标签且假设合理时可用半监督。GAN 是生成对抗框架，可有无条件、条件或半监督变体，不能将所有 GAN 直接列为半监督算法。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "学习范式比较",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 10,
+      "page_end": 11,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:023",
+    "position": 23,
+    "question": "集成学习为什么有效？Bagging、Boosting 与 Stacking 有何不同？",
+    "answer": "集成利用基学习器的互补误差改善预测。Bagging 并行训练并聚合，常用于降低方差；Boosting 顺序修正前序模型；Stacking 用基模型的折外预测训练元模型。集成并不必然优于单模型，缺乏多样性或验证泄漏会使结果失真。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "集成学习",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 11,
+      "page_end": 11,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:024",
+    "position": 24,
+    "question": "前向传播、反向传播和参数更新分别做什么？",
+    "answer": "前向传播用当前参数计算预测及损失；反向传播依据链式法则计算各参数梯度；优化器随后按梯度和内部状态更新参数。反向传播本身不是梯度下降，也不直接规定学习率或更新规则。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "前向与反向传播",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 11,
+      "page_end": 11,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:025",
+    "position": 25,
+    "question": "深度学习与传统机器学习的主要区别是什么？",
+    "answer": "深度学习使用多层可学习表示，常从原始输入联合学习特征和预测；传统方法往往依赖更多人工特征。深度模型在大数据和计算资源充分时有优势，但并非所有任务都更好；表格、小样本或强解释需求场景中传统方法仍很有竞争力。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "深度学习",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 12,
+      "page_end": 12,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:026",
+    "position": 26,
+    "question": "CNN、RNN、LSTM 与 GAN 分别适合什么任务？",
+    "answer": "CNN 利用局部连接和参数共享，常用于视觉；RNN 处理序列，LSTM 通过门控改善长期依赖建模；GAN 以生成器与判别器对抗学习数据分布。这些是结构或训练框架，不与单一任务绑定；序列任务也可使用 Transformer 等方法。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "应用",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 12,
+      "page_end": 12,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:027",
+    "position": 27,
+    "question": "什么是线性分类器？线性回归能否直接称为分类器？",
+    "answer": "线性分类器以输入特征的线性得分决定类别，如逻辑回归、线性 SVM 和感知机。线性回归原本预测连续值，虽然可人为加阈值分类，但不是标准的概率分类模型。核 SVM、决策树和带非线性激活的多层网络可形成非线性边界。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "分类器",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 12,
+      "page_end": 13,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:028",
+    "position": 28,
+    "question": "感知机与多层感知机有什么区别？为什么单层感知机不能解决 XOR？",
+    "answer": "单层感知机以线性加权和加阈值分类，只能表示线性可分边界；XOR 在原始二维空间不可被一条直线分开。多层感知机加入隐藏层和非线性激活，可表示非线性函数。仅堆叠线性层仍等价于单个仿射变换。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "感知机",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "机器学习八股.pdf",
+      "page_start": 13,
+      "page_end": 13,
+      "duplicate_sources": [
+        "机器学习八股 (1).pdf"
+      ]
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:029",
+    "position": 29,
+    "question": "训练集、验证集和测试集分别有什么用途？",
+    "answer": "训练集拟合参数，验证集用于超参数选择和模型比较，测试集仅在方案确定后估计泛化表现。反复根据测试结果修改方案会导致测试集泄漏。时间序列按时间划分，关联样本按实体或群组划分，避免近重复样本跨集合。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "数据划分",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/common_pitfalls.html",
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:030",
+    "position": 30,
+    "question": "K 折交叉验证怎样做？预处理为什么应放进 Pipeline？",
+    "answer": "将数据划分为 K 份，轮流用一份验证、其余训练，并汇总指标。每折的插补、缩放、特征选择等都只在该折训练部分拟合，再应用于验证部分。提前在全数据拟合会泄漏信息；调参与评估可用嵌套交叉验证分离。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "交叉验证",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/common_pitfalls.html",
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:031",
+    "position": 31,
+    "question": "什么是欠拟合、过拟合及偏差—方差权衡？",
+    "answer": "欠拟合表现为训练与验证误差均较高，可能源于表达能力不足；过拟合常表现为训练误差低而验证误差高。可通过学习曲线诊断，结合增加数据、正则化、简化模型或调整优化。偏差和方差的分解依赖具体损失及统计假设。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "偏差方差",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:032",
+    "position": 32,
+    "question": "L1 与 L2 正则化有什么区别？",
+    "answer": "L1 对参数绝对值求和，常使部分参数精确为零，有利于稀疏选择；L2 对参数平方求和，倾向于平滑缩小权重。它们通过惩罚模型复杂度折中拟合与泛化；效果依赖特征尺度。相关特征下 L1 的选择可能不稳定。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "正则化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:033",
+    "position": 33,
+    "question": "什么是数据泄漏？请给出排查方法。",
+    "answer": "泄漏是训练或选型使用了预测时无法获得的信息，如全数据标准化、用未来数据构造特征、患者或用户重复跨集合、使用目标的事后代理变量。应检查时间戳与特征可用性，按实体划分，并仅在训练折拟合预处理。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "数据泄漏",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/common_pitfalls.html",
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:034",
+    "position": 34,
+    "question": "准确率、精确率、召回率和 F1 如何计算？类别不平衡时选什么？",
+    "answer": "准确率=(TP+TN)/总数；精确率=TP/(TP+FP)；召回率=TP/(TP+FN)；F1=2PR/(P+R)。不平衡时单看准确率会掩盖少数类问题，应结合 PR 曲线、各类召回与业务代价，明确正类和宏、微或加权平均方式。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "评估指标",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:035",
+    "position": 35,
+    "question": "ROC-AUC 与 PR-AUC 有何不同？概率校准与阈值选择是什么？",
+    "answer": "ROC 描述不同阈值下 TPR 与 FPR，PR 描述精确率与召回率，稀有正类时 PR 更直接反映查准查全。AUC 衡量排序表现而非概率校准；校准关注预测概率与发生频率是否一致。阈值须依据成本或目标在验证集确定。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "阈值与曲线",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:036",
+    "position": 36,
+    "question": "类别不平衡有哪些常见处理方法？",
+    "answer": "可采用类别权重、欠采样、过采样、阈值调整和适合的评价指标。重采样只能在训练集或每折训练部分进行，不能先重采样再划分；SMOTE 等合成方法需考虑特征语义。最终应在真实分布测试集评估。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "不平衡数据",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:037",
+    "position": 37,
+    "question": "如何处理缺失值和异常值？",
+    "answer": "先检查缺失机制、采集错误和业务含义，可用训练集统计量插补、缺失指示器或支持缺失值的模型。异常点应区分错误与真实稀有事件，按任务决定保留、稳健变换或截尾，不能为提高指标随意删掉测试集困难样本。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "缺失与异常",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:038",
+    "position": 38,
+    "question": "决策树为什么容易过拟合？如何剪枝？",
+    "answer": "深树可不断划分以拟合噪声，导致高方差。可通过最大深度、最小叶样本数、最小增益等预剪枝，或用代价复杂度后剪枝。剪枝参数应在验证集选择；树对单调特征缩放通常不敏感，但仍需处理缺失和类别编码。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "树模型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:039",
+    "position": 39,
+    "question": "怎样选择 K-Means 的 K？它适合所有形状的簇吗？",
+    "answer": "可参考肘部法、轮廓系数、稳定性和业务解释选择 K，没有适用于所有数据的唯一标准。K-Means 偏好近似球形、尺度相近的簇，难以处理非凸簇和强噪声；可考虑 DBSCAN、层次聚类或高斯混合等方法。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "聚类评估",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:040",
+    "position": 40,
+    "question": "贝叶斯定理、最大似然估计与最大后验估计有什么关系？",
+    "answer": "贝叶斯定理为 p(θ∣D)∝p(D∣θ)p(θ)。最大似然选择使数据似然最大的参数；最大后验同时考虑参数先验。对数后验等于对数似然加对数先验及常数，因此某些先验可对应 L1 或 L2 类型的惩罚。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "概率模型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:041",
+    "position": 41,
+    "question": "强化学习中状态、动作、奖励、策略与价值函数是什么？",
+    "answer": "状态描述环境信息，策略给出状态下动作选择，奖励是交互反馈，价值函数估计未来折扣回报。目标是长期回报而非仅即时奖励；需处理探索与利用、延迟反馈及分布变化。基本建模常使用马尔可夫决策过程。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "强化学习",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:042",
+    "position": 42,
+    "question": "Q-learning 的更新公式与核心思想是什么？",
+    "answer": "更新为 Q(s,a)←Q(s,a)+α[r+γ maxₐ′Q(s′,a′)−Q(s,a)]。它用下一状态的最优动作价值构造自举目标，是离策略方法；终止状态不再加入未来价值。深度 Q 网络以神经网络近似 Q，并常用经验回放与目标网络稳定训练。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "Q学习",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:043",
+    "position": 43,
+    "question": "生成式模型与判别式模型有什么区别？",
+    "answer": "判别式模型直接学习条件分布 p(y∣x) 或决策函数；经典生成式分类模型学习 p(x∣y) 和 p(y)，或联合分布，再推断类别。更广义生成模型学习数据分布以生成样本。朴素贝叶斯与逻辑回归是常见对照。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "生成与判别",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_ml",
+    "source_key": "written-ai-v1:ai_ml:044",
+    "position": 44,
+    "question": "如何设计一个可信的机器学习实验基线？",
+    "answer": "固定并记录数据版本、划分策略、随机种子、预处理和软件环境，建立简单基线与统一指标；调参预算一致，报告多次运行的不确定性。先做数据与泄漏检查，再比较复杂模型，避免只汇报挑选出的最佳一次结果。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "可复现性",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/common_pitfalls.html",
+        "https://scikit-learn.org/stable/user_guide.html",
+        "https://www.statlearning.com/"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:001",
+    "position": 1,
+    "question": "什么是神经网络？输入层、隐藏层与输出层分别做什么？",
+    "answer": "神经网络由可学习的仿射变换和激活等运算组成。输入层接收特征，隐藏层学习中间表示，输出层映射到目标空间。基本神经元可写为 a=φ(wᵀx+b)，权重决定各输入贡献，偏置调整平移；输出设计取决于分类、回归等任务。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "神经网络",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 1,
+      "page_end": 1
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:002",
+    "position": 2,
+    "question": "感知机与多层感知机的结构和表达能力有什么区别？",
+    "answer": "感知机通常以线性得分和阈值做分类，只能解决线性可分问题。MLP 具有一层或多层隐藏层和非线性激活，可表示复杂非线性关系。经典感知机算法和现代使用反向传播的 MLP 训练方式不同，不能混为一谈。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "感知机与MLP",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 2,
+      "page_end": 2
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:003",
+    "position": 3,
+    "question": "什么是深度神经网络？增加深度有什么意义与代价？",
+    "answer": "深度网络通过多层组合学习分层表示，某些函数可比浅层网络更高效地表达。增加深度也会提高计算和优化难度，并可能带来梯度问题或过拟合。深度不是越大越好，效果取决于数据、结构、训练方法与资源约束。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "网络深度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 3,
+      "page_end": 3
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:004",
+    "position": 4,
+    "question": "深层神经网络为什么难训练？有哪些常见改善方法？",
+    "answer": "常见困难包括梯度消失或爆炸、优化不稳定、数据不足及泛化问题。可使用合适初始化、非饱和激活、残差连接、归一化、梯度裁剪和学习率调度，并结合正则化与数据增强。需要根据症状定位，不能认为某一种技巧能解决所有问题。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "训练困难",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 3,
+      "page_end": 7
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:005",
+    "position": 5,
+    "question": "如何理解内部协变量偏移？BN 的收益是否只能由它解释？",
+    "answer": "该术语常指训练中前层参数变化造成后层输入分布变化。BN 最初以缓解此现象解释，但其有效性并不只有这一种解释，优化平滑性、尺度不变性等同样重要。不能把“消除内部协变量偏移”视为已证明的唯一工作原理。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "内部协变量偏移",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 4,
+      "page_end": 5
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:006",
+    "position": 6,
+    "question": "梯度消失如何产生？怎样诊断和缓解？",
+    "answer": "反向传播中多层局部导数连乘，若长期小于1，早层梯度可能极小；饱和的 sigmoid/tanh 和不合适权重尺度会加剧。可监测梯度范数与激活分布，采用残差结构、适当初始化和激活等方法。学习率大并不能从根本上修复消失梯度。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "梯度消失",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 5,
+      "page_end": 6
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:007",
+    "position": 7,
+    "question": "梯度爆炸的原因、表现及处理方法是什么？",
+    "answer": "多层雅可比连乘可能放大梯度，引发更新剧烈、损失发散或非有限数值。可采用梯度范数裁剪、合适初始化、残差及归一化，并检查学习率与数值精度。梯度裁剪是控制更新幅度，不等于修复所有优化或数据错误。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "梯度爆炸",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 6,
+      "page_end": 7
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:008",
+    "position": 8,
+    "question": "为什么神经网络需要非线性激活函数？",
+    "answer": "多个仿射变换的复合仍是仿射变换，因此仅增加线性层无法获得复杂的非线性决策边界。非线性激活使网络可组合表示非线性关系。激活函数还影响梯度传播、稀疏性与数值稳定性，应按结构和任务选择。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "激活函数",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 8,
+      "page_end": 9
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:009",
+    "position": 9,
+    "question": "Sigmoid 的定义、适用位置和局限是什么？",
+    "answer": "σ(x)=1/(1+exp(−x))，导数为 σ(x)(1−σ(x))，输出在0与1之间，常用于二分类概率输出或门控。两端饱和使梯度小，输出非零中心；深层隐藏层中需谨慎使用。训练二分类时宜使用数值稳定的基于 logits 的损失。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Sigmoid",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 9,
+      "page_end": 10
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:010",
+    "position": 10,
+    "question": "Tanh 与 Sigmoid 相比有什么特点？",
+    "answer": "tanh(x) 输出在−1与1之间，零中心，导数为1−tanh²(x)。相对 sigmoid 可改善零中心问题，但输入绝对值大时仍饱和并产生小梯度。常见于部分循环网络状态，而不是所有深层网络的默认最优激活。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Tanh",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 10,
+      "page_end": 11
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:011",
+    "position": 11,
+    "question": "ReLU 的定义、优点与“死亡 ReLU”问题是什么？",
+    "answer": "ReLU(x)=max(0,x)，是分段线性但整体非线性的函数。正区间导数为1，有利于梯度传播且计算简单；负区间梯度为0，若神经元长期只收到负输入可能停止学习。可调整初始化、学习率或使用 Leaky ReLU 等变体。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "ReLU",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 11,
+      "page_end": 13
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:012",
+    "position": 12,
+    "question": "Leaky ReLU 怎样缓解 ReLU 的零梯度问题？",
+    "answer": "Leaky ReLU 在 x<0 时输出 αx，α 通常是较小正常数，负区间仍有非零梯度，降低神经元长期失活风险。PReLU 可学习该斜率。它们仍需合理初始化和训练，并不保证优于 ReLU，也不能消除所有梯度问题。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "LeakyReLU",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 13,
+      "page_end": 14
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:013",
+    "position": 13,
+    "question": "Softplus 的定义、导数与局限是什么？",
+    "answer": "Softplus(x)=log(1+exp(x))，导数为 sigmoid(x)，是 ReLU 的平滑近似。大正数处近似线性，负值处平滑趋近零；它不会产生精确的零激活，负区间梯度仍可能很小。实现需使用稳定公式避免 exp 溢出。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Softplus",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 14,
+      "page_end": 15
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:014",
+    "position": 14,
+    "question": "Softmax 如何把 logits 转为概率？怎样稳定计算？",
+    "answer": "pᵢ=exp(zᵢ)/Σⱼexp(zⱼ)，各分量非负且总和为1，常用于互斥多分类。可先减去最大 logit 再指数，概率保持不变而更稳定。多标签分类通常对各类独立使用 sigmoid，不能直接用 Softmax 强制互斥。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Softmax",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 15,
+      "page_end": 16
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:015",
+    "position": 15,
+    "question": "多分类交叉熵如何定义？Softmax 与交叉熵结合的梯度是什么？",
+    "answer": "对目标分布 y 和预测概率 p，交叉熵 L=−Σyᵢlog pᵢ。若 p=softmax(z) 且 Σyᵢ=1，则对 logit 的梯度为 ∂L/∂zᵢ=pᵢ−yᵢ；批平均时再除以批量。计算应结合 log-softmax 等稳定实现，避免直接 log(0)。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "交叉熵",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 16,
+      "page_end": 17
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:016",
+    "position": 16,
+    "question": "前向传播、反向传播与优化器更新有何区别？",
+    "answer": "前向传播计算中间激活、预测和损失；反向传播按链式法则从损失计算参数梯度；优化器依据梯度、学习率及动量等状态更新参数。反向传播是一种求导算法，不意味着一定采用普通梯度下降。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "传播",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 17,
+      "page_end": 19
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:017",
+    "position": 17,
+    "question": "模型参数与超参数有什么区别？如何调节超参数？",
+    "answer": "模型参数如权重由训练数据及优化过程学习；超参数如网络深度、学习率、批量和正则强度控制模型或训练。应在验证集或交叉验证中调优，固定测试集用于最终评估。自动调参也应记录搜索空间和预算，防止测试泄漏。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "超参数",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 19,
+      "page_end": 20
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:018",
+    "position": 18,
+    "question": "什么是 Batch Size？全批、随机与小批梯度下降怎样区分？",
+    "answer": "Batch Size 是一次梯度估计所使用的样本数。全批使用整个训练集，经典随机梯度下降每次用一个样本，小批使用样本子集。它影响梯度噪声、内存和硬件效率，但梯度累积与分布式训练还会改变有效批量。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "批量",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 20,
+      "page_end": 20
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:019",
+    "position": 19,
+    "question": "增大或减小 Batch Size 会怎样影响训练？",
+    "answer": "较大批量通常梯度方差较小、并行利用率较高，但显存增加，相同 epoch 的更新次数减少；小批量更噪声化，可能有泛化收益但并不保证。应联合调整学习率、训练步数和调度，不能断言大批量必然更快收敛或泛化更差。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "批量选择",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 20,
+      "page_end": 22
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:020",
+    "position": 20,
+    "question": "数据归一化、标准化与网络内归一化有什么不同？",
+    "answer": "数据预处理中的 Min-Max、Z-score 等调整输入尺度，其统计量只能在训练集拟合；BN、LN 是网络内部的运算，使用特定维度的统计量和可学习仿射参数。不同方式目标和计算轴不同，不应统称为把所有数据映射到0～1。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "归一化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 23,
+      "page_end": 23
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:021",
+    "position": 21,
+    "question": "为什么特征尺度差异会影响梯度优化？缩放是否总能加速？",
+    "answer": "尺度差异会使某些目标的等高线狭长、条件数变差，梯度下降易震荡；适当缩放可改善几何条件并让学习率更易设置。但收益取决于模型与数据，对树模型通常影响较小，不能保证所有问题都加速。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "归一化与优化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 23,
+      "page_end": 26
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:022",
+    "position": 22,
+    "question": "Min-Max 归一化如何计算？有哪些限制？",
+    "answer": "常见形式 x′=(x−min)/(max−min)，最小最大值仅从训练集获得。常量特征需单独处理避免零除。该方法对极端值敏感，测试数据可能超出训练范围并映射到0～1之外；是否截断要依据业务和验证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Min-Max",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 26,
+      "page_end": 26
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:023",
+    "position": 23,
+    "question": "Z-score 标准化是什么？它会使数据服从正态分布吗？",
+    "answer": "Z-score 以训练集均值和标准差计算 (x−μ)/σ，只改变位置和尺度，不会把任意分布变成正态分布，也并非对异常值不敏感。重尾或含极端值时可考虑中位数与四分位距等稳健缩放。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Z-score",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html",
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 27,
+      "page_end": 27
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:024",
+    "position": 24,
+    "question": "对数变换适合什么数据？使用时要注意什么？",
+    "answer": "对数变换可压缩正值长尾变量的动态范围，使乘性关系更易建模。零值可在含义允许时使用 log1p，负值不能直接取实数对数。变换不保证正态性，预测目标变换后还需考虑反变换偏差与指标定义。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "对数变换",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 27,
+      "page_end": 27
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:025",
+    "position": 25,
+    "question": "L2 向量归一化如何计算？它与 Z-score 有何区别？",
+    "answer": "L2 归一化将向量除以其欧氏范数，使非零向量长度为1，常用于余弦相似度或表示检索；零向量需保护。它按向量缩放，并非逐特征减均值除标准差。它不消除异常方向，也不使分布变为正态。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "L2归一化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 28,
+      "page_end": 28
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:026",
+    "position": 26,
+    "question": "Batch Normalization 的计算步骤与训练、推理差异是什么？",
+    "answer": "训练时按规定维度计算批均值与方差，使用 (x−μ)/√(σ²+ε) 标准化，再用 γ、β 仿射变换。常规推理使用训练累计的运行统计量而非当前测试批统计。运行方差的具体估计约定随框架而异，应遵循实现。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "BN",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://docs.pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html",
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 28,
+      "page_end": 32
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:027",
+    "position": 27,
+    "question": "全连接层与卷积层的 BN 通常沿哪些维度统计？",
+    "answer": "对形状 (N,C) 的全连接表示，通常每个特征在 N 上统计；对 (N,C,H,W) 的二维卷积表示，通常每个通道在 N、H、W 上统计，保留通道独立的 γ、β。不能说 BN 只在“第二个维度”计算均值与方差。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "BN维度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://docs.pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html",
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 29,
+      "page_end": 31
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:028",
+    "position": 28,
+    "question": "BN 有哪些好处与局限？小批量训练时怎么办？",
+    "answer": "BN 常改善优化、允许较稳健的学习率设置，并带来一定批噪声效应。小批量、分布差异或运行统计不准时效果可能下降；可考虑冻结统计、同步 BN、GroupNorm 或 LN。归一化并不保证避免过拟合，需按任务验证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "BN适用性",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://docs.pytorch.org/docs/stable/generated/torch.nn.BatchNorm2d.html",
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 29,
+      "page_end": 32
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:029",
+    "position": 29,
+    "question": "LayerNorm 如何计算？与 BatchNorm 有何区别？",
+    "answer": "LN 通常对每个样本内指定的特征维度独立统计，Transformer 常对每个 token 的隐藏维度归一化；BN 主要跨批样本统计每个通道。LN 不依赖其他样本，训练推理计算一致，适合小批量和序列场景，但并非任何结构都优于 BN。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "LN",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 32,
+      "page_end": 33
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:030",
+    "position": 30,
+    "question": "预训练为什么有帮助？微调时哪些参数会更新？",
+    "answer": "预训练可获得可迁移表示并提供较好的初始化，微调再用目标任务数据适配。可仅训练任务头、解冻部分层、全参数更新或使用适配器。无监督或自监督目标与下游任务不匹配时可能负迁移，因此预训练不保证提升。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "预训练微调",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 33,
+      "page_end": 34
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:031",
+    "position": 31,
+    "question": "为什么不能把同层所有权重初始化为相同值？Xavier 与 He 初始化怎样选？",
+    "answer": "对称初始化会使同层神经元获得相同梯度、学习相同特征；适当随机初始化打破对称并控制激活和梯度尺度。Xavier 按输入输出维度缩放，常适合 tanh 等；He 结合 ReLU 的半截断特性按输入维度缩放。偏置初始化需按具体结构选择。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "初始化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 34,
+      "page_end": 35
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:032",
+    "position": 32,
+    "question": "学习率过大或过小会有什么表现？如何选择？",
+    "answer": "过大可能震荡、发散或数值不稳定，过小可能进展缓慢或预算内优化不足。可从已验证的结构与优化器配置起步，用学习率范围测试及验证曲线调整。不同优化器、批量和损失缩放下合理值不同，不能直接套一个固定数。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "学习率",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 35,
+      "page_end": 37
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:033",
+    "position": 33,
+    "question": "常见学习率调度与 Warmup 分别起什么作用？",
+    "answer": "步进衰减、指数衰减、余弦调度等随训练推进调整学习率；Warmup 从较小值逐渐升至目标值，以缓解早期不稳定；循环策略在区间内改变学习率。需区分按 epoch 或 step 调度，断点恢复应同时恢复调度器状态。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "调度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 36,
+      "page_end": 37
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:034",
+    "position": 34,
+    "question": "全批、随机与小批梯度下降各有哪些优缺点？",
+    "answer": "全批梯度对固定训练集精确但每步开销大；单样本随机梯度便宜而方差高；小批梯度折中并利于向量化。这里的“精确”是经验目标的梯度，并非真实总体梯度；小批梯度不必与全批几乎相同。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "梯度下降",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 38,
+      "page_end": 39
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:035",
+    "position": 35,
+    "question": "AdaGrad 如何自适应调整学习率？主要局限是什么？",
+    "answer": "它累积各参数历史梯度平方，以其平方根加稳定项作为分母缩放更新。频繁出现的大梯度参数步长会缩小，对稀疏特征有用；累积量单调增加，长期训练可能导致有效步长过小。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "AdaGrad",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 39,
+      "page_end": 39
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:036",
+    "position": 36,
+    "question": "RMSProp 与 AdaGrad 有何区别？它如何强调近期梯度？",
+    "answer": "RMSProp 使用梯度平方的指数滑动平均而非无限累加，因此旧梯度贡献指数衰减，避免分母持续单调增长。它据此对各参数自适应缩放步长；衰减系数决定记忆长度，仍需设置基础学习率和稳定项。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "RMSProp",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 39,
+      "page_end": 40
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:037",
+    "position": 37,
+    "question": "动量法如何改进普通梯度下降？",
+    "answer": "动量累计过去梯度的指数加权信息，沿持续一致的方向加速，并降低某些方向的震荡。可写 vₜ=βvₜ₋₁+gₜ、θₜ=θₜ₋₁−ηvₜ，不同实现可能包含归一化因子。它不保证跳出所有局部极小值，也不免除学习率调参。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "动量",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 40,
+      "page_end": 40
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:038",
+    "position": 38,
+    "question": "Adam 的一阶矩、二阶矩和偏差校正是什么？",
+    "answer": "Adam 维护梯度一阶滑动均值 m 和平方梯度滑动均值 v，再进行从零初始化导致的偏差校正，用 m̂/(√v̂+ε) 更新参数。它结合动量与逐参数缩放，常用但并非总是最优，也不能笼统保证收敛到全局最优。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Adam",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 41,
+      "page_end": 41
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:039",
+    "position": 39,
+    "question": "L2 正则化与权重衰减是否总是等价？AdamW 为什么解耦衰减？",
+    "answer": "对普通 SGD，在匹配系数约定下，L2 惩罚梯度可等价于参数乘性衰减。对 Adam 等自适应方法，L2 梯度会进入矩估计并被预条件化，与直接衰减不同；AdamW 将衰减与梯度更新解耦。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "L2与权重衰减",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 41,
+      "page_end": 42
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:040",
+    "position": 40,
+    "question": "Dropout 在训练和推理时分别怎样工作？",
+    "answer": "训练时随机屏蔽部分激活；常见 inverted dropout 对保留值除以保留概率，以保持期望尺度，推理时关闭屏蔽且不再缩放。它减少共适应但不保证提升，对不同结构的适用位置及比例需要验证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Dropout",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 42,
+      "page_end": 42
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:041",
+    "position": 41,
+    "question": "准确率、精确率、召回率与 F1 各适合怎样的需求？",
+    "answer": "准确率关注总体正确比例，精确率强调预测为正的可信程度，召回率强调真实正类被找回的比例，F1 是二者调和平均。应结合误报漏报成本与类别分布选择；多分类需说明平均方式，不能只凭某个高指标判断模型好坏。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "评估",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 42,
+      "page_end": 44
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:042",
+    "position": 42,
+    "question": "CNN 的基本组成与局部连接、参数共享有什么意义？",
+    "answer": "CNN 常由卷积、非线性激活、下采样及任务头组成。局部连接利用空间邻域，参数共享让同一滤波器在不同位置复用，减少参数并具有平移等变性。边界处理、下采样等会影响严格等变性，不能把 CNN 说成天然完全平移不变。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "CNN基础",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 44,
+      "page_end": 46
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:043",
+    "position": 43,
+    "question": "卷积在图像中起什么作用？卷积核必须是人工设计的吗？",
+    "answer": "卷积通过局部窗口的加权和产生特征图，可表示边缘、纹理等局部模式。传统滤波器可能人工设计，CNN 中权重通常从任务数据学习。深层特征由多层组合产生，不能假定每个通道都对应明确的人类语义。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "卷积直观",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 47,
+      "page_end": 47
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:044",
+    "position": 44,
+    "question": "卷积层有哪些参数？输出尺寸与可训练参数量怎样计算？",
+    "answer": "对标准二维卷积，单轴输出为 floor((I+2P−D(K−1)−1)/S+1)。权重数为 C_out×(C_in/groups)×K_h×K_w，若有偏置再加 C_out。需区分卷积核大小、步长、填充、膨胀率、通道和分组，不能只数 K²。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "卷积参数",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 47,
+      "page_end": 50
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:045",
+    "position": 45,
+    "question": "Valid 与 Same Padding 的含义是什么？Same 是否总让尺寸不变？",
+    "answer": "Valid 表示不填充；Same 一般表示按输入尺寸、步长和核参数选填充，常得到 ceil(I/S) 输出。只有特定条件、尤其步长1时才通常与输入尺寸相同；偶数核等可能需要非对称填充，具体支持受框架限制。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Padding",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 48,
+      "page_end": 48
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:046",
+    "position": 46,
+    "question": "标准卷积怎样从多输入通道计算一个输出通道？",
+    "answer": "每个输出通道具有覆盖所有分组内输入通道的卷积核，对局部窗口逐元素乘加，再跨输入通道求和并可加偏置。深度学习库常实现互相关而非数学上翻转核的卷积，学习到的核仍能完成所需映射。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "卷积计算",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 50,
+      "page_end": 50
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:047",
+    "position": 47,
+    "question": "最大池化、平均池化、全局池化与自适应池化有什么区别？",
+    "answer": "最大池化保留窗口最大响应，平均池化取均值；全局池化把整个空间压为每通道一个值；自适应池化按目标输出尺寸确定区域。池化通常没有学习参数，降低分辨率并可能损失位置信息，不能保证对所有平移或缩放不变。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "池化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 50,
+      "page_end": 52
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:048",
+    "position": 48,
+    "question": "1×1 卷积有哪些作用？它能直接融合相邻空间位置吗？",
+    "answer": "1×1 卷积在每个位置混合通道，可升降维、减少后续卷积开销，并与激活组合增加非线性。它本身不融合相邻空间位置；在通道数不变时也不必然减少总参数。瓶颈结构可用它先降维再做较昂贵的空间卷积。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "1×1卷积",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 52,
+      "page_end": 52
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:049",
+    "position": 49,
+    "question": "卷积层与池化层的主要区别是什么？",
+    "answer": "卷积通常使用可学习权重进行局部特征变换并改变通道数；常规池化使用固定聚合规则，主要压缩空间维度。两者均可改变分辨率，但下采样卷积可学习映射，池化通常无训练参数，应根据结构需要选择。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "卷积与池化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 53,
+      "page_end": 53
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:050",
+    "position": 50,
+    "question": "大卷积核与叠加小卷积核在感受野、参数和非线性方面有何差别？",
+    "answer": "在步长1、无膨胀等条件下，两层3×3可获得5×5理论感受野，三层对应7×7，并可插入更多非线性。参数比较还取决于各层通道数和分组，不能仅比较9+9与25就断言所有配置更省；有效感受野也不同于理论范围。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "卷积核大小",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 53,
+      "page_end": 54
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:051",
+    "position": 51,
+    "question": "同一网络层能否并行使用不同尺寸的卷积核？",
+    "answer": "可以，Inception 类模块可设置不同卷积和池化分支，在通道维度拼接以获得多尺度表示。各分支空间输出尺寸必须对齐，并考虑计算量及通道分配；现代实现也常通过小卷积分解或膨胀卷积扩大感受野。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "多尺度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 54,
+      "page_end": 55
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:052",
+    "position": 52,
+    "question": "如何减少 CNN 的参数量和计算量？二者一定同步下降吗？",
+    "answer": "可用瓶颈降维、分组或深度可分离卷积、全局池化、剪枝及更窄网络。参数少不代表实际推理必然快，访存、算子支持、分辨率和硬件并行都会影响延迟，应同时报告参数、运算量与实测耗时。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "参数压缩",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 55,
+      "page_end": 56
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:053",
+    "position": 53,
+    "question": "有哪些提升 CNN 泛化能力的方法？",
+    "answer": "可结合合理数据划分、数据增强、权重衰减、Dropout、早停、迁移学习及更多高质量样本。增强应保持任务标签语义，例如医学或文字图像不宜盲目翻转；模型选择以验证集为准，不能根据测试集反复调节。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "泛化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 56,
+      "page_end": 59
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:054",
+    "position": 54,
+    "question": "Mixup、Cutout 与 CutMix 分别做什么？",
+    "answer": "Mixup 对两张输入及标签做凸组合；Cutout 遮挡输入的局部区域，通常保留标签；CutMix 把另一图像区域贴入当前图像，并常按面积混合标签。增强强度及标签假设应按任务验证，不是所有任务都适合线性混合。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "数据增强",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 57,
+      "page_end": 57
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:055",
+    "position": 55,
+    "question": "CNN 的局部连接、权值共享和池化怎样利用图像共性？",
+    "answer": "局部连接假设邻域具有有用结构，权值共享复用同一局部模式并减少参数，池化聚合邻域以降低分辨率和部分位置敏感性。它们是有用归纳偏置，但不能保证旋转、缩放或任意平移完全不变。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "归纳偏置",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 59,
+      "page_end": 60
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:056",
+    "position": 56,
+    "question": "LeNet 的典型结构和历史意义是什么？",
+    "answer": "LeNet-5 是早期卷积网络代表，用卷积、下采样和分类层识别手写字符，展示端到端学习视觉特征的可行性。原始结构与现代教材简化实现可能不同，回答时应区分，不把现代 ReLU、最大池化默认配置强加给原论文。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "LeNet",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 61,
+      "page_end": 61
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:057",
+    "position": 57,
+    "question": "AlexNet 的主要特点与贡献是什么？",
+    "answer": "AlexNet 使用较深的卷积网络、ReLU、GPU 训练、数据增强与全连接层 Dropout，在大规模图像分类中取得突破。其早期分组设计与当时硬件有关；这些技巧并非全由它首次提出，应表述为成功组合并推广。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "AlexNet",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 61,
+      "page_end": 62
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:058",
+    "position": 58,
+    "question": "VGG 为什么大量堆叠 3×3 卷积？有什么缺点？",
+    "answer": "堆叠小卷积可逐步扩大感受野并引入多次非线性，结构规则且便于扩展深度。VGG 的全连接分类头参数量很大，计算和内存开销也高。相对大核是否省参数须在通道配置相当等条件下比较。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "VGG",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 62,
+      "page_end": 62
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:059",
+    "position": 59,
+    "question": "Network in Network 的 MLPConv 与全局平均池化有什么作用？",
+    "answer": "NiN 用局部多层感知机增强每个局部区域的非线性特征表达，常通过空间卷积结合1×1卷积实现；全局平均池化聚合每通道响应，替代大型全连接头，减少参数。它不是在每个位置使用互不共享的一套独立参数。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "NiN",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 62,
+      "page_end": 64
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:060",
+    "position": 60,
+    "question": "GoogLeNet 的 Inception 模块如何融合多尺度特征？",
+    "answer": "典型 Inception 模块并行使用不同尺度卷积与池化分支，再沿通道拼接；1×1卷积常用于降维，控制较大卷积成本。不同版本采用分解卷积等改进。多尺度结构提供互补表示，但分支尺寸及计算预算必须协调。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "GoogLeNet",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 64,
+      "page_end": 65
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:061",
+    "position": 61,
+    "question": "深层网络的退化问题与过拟合、梯度消失有什么区别？",
+    "answer": "退化常指增加深度后训练误差反而升高，反映优化困难，不等同于仅验证误差升高的过拟合。梯度消失可造成困难，但不是唯一解释。残差结构提供更容易学习的恒等路径，可改善深层网络优化。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "退化问题",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 65,
+      "page_end": 66
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:062",
+    "position": 62,
+    "question": "残差连接为什么便于学习恒等映射并改善梯度传播？",
+    "answer": "残差块输出 y=x+F(x)，当需要恒等映射时只需让 F(x) 接近0。梯度可通过恒等捷径传播，缓解深层优化困难。非线性放置、投影及维度变化会影响具体表达，残差连接并不保证梯度永不消失或爆炸。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "残差",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 66,
+      "page_end": 66
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:063",
+    "position": 63,
+    "question": "残差分支输入输出维度不一致时怎么办？",
+    "answer": "逐元素相加要求尺寸匹配，可用1×1投影卷积配合步长改变通道和空间分辨率，或采用特定的下采样与补零策略。投影捷径不再是严格恒等映射，需要与主分支同步设计尺寸。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "残差维度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 67,
+      "page_end": 67
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:064",
+    "position": 64,
+    "question": "ResNet 的 Bottleneck 结构如何降低开销？",
+    "answer": "典型瓶颈按1×1降维、3×3空间处理、1×1升维组织，在较少中间通道上执行较昂贵的3×3卷积。输出与捷径对齐后相加。节省程度取决于通道配置，不能仅凭使用1×1就保证更省。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "瓶颈",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 67,
+      "page_end": 67
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:065",
+    "position": 65,
+    "question": "全局平均池化相对 Flatten 加全连接有什么优缺点？",
+    "answer": "对每个通道的空间维度取均值，将 H×W×C 压成 C 维，通常显著减少分类头参数并适配不同空间尺寸。它丢失精确位置信息，不是对所有任务都更好；后面仍可接线性层，分类通道也不必直接等于类别数。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "全局平均池化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 67,
+      "page_end": 68
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:066",
+    "position": 66,
+    "question": "标量、向量、矩阵与张量有什么关系？",
+    "answer": "在深度学习语境中，张量是多维数组的统称：标量是0阶，向量1阶，矩阵2阶，更高阶可表示批量图像等。张量的阶指轴数，形状描述各轴长度；线性代数中的矩阵秩是另一概念，不能混淆。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "张量",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "深度学习八股.pdf",
+      "page_start": 69,
+      "page_end": 69
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:067",
+    "position": 67,
+    "question": "为什么每次梯度更新前通常需要清空梯度？梯度累积如何使用？",
+    "answer": "PyTorch 默认把 backward 的梯度累加到参数梯度中，普通逐批更新前需清空。梯度累积刻意跨多次反向传播后再更新，应按有效批量正确缩放损失并安排清零；它不完全等价于大批量 BN 的统计行为。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "训练实现",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:068",
+    "position": 68,
+    "question": "model.train()、model.eval() 与 no_grad() 有何区别？",
+    "answer": "train/eval 控制 Dropout、BN 等模块行为；no_grad 禁用自动求导记录以节省推理资源。eval 不会自动关闭梯度，no_grad 也不会把模型切为评估模式。验证时通常两者配合，之后恢复训练模式。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "训练模式",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_dl",
+    "source_key": "written-ai-v1:ai_dl:069",
+    "position": 69,
+    "question": "混合精度训练为什么可能溢出或下溢？如何缓解？",
+    "answer": "低精度浮点数的动态范围或有效精度有限，小梯度可能下溢、大中间值可能溢出。可用合适的自动混合精度、动态损失缩放、稳定损失实现和非有限值检查。BF16 与 FP16 的范围和精度不同，需结合硬件选择。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "数值精度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://d2l.ai/",
+        "https://docs.pytorch.org/docs/stable/nn.html"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:001",
+    "position": 1,
+    "question": "什么是大语言模型？“大”是否存在固定参数门槛？",
+    "answer": "大语言模型通常指在大规模语料上训练、具有较强语言建模和迁移能力的神经网络，常用 Transformer。没有跨时期、跨机构统一的参数门槛。参数规模、数据质量、训练计算和对齐方式共同影响能力，不能仅按参数数目判断质量。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "大模型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 1,
+      "page_end": 1
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:002",
+    "position": 2,
+    "question": "Token 是什么？一个汉字或英文单词总对应一个 Token 吗？",
+    "answer": "Token 是分词器编码后供模型处理的离散单元，可是子词、字节、字符或其他片段。一个单词或汉字可能对应一个或多个 token，取决于词表与算法；标点和空格也可能占用 token，不能用固定字数比例精确换算。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Token",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 1,
+      "page_end": 2
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:003",
+    "position": 3,
+    "question": "模型参数量与运行显存有什么关系？",
+    "answer": "参数量表示可学习数值的数量，是容量与权重存储成本的一个因素。仅权重存储约为参数量乘每参数字节数；运行时还包括激活、KV Cache、优化器状态及临时缓冲。相同参数量模型的速度和能力也可因结构、精度及训练不同而差异很大。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "参数",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 2,
+      "page_end": 2
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:004",
+    "position": 4,
+    "question": "什么是上下文窗口？支持长窗口是否保证能有效利用所有内容？",
+    "answer": "上下文窗口是单次模型处理的 token 长度限制，输入、输出及额外预算的计数依服务而异。支持较长窗口不代表对全部位置都同样可靠，长距离检索和中间信息利用仍可能下降。应检查具体模型限制并进行长文任务评测。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "上下文",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 2,
+      "page_end": 3
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:005",
+    "position": 5,
+    "question": "词嵌入表和句向量模型有什么区别？",
+    "answer": "输入词嵌入表将 token ID 映射为可学习向量；上下文网络进一步得到依赖语境的隐藏表示。句向量模型通常经专门目标和池化，把文本映射为适合相似度比较的向量。不能直接把任意 token 向量平均就当作高质量语义检索模型。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Embedding",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 3,
+      "page_end": 4
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:006",
+    "position": 6,
+    "question": "什么是大模型幻觉？流畅或自信的回答为何仍可能错误？",
+    "answer": "幻觉通常指输出与事实、来源或给定约束不一致的内容。模型优化的是训练目标下的序列预测，流畅度和语言置信不等于事实真实性。训练数据缺陷、知识缺失、检索错误和提示诱导均可能导致问题，需要证据核验及不确定性管理。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "幻觉",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 4,
+      "page_end": 4
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:007",
+    "position": 7,
+    "question": "Prompt 中角色、任务、上下文、示例和输出约束分别起什么作用？",
+    "answer": "角色限定回答视角，任务说明目标，上下文提供资料，示例展示期望模式，输出约束明确格式与要求。应区分可信指令和外部内容，减少歧义并验证效果。Prompt 不能增加模型实际访问权限，也不保证完全遵循或事实正确。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "提示",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 4,
+      "page_end": 4
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:008",
+    "position": 8,
+    "question": "Transformer Encoder 的主要结构与用途是什么？",
+    "answer": "典型编码器包含自注意力、前馈网络、残差连接与归一化，可双向利用输入信息，输出上下文化表示。常用于分类、检索或作为编码器—解码器的输入编码部分。具体模型在位置编码及归一化顺序等方面可不同。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "编码器",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 4,
+      "page_end": 5
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:009",
+    "position": 9,
+    "question": "Decoder-only 与 Encoder–Decoder 架构怎样区别？",
+    "answer": "Decoder-only 通过因果掩码自注意力自回归生成，如许多现代语言模型；Encoder–Decoder 先编码输入，再由解码器结合因果自注意力和对编码结果的交叉注意力生成。不是所有所谓解码器都必须含交叉注意力。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "解码器",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 5,
+      "page_end": 5
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:010",
+    "position": 10,
+    "question": "缩放点积注意力如何计算？Q、K、V 分别是什么？",
+    "answer": "常见计算为 Attention(Q,K,V)=softmax(QKᵀ/√dₖ+M)V，其中 Q、K、V 为查询、键、值，通常由线性投影获得，M 为可选掩码。缩放缓解点积随维度增大的数值问题，多头并行学习不同子空间关系。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "注意力",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 5,
+      "page_end": 6
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:011",
+    "position": 11,
+    "question": "什么是 SFT？它与基座预训练的训练数据和目标有何不同？",
+    "answer": "SFT 使用指令与期望回答等示范数据适配模型，使输出更符合任务及对话格式。自回归模型仍常用 token 交叉熵，但损失可能只作用于回答部分。它主要改变任务行为，也能引入知识，却不能确保事实记忆完整或持续更新。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "指令微调",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 6,
+      "page_end": 7
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:012",
+    "position": 12,
+    "question": "Temperature 如何影响采样？低温度等于高准确率吗？",
+    "answer": "常用 pᵢ∝exp(zᵢ/T)，正温度降低使分布更集中，升高使分布更平坦；T 趋近0对应更接近贪心选择，接口对0的处理依实现。温度调节随机性而非直接度量准确率，低温仍会稳定地产生错误答案。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "温度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 7,
+      "page_end": 8
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:013",
+    "position": 13,
+    "question": "自回归语言模型的预训练过程与目标是什么？",
+    "answer": "对经清洗、去重与分词的语料，模型在给定前文下预测后续 token，以交叉熵优化，通常配合分布式训练、学习率调度和检查点。数据授权、质量、污染与配比影响结果；只增加语料数量不必然提高能力。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "预训练",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 8,
+      "page_end": 9
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:014",
+    "position": 14,
+    "question": "KL 散度如何定义？它为什么不是距离？",
+    "answer": "离散分布 D_KL(P∥Q)=ΣP(x)log(P(x)/Q(x))，在适当支持条件下非负且仅分布相同时为0。它通常不对称，也不满足三角不等式；若 P(x)>0 而 Q(x)=0，可为无穷大。固定目标分布时，最小化交叉熵等价于最小化相应 KL。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "KL散度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 9,
+      "page_end": 10
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:015",
+    "position": 15,
+    "question": "怎样客观比较不同开放权重语言模型？",
+    "answer": "应说明具体版本、许可证、规模、上下文、训练或对齐方式，并在同一提示、解码与预算下比较目标任务的效果、延迟和成本。开放权重不等于训练数据与全部代码开源；模型名单随时间变化，不应把某份旧清单当作永久标准。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "模型体系",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 10,
+      "page_end": 11
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:016",
+    "position": 16,
+    "question": "大语言模型有哪些优势？能力边界是什么？",
+    "answer": "它能在统一接口下完成生成、归纳、翻译和代码等多种任务，支持提示适配与工具组合。但效果取决于训练覆盖和任务条件，不保证可靠推理、事实更新或完全遵循。应按实际任务和风险评估，而非把涌现能力视为普遍保证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "优点",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 11,
+      "page_end": 11
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:017",
+    "position": 17,
+    "question": "大语言模型有哪些主要局限？",
+    "answer": "常见局限包括幻觉、训练知识时效、上下文及输出长度限制、偏见、提示注入敏感性和计算成本。它不天然具有外部行动权限、持久记忆或验证工具。可靠系统通常需结合检索、约束、访问控制与人工校验。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "缺点",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 11,
+      "page_end": 12
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:018",
+    "position": 18,
+    "question": "微调时 Batch Size 太小可能带来哪些问题？",
+    "answer": "梯度估计噪声增大，训练曲线更波动，设备利用率可能降低；若使用 BN，其统计还可能不稳定。但 Transformer 常用 LN，不应把 BN 的问题直接套用。可用梯度累积、合适学习率和裁剪，效果需验证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "小批量",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 12,
+      "page_end": 12
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:019",
+    "position": 19,
+    "question": "微调时 Batch Size 太大可能带来哪些问题？",
+    "answer": "显存占用提高，在相同 epoch 下更新步数减少，可能需要调整学习率、Warmup 和总训练步数。大批量的泛化影响并非必然恶化，也不是越大越好，应在统一预算与验证集上比较，并区分实际与有效批量。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "大批量",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 12,
+      "page_end": 12
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:020",
+    "position": 20,
+    "question": "“幻觉不一定有害”应怎样准确表述？",
+    "answer": "创作任务可以允许虚构，但须符合用户期待并清楚区分虚构与事实；事实问答、医学或代码执行中无依据的陈述可能造成严重后果。不能把被明确要求的想象与无意的事实错误完全等同，也不能用创作价值为错误事实背书。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "创作与幻觉",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 12,
+      "page_end": 12
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:021",
+    "position": 21,
+    "question": "大模型在什么情况下更容易产生无依据内容？",
+    "answer": "知识缺失、过时或长尾问题、错误前提、要求不存在的引用、证据不足、检索噪声和过长上下文均会增加风险。应校验前提与引用、使用可靠工具、支持拒答，并分别评估事实正确性及对来源的忠实程度。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "幻觉诱因",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 12,
+      "page_end": 13
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:022",
+    "position": 22,
+    "question": "Encoder-only、Decoder-only 与 Encoder–Decoder 各适合哪些任务？",
+    "answer": "Encoder-only 常用于双向表示和判别任务；Decoder-only 以因果语言建模进行开放生成；Encoder–Decoder 将输入编码与条件生成分开，常用于翻译或摘要。适用任务并非绝对排他，训练目标和微调方式也会改变表现。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "架构比较",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 13,
+      "page_end": 13
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:023",
+    "position": 23,
+    "question": "LLaMA 等模型的输入长度能否无限增长？",
+    "answer": "不能。位置编码可外推或使用 RoPE 并不意味着无限有效上下文，注意力计算、显存、KV Cache、训练长度与位置策略都会限制使用。应遵循具体版本配置及服务限制，并在目标长度验证质量，不能仅修改长度参数就宣称可靠扩展。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "长度限制",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 13,
+      "page_end": 14
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:024",
+    "position": 24,
+    "question": "有哪些处理长文本的方法？它们有什么取舍？",
+    "answer": "可采用分块与摘要、RAG、分层处理、滑动窗口或经过长上下文适配的模型；还可优化注意力实现与 KV 存储。分块可能丢跨块关系，摘要可能丢信息，长窗口仍耗资源。计算优化不会自动赋予超出训练的长距离理解能力。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "长文本",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 14,
+      "page_end": 14
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:025",
+    "position": 25,
+    "question": "大模型应从哪些维度评测？",
+    "answer": "结合知识与推理、指令遵循、任务成功率、事实性、鲁棒性、安全及成本延迟，使用独立测试集和人工抽检。基准分数会受污染、提示及评审模型偏差影响，应报告具体版本、设置和不确定性，避免单个总分代替全部能力。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "评测",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 14,
+      "page_end": 15
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:026",
+    "position": 26,
+    "question": "模型能可靠判断“自己是否知道”吗？如何改善？",
+    "answer": "通常不能仅凭语言自信或 token 概率可靠判断事实正确性。可用含拒答示例的数据、证据检索、校准与选择性预测训练，提高在目标分布下的风险控制；需同时评估正确率与覆盖率，不能宣称模型获得了绝对自知能力。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "不确定性",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 15,
+      "page_end": 15
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:027",
+    "position": 27,
+    "question": "如何降低偏好标注成本？AI 反馈有哪些风险？",
+    "answer": "可用清晰标注准则、主动选择难例、已有反馈和模型辅助生成候选及初评，再由人工抽查或复核。合成偏好可能放大评审模型偏见、风格偏好和共同错误，应保持独立评测与来源记录，不把 AI 分数当作事实真值。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "偏好数据",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 15,
+      "page_end": 16
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:028",
+    "position": 28,
+    "question": "为什么大模型在 CPU 与 GPU 上的推理速度差异不能给固定倍数？",
+    "answer": "速度取决于模型规模、精度、内存带宽、算子实现、批量、上下文及硬件。GPU 通常适合高并行运算，CPU 也可在小模型和量化场景实用。预填充与逐 token 解码瓶颈不同，应实测 TTFT、每 token 延迟及吞吐，而非给通用固定倍数。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "CPU与GPU",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 16,
+      "page_end": 16
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:029",
+    "position": 29,
+    "question": "高质量指令微调数据应怎样构建？",
+    "answer": "先定义目标任务和评价，再收集授权数据，统一对话格式，去重、去泄漏和清理敏感信息；确保回答正确、任务覆盖与难度适当。按来源或时间划分训练验证测试，人工抽检合成数据，并保证聊天模板及损失掩码与部署一致。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "微调数据",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 16,
+      "page_end": 17
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:030",
+    "position": 30,
+    "question": "从头预训练、继续预训练、SFT 与 RAG 应怎样选择？",
+    "answer": "从头训练成本高，通常仅在数据、计算及控制需求充分时考虑；继续预训练适应领域分布；SFT 改善任务行为；RAG 提供可更新和可溯源知识。它们可组合，应根据目标、预算与数据条件验证，不能把注入知识一概等同于微调。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "训练路线",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 17,
+      "page_end": 17
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:031",
+    "position": 31,
+    "question": "指令微调有哪些收益和潜在副作用？",
+    "answer": "SFT 可改善任务格式、领域术语和指令遵循，在特定任务上提升表现；也可能过拟合、灾难性遗忘或学到错误模式。数据质量、覆盖、学习率和训练量比简单增加条数更重要，应同时评估目标任务与通用能力。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "SFT收益",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 17,
+      "page_end": 18
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:032",
+    "position": 32,
+    "question": "微调所需显存如何估算？为什么只算权重不够？",
+    "answer": "训练需计入权重、梯度、优化器状态、激活及临时缓冲，受精度、序列长度、批量、分片和检查点影响。LoRA 或量化可降低部分成本但仍需存储基座和激活。不存在仅凭参数量就精确给出的统一显存数字，应以配置测量。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "显存估算",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 18,
+      "page_end": 18
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:033",
+    "position": 33,
+    "question": "一轮语言模型训练通常包含哪些步骤？",
+    "answer": "读取并分词数据，构造输入与标签及掩码，前向计算损失，反向求梯度，再按累积计划裁剪、优化和调度；记录指标、定期验证与保存检查点。恢复训练应同时恢复优化器、调度器及必要随机状态，测试集不参与模型选择。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "训练流程",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 18,
+      "page_end": 19
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:034",
+    "position": 34,
+    "question": "微调需要多少条数据？能否用固定条数保证效果？",
+    "answer": "没有统一条数门槛；任务复杂度、基座能力、样本长度、覆盖与噪声均重要。应从高质量小规模基线开始，绘制学习曲线并检查验证效果、遗忘与过拟合；报告 token 数和任务覆盖，不以“几千条必然够用”等固定结论替代实验。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "数据量",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 19,
+      "page_end": 19
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:035",
+    "position": 35,
+    "question": "领域知识适配一定要选预训练或微调中的一种吗？",
+    "answer": "不必二选一。频繁变化且需引用的知识适合 RAG；稳定领域语言或分布可考虑继续预训练；特定输出和行为适合 SFT。可组合使用，并检查保密、版权、事实准确性及更新成本。微调不保证像数据库一样可靠记忆所有事实。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "领域知识",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 19,
+      "page_end": 20
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:036",
+    "position": 36,
+    "question": "LoRA 的低秩更新公式与初始化是什么？必须先做 SVD 吗？",
+    "answer": "LoRA 冻结基座 W，学习 ΔW=(α/r)BA，其中秩 r 通常远小于矩阵维度，前向使用 W+ΔW。标准方法不需先分解原权重做 SVD；常见初始化让一矩阵随机、另一矩阵为零，使初始增量为零，具体实现可有变体。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "LoRA",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://huggingface.co/docs/peft/main/en/conceptual_guides/lora",
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 20,
+      "page_end": 21
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:037",
+    "position": 37,
+    "question": "LoRA 节省哪些资源？是否一定加速推理或无需遗忘评估？",
+    "answer": "它主要减少可训练参数、梯度与优化器状态，基座权重和激活成本仍在。兼容的线性权重可合并增量以减轻推理额外开销，但量化或多适配器场景需具体处理。它不保证训练、推理总是更快，也不保证没有遗忘。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "LoRA限制",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://huggingface.co/docs/peft/main/en/conceptual_guides/lora",
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 20,
+      "page_end": 21
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:038",
+    "position": 38,
+    "question": "Transformer 为什么需要位置信息？绝对位置、相对位置与 RoPE 有何区别？",
+    "answer": "无位置信号的自注意力难以表达序列顺序。绝对位置为每个位置加编码，常见相对方法在注意力中表达位置差；RoPE 对 Q、K 做位置相关旋转，使点积带相对位置信息。位置策略不同，扩展上下文仍需验证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "位置编码",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 21,
+      "page_end": 22
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:039",
+    "position": 39,
+    "question": "Adapter 微调的原理是什么？与 LoRA 有何不同？",
+    "answer": "Adapter 在网络中插入小型可训练模块，常使用降维、非线性和升维并保留残差；LoRA 则以低秩矩阵表示已有线性层的更新。两者都可冻结基座，但参数位置、表达形式及推理开销不同，不应混为一种方法。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Adapter",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 22,
+      "page_end": 24
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:040",
+    "position": 40,
+    "question": "如何衡量词或文本的相似性？余弦、PMI 与词典路径各有什么限制？",
+    "answer": "向量余弦比较方向，欧氏距离受尺度影响；PMI 衡量共现相对独立假设的强度，易受低频影响；词典路径依赖人工语义资源。上下文词义需使用语境表示，余弦为0仅表示向量正交，不能直接断言语言意义完全无关。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "词相似度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 24,
+      "page_end": 25
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:041",
+    "position": 41,
+    "question": "Adam 如何结合动量与自适应缩放？",
+    "answer": "它维护梯度一阶及平方梯度二阶指数滑动均值，并进行偏差校正，再按校正一阶矩除以二阶矩平方根更新。二阶量是未中心化二阶矩，不是直接估计“坡度是否平坦”的万能判断。仍需设置学习率并评估收敛与泛化。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Adam",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 25,
+      "page_end": 27
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:042",
+    "position": 42,
+    "question": "Transformer 中 LayerNorm 通常沿哪些维度计算？γ、β 能否任意还原每个样本？",
+    "answer": "通常对每个 token 的隐藏特征维度求均值方差，再使用可学习 γ、β 仿射变换，与同批其他样本无关。γ、β 通常按特征共享，不能对所有样本同时等同于各自瞬时标准差和均值，因此不能简单说一定能还原每个样本的原输入。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "LayerNorm",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "大模型八股.pdf",
+      "page_start": 27,
+      "page_end": 28
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:043",
+    "position": 43,
+    "question": "Top-k、Top-p 与温度有什么区别？",
+    "answer": "温度改变 logits 对应分布的集中程度；Top-k 只保留概率最高的 k 个候选，Top-p 选累计概率达到阈值的候选集合后重新归一化。它们可组合但顺序依实现，控制多样性而不保证事实正确或输出安全。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "生成控制",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:044",
+    "position": 44,
+    "question": "KV Cache 为什么能加速自回归解码？有什么代价？",
+    "answer": "缓存已生成位置的注意力键和值，后续 token 不必重复计算这些投影与历史状态。缓存随层数、序列长度、批量及 KV 头数增长并消耗显存；它不会免除当前 query 对历史键值的注意力计算。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "推理缓存",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_llm",
+    "source_key": "written-ai-v1:ai_llm:045",
+    "position": 45,
+    "question": "RAG 与微调在知识更新、引用和行为适配方面有什么区别？",
+    "answer": "RAG 在推理时提供外部证据，便于更新与引用，但依赖检索质量及访问控制；微调改变参数，适合风格和任务行为适配，但更新与溯源更困难。二者互补，RAG 不保证零幻觉，微调也不是可靠的逐条事实存储。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "RAG与微调",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/1706.03762",
+        "https://arxiv.org/abs/2106.09685",
+        "https://huggingface.co/docs/transformers/main/en/llm_tutorial"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:001",
+    "position": 1,
+    "question": "什么是 AI Agent？它与普通大模型对话有什么区别？",
+    "answer": "Agent 是以目标为导向，结合模型、状态、工具与控制流程进行行动及反馈迭代的系统。普通对话主要生成回复，Agent 可根据观察执行外部操作，但自主程度不同。仅给聊天模型加一个角色提示，并不自动形成可靠的自主执行系统。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Agent定义",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 1,
+      "page_end": 2
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:002",
+    "position": 2,
+    "question": "AI Agent 的核心组件通常有哪些？",
+    "answer": "常见组件包括模型与任务指令、规划和控制器、短长期状态、工具执行环境及结果反馈；还需权限约束、终止条件、监测与错误恢复。不存在唯一强制四件套，可按任务采用确定性工作流与模型决策的不同组合。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "核心组件",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 2,
+      "page_end": 3
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:003",
+    "position": 3,
+    "question": "ReAct 如何结合推理、行动和观察？有什么局限？",
+    "answer": "ReAct 以模型决策、工具行动和环境观察交替推进任务，使外部信息反馈到后续决策。收益是减少仅凭内部生成的猜测，但仍受工具错误、规划偏差、延迟和预算限制。实现应设步骤上限与授权检查，不需向用户暴露内部推理全文。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "ReAct",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 3,
+      "page_end": 3
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:004",
+    "position": 4,
+    "question": "思维链提示与 Agent 有什么关系？它是否保证推理正确？",
+    "answer": "思维链引导模型分步组织求解，可帮助某些多步骤任务；Agent 还需环境行动、状态与反馈，二者并非同义。生成的推理文本不一定反映真实因果过程，也不保证正确，应通过答案验证、计算工具或外部证据检验。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "CoT",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 3,
+      "page_end": 4
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:005",
+    "position": 5,
+    "question": "Agent 的短期与长期记忆如何实现？",
+    "answer": "短期记忆可为当前上下文、工作状态或近期事件；长期记忆可存于数据库、文档或向量索引，按需检索。应区分事实、用户偏好和系统指令，记录来源、更新时间与删除策略，避免错误记忆和跨用户泄漏。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "记忆",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 4,
+      "page_end": 5
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:006",
+    "position": 6,
+    "question": "工具使用如何扩展大模型能力？为什么不能仅依靠文本生成？",
+    "answer": "工具可提供实时查询、精确计算和受控外部操作，模型生成调用意图，执行器在验证与授权后执行并返回结果。模型自己输出“已发送”不等于操作成功；应依据工具回执确认，失败或结果未知时明确报告。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "工具价值",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 5,
+      "page_end": 5
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:007",
+    "position": 7,
+    "question": "RAG 与 Agent 的关系是什么？两者能否结合？",
+    "answer": "RAG 是通过检索外部资料辅助生成的技术；Agent 是包含目标、状态、决策和行动的系统组织方式。RAG 可作为 Agent 的一个工具，也可作为固定流程独立运行；二者不互斥，也不是所有 Agent 都必须使用 RAG。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "RAG与Agent",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 5,
+      "page_end": 6
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:008",
+    "position": 8,
+    "question": "多 Agent 相对单 Agent 有哪些潜在收益与成本？",
+    "answer": "可通过角色分工、并行处理和独立复核应对复杂任务，但会增加通信、协调、延迟与成本，并可能出现共同偏差或错误传播。只有任务可拆、职责清晰且评估显示收益时才值得增加 Agent，数量多不等于质量高。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "多智能体",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 6,
+      "page_end": 7
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:009",
+    "position": 9,
+    "question": "为什么 Agent 中的幻觉可能比普通对话错误更危险？",
+    "answer": "错误判断若被转为工具调用，可能真实修改数据、触发交易或泄露信息。应最小权限、验证参数与对象、对高影响操作设置确认和可恢复机制，并检查工具结果。不能把模型自信、反思或格式正确当作操作授权。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "行动幻觉",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 7,
+      "page_end": 7
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:010",
+    "position": 10,
+    "question": "什么是具身智能？它与软件 Agent 有什么联系和区别？",
+    "answer": "具身智能强调智能体通过身体或物理环境的感知行动闭环学习与执行；软件 Agent 主要在数字环境使用工具。两者均需状态、规划和反馈，但机器人还面临传感噪声、实时控制、动力学和物理安全，不能直接照搬纯文本策略。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "具身智能",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 7,
+      "page_end": 8
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:011",
+    "position": 11,
+    "question": "上下文长度为什么限制 Agent？如何管理长任务状态？",
+    "answer": "工具结果和历史会占满窗口，导致成本上升、重要信息丢失和指令混淆。可使用结构化任务状态、选择性检索、摘要和外部持久化，保留关键决策与证据；摘要可能有损，应可追溯原记录，不能把删除历史等同于可靠记忆。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "上下文瓶颈",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 8,
+      "page_end": 8
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:012",
+    "position": 12,
+    "question": "Reflection 机制如何帮助 Agent？为什么仍需要外部验证？",
+    "answer": "反思让系统根据失败反馈、测试或评审结果修改计划和候选解。只有引入有信息量的反馈才更可能改善；模型自评可能重复同一误判并增加成本。应限制重试次数、保留证据，用可执行测试或可信外部评估确认结果。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "反思",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 8,
+      "page_end": 9
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:013",
+    "position": 13,
+    "question": "Agent 为什么需要结构化输出？JSON 合法就足够吗？",
+    "answer": "结构化字段便于解析、路由与工具调用，但合法 JSON 仅保证语法；仍需校验字段类型、必填项、范围、实体存在、权限和业务状态。模型输出应在执行前验证，拒绝多余危险参数，失败时明确返回可恢复错误。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "结构输出",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 9,
+      "page_end": 10
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:014",
+    "position": 14,
+    "question": "Copilot 与自主 Agent 在用户交互上有何不同？",
+    "answer": "Copilot 通常由用户持续发起和确认局部建议，Agent 在授权目标和范围内可连续规划执行。实际产品是自主程度的连续谱；应清楚呈现进度、可中止入口、权限及结果，不应让自动化超出用户授权。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "交互模式",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 10,
+      "page_end": 10
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:015",
+    "position": 15,
+    "question": "评估 Agent 应考虑哪些维度和困难？",
+    "answer": "应看任务成功率、工具调用正确性、约束遵守、恢复能力、成本及耗时。长链错误会累积，环境有随机性，单步正确不等于最终成功；需用可复现实验、状态断言和人工抽查，避免仅以模型自评或漂亮报告衡量。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "评估",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 10,
+      "page_end": 11
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:016",
+    "position": 16,
+    "question": "Agent 的成本和延迟主要来自哪里？怎样优化？",
+    "answer": "多轮模型请求、长上下文、工具 I/O、重试与多 Agent 协作会累积成本和延迟。可采用预算上限、确定性流程、独立任务并行、缓存及模型分级。缓存须按权限、输入版本和有效期隔离，避免复用过期或其他用户的数据。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "成本延迟",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 11,
+      "page_end": 12
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:017",
+    "position": 17,
+    "question": "一个可靠的 Tool Use 流程应包含哪些步骤？",
+    "answer": "向模型提供清晰工具描述与参数定义，接收调用意图后验证参数、权限及当前状态，由执行器调用工具，再把可信回执供后续决策。对重试使用幂等键，区分失败与结果未知，设超时和终止条件；不能直接执行任意模型生成代码。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "工具实现",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 12,
+      "page_end": 13
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:018",
+    "position": 18,
+    "question": "RAG 的核心思想是什么？它会更新模型参数吗？",
+    "answer": "RAG 在推理时检索与问题相关的外部证据，将证据与问题一起输入生成模型。常规推理不修改模型参数，更新知识可通过更新索引实现；检索器或生成器也可另行训练，但不是每次检索都会进行训练。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "RAG定义",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 13,
+      "page_end": 13
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:019",
+    "position": 19,
+    "question": "标准 RAG 通常包含哪三个主要阶段？",
+    "answer": "索引阶段解析清洗文档、切片并建立索引；检索阶段根据问题召回和可选重排相关资料；生成阶段把证据组织进上下文并生成带来源的回答。阶段可按产品扩展，但必须保留文档权限、版本及来源定位。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "三阶段",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 13,
+      "page_end": 14
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:020",
+    "position": 20,
+    "question": "RAG 与 Fine-tuning 各有哪些适用场景与限制？",
+    "answer": "RAG 适于动态、私有和需引用知识，代价是检索与上下文链路；微调适于任务行为、格式或领域分布适配，需训练数据与计算且更新不易溯源。二者可组合，都不保证事实正确，需在同一业务测试集比较。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "微调比较",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 14,
+      "page_end": 15
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:021",
+    "position": 21,
+    "question": "Embedding 如何支持语义检索？相似度高是否一定相关？",
+    "answer": "嵌入模型把查询和文档映射到可比较的向量空间，再按余弦或内积等度量召回。相似度只是模型度量，可能受领域、语言和长度影响，语义相近也未必含答案；应使用适配检索任务的编码器并评估召回质量。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "语义嵌入",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 15,
+      "page_end": 15
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:022",
+    "position": 22,
+    "question": "RAG 是否必须使用独立向量数据库？与关系数据库如何配合？",
+    "answer": "不必须。小规模可直接计算相似度，也可用支持向量索引的关系数据库或专用引擎。专用向量库常提供近邻搜索及过滤；关系数据库擅长事务与结构化查询。应按规模、延迟、权限及维护成本选择，而非把两者视为互斥。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "向量数据库",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 15,
+      "page_end": 16
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:023",
+    "position": 23,
+    "question": "怎样分开评估 RAG 的检索质量与生成质量？",
+    "answer": "检索可看 Recall@k、Precision@k、MRR 或 nDCG，需标注相关文档；生成可看事实正确、证据忠实、引用支持和回答相关性，再结合端到端任务成功率。单个模型评分或嵌入相似度无法覆盖这些维度，应人工抽检。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "评估维度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 16,
+      "page_end": 16
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:024",
+    "position": 24,
+    "question": "从用户提问到带引用回答，完整 RAG 链路如何组织？",
+    "answer": "先鉴权与理解问题，必要时改写查询，按权限检索、去重与重排，再选择证据和构造提示，生成后校验引用及关键结论。应对无证据、冲突或过期内容明确说明，记录检索与生成版本以便排障。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "工作流程",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 16,
+      "page_end": 17
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:025",
+    "position": 25,
+    "question": "RAG 检索器可采用哪些优化策略？",
+    "answer": "从解析质量、语义切片和元数据开始，使用 BM25 与向量混合召回、查询改写、多路召回及重排；根据验证集选择 k 和阈值。优化应明确提升召回还是排序，避免仅扩大 k 引入噪声，并保持权限过滤。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "检索优化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 17,
+      "page_end": 17
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:026",
+    "position": 26,
+    "question": "RAG 生成器如何更可靠地利用证据？",
+    "answer": "明确资料仅作证据而非指令，要求结论可由来源支持，并提供稳定引用编号；控制上下文长度、处理冲突和时效，无充分证据时澄清或拒答。生成后校验引用是否真实存在且支持结论，Prompt 不能保证零幻觉。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "生成优化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 18,
+      "page_end": 18
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:027",
+    "position": 27,
+    "question": "RAG 有哪些收益？它是否天然保障隐私？",
+    "answer": "可更新外部知识、提供来源、降低某些事实错误并利用私有资料。但隐私取决于部署、访问控制、传输、日志和模型服务的数据政策；把私有文本发送到外部模型仍涉及数据流转，不能笼统声称 RAG 天然不上传公网或绝对安全。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "收益",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 19,
+      "page_end": 19
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:028",
+    "position": 28,
+    "question": "RAG 常见失败原因有哪些？",
+    "answer": "原始资料缺失或错误、解析与切片损坏、召回不足、排序不准、上下文噪声和模型误用证据都可能失败。增加文档量不一定解决，需按索引、检索、上下文和生成分层诊断，并检测权限、时效及引用问题。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "局限",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 19,
+      "page_end": 19
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:029",
+    "position": 29,
+    "question": "RAG 的关键技术是否只有向量搜索？",
+    "answer": "不仅有向量搜索，还包括文档解析与清洗、语义切片、稀疏及混合检索、重排、上下文组织、证据约束、评估与权限治理。不同任务可能更依赖精确关键词或结构化查询，应根据错误分析选择组件。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "核心技术",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 20,
+      "page_end": 20
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:030",
+    "position": 30,
+    "question": "上下文相关性、答案忠实度与答案相关性分别比较什么？",
+    "answer": "上下文相关性比较问题与检索证据是否相关；忠实度关注答案的陈述是否由证据支持；答案相关性看是否回应问题。忠实于错误来源的回答仍可能事实错误，因此还需独立标准或人工判断正确性。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "RAG三指标",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 20,
+      "page_end": 21
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:031",
+    "position": 31,
+    "question": "Precision@k、Recall@k、MRR 与 nDCG 有何区别？",
+    "answer": "Precision@k 看前 k 条中相关项比例，Recall@k 看已知相关项被覆盖的比例；MRR 关注首个相关项排名倒数；nDCG 同时考虑多级相关性与位置折扣。定义依赖标注单位和候选集合，应报告 k 及评估协议。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "检索指标",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 21,
+      "page_end": 22
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:032",
+    "position": 32,
+    "question": "为什么不能只用 BLEU、ROUGE 或向量相似度评价 RAG 答案？",
+    "answer": "词面重合难以识别同义正确答案及细微事实错误，嵌入相似度也可能把相反结论判得相近。可作为辅助指标，但应检查原子事实、证据支持、引用及任务完成；LLM 评审也有偏差，需要校准和人工抽检。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "生成指标",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 22,
+      "page_end": 23
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:033",
+    "position": 33,
+    "question": "RAG 的 TTFT、端到端延迟和拒答率怎样解释？",
+    "answer": "TTFT 是从约定请求起点到首个 token 的时间，端到端延迟到完整回答结束；应明确是否包含检索。拒答率需结合可回答性标注分析正确拒答与错误拒答，高或低都不自动代表好。还应记录成本、吞吐与抗噪性能。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "工程指标",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 23,
+      "page_end": 23
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:034",
+    "position": 34,
+    "question": "RAG 在企业知识库、专业问答和个人记忆中应注意什么？",
+    "answer": "企业场景重点是文档权限和版本，专业问答重视证据质量与责任范围，个人记忆需取得授权并支持更正删除。RAG 只是提供检索证据，不能保证专业结论正确、实时资料完整或记忆永久可靠。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "应用",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 23,
+      "page_end": 24
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:035",
+    "position": 35,
+    "question": "为什么组合 BM25、向量检索与重排序？",
+    "answer": "BM25 擅长关键词和专有名词精确匹配，向量检索补充语义匹配，两者可用 RRF 等融合；重排器再对候选与问题联合评分。需在验证集检查收益与延迟，过滤和分值尺度处理不当可能损害结果。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "混合检索",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 24,
+      "page_end": 25
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:036",
+    "position": 36,
+    "question": "Query Rewriting 怎样提高检索？有哪些风险？",
+    "answer": "改写可补全对话指代、展开术语或分解复杂问题，提升查询与文档匹配。但也可能改变用户意图或加入未经确认的前提。应保留原查询并可并行检索，限制使用的历史范围，对歧义优先澄清。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "查询改写",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 24,
+      "page_end": 25
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:037",
+    "position": 37,
+    "question": "GraphRAG 的基本思想、优势与代价是什么？",
+    "answer": "利用实体关系图及可选社区摘要辅助检索和生成，适于某些跨文档关联和全局主题问题。构图、实体消歧和摘要有额外成本，抽取错误会传播；并非所有 GraphRAG 都采用同一社区算法，也不保证推理或因果判断正确。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "GraphRAG",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 25,
+      "page_end": 25
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:038",
+    "position": 38,
+    "question": "Agentic RAG 与固定 RAG 流程有什么区别？",
+    "answer": "Agentic RAG 用决策控制器动态选择数据源、拆解查询、追加检索和检验结果；固定流程通常路径预先确定。灵活性增加成本与失败路径，应限定预算、工具权限和终止条件，不能认为自我反思可自动修复所有检索错误。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "AgenticRAG",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 25,
+      "page_end": 26
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:039",
+    "position": 39,
+    "question": "生成式 RAG 与传统检索或抽取式问答有什么区别？",
+    "answer": "检索系统返回资料，抽取式问答选择文中片段，生成式 RAG 基于证据组织新文本。传统系统也可以使用语义检索或多轮状态，并不天然只能关键词匹配；RAG 的综合能力取决于检索、生成与工具，不能保证多跳问题都正确。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "检索问答比较",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 26,
+      "page_end": 27
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:040",
+    "position": 40,
+    "question": "知识库有答案但 RAG 没答出，应怎样排查？",
+    "answer": "沿链路检查原文是否正确解析与入索引、权限过滤是否合理、目标片段是否被召回、重排与截断是否丢弃证据、上下文是否完整以及生成是否误读。保留每阶段候选和版本，使用可控样例定位，不要直接用更大模型掩盖索引问题。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "内容缺失",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 27,
+      "page_end": 28
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:041",
+    "position": 41,
+    "question": "RAG 输出 JSON 或引用格式错误时如何处理？",
+    "answer": "可使用受支持的结构化输出及明确 schema，再做解析、字段和语义校验，限制重试并给出错误反馈。JSON mode 一般只约束 JSON 语法，不保证必填字段、业务正确或权限；Function Calling 的可靠性也需遵循提供方保证并自行验证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "格式错误",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://platform.openai.com/docs/guides/structured-outputs",
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "依据对应章节重新组织题干并校订答案，非原文标准答案。",
+      "file": "Agent_Rag八股.pdf",
+      "page_start": 28,
+      "page_end": 29
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:042",
+    "position": 42,
+    "question": "如何防范检索文档或工具结果中的提示注入？",
+    "answer": "把外部内容视为不可信数据，明确区分指令与证据；限制可调用工具和参数，执行前做权限校验，对敏感操作取得授权。文档中的“忽略原指令”等文字不应改变系统权限。过滤器可辅助，但不能代替隔离和最小权限。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "提示注入",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:043",
+    "position": 43,
+    "question": "Chunk Size 与 Overlap 应如何设置？",
+    "answer": "按文档结构、问题粒度、嵌入窗口及生成预算选择切片，适度重叠可减少跨边界信息丢失，但会增加重复和成本。表格、标题与代码应尽量保持语义完整；使用真实问题评估召回与证据完整性，不设适用于所有文档的固定最佳值。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "切片",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  },
+  {
+    "collection_id": "ai_agent_rag",
+    "source_key": "written-ai-v1:ai_agent_rag:044",
+    "position": 44,
+    "question": "Agent 执行有副作用的工具时，为什么需要幂等性与结果核验？",
+    "answer": "网络超时可能意味着操作失败，也可能已成功但回执丢失；盲目重试可能重复扣费或提交。应使用幂等键、查询操作状态、记录请求与结果，在无法确认时停止依赖步骤并告知结果未知，而不是假定成功或失败。",
+    "images": [],
+    "source": {
+      "kind": "supplement",
+      "topic": "工具重试",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://arxiv.org/abs/2005.11401",
+        "https://arxiv.org/abs/2210.03629",
+        "https://arxiv.org/abs/2404.16130"
+      ],
+      "editorial_note": "补充知识点，非原文直接题目。"
+    }
+  }
+]

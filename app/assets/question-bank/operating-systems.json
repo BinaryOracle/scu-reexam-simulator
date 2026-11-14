@@ -1,0 +1,118 @@
+[
+  {
+    "id": "operating_systems-01",
+    "question": "操作系统的目标和功能？（什么是操作系统？）"
+  },
+  {
+    "id": "operating_systems-02",
+    "question": "操作系统的运行机制?"
+  },
+  {
+    "id": "operating_systems-03",
+    "question": "中断和异常？"
+  },
+  {
+    "id": "operating_systems-04",
+    "question": "系统调用？"
+  },
+  {
+    "id": "operating_systems-05",
+    "question": "大内核和微内核"
+  },
+  {
+    "id": "operating_systems-06",
+    "question": "进程与线程？"
+  },
+  {
+    "id": "operating_systems-07",
+    "question": "进程的通信方式？"
+  },
+  {
+    "id": "operating_systems-08",
+    "question": "进程的5种状态及转换过程？"
+  },
+  {
+    "id": "operating_systems-09",
+    "question": "进程的调度算法有哪些？"
+  },
+  {
+    "id": "operating_systems-10",
+    "question": "同步和互斥？"
+  },
+  {
+    "id": "operating_systems-11",
+    "question": "进程同步相关概念"
+  },
+  {
+    "id": "operating_systems-12",
+    "question": "死锁"
+  },
+  {
+    "id": "operating_systems-13",
+    "question": "什么是饥饿？与死锁有什么差别？"
+  },
+  {
+    "id": "operating_systems-14",
+    "question": "银行家算法"
+  },
+  {
+    "id": "operating_systems-15",
+    "question": "死锁定理"
+  },
+  {
+    "id": "operating_systems-16",
+    "question": "存储器管理应具有的功能？"
+  },
+  {
+    "id": "operating_systems-17",
+    "question": "将用户程序变为可在内存中执行的程序的步骤？"
+  },
+  {
+    "id": "operating_systems-18",
+    "question": "程序的链接方式有哪些？"
+  },
+  {
+    "id": "operating_systems-19",
+    "question": "程序的装入方式有哪些？"
+  },
+  {
+    "id": "operating_systems-20",
+    "question": "覆盖技术和交换技术？"
+  },
+  {
+    "id": "operating_systems-21",
+    "question": "内存连续分配管理方式有哪些？"
+  },
+  {
+    "id": "operating_systems-22",
+    "question": "基本分页和请求分页内存管理方式？"
+  },
+  {
+    "id": "operating_systems-23",
+    "question": "页面置换算法有哪些？"
+  },
+  {
+    "id": "operating_systems-24",
+    "question": "什么是页表和快表，有什么作用？"
+  },
+  {
+    "id": "operating_systems-25",
+    "question": "地址翻译的过程？"
+  },
+  {
+    "id": "operating_systems-26",
+    "question": "文件的基本操作？"
+  },
+  {
+    "id": "operating_systems-27",
+    "question": "磁盘调度算法有哪些？"
+  },
+  {
+    "id": "operating_systems-28",
+    "question": "I/O控制方式有哪些？"
+  },
+  {
+    "id": "operating_systems-29",
+    "question": "Spooling技术？"
+  }
+]

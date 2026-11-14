@@ -1,0 +1,3401 @@
+[
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:001",
+    "position": 1,
+    "question": "什么是软件？程序、数据与文档分别承担什么作用？",
+    "answer": "软件包括程序、相关数据和文档。程序实现功能与计算逻辑；数据表示输入、状态、配置及处理对象；文档支持需求沟通、开发、验证、部署、使用与维护。只有可运行代码并不等于完整可交付的软件产品。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "软件的组成",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 1,
+      "page_end": 2,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 1,
+          "page_end": 2
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:002",
+    "position": 2,
+    "question": "软件与硬件相比有哪些主要特点？",
+    "answer": "软件是逻辑产品，主要通过开发而非制造形成；复制成本通常很低，但设计、验证和演化成本可能很高。软件不会像机械部件一样物理磨损，却会因变更引入缺陷、环境演化而退化。软件规模大、依赖多，长期维护是生命周期的重要部分。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "软件的特点",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 1,
+      "page_end": 2,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 1,
+          "page_end": 2
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:003",
+    "position": 3,
+    "question": "软件文档在开发、使用和维护中有什么作用？",
+    "answer": "文档记录需求、设计决策、接口、测试依据和部署使用方法，支持沟通、评审、追溯和维护交接。应按风险和受众保持必要、准确且与实现一致的文档；文档数量多并不自动意味着质量高。可执行测试和接口规范也能承担部分可验证说明作用。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "文档作用",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 23,
+      "page_end": 23,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 23,
+          "page_end": 23
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:004",
+    "position": 4,
+    "question": "什么是软件危机？它通常表现在哪些方面？",
+    "answer": "软件危机指开发和维护大型软件时反复出现的成本超支、进度失控、质量不可靠、交付不满足需求、维护困难等系统性问题。它涉及如何满足不断增长的软件需求，以及如何持续维护已有软件，不只是程序写不出来。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "软件危机",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 2,
+      "page_end": 2,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 2,
+          "page_end": 2
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:005",
+    "position": 5,
+    "question": "软件危机的主要原因是什么？如何缓解？",
+    "answer": "原因包括复杂性和规模增长、需求沟通不足及频繁变化、估算困难、缺乏工程过程与质量控制、忽视维护和文档。可通过需求验证、适当的过程模型、模块化设计、自动化测试、配置管理、持续反馈与风险管理缓解；不存在只靠某种语言即可根治的办法。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "软件危机原因",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 2,
+      "page_end": 2,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 2,
+          "page_end": 2
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:006",
+    "position": 6,
+    "question": "怎样定义软件工程？它追求哪些目标？",
+    "answer": "软件工程是将系统化、规范化、可度量的方法用于软件的开发、运行和维护。它兼顾技术与管理，在成本、进度、范围和风险约束下满足利益相关者需求，并持续关注正确性、可靠性、可用性、可维护性等质量属性。低成本不是牺牲质量的同义词。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "软件工程",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 2,
+      "page_end": 3,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 2,
+          "page_end": 3
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:007",
+    "position": 7,
+    "question": "软件工程方法学的三个要素是什么？它们如何配合？",
+    "answer": "方法提供完成分析、设计、实现和验证任务的技术；工具提供自动化或半自动化支持；过程组织活动顺序、交付物、职责及质量控制。三者配合：例如在迭代过程内使用用例分析方法，并用建模和测试工具支持执行。不能仅靠购买工具建立工程能力。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "方法工具过程",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 2,
+      "page_end": 2,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 2,
+          "page_end": 2
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:008",
+    "position": 8,
+    "question": "传统结构化方法与面向对象方法的主要区别是什么？",
+    "answer": "传统结构化方法常以功能分解和数据流为中心，配合数据流图、结构图与逐步求精；面向对象方法围绕具有状态和行为的对象及其协作建模，强调封装、继承和多态。二者都需要需求、设计、验证和维护，不能把面向对象理解成取消生命周期管理。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "方法学分类",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 3,
+      "page_end": 3,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 3,
+          "page_end": 3
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:009",
+    "position": 9,
+    "question": "软件生命周期包含哪些阶段？各阶段的主要产物是什么？",
+    "answer": "常见划分包括问题定义与可行性研究、需求分析、概要和详细设计、实现与单元测试、集成和系统测试、交付验收、运行维护及退役。产物相应包括立项与可行性报告、需求规格、设计说明、代码与测试证据、发布包及运维资料。阶段可迭代重叠，并非所有项目都按一次性线性顺序执行。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "软件生命周期",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 3,
+      "page_end": 3,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 3,
+          "page_end": 3
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 6,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:010",
+    "position": 10,
+    "question": "软件过程、软件生命周期和软件过程模型有什么区别？",
+    "answer": "生命周期描述软件从构想到退役的全程；软件过程是为实现目标而执行的活动、任务、职责和工作产物；过程模型是对这些活动组织方式的抽象，如瀑布、增量和螺旋。一个生命周期可以采用多种过程实践，模型也不是必须机械照搬的项目计划。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "软件过程与过程模型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 3,
+      "page_end": 3,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 3,
+          "page_end": 3
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:011",
+    "position": 11,
+    "question": "瀑布模型的基本思想、优点、局限和适用条件是什么？",
+    "answer": "瀑布模型按需求、设计、实现、测试、交付等阶段推进，强调阶段产物和评审。优点是里程碑明确，便于计划与审查；局限是用户较晚看到完整可运行成果，早期需求错误和变更成本可能很高。适合需求相对明确稳定、技术风险可控且需要正式审查的情形，不应把文档视为质量保证的充分条件。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "瀑布模型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 3,
+      "page_end": 3,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 3,
+          "page_end": 3
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 2,
+          "page_end": 3
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:012",
+    "position": 12,
+    "question": "需求不明确时为什么可采用快速原型？抛弃式与演化式原型有何区别？",
+    "answer": "通过快速构造界面或关键功能原型，让用户试用并反馈，可澄清需求和交互风险。抛弃式原型用于学习后丢弃，产品按正式质量要求重新实现；演化式原型持续完善为产品，需要可演化架构与质量控制。原型过程通常反复迭代，不能说它必然线性或天然不利于创新。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "快速原型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "修正原材料“原型开发基本线性”的表述，区分探索用原型与可交付产品。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 4,
+      "page_end": 4,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 4,
+          "page_end": 4
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 3,
+          "page_end": 3
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:013",
+    "position": 13,
+    "question": "增量模型怎样交付软件？主要优势与风险是什么？",
+    "answer": "把需求划分成若干可集成增量，先交付可用核心，再逐步扩充。用户较早获得价值，团队能利用反馈调整后续范围。需要管理整体架构、接口、依赖和跨增量回归测试；若边界划分不合理，集成成本和架构退化风险会上升。增量交付与迭代改进可以结合。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "增量模型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 4,
+      "page_end": 4,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 4,
+          "page_end": 4
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 3,
+          "page_end": 4
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:014",
+    "position": 14,
+    "question": "螺旋模型为什么以风险为驱动？每轮通常做什么？",
+    "answer": "每轮确定目标、候选方案与约束，识别和评估风险，通过原型、实验或分析降低风险，开发并验证本轮产物，再计划下一轮。适合规模大或不确定性和风险较高的项目，但依赖风险分析能力，管理成本较高。它不是“减少测试”的模型，测试仍应按风险充分实施。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "螺旋模型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "删除材料中“螺旋模型减少测试”的错误优点；强调风险驱动而非固定线性阶段。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 4,
+      "page_end": 4,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 4,
+          "page_end": 4
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 4,
+          "page_end": 4
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:015",
+    "position": 15,
+    "question": "喷泉模型如何描述面向对象开发？它有哪些管理难点？",
+    "answer": "喷泉模型强调面向对象开发中分析、设计、实现等活动的迭代和重叠，活动之间没有严格的一次性分界。优点是便于反馈、复用和演化；难点是协调依赖、版本、文档与变更。活动重叠不必然要求大量人员，人员规模要由实际工作和协作成本决定。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "喷泉模型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 5,
+      "page_end": 5,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 5,
+          "page_end": 5
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 4,
+          "page_end": 4
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:016",
+    "position": 16,
+    "question": "为“需求稳定的结算系统”“需求不清的移动应用”“高风险大型系统”分别选择过程策略并说明理由。",
+    "answer": "需求稳定的结算系统可使用有正式评审的阶段式过程，配合早期测试设计；需求不清的移动应用可先做原型，再迭代增量交付；高风险大型系统可采用风险驱动螺旋策略并先验证关键技术。选择还应考虑合规、团队、交付节奏和变更成本，没有按项目名称唯一决定的模型。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "过程模型选择",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 3,
+      "page_end": 5,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 3,
+          "page_end": 5
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 2,
+          "page_end": 4
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:017",
+    "position": 17,
+    "question": "什么是敏捷开发？结合移动应用迭代说明其价值与限制。",
+    "answer": "敏捷强调持续协作、可工作的软件、响应变化和短周期反馈。移动应用可先交付预约核心流程，收集用户反馈，再迭代通知和支付；通过小批交付、自动化测试和复盘降低误解和返工。敏捷不等于不计划、不写必要文档或不做架构，强依赖协调或合规的项目仍需相应治理。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "敏捷开发",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 6,
+      "page_end": 6,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 6,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_fundamentals",
+    "source_key": "written-software-v1:se_fundamentals:018",
+    "position": 18,
+    "question": "迭代开发与增量开发有什么区别？",
+    "answer": "迭代强调反复完善已有方案或功能，例如根据用户反馈优化登录流程；增量强调逐步增加可用功能，例如依次交付登录、预约和支付。一个版本可同时包含对旧功能的迭代和对系统功能的增量。二者都需要反馈和回归控制，不能与无计划的“边做边改”等同。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "迭代与增量",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 4,
+      "page_end": 5,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 4,
+          "page_end": 5
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:001",
+    "position": 1,
+    "question": "可行性研究的目的与实质是什么？",
+    "answer": "在投入大规模资源前，以相对较小成本判断项目是否值得做、能否做，以及有哪些合理方案。它是在较高抽象层次开展的问题分析、方案设计和评估，不是提前完成详细设计。结果可能是继续、调整范围、推迟或终止，均应给出依据。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "可行性研究目的",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 5,
+      "page_end": 5,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 5,
+          "page_end": 5
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:002",
+    "position": 2,
+    "question": "可行性研究应检查哪些维度？为什么不能只比较收入与开发成本？",
+    "answer": "技术可行性检查技术、能力及集成条件；经济可行性比较全生命周期成本、收益和机会成本；操作可行性考察流程、人员和接受度；还应考虑进度、法律和合规约束。维护、培训、迁移和风险成本都应计入，收益也可能是安全或服务能力，不能只比较短期收入与编码费用。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "可行性维度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 5,
+      "page_end": 6,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 5,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:003",
+    "position": 3,
+    "question": "简述可行性研究的基本步骤及主要交付物。",
+    "answer": "复查问题、规模和目标，调查现有系统，建立目标系统高层逻辑模型，提出多个候选方案，分析成本、收益、约束和风险，推荐行动方案，草拟计划并提交评审。交付物应包含假设、方案比较、估算依据和继续或停止的建议。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "可行性步骤",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 5,
+      "page_end": 6,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 5,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:004",
+    "position": 4,
+    "question": "系统流程图、数据流图和程序流程图分别表达什么？",
+    "answer": "系统流程图侧重物理系统中设备、文件、人员等要素及信息流动；数据流图描述数据的输入、加工、存储和输出，属于逻辑功能模型；程序流程图描述算法执行的控制顺序、分支和循环。不能用数据流图箭头直接表示程序的先后控制。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "系统流程图",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 6,
+      "page_end": 6,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 6,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:005",
+    "position": 5,
+    "question": "什么是数据流图？四种基本元素是什么？",
+    "answer": "数据流图（DFD）描述系统如何把输入数据转换成输出数据。基本元素是外部实体、加工、数据存储和数据流。加工以动词短语命名，数据流和存储以名词命名；图中不表达硬件布置，也不直接表达条件分支的执行顺序。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "数据流图元素",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 6,
+      "page_end": 6,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 6,
+          "page_end": 6
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:006",
+    "position": 6,
+    "question": "画分层数据流图时应遵循哪些规则？",
+    "answer": "明确系统边界，先画上下文图，再逐层分解；父图与子图的外部输入输出应保持平衡。加工必须有合理输入输出，避免只有输入的黑洞、只有输出的奇迹或输入不足以解释输出的灰洞。外部实体之间、实体与存储之间、存储之间不能在系统DFD中直接相连，应经过加工；命名和数据字典应一致。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "DFD规则",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 6,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 6,
+          "page_end": 7
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 9,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:007",
+    "position": 7,
+    "question": "什么是数据字典？它与数据流图如何配合？",
+    "answer": "数据字典集中定义数据流图中的数据元素、数据结构、数据流、存储及加工相关信息，说明含义、组成、类型、范围与约束。数据流图描述数据如何流动和转换，字典消除名称及结构歧义。它能支持影响分析和数据库设计，但不能把它说成所有数据库项目必经的唯一第一步。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "数据字典",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 6,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 6,
+          "page_end": 7
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:008",
+    "position": 8,
+    "question": "数据字典如何表示顺序、选择、重复和可选结构？请举例。",
+    "answer": "顺序表示由若干字段依次组成，如“考生=学号+姓名”；选择表示备选项之一，如“联系方式=邮箱或电话”；重复表示零个或多个同类元素，如“成绩单=多条课程成绩”；可选表示该字段允许缺省。不同教材符号不同，使用时应给出符号说明，并补充取值范围和约束。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "数据结构定义",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:009",
+    "position": 9,
+    "question": "需求分析的主要任务是什么？与概要设计有何区别？",
+    "answer": "通过调查、分析、建模与协商明确系统必须做什么以及质量和约束要求，分析数据，建立逻辑模型，形成可评审的需求规格，并修订计划。概要设计解决主要模块、组件、接口和架构如何组织。分析也要考虑可实现性，但不应过早把未经验证的具体实现写成用户需求。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "需求分析任务",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 7,
+          "page_end": 7
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 6,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:010",
+    "position": 10,
+    "question": "简述需求分析的主要步骤及需求评审要点。",
+    "answer": "识别利益相关者和系统范围，访谈或观察获取需求，分析冲突与优先级，建立数据、功能和行为模型，编写需求规格说明并验证确认，建立追踪和变更机制。评审关注正确性、完整性、一致性、可行性、无歧义性、可验证性及可追踪性。各步骤可迭代开展。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "需求分析步骤",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 7,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 7,
+          "page_end": 8
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 2,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:011",
+    "position": 11,
+    "question": "数据模型、功能模型和行为模型分别解决什么问题？",
+    "answer": "数据模型描述实体、属性及联系，常用E-R图或概念类图；功能模型描述系统对输入的加工和输出，常用数据流图或用例描述；行为模型描述状态、事件、转换和交互，常用状态图、活动图和顺序图。模型应相互一致，而非三份互不校验的图。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "分析模型",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 7,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 7,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:012",
+    "position": 12,
+    "question": "E-R图包含哪些要素？如何为“学生选课”建模？",
+    "answer": "E-R图包含实体、属性、联系及基数约束。学生与课程是实体，选课通常是多对多联系，可带学期、成绩等属性；转为关系模式时可建立选课关联表，以学生、课程及学期等标识唯一记录，并明确主外键和完整性约束。E-R图表达数据语义而非调用顺序。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "ER建模",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:013",
+    "position": 13,
+    "question": "状态转换图如何描述系统行为？以面试会话为例说明。",
+    "answer": "状态图由状态、事件、带守卫条件的转换和动作组成。面试可设准备、进行、已结束；点击开始且材料满足条件时由准备进入进行，时间耗尽或用户结束时进入已结束。结束状态应禁止继续作答，重复结束事件应保持一致结果。应列出初始状态、非法事件及失败时状态是否改变。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "状态转换",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:014",
+    "position": 14,
+    "question": "什么是结构化分析（SA）？常用工具与基本步骤是什么？",
+    "answer": "结构化分析是以数据流和功能分解为核心、自顶向下建立系统逻辑模型的方法。常用数据流图、数据字典、结构化语言、判定表和判定树。一般先了解现有系统并抽象其逻辑，再建立目标系统逻辑模型，细化加工和数据定义并评审一致性。它不是“结构化程序分析”。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "结构化分析",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "修正原笔记将SA标题写为“结构化程序分析”的术语错误。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 15,
+      "page_end": 15,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 15,
+          "page_end": 15
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:015",
+    "position": 15,
+    "question": "什么是用例、用例图和用例分析？三者有何联系与区别？",
+    "answer": "用例描述参与者为达成目标与系统发生的交互，包含主成功场景、前后置条件和备选异常流程。用例图概览参与者、系统边界及用例关系，不能替代详细场景。用例分析进一步识别责任、协作对象及约束，将需求连接到设计和测试。include表示必需复用行为，extend表示在特定条件下的扩展。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "用例与用例图",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:016",
+    "position": 16,
+    "question": "交互设计中的用户研究如何开展？如何避免把个人偏好当作需求？",
+    "answer": "明确目标用户、任务与研究问题，使用访谈、情境观察、问卷和行为数据收集证据，分析痛点及使用环境，再用原型和可用性测试验证。样本应覆盖关键用户群，避免诱导提问，记录发现依据与局限。设计决策应结合任务成功率和反馈，而不是只听某个用户或设计者的喜好。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "用户研究",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 2,
+      "page_end": 2,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 2,
+          "page_end": 2
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:001",
+    "position": 1,
+    "question": "概要设计的主要任务与交付物有哪些？",
+    "answer": "把需求转化为系统总体方案，分配主要职责，确定模块或组件、接口、数据组织及部署约束，评估候选架构并计划验证。主要交付物包括架构和模块结构、接口与数据库概要、关键设计决策及测试策略。它不等于给所有函数写完算法细节。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "概要设计",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 8,
+      "page_end": 9,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 8,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:002",
+    "position": 2,
+    "question": "传统总体设计中的系统设计和结构设计分别做什么？",
+    "answer": "系统设计提出并比较候选方案，结合成本和约束选取可行方案；结构设计进一步功能分解，形成模块层次、接口和数据组织，制定测试计划，形成文档并评审。可从数据流图映射结构，也需检查质量属性和真实依赖，不能只按图形机械分块。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "设计过程",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 9,
+      "page_end": 9,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 9,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:003",
+    "position": 3,
+    "question": "什么是模块化？模块划分应考虑哪些因素？",
+    "answer": "模块化把系统划分成职责清晰、可独立理解和演化的单元，并通过明确接口协作。应考虑业务职责、变化原因、数据归属、依赖方向、测试及部署成本。模块并非越小越好，过度拆分会增加调用、集成和沟通成本。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "模块化",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 9,
+      "page_end": 10,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 9,
+          "page_end": 10
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:004",
+    "position": 4,
+    "question": "抽象与逐步求精有什么区别？如何共同支持软件设计？",
+    "answer": "抽象保留当前层次有关的本质特征，隐藏无关细节；逐步求精从较高层描述逐层展开实现细节。先把“处理订单”抽象为稳定职责，再细化校验、支付和库存等协作，可兼顾整体理解与实现精度。细化应保持上层语义和约束。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "抽象与逐步求精",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 10,
+      "page_end": 10,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 10,
+          "page_end": 10
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:005",
+    "position": 5,
+    "question": "信息隐藏、封装和局部化分别是什么意思？",
+    "answer": "信息隐藏是设计原则：把易变决策和实现细节限制在模块内，仅暴露必要接口；封装是把状态和行为组织在一起并控制访问的机制；局部化是让相关处理及其变化集中。使用私有字段有助于封装，但若接口泄露内部结构，仍可能违背信息隐藏。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "信息隐藏",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 10,
+      "page_end": 10,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 10,
+          "page_end": 10
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:006",
+    "position": 6,
+    "question": "如何实现模块独立性？内聚和耦合各表示什么？",
+    "answer": "内聚衡量模块内部元素围绕同一职责的关联程度；耦合衡量模块之间的依赖程度。独立性通常通过高内聚、低耦合、信息隐藏、清晰接口及明确的数据所有权提高。模块必须协作，目标不是完全没有依赖，而是让依赖必要、可理解且变化影响可控。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "模块独立性",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 10,
+      "page_end": 11,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 10,
+          "page_end": 11
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:007",
+    "position": 7,
+    "question": "传统结构化设计中耦合有哪些常见类型？请说明。",
+    "answer": "常见分类包括数据耦合（经参数交换必要数据）、标记耦合（传整个结构但只需部分字段）、控制耦合（传标志决定内部逻辑）、外部耦合（受外部格式、协议或设备约束）、公共耦合（共享全局环境）和内容耦合（直接依赖或修改另一模块内部）。通常力求避免公共与内容耦合；不同教材对外部耦合定义和排列略有差异，不应把它简单等同于共享单一全局变量。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "耦合类别",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "修正原文对外部耦合的过窄定义；低到高的顺序仅为传统教材常见概括，实际还应分析具体依赖。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 10,
+      "page_end": 10,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 10,
+          "page_end": 10
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:008",
+    "position": 8,
+    "question": "按传统分类由弱到强列出七类内聚并解释。",
+    "answer": "偶然内聚：无明确关联的任务凑在一起；逻辑内聚：按同类操作归组并由参数选择；时间内聚：因同一时机执行而归组；过程内聚：因同一控制顺序关联；通信内聚：围绕相同输入或输出；顺序内聚：前一步输出成为后一步输入；功能内聚：共同完成单一明确功能。分类帮助分析职责，不宜脱离场景机械打分。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "内聚类别",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 11,
+      "page_end": 11,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 11,
+          "page_end": 11
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 9,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:009",
+    "position": 9,
+    "question": "过程内聚、通信内聚、顺序内聚和功能内聚如何区分？",
+    "answer": "过程内聚主要要求按某个顺序执行，不保证共享数据；通信内聚的操作围绕相同数据，但未必是前后传递；顺序内聚要求前一步输出供下一步使用；功能内聚的所有元素共同实现单一功能。仅存在先后关系不能推出顺序内聚，复制代码也不能自动证明偶然内聚。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "内聚辨析",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 11,
+      "page_end": 11,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 11,
+          "page_end": 11
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:010",
+    "position": 10,
+    "question": "为了保持良好设计风格，应注意哪些模块和接口设计原则？",
+    "answer": "优先提高模块独立性，保持适当规模及层次，控制接口复杂性和不必要参数，限制副作用，形成可预测行为，并避免控制关系混乱。深度、宽度、扇入扇出要结合职责判断，不将某个固定数量当成通用上限；单入口单出口是结构化设计的常用指导，错误处理仍应清晰。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "设计启发原则",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 11,
+      "page_end": 12,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 11,
+          "page_end": 12
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 2,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:011",
+    "position": 11,
+    "question": "软件结构的深度、宽度、扇入和扇出各是什么？",
+    "answer": "深度是模块层次的最大层数；宽度是同一层模块数量的最大值；扇入是直接调用某模块的上级模块数；扇出是某模块直接调用的下级模块数。高扇入可能表明复用，也可能形成变更热点；高扇出可能职责过多。应分析复杂性和稳定性，不是无条件追求极大扇入或极小扇出。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "扇入扇出",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 11,
+      "page_end": 11,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 11,
+          "page_end": 11
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:012",
+    "position": 12,
+    "question": "模块的作用域与控制域分别是什么？为什么作用域通常应位于控制域内？",
+    "answer": "控制域包括模块本身及其直接、间接控制的下级模块；作用域是其内部某个判定影响的模块集合。若判定影响不受该模块控制的区域，修改和推理更困难；通常应调整模块位置或接口，使影响集中在可管理范围。这里是结构化设计术语，不能与编程语言变量作用域混淆。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "作用域控制域",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 11,
+      "page_end": 11,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 11,
+          "page_end": 11
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:013",
+    "position": 13,
+    "question": "层次图、IPO图、HIPO图和程序结构图分别用于什么？",
+    "answer": "层次图表示模块分解与层级；IPO图描述模块输入、处理和输出；HIPO把层次结构与各模块IPO说明结合；程序结构图进一步表示模块调用及数据、控制信息传递。它们服务于设计说明，不能用结构图的调用箭头替代数据流图的数据箭头。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "HIPO与结构图",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 9,
+      "page_end": 12,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 9,
+          "page_end": 12
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:014",
+    "position": 14,
+    "question": "数据流图中的变换流与事务流有什么区别？",
+    "answer": "变换流常体现输入处理、变换中心、输出处理，适合映射为输入、中心处理和输出等结构；事务流由事务中心识别事务类型，再选择不同动作路径。区分依据是数据流的结构特征，不是程序有无顺序执行，也不意味着业务事务或数据库事务的同一概念。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "变换流与事务流",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 13,
+      "page_end": 14,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 13,
+          "page_end": 14
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:015",
+    "position": 15,
+    "question": "怎样把变换型数据流图映射为模块结构？",
+    "answer": "复查并细化DFD，识别输入流、变换中心和输出流，进行一级分解形成主控与输入、变换、输出分支，再细化各分支；最后检查模块内聚、耦合、接口和异常处理。映射是设计起点，实际模块边界仍需按数据所有权、变化和复用要求优化。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "变换分析",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 14,
+      "page_end": 14,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 14,
+          "page_end": 14
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:016",
+    "position": 16,
+    "question": "详细设计的目的与主要任务是什么？",
+    "answer": "在总体结构基础上明确每个模块的算法、局部数据结构、接口约束和错误处理，使实现者能据此编码并设计测试。常用伪代码、程序流程图、N-S图、PAD图、判定表和判定树。数据及接口设计也会在总体阶段出现，详细阶段重点是补足可实现的精度。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "详细设计",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 14,
+      "page_end": 15,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 14,
+          "page_end": 15
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:017",
+    "position": 17,
+    "question": "结构化程序设计的核心思想和三种基本控制结构是什么？",
+    "answer": "核心是清晰控制流、自顶向下与逐步求精，基本结构是顺序、选择和循环。在适当条件下可组合表达单入口单出口程序。主程序员组属于人员组织方式，并非构造结构化程序必须采用的组织制度；结构化程序设计也不等于结构化分析或结构化设计。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "结构化程序设计",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "将原笔记混入结构化程序设计要点的“主程序员组”归回人员组织主题。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 14,
+      "page_end": 14,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 14,
+          "page_end": 14
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:018",
+    "position": 18,
+    "question": "判定表和判定树如何帮助详细设计？适用于什么情形？",
+    "answer": "判定表把条件组合与对应动作排列为规则，便于检查遗漏、冲突和冗余；判定树用树形分支展开条件及结果，阅读直观但组合多时容易膨胀。它们适合多条件业务规则，设计时应排除不可能组合，明确默认动作并由规则导出测试。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "判定表与判定树",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 15,
+      "page_end": 15,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 15,
+          "page_end": 15
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:019",
+    "position": 19,
+    "question": "简述Jackson结构化程序设计（JSP）的基本步骤。",
+    "answer": "分析输入和输出数据的顺序、选择、重复结构，画出数据结构图；建立输入输出元素的对应关系，据此形成程序结构；分配处理操作，再补充条件与控制逻辑并验证。输入输出结构冲突时可能需要程序分解等处理，不能简单照抄任意一方结构。它是数据结构驱动设计方法，不是JSON序列化库。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "Jackson方法",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 9,
+      "page_end": 9,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 9,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:020",
+    "position": 20,
+    "question": "对象、类、继承、消息、封装和多态在面向对象设计中各是什么？",
+    "answer": "对象具有标识、状态与行为，类定义同类对象的共同结构与行为；继承表达类型或实现复用关系，消息或调用触发对象协作；封装控制内部表示的访问，多态允许通过统一接口使用不同实现。子类不应破坏父类型的行为约定；并非任何复用都适合继承。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "对象方法",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 20,
+      "page_end": 20,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 20,
+          "page_end": 20
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:021",
+    "position": 21,
+    "question": "传统面向对象分析中的对象模型、动态模型和功能模型分别描述什么？",
+    "answer": "对象模型描述静态实体、属性和联系；动态模型描述事件、状态及交互随时间的变化；功能模型描述数据变换和计算结果。可用类图、状态图、顺序图和活动图等表达，具体记法依方法而定。三者是互补视角，不能各自独立而不检查一致性。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "对象建模",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 20,
+      "page_end": 20,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 20,
+          "page_end": 20
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:022",
+    "position": 22,
+    "question": "什么是交互设计？主要目标是什么？",
+    "answer": "交互设计围绕用户目标、任务、情境和反馈设计人与系统的行为关系。目标包括有效完成任务、提高效率、可学习性、减少错误、提供可恢复操作并形成合适体验。视觉样式只是其中一部分；美观不能替代清晰流程、可访问性和可用性验证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "交互设计",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:023",
+    "position": 23,
+    "question": "以移动预约应用为例，简述用户界面设计的过程。",
+    "answer": "研究用户和预约情境，分析查找时段、确认和取消等任务，组织信息架构及流程，制作低保真原型，与代表性用户测试后迭代，再形成视觉规范并验证实现。重点检查空状态、重复点击、网络失败、键盘及读屏支持，并以任务成功率、耗时和错误率衡量，而非只评价截图。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "移动应用界面流程",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:024",
+    "position": 24,
+    "question": "什么是软件复杂性？它包括哪些主要方面？",
+    "answer": "软件复杂性来自元素数量、相互关系及其变化，涉及问题领域和需求的固有复杂性，也涉及架构依赖、数据、控制流、接口、并发、部署和组织协作带来的复杂性。可用模块依赖、圈复杂度等局部度量辅助分析，但不存在单一指标能完整刻画软件复杂性。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "软件复杂性",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:001",
+    "position": 1,
+    "question": "软件测试的目标是什么？为什么测试不能证明一般程序不存在缺陷？",
+    "answer": "测试通过静态或动态活动发现缺陷、评价质量并提供风险决策信息；动态测试通过执行软件检查预期行为。有限用例通常无法穷尽输入、状态及环境组合，测试通过只说明已检查范围未观察到问题。形式化验证也依赖模型和假设，不能与普通测试通过混为一谈。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "测试目标",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 15,
+      "page_end": 16,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 15,
+          "page_end": 16
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:002",
+    "position": 2,
+    "question": "单元测试、集成测试、系统测试和验收测试各关注什么？与开发阶段如何对应？",
+    "answer": "单元测试关注模块或组件实现；集成测试关注组件或系统接口与协作；系统测试关注完整系统是否满足功能和质量要求；验收测试关注业务需求和可接受性。常分别追踪详细设计、架构接口、系统规格和用户需求，设计可提前进行并在迭代中反复执行。系统测试不能简单并入集成测试，平行运行也不是所有软件必需的独立测试级别。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "测试层级",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "修正原笔记将系统测试与子系统测试合称集成测试的混用；区分测试级别与交付切换策略。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 16,
+      "page_end": 17,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 16,
+          "page_end": 17
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:003",
+    "position": 3,
+    "question": "单元测试应重点检查哪些内容？一定只能采用白盒方法吗？",
+    "answer": "应检查模块接口、局部数据、关键执行路径、边界条件及错误处理，可通过桩、模拟或测试替身隔离依赖。既可用白盒覆盖指导测试，也可根据接口规格做黑盒测试；测试技术不由测试级别唯一决定。可测试性和清晰职责有助于构造有意义的单元测试。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "单元测试",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 16,
+      "page_end": 17,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 16,
+          "page_end": 17
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:004",
+    "position": 4,
+    "question": "非渐增式和渐增式集成测试有什么区别？渐增式有哪些策略？",
+    "answer": "非渐增式把组件集中组装后整体测试，接口问题难以定位；渐增式逐步集成并持续回归，便于定位但需要测试替身和计划。常见策略有自顶向下、自底向上和混合式。自顶向下常需桩模块，自底向上常需驱动模块，两者都要检查实际接口和数据语义。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "集成策略",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 17,
+      "page_end": 17,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 17,
+          "page_end": 17
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 9,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:005",
+    "position": 5,
+    "question": "验证（verification）与确认（validation）有什么区别？",
+    "answer": "验证检查工作产物是否满足规定要求，常表述为“是否正确地构建产品”；确认检查产品是否满足预期用途及利益相关者需要，常表述为“是否构建了需要的产品”。评审、原型和测试都可提供证据，不能将验证严格等同于白盒、确认严格等同于黑盒。验收是确认的一种重要活动。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "确认验证",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "纠正黑盒与确认、白盒与验证之间的一一对应；区分目的与测试技术。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 17,
+      "page_end": 17,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 17,
+          "page_end": 17
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 5,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:006",
+    "position": 6,
+    "question": "黑盒测试与白盒测试的依据、优点和局限分别是什么？",
+    "answer": "黑盒依据需求或接口规格设计输入输出检查，擅长发现功能遗漏和行为错误，但不能保证内部路径被覆盖；白盒依据代码或内部结构选择用例并度量覆盖，有助于发现控制流和实现问题，却可能漏掉未实现的需求。二者互补且可用于不同测试级别，白盒并非只能用于单元测试。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "黑白盒比较",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 16,
+      "page_end": 16,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 16,
+          "page_end": 16
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 2,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:007",
+    "position": 7,
+    "question": "测试用例与测试方案通常应包含哪些信息？",
+    "answer": "测试用例应给出标识、目标、前置条件、输入和操作、预期结果及必要的后置检查，执行时记录实际结果。测试方案或计划还应明确范围、风险、技术、环境、资源、进出准则及用例组织。只有输入而没有可判定的预期结果，通常不足以构成完整可执行测试。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "测试用例与方案",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 17,
+      "page_end": 17,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 17,
+          "page_end": 17
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:008",
+    "position": 8,
+    "question": "语句覆盖和判定覆盖分别要求什么？二者关系如何？",
+    "answer": "语句覆盖要求每条可执行语句至少执行一次；判定覆盖要求每个判定的每个结果通常为真与假都至少出现一次。在通常可达的二分支结构下，判定覆盖强于语句覆盖，但二者都不能保证复合条件的每个基本条件各取过真和假，也不能保证所有缺陷被发现。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "语句判定覆盖",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 17,
+      "page_end": 18,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 17,
+          "page_end": 18
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:009",
+    "position": 9,
+    "question": "条件覆盖、判定/条件覆盖与条件组合覆盖有什么区别？",
+    "answer": "条件覆盖要求每个基本条件在求值时都出现真和假；判定/条件覆盖同时满足判定覆盖和条件覆盖；条件组合覆盖要求一个判定内基本条件的可行取值组合被覆盖。条件覆盖与判定覆盖一般互不包含。短路求值会使部分条件未执行，设计用例和计算覆盖时应说明语义。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "条件覆盖",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 17,
+      "page_end": 18,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 17,
+          "page_end": 18
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:010",
+    "position": 10,
+    "question": "对于 if (A or B)，分别给出条件覆盖不满足判定覆盖、判定覆盖不满足条件覆盖的例子（假定两个条件均求值）。",
+    "answer": "条件覆盖反例：测试(A=true,B=false)和(A=false,B=true)，每个条件各取真和假，但判定始终为真。判定覆盖反例：测试(false,false)和(true,false)，判定取假和真，而B从未为真。这里明确假定两个条件均求值；使用短路语言时应按实际执行另算条件覆盖。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "覆盖反例",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 17,
+      "page_end": 17,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 17,
+          "page_end": 17
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:011",
+    "position": 11,
+    "question": "路径覆盖与基本路径测试有什么区别？",
+    "answer": "路径覆盖试图覆盖所有可执行路径，存在循环时路径数可能无界，且逻辑约束会形成不可行路径。基本路径测试从控制流图和圈复杂度出发选择线性独立路径，以有限测试覆盖独立控制结构。独立路径数不能直接当成所有可执行路径数，也不保证任意路径都可用输入实现。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "路径与基本路径",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 17,
+      "page_end": 18,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 17,
+          "page_end": 18
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:012",
+    "position": 12,
+    "question": "圈复杂度有哪些计算公式？它们成立需要哪些条件？",
+    "answer": "对单个连通控制流图，圈复杂度V(G)=E−N+2；对P个不相交连通分量，V(G)=E−N+2P。平面嵌入图的区域计数应包含外部区域；仅在单连通且判定都为二分支等条件下，才可写成“二分支判定结点数+1”。多路分支、复合条件和短路展开会改变结点计数。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "圈复杂度",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "补充连通分量和二分支条件，防止把P同时混作判定数与连通分量数。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 13,
+      "page_end": 13,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 13,
+          "page_end": 13
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 4,
+          "page_end": 5
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:013",
+    "position": 13,
+    "question": "一个单连通控制流图有9个结点、11条边，且有3个二分支判定，计算圈复杂度并解释意义。",
+    "answer": "V(G)=11−9+2=4，也可按3+1=4交叉检查。在控制流图假设下，4是独立路径基的维数，可指导基本路径测试；不表示一共只有4条执行路径，也不表示任意4个用例就能覆盖所有错误。若图有不可行路径，还需分析可构造输入。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "圈复杂度计算",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "原页示例图给出11条边、9个结点；将图中计数写入题干，避免训练卡依赖看不清的图片。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 5,
+      "page_end": 5,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 5,
+          "page_end": 5
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:014",
+    "position": 14,
+    "question": "循环测试应覆盖哪些典型情形？",
+    "answer": "在允许的范围内覆盖零次、一次、两次、典型次数、最大次数及其邻近边界，并检查终止条件、越界和资源释放。嵌套循环可先固定外层、检查内层，再逐步向外扩展。不可达或不允许的次数应明确排除；不能用大量重复次数替代边界和异常设计。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "循环测试",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 18,
+      "page_end": 18,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 18,
+          "page_end": 18
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:015",
+    "position": 15,
+    "question": "怎样使用等价类划分设计测试？以整数年龄1到120为例。",
+    "answer": "把预期处理方式相同的输入分组，并从每组选择代表。对仅允许整数1到120的字段，有效类为该区间整数，无效类可含小于1、大于120、非整数、非数字和缺失。有效代表如30；无效代表如0、121、1.5、abc和空值。通常分开测试无效类，防止一种错误遮蔽另一种。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "等价类",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 18,
+      "page_end": 18,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 18,
+          "page_end": 18
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:016",
+    "position": 16,
+    "question": "怎样为仅接受整数1到120的字段设计边界值测试？",
+    "answer": "可检查最小值附近0、1、2，最大值附近119、120、121，并加一个典型内部值。若采用两值或三值边界分析，应说明具体准则及边界定义。还需测试类型和缺失等规则，边界值分析不能替代全部等价类和业务约束测试。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "边界值",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 18,
+      "page_end": 18,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 18,
+          "page_end": 18
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:017",
+    "position": 17,
+    "question": "简述利用因果图生成测试用例的步骤。",
+    "answer": "从规格中识别输入条件即原因和输出或动作即结果，为它们编号；建立逻辑关系，并加入互斥、依赖等约束；转换成判定表，剔除不可能组合；为有效规则选择输入并确定预期输出，形成用例。因果图特别适合条件组合复杂的功能，不应忽略需求中的约束。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "因果图",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:018",
+    "position": 18,
+    "question": "什么是回归测试？它与修复确认测试有什么区别？",
+    "answer": "修复确认测试针对已知缺陷检查修复是否有效；回归测试检查变更是否使原有正确功能或质量退化。回归范围应基于影响分析、风险及历史问题选择，可自动化稳定且高价值的检查。只重跑原失败用例通常不足以完成回归。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "回归测试",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:019",
+    "position": 19,
+    "question": "什么是变异测试？变异得分能说明什么？",
+    "answer": "对程序施加小的语法变更生成变异体，检查现有测试能否使其失败，称为杀死变异体。变异得分通常用被杀死数量除以有效且非等价变异体数量。它有助于评价测试识别缺陷的能力，但等价变异体难以判断，生成及执行成本也高，得分不能直接代表真实缺陷检出率。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "变异测试",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:020",
+    "position": 20,
+    "question": "什么是可用性测试？它与软件可用性（availability）指标有何区别？",
+    "answer": "可用性测试通常指usability testing，让代表性用户完成典型任务，观察成功率、耗时、错误和满意度，改进交互。availability表示系统在指定时刻或区间可提供服务的程度，是另一质量概念。中文都可能写“可用性”，答题时应注明英文和测量对象以免混淆。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "可用性测试",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 7,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:021",
+    "position": 21,
+    "question": "测试与调试有何区别？常用调试策略有哪些？",
+    "answer": "测试发现并报告偏离预期的行为；调试定位原因、修复并验证。常用策略包括日志和诊断信息分析、从故障点回溯、提出可证伪假设并逐项排除原因。修复后既要确认原故障消失，也要做相关回归，避免仅靠猜测改代码而没有复现依据。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "调试",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 18,
+      "page_end": 18,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 18,
+          "page_end": 18
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:022",
+    "position": 22,
+    "question": "软件可靠性与服务可用性有什么区别？常用近似公式的前提是什么？",
+    "answer": "可靠性是在规定条件和时间区间内持续无失效运行的概率；服务可用性是指定时刻或区间能够提供服务的概率或时间比例。可修复系统在稳态和相应统计假设下常近似A=MTTF/(MTTF+MTTR)；若MTBF采用其他定义，需先说明定义再套公式。修复快可提高可用性，但不等同于减少失效发生。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "可靠性与可用性",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 19,
+      "page_end": 19,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 19,
+          "page_end": 19
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:001",
+    "position": 1,
+    "question": "软件维护分为哪四类？分别举例。",
+    "answer": "改正性维护修复已暴露缺陷，例如修复计费错误；适应性维护应对环境变化，例如适配新操作系统；完善性维护扩充功能或改进性能；预防性维护降低未来故障或维护风险，例如整理脆弱模块并补足测试。一次变更可有多个目的，分类时按主要动机解释。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "维护分类",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 19,
+      "page_end": 19,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 19,
+          "page_end": 19
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 6,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:002",
+    "position": 2,
+    "question": "结构化维护和非结构化维护有什么区别？为什么维护成本可能很高？",
+    "answer": "具有一致的需求、设计、代码、测试和配置资料时，可先做影响分析再修改；资料缺失时往往需先逆向理解代码，定位影响更困难。维护成本还受历史耦合、环境依赖、兼容性、人员流动及回归风险影响。不是“有文档就一定易维护”，资料必须可信且与实现一致。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "维护特点",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 19,
+      "page_end": 19,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 19,
+          "page_end": 19
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:003",
+    "position": 3,
+    "question": "什么是可维护性？可理解性、可测试性、可修改性等如何影响维护？",
+    "answer": "可维护性反映分析、修改并验证软件所需的难易和成本。职责清晰与文档支持理解，自动化测试和可观测性支持验证，低耦合支持局部修改，可移植和可复用设计减少环境或重复实现成本。可测试性是易于建立测试并判断结果，不等于容易证明程序完全正确。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "可维护性",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 19,
+      "page_end": 20,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 19,
+          "page_end": 20
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:004",
+    "position": 4,
+    "question": "预防性维护、重构、逆向工程和软件再工程有什么联系与区别？",
+    "answer": "预防性维护按目的分类，主动降低未来故障或维护风险；重构在保持可观察行为的前提下调整内部结构；逆向工程从实现恢复更高层知识；再工程可包含理解、重构、数据改造及重新构建等活动。再工程可服务于预防性维护，但二者范围不同，不能直接画等号。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "预防性维护与再工程",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "修正原材料“预防性维护也称软件再工程”的无条件等同。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 20,
+      "page_end": 20,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 20,
+          "page_end": 20
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:005",
+    "position": 5,
+    "question": "软件项目管理与软件过程管理分别关注什么？",
+    "answer": "项目管理围绕特定目标计划、组织、监控和调整范围、成本、进度、质量、人员及风险；过程管理定义、度量和改进组织或项目采用的工作方式。项目可使用组织过程并按约束裁剪，过程改进不能只追求文档合规而忽略交付效果。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "项目管理",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 20,
+      "page_end": 20,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 20,
+          "page_end": 20
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:006",
+    "position": 6,
+    "question": "代码行和功能点如何估算软件规模？优缺点是什么？",
+    "answer": "代码行估算利用历史数据预测实现规模，便于对已有代码计数，但依赖语言、编码习惯和复用程度，早期难准确估计。功能点按外部输入、输出、查询、内部逻辑文件等用户可见功能度量，较少受语言影响，但需要一致的计数规则和需求分析。规模不是工作量，二者要通过经验模型联系。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "LOC与功能点",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 20,
+      "page_end": 21,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 20,
+          "page_end": 21
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:007",
+    "position": 7,
+    "question": "COCOMO和Putnam等工作量模型用于什么？估算时要说明哪些假设？",
+    "answer": "工作量模型根据软件规模、成本驱动因素及历史数据估算人月等资源需求。基本COCOMO常采用规模幂函数，COCOMO II进一步考虑规模因子及多种驱动因素；Putnam模型联系规模、工作量和进度。模型需用适合的项目数据校准，不能只凭模型名称直接给出精确工期。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "工作量估算",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 21,
+      "page_end": 21,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 21,
+          "page_end": 21
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:008",
+    "position": 8,
+    "question": "甘特图与工程网络计划各有什么作用？关键路径表示什么？",
+    "answer": "甘特图以时间轴显示任务、持续时间和进展，直观但复杂依赖可能不明显；网络计划强调任务先后依赖。按既定工期和依赖计算，关键路径决定项目最短完成时间，路径上任务通常总时差为零。资源约束或任务持续时间变化后需要重算，任务最多的路径不一定最长。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "甘特与网络计划",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 21,
+      "page_end": 21,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 21,
+          "page_end": 21
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:009",
+    "position": 9,
+    "question": "民主制程序员组、主程序员组和现代程序员组有什么特点？",
+    "answer": "民主制强调协商与平等沟通，适合需要共同探索的问题但协调成本可能较高；主程序员组以能力较强的负责人组织设计实现，由后备和支持角色配合，效率依赖核心人员；现代组织常结合技术领导、分工协作和评审。组织方式应适应规模、技能和风险，不能机械认定一种适用于所有项目。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "人员组织",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 21,
+      "page_end": 21,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 21,
+          "page_end": 21
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:010",
+    "position": 10,
+    "question": "软件过程中的主要角色如何分工与协作？",
+    "answer": "利益相关者和产品角色明确目标与优先级；需求分析人员澄清并确认需求；架构和开发人员设计实现；质量与测试人员提供独立验证视角；项目管理协调资源与风险；运维与安全人员参与部署、监控及约束设计。角色不一定一人一个，但责任、审批和交接应清晰。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "角色分工",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:011",
+    "position": 11,
+    "question": "软件质量保证通常采用哪些手段？它与测试是什么关系？",
+    "answer": "质量保证通过过程和产品活动提供满足质量要求的信心，包括规范与计划、评审、审计、静态分析、动态测试、度量和改进。测试是其中的重要手段，但不能替代需求评审、设计检查及配置管理。形式化分析适用于特定性质和模型，不能泛称所有软件都已被数学方法证明正确。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "质量保证",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 21,
+      "page_end": 22,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 21,
+          "page_end": 22
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:012",
+    "position": 12,
+    "question": "什么是软件配置管理？主要任务有哪些？",
+    "answer": "配置管理在生命周期中标识配置项，控制和记录变更，确保版本及组合可追踪、一致和可复现。典型任务包括配置标识、版本控制、变更控制、配置状态报告和配置审计。Git是支持工具之一，提交了代码并不代表完成审批、基线、依赖锁定或发布审计。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "配置管理",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 22,
+      "page_end": 22,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 22,
+          "page_end": 22
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 2,
+          "page_end": 2
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:013",
+    "position": 13,
+    "question": "什么是配置项与基线？为什么设置基线？",
+    "answer": "配置项是需要受配置管理控制的工作产物，如需求、设计、代码、测试、构建脚本和依赖说明。基线是一组经正式评审或批准、作为后续工作基础的配置项版本，变更需走规定流程。它提供共同参照，支持追溯、回滚和发布复现；不是一个文件只要提交过就自动成为基线。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "配置项和基线",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 22,
+      "page_end": 22,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 22,
+          "page_end": 22
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:014",
+    "position": 14,
+    "question": "用户直接提出新需求，开发人员立即改代码，有哪些问题？正确流程是什么？",
+    "answer": "问题包括缺少需求澄清、影响评估和授权，导致范围蔓延、成本失控、文档与实现不一致及回归故障。合理流程是登记请求，澄清目标，分析影响与风险，按权限评审批准，更新计划和需求基线，实现并评审，验证回归，发布并通知相关方，记录结果。紧急变更也应有可追踪的简化审批和补充审查。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "需求变更",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 22,
+      "page_end": 22,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 22,
+          "page_end": 22
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 9,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:015",
+    "position": 15,
+    "question": "配置审计与配置状态报告有什么区别？",
+    "answer": "状态报告记录并提供配置项版本、基线、变更申请及处理状态，回答当前有哪些版本、哪些变更进行到哪里；配置审计检查实际产物与批准的需求、版本及记录是否一致。二者共同支持追踪和发布决策，审计不是把提交日志复制成报告。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "配置审计与状态报告",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 22,
+      "page_end": 22,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 22,
+          "page_end": 22
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:016",
+    "position": 16,
+    "question": "经典软件CMM的五级是什么？与CMMI的名称有何区别？",
+    "answer": "经典SW-CMM五级依次为初始级、可重复级、已定义级、已管理级和优化级。CMMI成熟度等级中第二级通常称已管理级，第四级称量化管理级，不能混用两套名称。成熟度关注过程能力和改进，不保证每个项目都无缺陷或必定按期交付。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "CMM与CMMI",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 22,
+      "page_end": 22,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 22,
+          "page_end": 22
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:001",
+    "position": 1,
+    "question": "训练改编：依次检查a≤0、b≤0、c≤0、a+b≤c、a+c≤b、b+c≤a；每个条件为真即返回“不能构成”，全部为假则输出三边。写出流程并计算圈复杂度（每项为独立二分支，统一出口）。",
+    "answer": "流程：输入a、b、c → 依次执行六个否定性检查；任一命中则输出不能构成并转出口；否则输出三边并转出口。共有六个二分支判定，单连通图V=6+1=7。将复合条件合并为一个抽象结点或展开短路时会改变图的计数，必须说明粒度。算法时间和空间开销均为O(1)，但这与圈复杂度是不同指标。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "三角形分析",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "原回忆没有提供具体流程或源程序，无法唯一计算复杂度；明确补充六个独立检查及统一出口作为训练条件。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ],
+      "reconstructed": true
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:002",
+    "position": 2,
+    "question": "训练改编：对上一类六次顺序检查的三角形程序，设计七条可行独立路径的用例，并说明是否等于穷尽测试。",
+    "answer": "按首个失败检查顺序，可用：(-1,2,2)、(1,-1,2)、(1,1,-1)、(1,1,2)、(1,3,1)、(3,1,1)；它们均应返回不能构成。用(3,4,5)覆盖所有检查通过，应输出三边。七组覆盖该控制结构的可行独立路径，不穷尽所有整数输入；仍可加入零值、边界、大整数及输入类型测试。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "三角形路径测试",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按已明确的六个独立检查构造路径用例；不声称是缺少原程序的历年题唯一答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 8,
+      "page_end": 8,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 8,
+          "page_end": 8
+        }
+      ],
+      "reconstructed": true
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:003",
+    "position": 3,
+    "question": "根据“原始成绩生成标准分并存入考生文件；根据标准分和招生计划计算录取线并存入文件”，设计数据流图，说明必要假设。",
+    "answer": "可设P1计算标准分，P2计算录取线，D1考生文件，D2招生计划文件，D3录取线文件。\\n\\n考务人员 -> 原始成绩 -> P1；P1 -> 考生标准分 -> D1；D1 -> 标准分 -> P2；D2 -> 招生计划 -> P2；P2 -> 录取线 -> D3。\\n\\n标准分转换规则、录取线分组及同分处理原回忆未给出，必须列为待澄清需求，不能擅自假定学校采用某个公式。上下层DFD输入输出应平衡。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "录取系统DFD",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "保留历年回忆的两项功能；参考答案给出可绘制的元素与连线，不虚构未提供的标准分或录取规则。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 9,
+      "page_end": 9,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 9,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:004",
+    "position": 4,
+    "question": "在上述标准分与录取线DFD基础上，设计相应的程序模块结构。",
+    "answer": "主控模块调用“生成标准分”和“生成录取线”两条职责分支。前者调用原始成绩读取、成绩校验、标准分计算和考生记录写入；后者调用标准分读取、招生计划读取、录取线计算和结果写入。各分支可共享受控文件访问接口，计算模块接收必要数据并返回结果。结构图表示调用关系，应与DFD的数据流区别，公式和政策仍需需求确认。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "录取系统结构图",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 9,
+      "page_end": 9,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 9,
+          "page_end": 9
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:005",
+    "position": 5,
+    "question": "设计一个人工智能辅助软件工程的应用，说明背景、意义、技术方案、核心算法和评估方法。",
+    "answer": "示例：需求驱动测试用例辅助生成。背景是需求分散、人工编写慢且易漏边界。方案为导入版本化需求，检索相关接口和历史缺陷，利用受限大模型生成结构化候选用例，再做字段、约束和重复检查，最后人工审核及隔离执行。\\n\\n核心流程：需求切分与向量检索 -> 结合证据生成候选 -> 约束校验与去重 -> 评审执行 -> 反馈改进。以需求覆盖、有效用例率、真实缺陷发现率和审核耗时评估，记录基线和对照；不得把生成结果自动视为正确或在生产环境任意执行。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "AI软件工程设计",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:006",
+    "position": 6,
+    "question": "训练改编：相关度依次为[3,2,0]，采用gain(rel)=2^rel−1、discount(i)=log₂(i+1)，从i=1开始，计算DCG@3。",
+    "answer": "DCG@3=7/log₂2+3/log₂3+0/log₂4≈7+1.8928=8.8928。该排序已按相关度降序，IDCG@3相同，因此NDCG@3=1。若采用线性增益rel而不是指数增益，数值不同，必须按题干约定计算。原回忆未提供相关度序列和增益公式，本题是补足条件后的训练例。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "DCG训练改编",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "原回忆只有“英语阅读求DCG值”，无原文和数据；新增明确公式与样例，标为训练改编。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ],
+      "reconstructed": true
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:007",
+    "position": 7,
+    "question": "根据回忆表重构：三条二值训练样本为(0,1,0)→0、(1,0,0)→0、(0,1,1)→1。用朴素贝叶斯判断(0,0,0)，类别先验用频率估计，各特征在每类内采用加一平滑。",
+    "answer": "先验P(y=0)=2/3，P(y=1)=1/3。类0中三个目标取值0的条件概率为1/2、1/2、3/4，未归一化得分为(2/3)×(1/2)×(1/2)×(3/4)=0.125。类1的对应概率为2/3、1/3、1/3，得分为2/81≈0.024691，故预测为0。这里仅对条件概率平滑；样本极少且假定类内条件独立，结论不代表真实邮件分类质量。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "邮件分类训练改编",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "回忆表第三个属性名称遗失、算法未指定；保留表中0/1标签关系，明确采用朴素贝叶斯及平滑约定作为训练改编。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ],
+      "reconstructed": true
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:008",
+    "position": 8,
+    "question": "前馈神经网络通常有哪些层？各层输入、参数和输出之间是什么关系？",
+    "answer": "通常包括输入层、若干隐藏层和输出层。第l层接收a(l−1)，通过可训练权重W(l)和偏置b(l)计算z(l)=W(l)a(l−1)+b(l)，再经激活函数得到a(l)。输入数据不是训练参数；输出激活和损失应与分类或回归任务匹配。现代网络还可包含归一化、残差和注意力等结构。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "神经网络层",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:009",
+    "position": 9,
+    "question": "反向传播中为什么可能发生梯度消失？有哪些常见缓解方法？",
+    "answer": "链式法则使梯度包含多层权重和激活导数的乘积；若乘积持续收缩，前层梯度会很小，饱和sigmoid等激活可加重问题。缓解方法包括合适初始化、非饱和激活、残差连接及归一化等，需结合结构验证。梯度裁剪主要控制梯度爆炸，不能把它直接当作梯度消失的通用解决方法。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "反向传播梯度消失",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 7,
+          "page_end": 7
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:010",
+    "position": 10,
+    "question": "If customers are unsure what they want and requirements are poorly defined, which approach best helps clarify requirements?\nA. Prototyping\nB. Waterfall\nC. V-model\nD. Spiral",
+    "answer": "选A。原型便于用户试用并反馈，从而澄清需求与交互。风险较高时也可在螺旋过程中采用原型，但就题干强调的“澄清不明确需求”而言，A是最直接的选项。原型不应未经工程化就直接当作可靠成品交付。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "截图选择题1",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 25,
+      "page_end": 25,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 25,
+          "page_end": 25
+        }
+      ],
+      "embedded_number": 1
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:011",
+    "position": 11,
+    "question": "An experienced team knows the domain; the project is large but is not expected to introduce many unfamiliar complications. Can these facts alone uniquely determine waterfall or spiral as the process model?",
+    "answer": "不能唯一决定。材料截图把spiral标为答案，但“规模大、团队熟悉领域”不足以推导唯一过程；若需求稳定、风险可控，阶段式策略可以合理，若关键不确定性和风险较高，风险驱动螺旋更合适。应补充需求稳定性、风险与交付节奏后判断。本题保留情境并改为辨析，避免传播有争议的单选答案。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "截图选择题2",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "截图第2题将spiral标红，但给定条件不足以支持唯一选项；改为过程选择辨析，未直接沿用标红答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 25,
+      "page_end": 25,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 25,
+          "page_end": 25
+        }
+      ],
+      "embedded_number": 2
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:012",
+    "position": 12,
+    "question": "Which item is not a layer in the common layered view of software engineering?\nA. Process\nB. Manufacturing\nC. Methods\nD. Tools",
+    "answer": "选B。经典分层观点以质量关注为基础，上面是过程、方法和工具。Manufacturing不是该分层中的一层。这里是特定教材的分层表述，不能扩展为软件部署、交付或运维不属于软件工程活动。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "截图选择题3",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 25,
+      "page_end": 25,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 25,
+          "page_end": 25
+        }
+      ],
+      "embedded_number": 3
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:013",
+    "position": 13,
+    "question": "What are the five generic software process framework activities in the common Pressman framework?",
+    "answer": "常见表述是communication、planning、modeling、construction、deployment，即沟通、策划、建模、构建和部署。它们可在每轮迭代中反复展开；质量保证、配置管理和风险管理等支持活动贯穿过程。此为教材框架分类，不是要求所有项目固定按五步只做一遍。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "截图选择题4",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 25,
+      "page_end": 25,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 25,
+          "page_end": 25
+        }
+      ],
+      "embedded_number": 4
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:014",
+    "position": 14,
+    "question": "The incremental model is especially useful when which of the following is needed?\nA. A process chosen solely because requirements are well defined\nB. A working core product quickly\nC. A process chosen solely because the team is large\nD. Only noncommercial products",
+    "answer": "选B。增量模型可先交付可工作的核心产品，再加入后续功能。需求是否明确和团队规模只是选择因素，不能单独决定模型；商业或非商业产品都可采用增量方式。应提前管理跨增量架构、接口与回归验证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "截图选择题5",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 25,
+      "page_end": 25,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 25,
+          "page_end": 25
+        }
+      ],
+      "embedded_number": 5
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:015",
+    "position": 15,
+    "question": "What makes requirements elicitation difficult?\nA. Problems of scope\nB. Problems of understanding\nC. Requirements volatility\nD. All of the above",
+    "answer": "选D。范围问题涉及边界和细节，理解问题涉及用户与开发者知识、语言及隐含假设，波动问题涉及业务和环境导致的需求变化。可通过范围澄清、场景与原型验证、持续沟通及受控变更来应对，不能把需求获取看作一次性抄录用户口述。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "截图选择题6",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 25,
+      "page_end": 25,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 25,
+          "page_end": 25
+        }
+      ],
+      "embedded_number": 6
+    }
+  },
+  {
+    "collection_id": "c_programming",
+    "source_key": "written-software-v1:c_programming:016",
+    "position": 16,
+    "question": "Requirements elaboration produces an analysis model describing which views of the problem domain?\nA. Information\nB. Functional\nC. Behavioral\nD. All of the above",
+    "answer": "选D。需求细化应兼顾信息或数据、功能以及行为视图，并检查其一致性。具体工具可包括E-R图或类图、用例及数据流图、状态图和交互图；不要求每个小项目机械绘制所有图，但不能只列功能按钮而忽略数据约束与状态变化。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "截图选择题7",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 25,
+      "page_end": 25,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 25,
+          "page_end": 25
+        }
+      ],
+      "embedded_number": 7
+    }
+  },
+  {
+    "collection_id": "se_requirements",
+    "source_key": "written-software-v1:se_requirements:017",
+    "position": 17,
+    "question": "如何把“系统应该很快、好用”改成可验证的需求？",
+    "answer": "先确认用户、任务、负载和环境，再定义测量条件与接受阈值。例如“在规定数据规模和并发数下，95%的查询在2秒内返回”“新用户在无指导下完成预约的成功率不低于约定值”。这些数字需经业务确认和可行性分析，不应由开发者擅定；同时记录测量方式与排除条件。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "需求规格质量",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 7,
+      "page_end": 7,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 7,
+          "page_end": 7
+        },
+        {
+          "file": "(软件学硕)软件工程历年笔试真题汇总.pdf",
+          "page_start": 6,
+          "page_end": 6
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_design",
+    "source_key": "written-software-v1:se_design:025",
+    "position": 25,
+    "question": "如何把事务型数据流图映射为程序结构？",
+    "answer": "识别事务中心、输入路径和各动作路径，将中心映射为调度模块，把每类事务处理映射成相对独立分支，再分别细化分支。明确事务识别规则、参数、错误处理与共享服务，避免一个调度器承担全部业务。事务流的“事务”是处理请求类型，不等于数据库ACID事务。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "事务分析",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 13,
+      "page_end": 13,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 13,
+          "page_end": 13
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_testing",
+    "source_key": "written-software-v1:se_testing:023",
+    "position": 23,
+    "question": "自顶向下与自底向上集成测试分别为什么需要桩或驱动模块？",
+    "answer": "自顶向下先测试高层控制，当下层尚未实现时需桩模拟被调用模块；自底向上从底层服务开始，当上层调用者尚未实现时需驱动发起调用并检查结果。替身应模拟约定行为和错误，但仍需后续真实组件集成测试，不能把替身通过当成真实接口兼容的保证。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "集成替身",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 17,
+      "page_end": 17,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 17,
+          "page_end": 17
+        }
+      ]
+    }
+  },
+  {
+    "collection_id": "se_management",
+    "source_key": "written-software-v1:se_management:017",
+    "position": 17,
+    "question": "如何利用配置管理保证一个已发布版本能够重建并追溯？",
+    "answer": "记录源代码版本、依赖锁定、构建工具和环境、配置模板、数据库迁移版本、测试结果及发布制品标识，受控保存发布基线和审批记录。敏感凭证单独管理，不放入可公开的基线。重建验证应检查产物与行为，只有一个Git标签而缺少依赖和工具版本仍可能无法复现。",
+    "images": [],
+    "source": {
+      "kind": "curated",
+      "topic": "发布复现",
+      "revision": "2026-11-14-v1",
+      "references": [
+        "https://www.computer.org/education/bodies-of-knowledge/software-engineering",
+        "https://glossary.istqb.org/"
+      ],
+      "editorial_note": "按所列来源主题重新组织题干和参考答案；历年考点为材料中的考生回忆，不作为官方原题或官方答案。",
+      "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+      "page_start": 22,
+      "page_end": 22,
+      "origins": [
+        {
+          "file": "(软件学硕)软件工程笔试个人复习笔记.pdf",
+          "page_start": 22,
+          "page_end": 22
+        }
+      ]
+    }
+  }
+]

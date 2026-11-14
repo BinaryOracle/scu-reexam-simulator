@@ -1,0 +1,126 @@
+[
+  {
+    "id": "translation-001",
+    "question": "Large Language Models (LLMs) have demonstrated remarkable emergent abilities that are not present in smaller models. These capabilities, such as complex reasoning and in-context learning, typically manifest when the model scale reaches a certain threshold. While the \"Scaling Laws\" suggest that performance improves predictably with increased compute and data, researchers are now focusing on enhancing computational efficiency and data quality to achieve better results with fewer parameters."
+  },
+  {
+    "id": "translation-002",
+    "question": "Retrieval-Augmented Generation (RAG) aims to mitigate the \"hallucination\" problem in LLMs by integrating external, up-to-date knowledge bases. Instead of relying solely on the model's parametric memory, a RAG system retrieves relevant documents in response to a query and provides them as context for the generator. This architecture ensures that the generated responses are more factually accurate, traceable, and adaptable to domain-specific information without the need for constant retraining."
+  },
+  {
+    "id": "translation-003",
+    "question": "An AI Agent is viewed as an autonomous system that utilizes an LLM as its central reasoning engine to perceive its environment, formulate plans, and execute tasks via tool-use. Unlike static chatbots, agents can break down complex objectives into manageable sub-tasks and interact with external software or APIs to achieve a goal. The transition from \"LLM-as-a-chatbot\" to \"LLM-as-an-agent\" represents a significant shift toward Artificial General Intelligence (AGI)."
+  },
+  {
+    "id": "translation-004",
+    "question": "The emergence of reasoning-oriented models, such as OpenAI’s o1 and the open-source DeepSeek-R1, marks a new paradigm in AI development. By employing large-scale reinforcement learning and extending the \"thinking\" time during inference—often referred to as Chain-of-Thought (CoT) processing—these models can solve high-level mathematical and programming problems that were previously out of reach. This shift prioritizes \"inference-time compute\" over simple pre-training scale."
+  },
+  {
+    "id": "translation-005",
+    "question": "Multimodal Large Language Models (MLLMs) integrate visual and textual information into a unified representation space. By aligning visual encoders with language decoders, these models can \"see\" and \"describe\" the world, enabling applications ranging from autonomous driving to medical image analysis. The challenge remains in achieving fine-grained cross-modal alignment and reducing the computational overhead of processing high-resolution visual tokens."
+  },
+  {
+    "id": "translation-006",
+    "question": "OpenClaw is a viral open-source AI agent framework that functions as a \"local-first\" autonomous assistant. Unlike traditional web-based chatbots, OpenClaw runs on the user's own hardware and interacts via ubiquitous messaging platforms like Telegram or WhatsApp. By utilizing Large Language Models as a decision-making core, it can execute real-world operations such as managing local files, automating browser tasks, and coordinating complex workflows across different software ecosystems."
+  },
+  {
+    "id": "translation-007",
+    "question": "The meteoric rise of OpenClaw signals a shift from \"Chatbot AI\" to \"Executive Agentic AI.\" While standard models are often described as \"brains in a jar\" that only respond to prompts, OpenClaw is designed to be proactive. It maintains long-term memory and persistent context, allowing it to monitor environments—such as email inboxes or GitHub repositories—and take autonomous actions without constant human intervention, effectively serving as a digital employee."
+  },
+  {
+    "id": "translation-008",
+    "question": "Despite its popularity, OpenClaw has raised significant security concerns regarding its high-level system access. To perform tasks like file deletion or script execution, the agent requires extensive permissions, which can lead to catastrophic results if the underlying model experiences a \"hallucination\" or a prompt injection attack. Experts emphasize the need for a \"Human-in-the-Loop\" (HITL) mechanism and stricter sandboxing to prevent unauthorized data exfiltration or accidental system damage."
+  },
+  {
+    "id": "translation-009",
+    "question": "The success of OpenClaw has prompted tech giants to accelerate their own agent strategies. For instance, Nvidia's announcement of \"NemoClaw\" aims to provide an enterprise-grade, hardware-agnostic platform that combines the flexibility of open-source agents with robust security protocols. This trend suggests that the future of computing may involve a decentralized network of autonomous agents, integrated deeply into both cloud infrastructure and local edge devices."
+  },
+  {
+    "id": "translation-010",
+    "question": "While the benefit of running regression tests is increased quality, there is also a cost to this effort in terms of resources to run the suites and to analyze their results. Testing processes by which fewer tests are run while maintaining the same ability to detect defects are therefore beneficial in reducing costs while maintaining quality, and many researchers have proposed various regression testing techniques to achieve this goal."
+  },
+  {
+    "id": "translation-011",
+    "question": "We present a novel and practical deep fully convolutional neural network architecture for semantic pixel-wise segmentation termed SegNet. This core trainable segmentation engine consists of an encoder network, a corresponding decoder network followed by a pixel-wise classification layer. The role of the decoder network is to map the low resolution encoder feature maps to full input resolution feature maps for pixel-wise classification. The novelty of SegNet lies is in the manner in which the decoder upsamples its lower resolution input feature map(s). Specifically, the decoder uses pooling indices computed in the max-pooling step of the corresponding encoder to perform non-linear upsampling."
+  },
+  {
+    "id": "translation-012",
+    "question": "Deeper neural networks are more difficult to train. We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs, instead of learning unreferenced functions. We provide comprehensive empirical evidence showing that these residual networks are easier to optimize, and can gain accuracy from considerably increased depth. On the ImageNet dataset we evaluate residual nets with a depth of up to 152 layers---8x deeper than VGG nets but still having lower complexity. An ensemble of these residual nets achieves 3.57% error on the ImageNet test set."
+  },
+  {
+    "id": "translation-013",
+    "question": "Genetic algorithms are randomized search algorithms that have been developed in an effort to imitate the mechanics of natural selection and natural genetics. Genetic algorithms operate on string structures, like biological structures, which are evolving in time according to the rule of survival of the fittest by using a randomized yet structured information exchange."
+  },
+  {
+    "id": "translation-014",
+    "question": "The recently proposed Temporal Ensembling has achieved state-of-the-art results in several semi-supervised learning benchmarks. It maintains an exponential moving average of label predictions on each training example, and penalizes predictions that are inconsistent with this target. However,because the targets change only once per epoch, Temporal Ensembling becomes unwieldy when learning large datasets. To overcome this problem, we propose Mean Teacher, a method that averages model weights instead of label predictions. As an additional benefit, Mean Teacher improves test accuracy and enables training with fewer labels than Temporal Ensembling."
+  },
+  {
+    "id": "translation-015",
+    "question": "There is an immense variety to be found in development procedures, organizational culture, and products. This breadth implies that empirical studies based on observing or measuring some aspect of software development in a particular company must report a great deal of contextual information if any results and their implications are to be properly understood."
+  },
+  {
+    "id": "translation-016",
+    "question": "The Doc2Vec is one of the most promising NLP techniques to obtain a vector representation of a document. For a pair of similar documents, a well-trained Doc2Vec produces a pair of vectors that are close to each other in the vector space. The Doc2Vec is an extension of the Word2Vec technique that vectorizes a word. Both of these techniques utilize a neural network that learns words."
+  },
+  {
+    "id": "translation-017",
+    "question": "Word representations learned from neural language models have been shown to improve many NLP tasks. These low-dimensional representations are learned as parameters in a language model and trained to maximize the likelihood of a large corpus of raw text. They are then incorporated as features alongside hand-engineered features, or used to initialize the parameters of neural networks targeting tasks for which substantially less training data is available."
+  },
+  {
+    "id": "translation-018",
+    "question": "Semi-supervised learning (SSL) provides an effective means of leveraging unlabeled data to improve a model's performance. In this paper, we demonstrate the power of a simple combination of two common SSL methods: consistency regularization and pseudo-labeling. Our algorithm, FixMatch, first generates pseudo-labels using the model's predictions on weakly-augmented unlabeled images. For a given image, the pseudo-label is only retained if the model produces a high-confidence prediction. The model is then trained to predict the pseudo-label when fed a strongly-augmented version of the same image."
+  },
+  {
+    "id": "translation-019",
+    "question": "There is large consent that successful training of deep networks requires many thousand annotated training samples. In this paper, we present a network and training strategy that relies on the strong use of data augmentation to use the available annotated samples more efficiently. The architecture consists of a contracting path to capture context and a symmetric expanding path that enables precise localization. We show that such a network can be trained end-to-end from very few images and outperforms the prior best method (a sliding-window convolutional network) on the ISBI challenge for segmentation of neuronal structures in electron microscopic stacks."
+  },
+  {
+    "id": "translation-020",
+    "question": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models (Peters et al., 2018a; Radford et al., 2018), BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful."
+  },
+  {
+    "id": "translation-021",
+    "question": "Recent progress has shown that large-scale pre-training using contrastive image-text pairs can be a promising alternative for high-quality visual representation learning from natural language supervision. Benefiting from a broader source of supervision, this new paradigm exhibits impressive transferability to downstream classification tasks and datasets. In this work, we present a new framework for dense prediction by implicitly and explicitly leveraging the pre-trained knowledge from CLIP. Specifically, we convert the original image-text matching problem in CLIP to a pixel-text matching problem and use the pixel-text score maps to guide the learning of dense prediction models."
+  },
+  {
+    "id": "translation-022",
+    "question": "While the Transformer architecture has become the de-facto standard for natural language processing tasks, its applications to computer vision remain limited. In vision, attention is either applied in conjunction with convolutional networks, or used to replace certain components of convolutional networks while keeping their overall structure in place. We show that this reliance on CNNs is not necessary and a pure transformer applied directly to sequences of image patches can perform very well on image classification tasks. When pre-trained on large amounts of data and transferred to multiple mid-sized or small image recognition benchmarks, Vision Transformer (ViT) attains excellent results compared to state-of-the-art convolutional networks."
+  },
+  {
+    "id": "translation-023",
+    "question": "We propose a new framework for estimating generative models via an adversarial process, in which we simultaneously train two models: a generative model G that captures the data distribution, and a discriminative model D that estimates the probability that a sample came from the training data rather than G. The training procedure for G is to maximize the probability of D making a mistake. This framework corresponds to a minimax two-player game. In the space of arbitrary functions G and D, a unique solution exists, with G recovering the training data distribution and D equal to ½ everywhere. In the case where G and D are defined by multilayer perceptrons, the entire system can be trained with backpropagation."
+  },
+  {
+    "id": "translation-024",
+    "question": "We present a conceptually simple, flexible, and general framework for object instance segmentation. Our approach efficiently detects objects in an image while simultaneously generating a high-quality segmentation mask for each instance. The method, called Mask R-CNN, extends Faster R-CNN by adding a branch for predicting an object mask in parallel with the existing branch for bounding box recognition. Mask R-CNN is simple to train and adds only a small overhead to Faster R-CNN, running at 5 fps. Moreover, Mask R-CNN is easy to generalize to other tasks, e.g., allowing us to estimate human poses in the same framework. We show top results in all three tracks of the COCO suite of challenges,including instance segmentation, bounding-box object detection, and person keypoint detection."
+  },
+  {
+    "id": "translation-025",
+    "question": "In this work we address the task of semantic image segmentation with Deep Learning and make three main contributions that are experimentally shown to have substantial practical merit. First, we highlight convolution with upsampled filters, or 'atrous convolution', as a powerful tool in dense prediction tasks. Atrous convolution allows us to explicitly control the resolution at which feature responses are computed within Deep Convolutional Neural Networks. It also allows us to effectively enlarge the field of view of filters to incorporate larger context without increasing the number of parameters or the amount of computation. Second, we propose atrous spatial pyramid pooling (ASPP) to robustly segment objects at multiple scales."
+  },
+  {
+    "id": "translation-026",
+    "question": "The deficiency of segmentation labels is one of the main obstacles to semantic segmentation in the wild. To alleviate this issue, we present a novel framework that generates segmentation labels of images given their image-level class labels. In this weakly supervised setting, trained models have been known to segment local discriminative parts rather than the entire object area. Our solution is to propagate such local responses to nearby areas which belong to the same semantic entity. To this end, we propose a Deep Neural Network (DNN) called AffinityNet that predicts semantic affinity between a pair of adjacent image coordinates. The semantic propagation is then realized by random walk with the affinities predicted by AffinityNet."
+  },
+  {
+    "id": "translation-027",
+    "question": "The Synthesis operating system kernel combines several techniques to provide high performance,including kernel code synthesis, fine-grain scheduling, and optimistic synchronization. Kernel code synthesis reduces the execution path for frequently used kernel calls. Optimistic synchronization increases concurrency within the kernel. Their combination results in significant performance improvement over traditional operating system implementations. Using hardware and software emulating a SUN 3/160 running SUNOS, Synthesis achieves several times to several dozen times speedup for UNIX kernel calls and context switch times of 21 microseconds or faster."
+  },
+  {
+    "id": "translation-028",
+    "question": "A training algorithm that maximizes the margin between the training patterns and the decision boundary is presented. The technique is applicable to a wide variety of the classification functions,including Perceptrons, polynomials, and Radial Basis Functions. The effective number of parameters is adjusted automatically to match the complexity of the problem. The solution is expressed as a linear combination of supporting patterns. These are the subset of training patterns that are closest to the decision boundary. Bounds on the generalization performance based on the leave-one-out method and the VC-dimension are given. Experimental results on optical character recognition problems demonstrate the good generalization obtained when compared with other learning algorithms."
+  },
+  {
+    "id": "translation-029",
+    "question": "A network protocol is a set of established rules that specify how to format, send and receive data so that computer network endpoints, including computers, servers, routers and virtual machines, can communicate despite differences in their underlying infrastructures, designs or standards. To successfully send and receive information, devices on both sides of a communication exchange must accept and follow protocol conventions. In networking, support for protocols can be built into the software, hardware or both."
+  },
+  {
+    "id": "translation-030",
+    "question": "Attention is a machine learning method that determines the relative importance of each component in a sequence relative to the other components in that sequence. In natural language processing,importance is represented by \"soft\" weights assigned to each word in a sentence. More generally,attention encodes vectors called token embeddings across a fixed-width sequence that can range from tens to millions of tokens in size."
+  },
+  {
+    "id": "translation-031",
+    "question": "Research quality is vital to scientific progress, relying on integrity, cooperation, and diligence. Integrity ensures honest reporting of methods and results, fostering trust akin to clear societal norms. Cooperation, through transparent data sharing and peer review, strengthens collaboration, much like standardized protocols enable network communication. Diligence drives rigorous methodologies and persistence, overcoming challenges like funding pressures. Together, these qualities uphold reliable,reproducible science, advancing knowledge for the collective good."
+  }
+]

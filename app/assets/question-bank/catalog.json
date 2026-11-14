@@ -1,0 +1,902 @@
+[
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "时间复杂度"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "空间复杂度"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "数据的逻辑结构"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "数据的存储结构"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "用循环比递归的效率高吗？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "贪心算法和动态规划以及分治法的区别？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "顺序表和链表的比较"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "头指针和头结点的区别？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "栈和队列的区别？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "共享栈"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "如何区分循环队列是队空还是队满？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "栈在括号匹配中的算法思想？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "栈在通过后缀表达式求值的算法思想？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "栈在递归中的应用？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "队列在层次遍历中的作用？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "队列在计算机系统中的应用？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "矩阵的压缩存储"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "串的模式匹配"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "树与二叉树的相关概念？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "如何由遍历序列构造一棵二叉树？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "线索二叉树的概念？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "树的存储结构？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "二叉排序树："
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "哈夫曼树和哈夫曼编码："
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "图的一些相关定义"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "图的存储结构:"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "图的遍历"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "最小生成树和最短路径："
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "关键路径："
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "对各种查找方法的概括？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "B树和B+树："
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "哈希表的概念、哈希函数的构造方法、哈希冲突的解决办法？"
+  },
+  {
+    "category": "professional",
+    "subject": "data_structures",
+    "content": "对各种内部排序的概括与总结？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "操作系统的目标和功能？（什么是操作系统？）"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "操作系统的运行机制?"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "中断和异常？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "系统调用？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "大内核和微内核"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "进程与线程？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "进程的通信方式？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "进程的5种状态及转换过程？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "进程的调度算法有哪些？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "同步和互斥？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "进程同步相关概念"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "死锁"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "什么是饥饿？与死锁有什么差别？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "银行家算法"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "死锁定理"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "存储器管理应具有的功能？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "将用户程序变为可在内存中执行的程序的步骤？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "程序的链接方式有哪些？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "程序的装入方式有哪些？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "覆盖技术和交换技术？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "内存连续分配管理方式有哪些？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "基本分页和请求分页内存管理方式？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "页面置换算法有哪些？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "什么是页表和快表，有什么作用？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "地址翻译的过程？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "文件的基本操作？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "磁盘调度算法有哪些？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "I/O控制方式有哪些？"
+  },
+  {
+    "category": "professional",
+    "subject": "operating_systems",
+    "content": "Spooling技术？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "计算机网络的主要功能？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "主机间的通信方式？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "电路交换，报文交换和分组交换的区别？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "计算机网络的主要性能指标？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "计算机网络提供的服务的三种分类？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "ISO/OSI参考模型和TCP/IP模型？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "端到端通信和点到点通信的区别？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "如何理解同步和异步？什么是同步通信和异步通信？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "频分复用 时分复用 波分复用 码分复用"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "为什么要进行流量控制?"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "流量控制的常见方式？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "可靠传输机制有哪些？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "随机访问介质访问控制？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "PPP协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "HDLC协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "试分析中继器、集线器、网桥和交换机这四种网络互联设备的区别与联系。"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "路由器的主要功能？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "动态路由算法？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "网络层转发分组的流程？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "IP地址和MAC地址？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "ARP地址解析协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "DHCP动态主机配置协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "ICMP网际控制报文协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "传输层的功能？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "UDP协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "TCP协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "拥塞控制的四种算法？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "为何不采用“三次握手”释放连接，且发送最后一次握手报文后要等待 2MSL 的时间呢？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "为什么不采用“两次握手”建立连接呢？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "DNS域名解析协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "FTP文件传输协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "SMTP简单邮件传输协议？"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "POP3"
+  },
+  {
+    "category": "professional",
+    "subject": "computer_networks",
+    "content": "HTTP超文本传输协议？"
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Large Language Models (LLMs) have demonstrated remarkable emergent abilities that are not present in smaller models. These capabilities, such as complex reasoning and in-context learning, typically manifest when the model scale reaches a certain threshold. While the \"Scaling Laws\" suggest that performance improves predictably with increased compute and data, researchers are now focusing on enhancing computational efficiency and data quality to achieve better results with fewer parameters."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Retrieval-Augmented Generation (RAG) aims to mitigate the \"hallucination\" problem in LLMs by integrating external, up-to-date knowledge bases. Instead of relying solely on the model's parametric memory, a RAG system retrieves relevant documents in response to a query and provides them as context for the generator. This architecture ensures that the generated responses are more factually accurate, traceable, and adaptable to domain-specific information without the need for constant retraining."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "An AI Agent is viewed as an autonomous system that utilizes an LLM as its central reasoning engine to perceive its environment, formulate plans, and execute tasks via tool-use. Unlike static chatbots, agents can break down complex objectives into manageable sub-tasks and interact with external software or APIs to achieve a goal. The transition from \"LLM-as-a-chatbot\" to \"LLM-as-an-agent\" represents a significant shift toward Artificial General Intelligence (AGI)."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "The emergence of reasoning-oriented models, such as OpenAI’s o1 and the open-source DeepSeek-R1, marks a new paradigm in AI development. By employing large-scale reinforcement learning and extending the \"thinking\" time during inference—often referred to as Chain-of-Thought (CoT) processing—these models can solve high-level mathematical and programming problems that were previously out of reach. This shift prioritizes \"inference-time compute\" over simple pre-training scale."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Multimodal Large Language Models (MLLMs) integrate visual and textual information into a unified representation space. By aligning visual encoders with language decoders, these models can \"see\" and \"describe\" the world, enabling applications ranging from autonomous driving to medical image analysis. The challenge remains in achieving fine-grained cross-modal alignment and reducing the computational overhead of processing high-resolution visual tokens."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "OpenClaw is a viral open-source AI agent framework that functions as a \"local-first\" autonomous assistant. Unlike traditional web-based chatbots, OpenClaw runs on the user's own hardware and interacts via ubiquitous messaging platforms like Telegram or WhatsApp. By utilizing Large Language Models as a decision-making core, it can execute real-world operations such as managing local files, automating browser tasks, and coordinating complex workflows across different software ecosystems."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "The meteoric rise of OpenClaw signals a shift from \"Chatbot AI\" to \"Executive Agentic AI.\" While standard models are often described as \"brains in a jar\" that only respond to prompts, OpenClaw is designed to be proactive. It maintains long-term memory and persistent context, allowing it to monitor environments—such as email inboxes or GitHub repositories—and take autonomous actions without constant human intervention, effectively serving as a digital employee."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Despite its popularity, OpenClaw has raised significant security concerns regarding its high-level system access. To perform tasks like file deletion or script execution, the agent requires extensive permissions, which can lead to catastrophic results if the underlying model experiences a \"hallucination\" or a prompt injection attack. Experts emphasize the need for a \"Human-in-the-Loop\" (HITL) mechanism and stricter sandboxing to prevent unauthorized data exfiltration or accidental system damage."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "The success of OpenClaw has prompted tech giants to accelerate their own agent strategies. For instance, Nvidia's announcement of \"NemoClaw\" aims to provide an enterprise-grade, hardware-agnostic platform that combines the flexibility of open-source agents with robust security protocols. This trend suggests that the future of computing may involve a decentralized network of autonomous agents, integrated deeply into both cloud infrastructure and local edge devices."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "While the benefit of running regression tests is increased quality, there is also a cost to this effort in terms of resources to run the suites and to analyze their results. Testing processes by which fewer tests are run while maintaining the same ability to detect defects are therefore beneficial in reducing costs while maintaining quality, and many researchers have proposed various regression testing techniques to achieve this goal."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "We present a novel and practical deep fully convolutional neural network architecture for semantic pixel-wise segmentation termed SegNet. This core trainable segmentation engine consists of an encoder network, a corresponding decoder network followed by a pixel-wise classification layer. The role of the decoder network is to map the low resolution encoder feature maps to full input resolution feature maps for pixel-wise classification. The novelty of SegNet lies is in the manner in which the decoder upsamples its lower resolution input feature map(s). Specifically, the decoder uses pooling indices computed in the max-pooling step of the corresponding encoder to perform non-linear upsampling."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Deeper neural networks are more difficult to train. We present a residual learning framework to ease the training of networks that are substantially deeper than those used previously. We explicitly reformulate the layers as learning residual functions with reference to the layer inputs, instead of learning unreferenced functions. We provide comprehensive empirical evidence showing that these residual networks are easier to optimize, and can gain accuracy from considerably increased depth. On the ImageNet dataset we evaluate residual nets with a depth of up to 152 layers---8x deeper than VGG nets but still having lower complexity. An ensemble of these residual nets achieves 3.57% error on the ImageNet test set."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Genetic algorithms are randomized search algorithms that have been developed in an effort to imitate the mechanics of natural selection and natural genetics. Genetic algorithms operate on string structures, like biological structures, which are evolving in time according to the rule of survival of the fittest by using a randomized yet structured information exchange."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "The recently proposed Temporal Ensembling has achieved state-of-the-art results in several semi-supervised learning benchmarks. It maintains an exponential moving average of label predictions on each training example, and penalizes predictions that are inconsistent with this target. However,because the targets change only once per epoch, Temporal Ensembling becomes unwieldy when learning large datasets. To overcome this problem, we propose Mean Teacher, a method that averages model weights instead of label predictions. As an additional benefit, Mean Teacher improves test accuracy and enables training with fewer labels than Temporal Ensembling."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "There is an immense variety to be found in development procedures, organizational culture, and products. This breadth implies that empirical studies based on observing or measuring some aspect of software development in a particular company must report a great deal of contextual information if any results and their implications are to be properly understood."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "The Doc2Vec is one of the most promising NLP techniques to obtain a vector representation of a document. For a pair of similar documents, a well-trained Doc2Vec produces a pair of vectors that are close to each other in the vector space. The Doc2Vec is an extension of the Word2Vec technique that vectorizes a word. Both of these techniques utilize a neural network that learns words."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Word representations learned from neural language models have been shown to improve many NLP tasks. These low-dimensional representations are learned as parameters in a language model and trained to maximize the likelihood of a large corpus of raw text. They are then incorporated as features alongside hand-engineered features, or used to initialize the parameters of neural networks targeting tasks for which substantially less training data is available."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Semi-supervised learning (SSL) provides an effective means of leveraging unlabeled data to improve a model's performance. In this paper, we demonstrate the power of a simple combination of two common SSL methods: consistency regularization and pseudo-labeling. Our algorithm, FixMatch, first generates pseudo-labels using the model's predictions on weakly-augmented unlabeled images. For a given image, the pseudo-label is only retained if the model produces a high-confidence prediction. The model is then trained to predict the pseudo-label when fed a strongly-augmented version of the same image."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "There is large consent that successful training of deep networks requires many thousand annotated training samples. In this paper, we present a network and training strategy that relies on the strong use of data augmentation to use the available annotated samples more efficiently. The architecture consists of a contracting path to capture context and a symmetric expanding path that enables precise localization. We show that such a network can be trained end-to-end from very few images and outperforms the prior best method (a sliding-window convolutional network) on the ISBI challenge for segmentation of neuronal structures in electron microscopic stacks."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models (Peters et al., 2018a; Radford et al., 2018), BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Recent progress has shown that large-scale pre-training using contrastive image-text pairs can be a promising alternative for high-quality visual representation learning from natural language supervision. Benefiting from a broader source of supervision, this new paradigm exhibits impressive transferability to downstream classification tasks and datasets. In this work, we present a new framework for dense prediction by implicitly and explicitly leveraging the pre-trained knowledge from CLIP. Specifically, we convert the original image-text matching problem in CLIP to a pixel-text matching problem and use the pixel-text score maps to guide the learning of dense prediction models."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "While the Transformer architecture has become the de-facto standard for natural language processing tasks, its applications to computer vision remain limited. In vision, attention is either applied in conjunction with convolutional networks, or used to replace certain components of convolutional networks while keeping their overall structure in place. We show that this reliance on CNNs is not necessary and a pure transformer applied directly to sequences of image patches can perform very well on image classification tasks. When pre-trained on large amounts of data and transferred to multiple mid-sized or small image recognition benchmarks, Vision Transformer (ViT) attains excellent results compared to state-of-the-art convolutional networks."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "We propose a new framework for estimating generative models via an adversarial process, in which we simultaneously train two models: a generative model G that captures the data distribution, and a discriminative model D that estimates the probability that a sample came from the training data rather than G. The training procedure for G is to maximize the probability of D making a mistake. This framework corresponds to a minimax two-player game. In the space of arbitrary functions G and D, a unique solution exists, with G recovering the training data distribution and D equal to ½ everywhere. In the case where G and D are defined by multilayer perceptrons, the entire system can be trained with backpropagation."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "We present a conceptually simple, flexible, and general framework for object instance segmentation. Our approach efficiently detects objects in an image while simultaneously generating a high-quality segmentation mask for each instance. The method, called Mask R-CNN, extends Faster R-CNN by adding a branch for predicting an object mask in parallel with the existing branch for bounding box recognition. Mask R-CNN is simple to train and adds only a small overhead to Faster R-CNN, running at 5 fps. Moreover, Mask R-CNN is easy to generalize to other tasks, e.g., allowing us to estimate human poses in the same framework. We show top results in all three tracks of the COCO suite of challenges,including instance segmentation, bounding-box object detection, and person keypoint detection."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "In this work we address the task of semantic image segmentation with Deep Learning and make three main contributions that are experimentally shown to have substantial practical merit. First, we highlight convolution with upsampled filters, or 'atrous convolution', as a powerful tool in dense prediction tasks. Atrous convolution allows us to explicitly control the resolution at which feature responses are computed within Deep Convolutional Neural Networks. It also allows us to effectively enlarge the field of view of filters to incorporate larger context without increasing the number of parameters or the amount of computation. Second, we propose atrous spatial pyramid pooling (ASPP) to robustly segment objects at multiple scales."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "The deficiency of segmentation labels is one of the main obstacles to semantic segmentation in the wild. To alleviate this issue, we present a novel framework that generates segmentation labels of images given their image-level class labels. In this weakly supervised setting, trained models have been known to segment local discriminative parts rather than the entire object area. Our solution is to propagate such local responses to nearby areas which belong to the same semantic entity. To this end, we propose a Deep Neural Network (DNN) called AffinityNet that predicts semantic affinity between a pair of adjacent image coordinates. The semantic propagation is then realized by random walk with the affinities predicted by AffinityNet."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "The Synthesis operating system kernel combines several techniques to provide high performance,including kernel code synthesis, fine-grain scheduling, and optimistic synchronization. Kernel code synthesis reduces the execution path for frequently used kernel calls. Optimistic synchronization increases concurrency within the kernel. Their combination results in significant performance improvement over traditional operating system implementations. Using hardware and software emulating a SUN 3/160 running SUNOS, Synthesis achieves several times to several dozen times speedup for UNIX kernel calls and context switch times of 21 microseconds or faster."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "A training algorithm that maximizes the margin between the training patterns and the decision boundary is presented. The technique is applicable to a wide variety of the classification functions,including Perceptrons, polynomials, and Radial Basis Functions. The effective number of parameters is adjusted automatically to match the complexity of the problem. The solution is expressed as a linear combination of supporting patterns. These are the subset of training patterns that are closest to the decision boundary. Bounds on the generalization performance based on the leave-one-out method and the VC-dimension are given. Experimental results on optical character recognition problems demonstrate the good generalization obtained when compared with other learning algorithms."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "A network protocol is a set of established rules that specify how to format, send and receive data so that computer network endpoints, including computers, servers, routers and virtual machines, can communicate despite differences in their underlying infrastructures, designs or standards. To successfully send and receive information, devices on both sides of a communication exchange must accept and follow protocol conventions. In networking, support for protocols can be built into the software, hardware or both."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Attention is a machine learning method that determines the relative importance of each component in a sequence relative to the other components in that sequence. In natural language processing,importance is represented by \"soft\" weights assigned to each word in a sentence. More generally,attention encodes vectors called token embeddings across a fixed-width sequence that can range from tens to millions of tokens in size."
+  },
+  {
+    "category": "translation",
+    "subject": "",
+    "content": "Research quality is vital to scientific progress, relying on integrity, cooperation, and diligence. Integrity ensures honest reporting of methods and results, fostering trust akin to clear societal norms. Cooperation, through transparent data sharing and peer review, strengthens collaboration, much like standardized protocols enable network communication. Diligence drives rigorous methodologies and persistence, overcoming challenges like funding pressures. Together, these qualities uphold reliable,reproducible science, advancing knowledge for the collective good."
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Please introduce yourself, including your name, major, university, and hometown."
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is the most impressive thing you have ever accomplished?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are the main stages of database design?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What were your major courses during your undergraduate studies?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What have you been doing over the past year?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "How do you feel when you look at your academic grades?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Who was the most memorable teacher you had as an undergraduate, and why?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are five basic data types in C or Java?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Which field of computer science do you plan to pursue, and why?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "How do you conduct academic research?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are your plans for postgraduate study?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Could you tell me about your hometown?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Why did you choose Sichuan University?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What do you consider your greatest achievement?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Have you ever had an unusual or particularly interesting idea at university?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is information security?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "How can we benefit from the Internet?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What sports do you enjoy, and why?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Please introduce a project or piece of engineering work you completed during university."
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Why is green computing important?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is the biggest problem you have encountered in software engineering, and how did you solve it?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is the difference between computer graphics and image processing?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is software engineering, and what are its main processes?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is software testing?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are the properties of a database transaction? Please explain them."
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are the main stages of database design and database application development? Why are they needed?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Which academic papers or journals related to databases have you read? What did you learn from them?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What measures can be used to protect data and ensure data security?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Could you describe the compilation process?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is the difference between a password and encryption?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is the difference between encoding and encryption?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are the differences between C and C++? What are the main features and advantages of C++?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are the differences between C++ and Java?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What special data types are available in C++ or Java? Please give examples and explain how they differ."
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is UML, and what is it used for?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is the difference between a process and a thread?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Could you describe the seven-layer OSI model?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Which protocol do you think is most important in computer networking, and what does it do?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is temperature in large language model generation, and how does it affect the output?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are zero-shot and few-shot learning?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What does the scale, or number of parameters, represent in a large language model?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are tokens in the context of large language models?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is the main difference between pre-training and fine-tuning?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is a Transformer, and why is it important for large language models?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is the main difference between retrieval-augmented generation and fine-tuning?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What are the core components of an AI agent?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "How can you address hallucinations in large language models?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What is chain of thought, and why can it help with reasoning?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Why has the OpenClaw project attracted so much attention recently?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "What security risks can autonomous agents such as OpenClaw pose?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "How do you see the future of inference-time computation, as used by models such as DeepSeek-R1 and o1?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "If you could improve an open-source agent framework, which area would you focus on, and why?"
+  },
+  {
+    "category": "oral",
+    "subject": "",
+    "content": "Why can large multimodal models such as GPT-4o perform tasks that traditional language models cannot?"
+  }
+]
