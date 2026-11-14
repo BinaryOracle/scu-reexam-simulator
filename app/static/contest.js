@@ -17,6 +17,8 @@ import { formatLuoguSubmitError, isLuoguExtensionOutdated } from "./luogu-errors
 import { submitWithLuoguVerification } from "./luogu-submit.mjs?v=20261114-captcha-v2";
 import { requestLuoguCaptcha } from "./luogu-captcha.js?v=20261114-captcha-v2";
 import { normalizeSubmissionPage, refreshContestProblemStats } from "./contest-model.mjs?v=20261114-contest-stats-v1";
+import { writeAppRoute } from "./view-route.mjs?v=20261115-navigation-v3";
+import { readLuoguConnection, writeLuoguConnection } from "./luogu-connection.mjs?v=20261115-navigation-v3";
 
 let contests = [];
 let selectedContest = null;
@@ -25,6 +27,9 @@ let selectedProblem = null;
 let clock;
 let submitting = false;
 let luoguConnected = false;
+let luoguConnectionUserId = null;
+let luoguStatusChecked = false;
+let luoguConnectionRequest = null;
 let selectedLuoguProblems = [];
 let editingContestId = null;
 let contestOverview = null;
@@ -59,6 +64,8 @@ export function clearContestState() {
   submissionResultNodes.clear();
   bridgeWaiters.clear();
   clearInterval(clock);
+  document.body.dataset.contestWorkspace = "false";
+  document.body.classList.remove("contest-immersive");
   if ($("submissionDetailDialog").open) $("submissionDetailDialog").close();
   $("problemList").replaceChildren();
   $("problemList").hidden = true;
@@ -128,11 +135,38 @@ function tick() {
 }
 export async function refreshContests() {
   contests = await api(contestPath("/contests"));
-  renderContestList();
   clearInterval(clock);
   clock = setInterval(tick, 1000);
-  if (selectedContest)
-    selectedContest = contests.find((c) => c.id === selectedContest.id) || null;
+  await restoreContestRoute();
+}
+function contestRoute() {
+  const [, id, stage, problem] = location.hash.replace(/^#/, "").split("/");
+  const contestId = Number(id);
+  const problemId = Number(problem);
+  return {
+    contestId: Number.isInteger(contestId) && contestId > 0 ? contestId : null,
+    workspace: stage === "workspace",
+    problemId: Number.isInteger(problemId) && problemId > 0 ? problemId : null,
+  };
+}
+async function restoreContestRoute() {
+  const route = contestRoute();
+  selectedContest = null;
+  currentProblems = [];
+  selectedProblem = null;
+  contestOverview = null;
+  if (!route.contestId) {
+    renderContestList();
+    return;
+  }
+  const contest = contests.find(item => item.id === route.contestId);
+  if (!contest) {
+    writeAppRoute("contest", { replace: true });
+    renderContestList();
+    return;
+  }
+  await openContest(contest, { recordHistory: false });
+  if (route.workspace) await enterContest({ recordHistory: false, problemId: route.problemId });
 }
 function renderContestList() {
   const list = $("contestList");
@@ -236,7 +270,7 @@ async function deleteContest(contest) {
   await refreshContests();
   notify("比赛及其题目、提交记录已删除。");
 }
-async function openContest(contest) {
+async function openContest(contest, { recordHistory = true } = {}) {
   try {
     contestOverview = await api(`/contests/${contest.id}`);
   } catch (error) {
@@ -253,6 +287,7 @@ async function openContest(contest) {
       problems: problems.map(({ id, title, remote_problem_id }) => ({ id, title, remote_problem_id })),
     };
   }
+  if (recordHistory) writeAppRoute(`contest/${contest.id}`);
   selectedContest = contest;
   $("contestList").hidden = true;
   $("contestListHeading").hidden = true;
@@ -264,6 +299,8 @@ async function openContest(contest) {
   $("problemList").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 function renderContestOverview() {
+  document.body.dataset.contestWorkspace = "false";
+  document.body.classList.remove("contest-immersive");
   const container = $("problemList");
   container.hidden = false;
   const panel = el("section", "", "panel contest-overview");
@@ -300,6 +337,7 @@ function renderContestOverview() {
   void loadContestRanking(panel, contestOverview.id);
   const actions = el("div", "", "contest-overview-actions");
   actions.append(button("← 返回比赛列表", () => {
+    writeAppRoute("contest");
     selectedContest = null;
     contestOverview = null;
     container.replaceChildren();
@@ -330,6 +368,7 @@ function renderContestOverview() {
   tick();
 }
 function showContestRanking() {
+  writeAppRoute(`contest/${selectedContest.id}`);
   renderContestOverview();
   requestAnimationFrame(() => document.getElementById(`contest-ranking-${selectedContest?.id}`)
     ?.scrollIntoView({ behavior: "smooth", block: "start" }));
@@ -371,18 +410,24 @@ async function loadContestRanking(panel, contestId) {
     if (panel.isConnected && contestOverview?.id === contestId) section.replaceChildren(el("h3", "比赛排名"), el("p", error.message, "muted"));
   }
 }
-async function enterContest() {
+async function enterContest({ recordHistory = true, problemId = null } = {}) {
   contestSubmissionPage = 1;
   currentProblems = await api(contestPath(`/contests/${selectedContest.id}/problems`));
   $("contestList").hidden = true;
   $("contestListHeading").hidden = true;
   $("contestListToolbar").hidden = true;
   $("contestPagination").hidden = true;
-  selectedProblem = currentProblems[0]?.id ?? null;
+  selectedProblem = currentProblems.some(problem => problem.id === problemId)
+    ? problemId
+    : currentProblems[0]?.id ?? null;
+  if (recordHistory) writeAppRoute(`contest/${selectedContest.id}/workspace${selectedProblem ? `/${selectedProblem}` : ""}`);
+  document.body.dataset.contestWorkspace = "true";
+  document.body.classList.toggle("contest-immersive", !managementMode());
   renderWorkspace();
   $("problemList").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 function renderWorkspace() {
+  prepareLuoguConnection();
   const container = $("problemList");
   container.hidden = false;
   $("contestList").hidden = true;
@@ -392,9 +437,14 @@ function renderWorkspace() {
   const heading = el("div", "", "workspace-header-title");
   heading.append(el("span", "答题工作区", "eyebrow"), el("h2", selectedContest.title));
   const headerActions = el("div", "", "workspace-header-actions");
+  const countdown = el("span", deadline(selectedContest), "workspace-countdown");
   headerActions.append(
+    ...(!managementMode() ? [countdown] : []),
     button("比赛排名", showContestRanking, "text-button workspace-ranking"),
-    button("返回比赛信息", renderContestOverview, "button secondary workspace-back"),
+    button("返回比赛信息", () => {
+      writeAppRoute(`contest/${selectedContest.id}`);
+      renderContestOverview();
+    }, "button secondary workspace-back"),
   );
   header.append(heading, headerActions);
   const [statusLabel, statusColor] = contestStatus(selectedContest);
@@ -404,8 +454,11 @@ function renderWorkspace() {
     el("span", selectedContest.judge_mode === "luogu" ? "洛谷评测" : "本站评测", "workspace-judge-mode"),
     el("span", deadline(selectedContest), "workspace-countdown"),
   );
-  workspace.append(header, livebar);
-  if (!managementMode() && selectedContest.judge_mode === "luogu") workspace.append(renderLuoguSetup());
+  workspace.append(header);
+  if (managementMode()) workspace.append(livebar);
+  if (!managementMode() && selectedContest.judge_mode === "luogu") {
+    workspace.append(renderLuoguSetup());
+  }
   if (!currentProblems.length) {
     workspace.append(
       emptyState(
@@ -417,6 +470,8 @@ function renderWorkspace() {
       ),
     );
     container.replaceChildren(workspace);
+    if (!managementMode() && selectedContest.judge_mode === "luogu" && !luoguStatusChecked)
+      void refreshLuoguBridgeConnection();
     return;
   }
   const workbench = el("div", "", "problem-workbench");
@@ -429,6 +484,7 @@ function renderWorkspace() {
       "",
       () => {
         selectedProblem = problem.id;
+        writeAppRoute(`contest/${selectedContest.id}/workspace/${problem.id}`);
         renderWorkspace();
       },
       `problem-tab${problem.id === selectedProblem ? " selected" : ""}`,
@@ -531,6 +587,8 @@ function renderWorkspace() {
   if (paneSwitcher) workbench.insertBefore(paneSwitcher, columns);
   workspace.append(workbench);
   container.replaceChildren(workspace);
+  if (!managementMode() && selectedContest.judge_mode === "luogu" && !luoguStatusChecked)
+    void refreshLuoguBridgeConnection();
   loadContestSubmissions();
   tick();
 }
@@ -778,20 +836,68 @@ function renderEditor(problem) {
 function renderLuoguSetup() {
   const panel = el("section", "", "panel luogu-setup");
   const heading = el("div", "", "luogu-setup-heading");
-  heading.append(el("h3", "洛谷提交桥接"), badge(luoguConnected ? `插件已连接 · ${luoguConnected}` : "需先配置", luoguConnected ? "green" : "orange"));
+  const status = badge(luoguConnected ? `插件已连接 · ${luoguConnected}` : "需先配置", luoguConnected ? "green" : "orange");
+  status.classList.add("luogu-connection-status");
+  heading.append(el("h3", "洛谷提交桥接"), status);
   panel.append(heading,
     el("p", "通过浏览器中的洛谷登录页提交；请保持插件已安装且洛谷处于登录状态。本站不保存洛谷凭证。"),
     button("查看插件配置教程", () => $("luoguTutorial")?.showModal(), "text-button"),
     button("检测洛谷登录状态", async () => {
-      const response = await sendLuoguBridge("PING", {});
-      ensureLuoguExtensionCurrent(response);
-      luoguConnected = response.connected ? response.account || "已连接" : false;
+      const response = await refreshLuoguBridgeConnection({ force: true });
       if (!luoguConnected) throw new Error(response.reason || "未找到已登录的洛谷页面，请先登录洛谷后重试。");
       notify("已连接洛谷登录页面。");
       renderWorkspace();
     }, "button secondary"),
   );
   return panel;
+}
+function prepareLuoguConnection() {
+  const userId = state.user?.id || null;
+  if (userId === luoguConnectionUserId) return;
+  luoguConnectionUserId = userId;
+  luoguConnected = readLuoguConnection(localStorage, userId) || false;
+  luoguStatusChecked = false;
+  luoguConnectionRequest = null;
+}
+function setLuoguConnection(account) {
+  prepareLuoguConnection();
+  luoguConnected = account || false;
+  writeLuoguConnection(localStorage, luoguConnectionUserId, luoguConnected);
+  const status = document.querySelector(".luogu-connection-status");
+  if (status) {
+    status.textContent = luoguConnected ? `插件已连接 · ${luoguConnected}` : "需先配置";
+    status.className = `badge ${luoguConnected ? "green" : "orange"} luogu-connection-status`;
+  }
+}
+async function refreshLuoguBridgeConnection({ force = false } = {}) {
+  prepareLuoguConnection();
+  if (luoguConnectionRequest) return luoguConnectionRequest;
+  if (luoguStatusChecked && !force)
+    return { connected: Boolean(luoguConnected), account: luoguConnected };
+  luoguStatusChecked = true;
+  const status = document.querySelector(".luogu-connection-status");
+  if (status) {
+    status.textContent = luoguConnected ? `正在恢复连接 · ${luoguConnected}` : "正在检测洛谷连接";
+    status.className = "badge blue luogu-connection-status";
+  }
+  const request = (async () => {
+    try {
+      const response = await sendLuoguBridge("PING", {});
+      ensureLuoguExtensionCurrent(response);
+      setLuoguConnection(response.connected ? response.account || "已连接" : "");
+      return response;
+    } catch (error) {
+      const currentStatus = document.querySelector(".luogu-connection-status");
+      if (currentStatus) {
+        currentStatus.textContent = luoguConnected ? `上次连接 · ${luoguConnected}（等待确认）` : "插件未响应";
+        currentStatus.className = "badge orange luogu-connection-status";
+      }
+      if (force) throw error;
+      return { connected: false, reason: error.message };
+    }
+  })().finally(() => { luoguConnectionRequest = null; });
+  luoguConnectionRequest = request;
+  return request;
 }
 function sendLuoguBridge(type, payload, timeoutMs = 15000) {
   const requestId = crypto.randomUUID();
@@ -824,10 +930,8 @@ window.addEventListener("scu-luogu-status", event => {
     .catch(error => notify(`洛谷评测状态同步失败：${error.message}`, "error"));
 });
 async function requestLuoguSubmit(payload) {
-  const ping = await sendLuoguBridge("PING", {});
-  ensureLuoguExtensionCurrent(ping);
+  const ping = await refreshLuoguBridgeConnection({ force: true });
   if (!ping.connected) throw new Error(ping.reason || "请先登录洛谷并检测插件连接。");
-  luoguConnected = true;
   return submitWithLuoguVerification(payload, {
     send: value => sendLuoguBridge("SUBMIT", value, 30000),
     requestCaptcha: requestLuoguCaptcha,

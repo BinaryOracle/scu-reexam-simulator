@@ -2,7 +2,7 @@
 from typing import Literal
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from pydantic import BaseModel, ConfigDict, Field
 from app.db import connect
 from app.services.auth import current_user, administrator
 from app.services import announcements
@@ -15,7 +15,8 @@ class Announcement(BaseModel):
     title:str=Field(min_length=1,max_length=120)
     summary:str=Field(default='',max_length=500)
     cover_url:str=Field(default='',max_length=500)
-    blocks:list[dict]=Field(max_length=100)
+    body_markdown:str=Field(default='',max_length=100000)
+    blocks:list[dict]=Field(default_factory=list,max_length=100)
 
 
 @router.get('/api/announcements')
@@ -42,6 +43,11 @@ def admin_list(status:Literal['','draft','published','withdrawn']='',q:str=Query
 @router.post('/api/admin/announcements',status_code=201)
 def create(payload:Announcement,actor=Depends(administrator)):
     with connect() as db: return announcements.save(db,actor['id'],aid=None,**payload.model_dump())
+
+
+@router.post('/api/admin/announcements/preview')
+def preview(payload:Announcement,actor=Depends(administrator)):
+    with connect() as db: return announcements.preview(db,**payload.model_dump())
 
 
 @router.put('/api/admin/announcements/{aid}')

@@ -19,19 +19,10 @@ function openAnnouncement(item) {
     body.append(image);
   }
   if (item.summary) body.append(el("p", item.summary, "announcement-summary"));
-  for (const block of item.blocks) {
-    if (block.type === "heading") body.append(el("h3", block.text));
-    else if (block.type === "paragraph") body.append(el("p", block.text));
-    else if (block.type === "image") {
-      const image = el("img", "", "announcement-content-image");
-      image.src = announcementAssetUrl(block.asset_id);
-      image.alt = block.alt || "";
-      body.append(image);
-    } else if (block.type === "link") {
-      const link = el("a", block.text + " ↗", "announcement-content-link");
-      link.href = block.url; link.target = "_blank"; link.rel = "noopener noreferrer";
-      body.append(link);
-    }
+  body.insertAdjacentHTML("beforeend", item.body_html || "");
+  for (const image of body.querySelectorAll("img")) {
+    image.classList.add("announcement-content-image");
+    if (state.adminMode) image.src = image.src.replace("/api/announcements/assets/", "/api/admin/announcements/assets/");
   }
   $("announcementDialog").showModal();
 }
@@ -204,64 +195,61 @@ function editNotice(item) {
   const titleLabel=el("label","标题");titleLabel.append(title);
   const summaryLabel=el("label","摘要");summaryLabel.append(summary);
   const coverLabel=el("label","封面图片地址");coverLabel.append(cover);
-  const blocks=structuredClone(item?.blocks||[]);
-  const editor=el("div","","announcement-block-editor");
-  const addControl=el("div","","announcement-block-actions");
-  function renderBlocks(){
-    editor.replaceChildren();
-    blocks.forEach((block,index)=>{
-      const row=el("article","","announcement-block-row");
-      const kind=el("strong",block.type==="heading"?"小标题":block.type==="paragraph"?"正文":block.type==="image"?"图片":"外部链接");
-      row.append(kind);
-      if(block.type==="image"){
-      const image=el("img","","announcement-block-preview");
-        image.src=block.asset_id?announcementAssetUrl(block.asset_id):block.url;
-        image.alt=block.alt||"";row.append(image);
-      }else{
-        const input=el("textarea");input.rows=block.type==="paragraph"?4:2;
-        input.value=block.type==="link"?block.text:block.text||"";
-        input.addEventListener("input",()=>{block.text=input.value;});
-        row.append(input);
-        if(block.type==="link"){
-          const url=el("input");url.type="url";url.required=true;url.placeholder="https://";url.value=block.url||"";
-          url.addEventListener("input",()=>{block.url=url.value;});row.append(url);
-        }
-      }
-      row.append(button("移除",()=>{blocks.splice(index,1);renderBlocks();},"text-button danger"));
-      editor.append(row);
-    });
+  const markdown=el("textarea");markdown.rows=16;markdown.maxLength=100000;
+  markdown.className="announcement-markdown-editor";markdown.value=item?.body_markdown||"";
+  markdown.setAttribute("aria-label","公告 Markdown 正文");
+  async function uploadInlineImage(file){
+    if(file.size>5*1024*1024)throw new Error("图片不能超过 5 MB");
+    if(!["image/png","image/jpeg","image/webp"].includes(file.type))throw new Error("粘贴图片仅支持 PNG、JPEG 或 WebP");
+    const data=new FormData();data.append("file",file,file.name||"pasted-image.png");
+    return api("/admin/announcements/assets",{method:"POST",body:data});
   }
-  for(const [kind,label] of [["heading","添加小标题"],["paragraph","添加正文"],["link","添加外部链接"]]){
-    addControl.append(button(label,()=>{blocks.push(kind==="link"?{type:kind,text:"链接标题",url:"https://"}:{type:kind,text:""});renderBlocks();},"button quiet"));
-  }
+  markdown.addEventListener("paste",async event=>{
+    const images=[...(event.clipboardData?.items||[])].filter(part=>part.type.startsWith("image/"));
+    if(!images.length)return;
+    event.preventDefault();
+    for(const part of images){
+      const file=part.getAsFile();if(!file)continue;
+      try{
+        const uploaded=await uploadInlineImage(file);
+        const alt=(file.name||"公告图片").replace(/[\[\]\\]/g,"");
+        const value=`![${alt}](${uploaded.url})`;
+        const start=markdown.selectionStart,end=markdown.selectionEnd;
+        markdown.setRangeText(value,start,end,"end");markdown.dispatchEvent(new Event("input",{bubbles:true}));
+        markdown.focus();
+      }catch(error){notify(error.message,"error");}
+    }
+  });
+  const blockHeading=el("div","","announcement-editor-heading");
+  blockHeading.append(el("h2","公告正文 · Markdown"),el("p","支持标题、列表、引用、表格和链接。将图片粘贴到正文框，会自动上传并插入图片引用。","muted"));
   const imageInput=el("input");imageInput.type="file";imageInput.accept="image/png,image/jpeg,image/webp";imageInput.hidden=true;
-  const addImage=button("上传图片",()=>imageInput.click(),"button quiet");
+  const addImage=button("插入图片",()=>imageInput.click(),"button quiet");
   imageInput.addEventListener("change",async()=>{
     const file=imageInput.files?.[0];if(!file)return;
-    if(file.size>5*1024*1024){notify("图片不能超过 5 MB","error");return;}
-    const data=new FormData();data.append("file",file);
     try{
-      const uploaded=await api("/admin/announcements/assets",{method:"POST",body:data});
-      blocks.push({type:"image",asset_id:uploaded.asset_id,alt:file.name});renderBlocks();
+      const uploaded=await uploadInlineImage(file);
+      const alt=file.name.replace(/[\[\]\\]/g,"")||"公告图片";
+      markdown.setRangeText(`![${alt}](${uploaded.url})`,markdown.selectionStart,markdown.selectionEnd,"end");
+      markdown.focus();
     }catch(error){notify(error.message,"error");}
     finally{imageInput.value="";}
   });
-  const blockHeading=el("div","","announcement-editor-heading");
-  blockHeading.append(el("h2","公告正文"),el("p","内容以文字、图片和外链组成，页面不会执行自定义 HTML。","muted"));
-  renderBlocks();
   const actions=el("div","","action-group");
   actions.append(button("取消",()=>form.remove(),"button quiet"));
-  actions.append(button("预览",()=>{
-    const preview={id:item?.id||0,title:title.value,summary:summary.value,cover_url:cover.value,blocks,status:"draft"};
-    openAnnouncement(preview);
+  actions.append(button("预览",async()=>{
+    try{
+      const preview=await api("/admin/announcements/preview",{method:"POST",body:JSON.stringify({
+        title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value})});
+      openAnnouncement(preview);
+    }catch(error){notify(error.message,"error");}
   },"button secondary"));
   actions.append(button("保存草稿",async()=>{
-    const payload={title:title.value,summary:summary.value,cover_url:cover.value,blocks};
+    const payload={title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value};
     const saved=await api(item?"/admin/announcements/"+item.id:"/admin/announcements",{
       method:item?"PUT":"POST",body:JSON.stringify(payload)});
     notify("公告草稿已保存");
     if(!item)editNotice(saved);else await refreshAnnouncementsAdmin();
   },"button primary"));
-  form.append(titleLabel,summaryLabel,coverLabel,coverUpload,coverFile,blockHeading,addControl,addImage,imageInput,editor,actions);
+  form.append(titleLabel,summaryLabel,coverLabel,coverUpload,coverFile,blockHeading,markdown,addImage,imageInput,actions);
   root.append(form);form.scrollIntoView({behavior:"smooth",block:"start"});
 }

@@ -15,7 +15,7 @@ import {
   createContest,
   clearContestState,
   setupContestCreation,
-} from "./contest.js?v=20261114-captcha-v2";
+} from "./contest.js?v=20261115-navigation-v3";
 import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261114-ui-v23";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261114-training-v9";
 import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
@@ -24,7 +24,8 @@ import { refreshTraining, clearTraining, selectTrainingSection } from "./trainin
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261114-training-v11";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261114-training-v10";
-import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261114-home-v2";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261114-home-v3";
+import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
 const views = {
   home: { label: "备考首页", refresh: refreshHome },
@@ -106,7 +107,7 @@ function configureAccess() {
     : "用户工作台";
   return allowed;
 }
-async function show(view, force = false) {
+async function show(view, force = false, { historyMode = "push" } = {}) {
   if (!force && !allowNavigation()) return;
   clearVisiblePasswords();
   clearProfilePassword();
@@ -115,7 +116,9 @@ async function show(view, force = false) {
   state.user = user;
   const allowed = configureAccess();
   const selected = allowed.includes(view) ? view : allowed[0];
+  if (historyMode !== "none") writeAppViewRoute(selected, Object.keys(views), { replace: historyMode === "replace" });
   document.body.classList.toggle("interview-immersive", selected === "interview" && !$("interviewDetail").hidden && $("interviewDetail").dataset.immersive === "true");
+  document.body.classList.toggle("contest-immersive", selected === "contest" && document.body.dataset.contestWorkspace === "true" && !state.adminMode);
   document.body.classList.remove("interview-shell-open");
   syncSidebarToggle();
   if (selected !== currentView) { pauseInterviewAudio(); clearTraining(); clearTrainingAdmin(); }
@@ -149,7 +152,8 @@ async function enterWorkspace() {
   });
   configureInterviewMode();
   configureAccess();
-  await show(currentView || (state.adminMode ? "users" : "home"));
+  const fallback = state.adminMode ? "users" : "home";
+  await show(readAppRoute(location.hash, allowedViews(), fallback), false, { historyMode: "replace" });
 }
 function configureShell() {
   document.body.classList.toggle("admin-mode", state.adminMode);
@@ -160,10 +164,6 @@ function configureShell() {
     "后台管理系统";
   document.querySelector(".breadcrumb").textContent = "管理工作台";
   $("workspaceLabel").textContent = "平台管理空间";
-  document.querySelector(".sidebar-tip .eyebrow").textContent =
-    "账号有序，练习从容";
-  document.querySelector(".sidebar-tip p").textContent =
-    "统一管理账号与次数，让每位用户专注自己的练习。";
   document.querySelector(".login-card h2").textContent = "登录管理后台";
   document.querySelector(".login-description").textContent =
     "使用管理员账号，管理用户、题库与考务。";
@@ -192,6 +192,17 @@ document.addEventListener("navigate-view", event => {
   if (event.detail.section && target === "training") selectTrainingSection(event.detail.section);
   void show(target).then(() => {
   }).catch(error => notify(error.message, "error"));
+});
+window.addEventListener("popstate", () => {
+  if (!state.user) return;
+  if (!isAppRouteHash(location.hash)) return;
+  const fallback = state.adminMode ? "users" : "home";
+  const route = readAppRoute(location.hash, allowedViews(), fallback);
+  if (!allowNavigation()) {
+    writeAppRoute(currentView || fallback, { replace: true });
+    return;
+  }
+  void show(route, true, { historyMode: "none" }).catch(error => notify(error.message, "error"));
 });
 let loginMethod = state.adminMode ? "password" : "email";
 let codeRequestPending = false;
@@ -347,7 +358,7 @@ window.addEventListener("beforeunload", (event) => {
   }
 });
 window.addEventListener("account-access-updated", () =>
-  run(() => show(currentView)),
+  run(() => show(currentView, false, { historyMode: "none" })),
 );
 let updatingAccess = false;
 window.addEventListener("session-expired", () => {
@@ -409,7 +420,7 @@ window.addEventListener("access-denied", async () => {
   if (updatingAccess || !state.user) return;
   updatingAccess = true;
   try {
-    await show(currentView, true);
+    await show(currentView, true, { historyMode: "none" });
   } catch (error) {
     notify(error.message, "error");
   } finally {

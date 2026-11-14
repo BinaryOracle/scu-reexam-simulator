@@ -48,6 +48,61 @@ def test_announcement_drafts_are_hidden_until_published_and_links_are_validated(
     assert client.get(f"/api/announcements/{item['id']}",headers=alice).status_code==404
 
 
+def test_announcement_markdown_renders_format_and_keeps_raw_html_inert(client):
+    admin,alice=login(client,'manager'),login(client,'alice')
+    created=client.post('/api/admin/announcements',headers=admin,json={
+        'title':'Markdown 公告','summary':'摘要','cover_url':'',
+        'body_markdown':'## 小标题\n\n**重点内容**\n\n<script>alert(1)</script>'})
+    assert created.status_code==201,created.text
+    item=created.json()
+    assert item['body_markdown'].startswith('## 小标题')
+    assert '<h2>小标题</h2>' in item['body_html']
+    assert '<strong>重点内容</strong>' in item['body_html']
+    assert '<script>' not in item['body_html']
+    assert '&lt;script&gt;' in item['body_html']
+    assert client.post(f"/api/admin/announcements/{item['id']}/status",headers=admin,
+                       json={'status':'published'}).status_code==200
+    public=client.get(f"/api/announcements/{item['id']}",headers=alice).json()
+    assert public['body_markdown']==item['body_markdown']
+    assert public['body_html']==item['body_html']
+
+
+def test_announcement_markdown_images_must_reference_uploaded_local_assets(client):
+    admin,alice=login(client,'manager'),login(client,'alice')
+    bad=client.post('/api/admin/announcements',headers=admin,json={
+        'title':'外链图片','summary':'','cover_url':'',
+        'body_markdown':'![外部图片](https://example.com/image.png)'})
+    assert bad.status_code==422
+    png=b'\x89PNG\r\n\x1a\n'+b'\x00'*32
+    uploaded=client.post('/api/admin/announcements/assets',headers=admin,
+                         files={'file':('paste.png',png,'image/png')})
+    assert uploaded.status_code==201
+    asset_id=uploaded.json()['asset_id']
+    saved=client.post('/api/admin/announcements',headers=admin,json={
+        'title':'粘贴图片','summary':'','cover_url':'',
+        'body_markdown':f'![已上传图片](/api/announcements/assets/{asset_id})'})
+    assert saved.status_code==201,saved.text
+    assert f'/api/announcements/assets/{asset_id}' in saved.json()['body_html']
+    assert client.get(f'/api/announcements/assets/{asset_id}',headers=alice).status_code==404
+
+
+def test_legacy_announcement_blocks_migrate_to_markdown(client):
+    admin=login(client,'manager')
+    created=client.post('/api/admin/announcements',headers=admin,json={
+        'title':'旧格式迁移','summary':'','cover_url':'','body_markdown':'旧内容'})
+    assert created.status_code==201
+    from app.db import connect
+    from app.services.announcements import initialize
+    with connect() as db:
+        aid=created.json()['id']
+        db.execute("UPDATE announcements SET blocks=? WHERE id=?",
+                   ('[{"type":"heading","text":"旧公告"},{"type":"paragraph","text":"正文"}]',aid))
+        db.execute("UPDATE announcements SET body_markdown='' WHERE id=?",(aid,))
+        initialize(db)
+        markdown=db.execute('SELECT body_markdown FROM announcements WHERE id=?',(aid,)).fetchone()[0]
+        assert markdown=='## 旧公告\n\n正文'
+
+
 def test_only_administrators_manage_announcements(client):
     alice=login(client,'alice')
     assert client.get('/api/admin/announcements',headers=alice).status_code==403

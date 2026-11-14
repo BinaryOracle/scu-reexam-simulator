@@ -6,10 +6,59 @@ import time
 from pathlib import Path
 from urllib.parse import urlsplit
 from fastapi import HTTPException
+from markdown_it import MarkdownIt
 from app.config import load_config
 
 DEFAULT_COVER = '/static/assets/announcement-cover.png'
 DEFAULT_TITLE = '平台功能与奖励规则说明'
+ASSET_PATH = re.compile(r'^/api/announcements/assets/([a-f0-9]{32})$')
+
+
+def blocks_to_markdown(blocks):
+    lines = []
+    for block in blocks:
+        kind, text = block['type'], block.get('text', '')
+        if kind == 'heading':
+            lines.append('## ' + text)
+        elif kind == 'paragraph':
+            lines.append(text)
+        elif kind == 'link':
+            lines.append(f'[{text}]({block["url"]})')
+        elif kind == 'image':
+            lines.append(f'![{block.get("alt", "")}](/api/announcements/assets/{block["asset_id"]})')
+    return '\n\n'.join(lines)
+
+
+def validate_markdown(db, content):
+    if not isinstance(content, str) or len(content) > 100000:
+        raise HTTPException(422, '公告 Markdown 不能为空或超过 100000 个字符')
+    renderer = MarkdownIt('commonmark', {'html': False, 'breaks': True})
+    renderer.enable(['table', 'strikethrough'])
+    tokens = renderer.parse(content)
+    for token in tokens:
+        for child in token.children or []:
+            if child.type == 'link_open':
+                url = child.attrGet('href') or ''
+                parsed = urlsplit(url)
+                if parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password:
+                    raise HTTPException(422, '公告链接只支持有效的 HTTP 或 HTTPS 地址')
+            elif child.type == 'image':
+                match = ASSET_PATH.fullmatch(child.attrGet('src') or '')
+                if not match or not db.execute('SELECT 1 FROM announcement_assets WHERE id=?', (match[1],)).fetchone():
+                    raise HTTPException(422, '公告图片须先粘贴或上传到本站')
+    return content.strip()
+
+
+def render_markdown(content):
+    renderer = MarkdownIt('commonmark', {'html': False, 'breaks': True})
+    renderer.enable(['table', 'strikethrough'])
+    tokens = renderer.parse(content or '')
+    for token in tokens:
+        for child in token.children or []:
+            if child.type == 'link_open':
+                child.attrSet('target', '_blank')
+                child.attrSet('rel', 'noopener noreferrer')
+    return renderer.renderer.render(tokens, renderer.options, {})
 
 
 def default_blocks():
@@ -29,24 +78,33 @@ def default_blocks():
 def initialize(db):
     db.execute('''CREATE TABLE IF NOT EXISTS announcements(
         id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT NOT NULL,summary TEXT NOT NULL DEFAULT '',
-        cover_url TEXT NOT NULL DEFAULT '',blocks TEXT NOT NULL DEFAULT '[]',status TEXT NOT NULL CHECK(status IN ('draft','published','withdrawn')),
+        cover_url TEXT NOT NULL DEFAULT '',blocks TEXT NOT NULL DEFAULT '[]',body_markdown TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL CHECK(status IN ('draft','published','withdrawn')),
         created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
         created REAL NOT NULL,updated REAL NOT NULL,published_at REAL)''')
     db.execute('CREATE INDEX IF NOT EXISTS announcements_by_status ON announcements(status,published_at)')
     db.execute('''CREATE TABLE IF NOT EXISTS announcement_assets(
         id TEXT PRIMARY KEY,path TEXT NOT NULL,mime_type TEXT NOT NULL,created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
         created REAL NOT NULL)''')
+    columns = {row['name'] for row in db.execute('PRAGMA table_info(announcements)')}
+    if 'body_markdown' not in columns:
+        db.execute("ALTER TABLE announcements ADD COLUMN body_markdown TEXT NOT NULL DEFAULT ''")
+    for row in db.execute("SELECT id,blocks FROM announcements WHERE body_markdown='' AND blocks!='[]'").fetchall():
+        db.execute('UPDATE announcements SET body_markdown=? WHERE id=?',
+                   (blocks_to_markdown(json.loads(row['blocks'])), row['id']))
     existing = db.execute('SELECT * FROM announcements WHERE title=? LIMIT 1', (DEFAULT_TITLE,)).fetchone()
     if not existing:
         now = time.time()
-        db.execute('''INSERT INTO announcements(title,summary,cover_url,blocks,status,created,updated,published_at)
-            VALUES (?,?,?,?,?,?,?,?)''', (DEFAULT_TITLE, '题目投稿、每日签到、次数购买兑换与转赠说明', DEFAULT_COVER,
-            json.dumps(default_blocks(), ensure_ascii=False), 'published', now, now, now))
+        blocks = default_blocks()
+        db.execute('''INSERT INTO announcements(title,summary,cover_url,blocks,body_markdown,status,created,updated,published_at)
+            VALUES (?,?,?,?,?, 'published',?,?,?)''', (DEFAULT_TITLE, '题目投稿、每日签到、次数购买兑换与转赠说明', DEFAULT_COVER,
+            json.dumps(blocks, ensure_ascii=False), blocks_to_markdown(blocks), now, now, now))
     elif existing['created_by'] is None and existing['updated_by'] is None:
         # Refresh only the untouched system seed; preserve administrator edits and publication state.
-        db.execute('UPDATE announcements SET summary=?,cover_url=?,blocks=?,updated=? WHERE id=?',
+        blocks = default_blocks()
+        db.execute('UPDATE announcements SET summary=?,cover_url=?,blocks=?,body_markdown=?,updated=? WHERE id=?',
                    ('题目投稿、每日签到、次数购买兑换与转赠说明', DEFAULT_COVER,
-                    json.dumps(default_blocks(), ensure_ascii=False), time.time(), existing['id']))
+                    json.dumps(blocks, ensure_ascii=False), blocks_to_markdown(blocks), time.time(), existing['id']))
 
 
 def validate_blocks(blocks):
@@ -79,7 +137,8 @@ def validate_blocks(blocks):
 
 def serialize(row, *, admin=False):
     return {'id':row['id'],'title':row['title'],'summary':row['summary'],'cover_url':row['cover_url'],
-            'blocks':json.loads(row['blocks']),'status':row['status'],'created':row['created'],'updated':row['updated'],
+            'blocks':json.loads(row['blocks']),'body_markdown':row['body_markdown'],
+            'body_html':render_markdown(row['body_markdown']),'status':row['status'],'created':row['created'],'updated':row['updated'],
             'published_at':row['published_at']} | ({'created_by':row['created_by'],'updated_by':row['updated_by']} if admin else {})
 
 
@@ -99,22 +158,37 @@ def get_item(db, aid, *, public=False):
     return serialize(row,admin=not public)
 
 
-def save(db, actor_id, *, aid, title, summary, cover_url, blocks):
-    title, summary = title.strip(), summary.strip()
-    if not title or len(title)>120 or len(summary)>500: raise HTTPException(422,'请填写有效的公告标题和摘要')
-    parsed = validate_blocks(blocks)
+def validate_cover(cover_url):
     is_static = cover_url.startswith('/static/') and '..' not in cover_url
-    is_asset = re.fullmatch(r'/api/announcements/assets/[a-f0-9]{32}', cover_url) is not None
+    is_asset = ASSET_PATH.fullmatch(cover_url) is not None
     if cover_url and not (is_static or is_asset):
         raise HTTPException(422,'公告封面地址无效')
+
+
+def preview(db, *, title, summary, cover_url, body_markdown, blocks=None):
+    title, summary = title.strip(), summary.strip()
+    if not title or len(title)>120 or len(summary)>500: raise HTTPException(422,'请填写有效的公告标题和摘要')
+    validate_cover(cover_url)
+    markdown = body_markdown if body_markdown else blocks_to_markdown(validate_blocks(blocks or []))
+    markdown = validate_markdown(db, markdown)
+    return {'title':title,'summary':summary,'cover_url':cover_url,'body_markdown':markdown,
+            'body_html':render_markdown(markdown),'blocks':[],'status':'draft'}
+
+
+def save(db, actor_id, *, aid, title, summary, cover_url, body_markdown='', blocks=None):
+    title, summary = title.strip(), summary.strip()
+    if not title or len(title)>120 or len(summary)>500: raise HTTPException(422,'请填写有效的公告标题和摘要')
+    validate_cover(cover_url)
+    markdown = body_markdown if body_markdown else blocks_to_markdown(validate_blocks(blocks or []))
+    markdown = validate_markdown(db, markdown)
     now = time.time()
-    data = (title,summary,cover_url,json.dumps(parsed,ensure_ascii=False),actor_id,now)
+    data = (title,summary,cover_url,json.dumps([],ensure_ascii=False),markdown,actor_id,now)
     if aid is None:
-        aid=db.execute('''INSERT INTO announcements(title,summary,cover_url,blocks,status,created_by,updated_by,created,updated)
-            VALUES (?,?,?,?,\'draft\',?,?,?,?)''',(title,summary,cover_url,json.dumps(parsed,ensure_ascii=False),actor_id,actor_id,now,now)).lastrowid
+        aid=db.execute('''INSERT INTO announcements(title,summary,cover_url,blocks,body_markdown,status,created_by,updated_by,created,updated)
+            VALUES (?,?,?,?,?,\'draft\',?,?,?,?)''',(title,summary,cover_url,json.dumps([],ensure_ascii=False),markdown,actor_id,actor_id,now,now)).lastrowid
     else:
         if not db.execute('SELECT 1 FROM announcements WHERE id=?',(aid,)).fetchone(): raise HTTPException(404,'公告不存在')
-        db.execute('UPDATE announcements SET title=?,summary=?,cover_url=?,blocks=?,updated_by=?,updated=? WHERE id=?',(*data,aid))
+        db.execute('UPDATE announcements SET title=?,summary=?,cover_url=?,blocks=?,body_markdown=?,updated_by=?,updated=? WHERE id=?',(*data,aid))
     return get_item(db,aid)
 
 
@@ -152,7 +226,8 @@ def image_path(db, asset_id, *, admin=False):
     if not admin:
         needle=f'"asset_id": "{asset_id}"'
         cover=f'/api/announcements/assets/{asset_id}'
-        if not db.execute("SELECT 1 FROM announcements WHERE status='published' AND (blocks LIKE ? OR cover_url=?) LIMIT 1",('%'+needle+'%',cover)).fetchone():
+        if not db.execute("SELECT 1 FROM announcements WHERE status='published' AND (blocks LIKE ? OR body_markdown LIKE ? OR cover_url=?) LIMIT 1",
+                          ('%'+needle+'%','%'+cover+'%',cover)).fetchone():
             raise HTTPException(404,'公告图片不存在')
     path=Path(row['path'])
     if not path.is_file(): raise HTTPException(404,'公告图片文件不存在')
