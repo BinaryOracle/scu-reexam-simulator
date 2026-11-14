@@ -1,0 +1,20 @@
+[
+  {"id":"strategy","group":"备考路线","title":"复试备考战略白皮书","summary":"先明确复试组成与准备优先级，再安排每日投入。","stars":5,"kind":"external","url":"https://dcnjjxjof559.feishu.cn/docx/Md56dwICfo5F5UxIjEecVns0nQb"},
+  {"id":"deep-learning-roadmap","group":"基础与 AI","title":"深度学习零基础入门路线","summary":"从数学和神经网络基础逐步进入模型实践。","stars":4,"kind":"external","url":"https://ai.feishu.cn/docx/VPZCdXh0poGyzAxEt27coEPdnlg"},
+  {"id":"probability","group":"基础与 AI","title":"概率论基础概念","summary":"补齐机器学习与深度学习常用的概率基础。","stars":1,"kind":"external","url":"https://my.feishu.cn/docx/NvukdXiMxoJ5oPxqptbcWLSqnBe?from=from_copylink"},
+  {"id":"pytorch","group":"基础与 AI","title":"PyTorch 快速入门","summary":"开展深度学习代码实践前的工具准备。","stars":1,"kind":"external","url":"https://ai.feishu.cn/docx/QkTyd90Nlo5XLPxDszfcUc5Xnfd"},
+  {"id":"llm-basics","group":"基础与 AI","title":"大模型基础知识与八股","summary":"建立 LLM 基本概念、训练和推理知识框架。","stars":2,"kind":"external","url":"https://my.feishu.cn/docx/MgWYd1hD2oxvvRxx5L6cOnN5nch?from=from_copylink"},
+  {"id":"transformer","group":"基础与 AI","title":"Transformer 详解与形象化解释","summary":"理解注意力机制及 Transformer 的关键结构。","stars":2,"kind":"external","url":"https://my.feishu.cn/docx/AqcbduoProVFWFxGKz5cWKHUnSh?from=from_copylink"},
+  {"id":"ai-practice","group":"基础与 AI","title":"每日训练 · 人工智能篇","summary":"按主题练习机器学习、深度学习、LLM、Agent/RAG 与文献翻译。","stars":4,"kind":"view","view":"training","section":"written_ai"},
+  {"id":"software-engineering","group":"笔试与机试","title":"每日训练 · 软件工程篇","summary":"复习软件工程基础、需求、设计、测试与项目管理。","stars":5,"kind":"view","view":"training","section":"written_c"},
+  {"id":"exam-contests","group":"笔试与机试","title":"上机考试","summary":"查看考试安排、练习赛与提交记录。","stars":5,"kind":"view","view":"contest"},
+  {"id":"exam-guide","group":"笔试与机试","title":"上机考试与 VJudge 练习指南","summary":"了解平台练习流程，按真题和算法主题训练。","stars":5,"kind":"external","url":"https://www.bilibili.com/video/BV1UqPQzXEmy/?spm_id_from=333.1387.homepage.video_card.click&vd_source=3cd7189878fe1460a8b3a9f98a91d21b"},
+  {"id":"interview-review","group":"面试准备","title":"模拟面试与整场复盘","summary":"上传个人 PPT，完成限时面试并查看语音回答点评。","stars":4,"kind":"view","view":"interview"},
+  {"id":"professional-practice","group":"面试准备","title":"专业课问答训练","summary":"覆盖数据结构、操作系统和计算机网络。","stars":4,"kind":"view","view":"training","section":"interview"},
+  {"id":"english-practice","group":"面试准备","title":"英文翻译与口语问答","summary":"使用题库进行段落翻译和英文问答练习。","stars":3,"kind":"view","view":"training","section":"interview"},
+  {"id":"interview-format","group":"面试准备","title":"复试考察形式与考情分析","summary":"参考四川大学计算机学院电子信息专业复试考情。","stars":3,"kind":"external","url":"https://www.bilibili.com/video/BV1UukcBWEcE/?spm_id_from=333.1387"},
+  {"id":"mentor-info","group":"导师与课程","title":"四川大学计算机学院导师信息","summary":"查看白皮书收录的导师资料。","stars":2,"kind":"external","url":"https://my.feishu.cn/docx/ERTRdjIx2oSVjxxZVHLc4hKVngd?from=from_copylink"},
+  {"id":"recorded-courses","group":"导师与课程","title":"2025 年录播课程视频与资料","summary":"课程索引和配套资料入口。","stars":2,"kind":"external","url":"https://my.feishu.cn/docx/HmKodVM8noLg9LxaBCDcCuVbncf?from=from_copylink","notice":"部分课程需购买 888、2288 或 3888 套餐"},
+  {"id":"basic-project-courses","group":"导师与课程","title":"基础项目录播课程","summary":"基础项目实践课程与资料。","stars":2,"kind":"external","url":"https://my.feishu.cn/docx/MIvtd9CjRo7bYkxid88cPMpen7b?from=from_copylink","notice":"需购买 799 基础项目、2288 或 3888 套餐"},
+  {"id":"advanced-project-courses","group":"导师与课程","title":"中高级项目录播课程","summary":"进阶项目实践课程与资料。","stars":2,"kind":"external","url":"https://my.feishu.cn/docx/BMUzdWbwRopoLdxtrVqcjZx0nib?from=from_copylink","notice":"需购买 1888 中高级项目或 3888 套餐"}
+]

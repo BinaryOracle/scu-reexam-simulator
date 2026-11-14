@@ -10,6 +10,7 @@ export function clearLearningMedia() {
 }
 export function selectField(label, options, selected = '') {
   const wrap = el('div', '', 'learning-field');
+  wrap.classList.add('learning-select-field');
   const input = el('select'); input.id = `learning-select-${crypto.randomUUID()}`;
   const title = el('label', label); title.htmlFor = input.id;
   for (const [value, text] of options) {

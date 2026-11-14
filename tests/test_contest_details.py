@@ -27,7 +27,7 @@ def test_edit_contest_retains_existing_problem_and_submission_ids(client):
     assert saved.status_code == 200, saved.text
     assert saved.json()['problem_ids'] == [pid]
     assert client.get('/api/contests', headers=alice).json()[0]['title'] == '修改后的比赛'
-    assert client.get('/api/submissions', headers=alice).json()[0]['id'] == sid
+    assert client.get('/api/submissions', headers=alice).json()['items'][0]['id'] == sid
 
 
 def test_edit_contest_rejects_empty_invalid_times_and_submitted_problem_removal(client):
@@ -91,7 +91,7 @@ def test_refresh_existing_problem_repairs_samples_without_touching_submissions(c
     response = client.post(f'/api/admin/problems/{pid}/refresh', headers=manager)
     assert response.status_code == 200, response.text
     assert len(response.json()['samples']) == 2
-    assert client.get('/api/submissions', headers=alice).json()[0]['id'] == sid
+    assert client.get('/api/submissions', headers=alice).json()['items'][0]['id'] == sid
 
 
 def test_future_contest_overview_is_visible_but_statement_is_not(client):

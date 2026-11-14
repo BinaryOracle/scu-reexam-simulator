@@ -8,24 +8,27 @@ import {
   hasUnsavedWork,
   pauseInterviewAudio,
   clearInterviewState,
-} from "./interview.js?v=20261114-ui-v19";
+} from "./interview.js?v=20261114-ui-v20";
 import {
   refreshContests,
   refreshSubmissions,
   createContest,
   clearContestState,
   setupContestCreation,
-} from "./contest.js?v=20261114-oj-v3";
+} from "./contest.js?v=20261114-captcha-v2";
 import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261114-ui-v23";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261114-training-v9";
 import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
 
-import { refreshTraining, clearTraining } from "./training.js?v=20261114-training-v10";
-import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261114-training-v10";
+import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261114-training-v11";
+import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261114-training-v11";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261114-training-v10";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261114-home-v2";
 
 const views = {
+  home: { label: "备考首页", refresh: refreshHome },
+  announcementsAdmin: { label: "公告管理", refresh: refreshAnnouncementsAdmin },
   training: { label: "每日训练", refresh: refreshTraining },
   trainingAdmin: { label: "训练题库", refresh: refreshTrainingAdmin },
   users: { label: "用户管理", refresh: refreshUsers },
@@ -84,9 +87,9 @@ function syncSidebarToggle() {
 function allowedViews() {
   if (state.adminMode)
     return state.user.is_admin
-      ? ["users", "questionBank", "trainingAdmin", "vouchers", "systemSettings", "interview", "contest", "submissions", "profile"]
+      ? ["users", "questionBank", "trainingAdmin", "announcementsAdmin", "vouchers", "systemSettings", "interview", "contest", "submissions", "profile"]
       : ["adminDenied"];
-  return ["training", "interview", "contest", "submissions", "profile"];
+  return ["home", "training", "interview", "contest", "submissions", "profile"];
 }
 function configureAccess() {
   const allowed = allowedViews();
@@ -146,7 +149,7 @@ async function enterWorkspace() {
   });
   configureInterviewMode();
   configureAccess();
-  await show(currentView);
+  await show(currentView || (state.adminMode ? "users" : "home"));
 }
 function configureShell() {
   document.body.classList.toggle("admin-mode", state.adminMode);
@@ -183,6 +186,13 @@ function configureShell() {
     }),
   );
 }
+document.addEventListener("navigate-view", event => {
+  const target = event.detail?.view;
+  if (!target || !views[target]) return;
+  if (event.detail.section && target === "training") selectTrainingSection(event.detail.section);
+  void show(target).then(() => {
+  }).catch(error => notify(error.message, "error"));
+});
 let loginMethod = state.adminMode ? "password" : "email";
 let codeRequestPending = false;
 let codeCooldownUntil = 0;
@@ -414,6 +424,7 @@ $("avatar").addEventListener("click", () => run(() => show("profile")));
 $("openRedeemProfile").addEventListener("click", () => run(() => show("profile")));
 $("profileBack").addEventListener("click", event => run(() => show(null), event.currentTarget));
 window.addEventListener("open-profile", () => run(() => show("profile")));
+setupHome();
 if (state.token)
   enterWorkspace().catch((error) => {
     notify(`无法恢复工作台：${error.message}。请重新登录。`, "error");

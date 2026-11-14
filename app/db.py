@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 22
+SCHEMA_VERSION = 24
 
 
 @contextmanager
@@ -71,8 +71,11 @@ def initialize():
             db.execute(statement)
         for table, field, declaration in [
             ('contests', 'judge_mode', "TEXT NOT NULL DEFAULT 'docker' CHECK(judge_mode IN ('docker','luogu'))"),
+            ('contests', 'show_ranking', 'INTEGER NOT NULL DEFAULT 1'),
+            ('contests', 'ranking_rule', "TEXT NOT NULL DEFAULT 'score'"),
             ('problems', 'remote_problem_id', "TEXT NOT NULL DEFAULT ''"),
             ('problems', 'samples', "TEXT NOT NULL DEFAULT '[]'"),
+            ('problems', 'points', 'INTEGER NOT NULL DEFAULT 100'),
             ('submissions', 'remote_submission_id', "TEXT NOT NULL DEFAULT ''"),
             ('submissions', 'detail', "TEXT NOT NULL DEFAULT ''"),
         ]:
@@ -221,4 +224,8 @@ def initialize():
             repair_answer_format(db)
         from .services.training_schema import initialize_sections
         initialize_sections(db, seed=version < 20, seed_literature=version < 21, seed_software=version < 22)
+        from .services.contribution_rewards import initialize as initialize_contribution_rewards
+        initialize_contribution_rewards(db)
+        from .services.announcements import initialize as initialize_announcements
+        initialize_announcements(db)
         db.execute(f'PRAGMA user_version={SCHEMA_VERSION}')

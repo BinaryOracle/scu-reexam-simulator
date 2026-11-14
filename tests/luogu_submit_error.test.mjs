@@ -27,12 +27,20 @@ test("leaves non-captcha failures unchanged", () => {
   assert.equal(formatLuoguSubmitError(new Error("洛谷未返回提交编号。")), "洛谷未返回提交编号。");
 });
 
+test("keeps captcha cancellation and retry guidance actionable", () => {
+  assert.equal(formatLuoguSubmitError(new Error("已取消验证码，本次提交未被洛谷受理。")), "已取消验证码，本次提交未被洛谷受理。");
+  assert.equal(formatLuoguSubmitError(new Error("洛谷未接受该验证码，请重新提交并输入新的验证码。")), "洛谷未接受该验证码，请重新提交并输入新的验证码。");
+});
+
 test("requires an extension version that can guide captcha recovery", () => {
   assert.equal(isLuoguExtensionOutdated(undefined), true);
   assert.equal(isLuoguExtensionOutdated("1.0.0"), true);
   assert.equal(isLuoguExtensionOutdated("1.0.1"), true);
-  assert.equal(isLuoguExtensionOutdated("1.0.2"), false);
-  assert.equal(isLuoguExtensionOutdated("1.1.0"), false);
+  assert.equal(isLuoguExtensionOutdated("1.0.2"), true);
+  assert.equal(isLuoguExtensionOutdated("1.1.0"), true);
+  assert.equal(isLuoguExtensionOutdated("1.1.1"), true);
+  assert.equal(isLuoguExtensionOutdated("1.1.2"), true);
+  assert.equal(isLuoguExtensionOutdated("1.1.3"), false);
   assert.equal(isLuoguExtensionOutdated("unknown"), true);
   assert.match(contestSource, /isLuoguExtensionOutdated\(.*extension_version/);
 });

@@ -129,6 +129,17 @@ export function sectionHeading(title, caption = "") {
   heading.append(text);
   return heading;
 }
+export function renderPagination(container, page, total, pageSize, change) {
+  const pageCount = Math.ceil(total / pageSize);
+  container.replaceChildren();
+  container.hidden = pageCount <= 1;
+  if (container.hidden) return;
+  const previous = button("上一页", () => change(page - 1), "button secondary");
+  previous.disabled = page <= 1;
+  const next = button("下一页", () => change(page + 1), "button secondary");
+  next.disabled = page >= pageCount;
+  container.append(previous, el("span", `第 ${page} / ${pageCount} 页`), next);
+}
 export function statusBadge(status) {
   const labels = {
     Accepted: ["通过", "green"],

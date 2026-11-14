@@ -11,6 +11,7 @@ from app.services.auth import current_user, administrator
 from app.services import training as practice
 from app.services import training_catalog as catalog
 from app.services.training_schema import ASSETS
+from app.services import contribution_rewards
 
 router = APIRouter(tags=['每日训练'])
 
@@ -75,10 +76,33 @@ class Settings(Payload):
     round_size: StrictInt = Field(ge=1, le=50)
 
 
+class ContributionPolicy(Payload):
+    questions_per_reward: StrictInt = Field(ge=1,le=10000)
+    credits_per_reward: StrictInt = Field(ge=1,le=1000000)
+
+
 @router.get('/api/training/home')
 def home(section_id: str = Query('interview', max_length=40), user=Depends(current_user)):
     with connect() as db:
         return practice.home(db, user, section_id)
+
+
+@router.get('/api/training/contribution-rewards')
+def contribution_progress(user=Depends(current_user)):
+    with connect() as db: return contribution_rewards.progress(db,user['id'])
+
+
+@router.get('/api/admin/training/contribution-rewards')
+def contribution_admin(page:int=Query(1,ge=1),user=Depends(administrator)):
+    with connect() as db: return contribution_rewards.admin_summary(db,page)
+
+
+@router.put('/api/admin/training/contribution-rewards')
+def contribution_policy(payload:ContributionPolicy,user=Depends(administrator)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        contribution_rewards.set_policy(db,user['id'],payload.questions_per_reward,payload.credits_per_reward)
+        return contribution_rewards.admin_summary(db)
 
 
 @router.post('/api/training/sessions', status_code=201)

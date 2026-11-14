@@ -184,4 +184,7 @@ def review(db, actor, qid, version, approve, reason):
         reviewed_at=?,version=version+1,updated=? WHERE id=?''',
         ('public' if approve else 'private', 'approved' if approve else 'rejected', reason, actor['id'], time.time(), time.time(), qid))
     event(db, qid, actor, 'approve' if approve else 'reject', version + 1, reason)
+    if approve:
+        from app.services.contribution_rewards import approve_question
+        approve_question(db, row)
     return serialize(db, get_question(db, qid), actor['id'])

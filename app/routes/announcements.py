@@ -1,0 +1,68 @@
+"""Authenticated announcement reads and administrator content management."""
+from typing import Literal
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from app.db import connect
+from app.services.auth import current_user, administrator
+from app.services import announcements
+
+router=APIRouter(tags=['公告'])
+
+
+class Announcement(BaseModel):
+    model_config=ConfigDict(extra='forbid')
+    title:str=Field(min_length=1,max_length=120)
+    summary:str=Field(default='',max_length=500)
+    cover_url:str=Field(default='',max_length=500)
+    blocks:list[dict]=Field(max_length=100)
+
+
+@router.get('/api/announcements')
+def published(user=Depends(current_user)):
+    with connect() as db: return announcements.list_items(db)
+
+
+@router.get('/api/announcements/{aid}')
+def published_detail(aid:int,user=Depends(current_user)):
+    with connect() as db: return announcements.get_item(db,aid,public=True)
+
+
+@router.get('/api/announcements/assets/{asset_id}')
+def image(asset_id:str,user=Depends(current_user)):
+    with connect() as db: path,mime=announcements.image_path(db,asset_id)
+    return FileResponse(path,media_type=mime,headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'})
+
+
+@router.get('/api/admin/announcements')
+def admin_list(status:Literal['','draft','published','withdrawn']='',q:str=Query('',max_length=120),actor=Depends(administrator)):
+    with connect() as db: return {'items':announcements.list_items(db,admin=True,status=status,q=q)}
+
+
+@router.post('/api/admin/announcements',status_code=201)
+def create(payload:Announcement,actor=Depends(administrator)):
+    with connect() as db: return announcements.save(db,actor['id'],aid=None,**payload.model_dump())
+
+
+@router.put('/api/admin/announcements/{aid}')
+def update(aid:int,payload:Announcement,actor=Depends(administrator)):
+    with connect() as db: return announcements.save(db,actor['id'],aid=aid,**payload.model_dump())
+
+
+@router.post('/api/admin/announcements/{aid}/status')
+def status(aid:int,payload:dict,actor=Depends(administrator)):
+    value=payload.get('status') if set(payload)=={'status'} else None
+    if value not in ('published','withdrawn','draft'): raise HTTPException(422,'公告状态无效')
+    with connect() as db: return announcements.set_status(db,aid,actor['id'],value)
+
+
+@router.post('/api/admin/announcements/assets',status_code=201)
+async def upload(file:UploadFile=File(...),actor=Depends(administrator)):
+    data=await file.read(5*1024*1024+1)
+    with connect() as db: return announcements.upload_image(db,actor['id'],data,file.content_type or '')
+
+
+@router.get('/api/admin/announcements/assets/{asset_id}')
+def admin_image(asset_id:str,actor=Depends(administrator)):
+    with connect() as db: path,mime=announcements.image_path(db,asset_id,admin=True)
+    return FileResponse(path,media_type=mime,headers={'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'})

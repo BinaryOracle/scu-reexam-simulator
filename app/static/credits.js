@@ -89,6 +89,7 @@ export async function refreshVouchers() {
 
 export async function refreshProfile() {
   const data = await api("/profile");
+  const contribution = await api("/training/contribution-rewards");
   state.user.interview_credits = data.remaining;
   $("profileUsername").textContent = data.username;
   refreshAccountSettings();
@@ -100,6 +101,24 @@ export async function refreshProfile() {
   $("profileAmount").textContent = money(data.redeemed_amount_fen);
   $("profileRedeemCount").textContent = `${data.redemptions.length} 张`;
   const shop = $("voucherShopLink");
+  const contributionRoot = $("profileContribution");
+  contributionRoot.replaceChildren();
+  const contributionHeading = el("div", "", "contribution-heading");
+  contributionHeading.append(el("div", "题库贡献奖励", "eyebrow"),
+    el("h2", contribution.exempt ? "管理员账号不参与奖励" : "分享题目，获得面试次数"));
+  const contributionProgress = el("p", contribution.exempt
+    ? "普通用户投稿审核通过并公开后计入奖励。"
+    : "当前规则：每 " + contribution.policy.questions_per_reward + " 道公开题奖励 " +
+      contribution.policy.credits_per_reward + " 次；本规则下已通过 " + contribution.approved_count +
+      " 道，再通过 " + contribution.remaining_questions + " 道可达下一奖励。", "muted");
+  contributionRoot.append(contributionHeading, contributionProgress);
+  if (!contribution.exempt) {
+    const history = el("div", "", "contribution-history");
+    for (const grant of contribution.grants.slice(0, 5))
+      history.append(el("span", "+" + grant.credits + " 次 · " + new Date(grant.created * 1000).toLocaleDateString("zh-CN")));
+    if (!contribution.grants.length) history.append(el("span", "审核通过的投稿达到规则数量后，会在这里显示奖励记录。"));
+    contributionRoot.append(history);
+  }
   shop.hidden = !data.shop_url;
   if (data.shop_url) shop.href = data.shop_url;
   else shop.removeAttribute("href");

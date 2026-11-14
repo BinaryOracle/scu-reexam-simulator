@@ -31,6 +31,7 @@ from app.routes.profile_account import router as profile_account_router
 
 from app.routes.training import router as training_router
 from app.routes.credit_transfers import router as credit_transfers_router
+from app.routes.announcements import router as announcements_router
 
 initialize()
 app = FastAPI(title='复试模拟系统')
@@ -49,7 +50,13 @@ app.include_router(email_auth_router)
 app.include_router(profile_account_router)
 app.include_router(training_router)
 app.include_router(credit_transfers_router)
+app.include_router(announcements_router)
 app.mount('/static', StaticFiles(directory=ROOT / 'app/static'), name='static')
+
+@app.get('/api/home/resources')
+def home_resources(user=Depends(current_user)):
+    catalog=ROOT/'app/assets/home-resources-v1.json'
+    return JSONResponse(json.loads(catalog.read_text(encoding='utf-8')),headers={'Cache-Control':'no-cache'})
 
 class Login(BaseModel):
     username: str
@@ -66,11 +73,14 @@ class Problem(BaseModel):
     samples: list[PublicSample] = Field(default_factory=list, max_length=100)
     tests: list[dict[str, str]] = Field(default_factory=list, max_length=50)
     remote_problem_id: str = Field(default='', max_length=32)
+    points: int = Field(default=100, ge=0, le=100000)
 class ContestInfo(BaseModel):
     model_config = ConfigDict(allow_inf_nan=False)
     title: str = Field(min_length=1, max_length=100)
     starts: float
     ends: float
+    show_ranking: bool = True
+    ranking_rule: str = Field(default='score', pattern='^(score|acm)$')
 
     @field_validator('title')
     @classmethod
@@ -90,7 +100,7 @@ class InterviewTitle(BaseModel):
 class SubjectChoice(BaseModel):
     subject: str = Field(pattern='^(data_structures|operating_systems|computer_networks)$')
 class Submission(BaseModel):
-    language: str = 'python3'
+    language: str = Field(default='cpp11', pattern='^(cpp11|cpp14|c|python3|java|go)$')
     source: str = Field(min_length=1, max_length=30000)
 class RemoteSubmissionResult(BaseModel):
     remote_submission_id: str = Field(default='', max_length=64)
@@ -443,9 +453,59 @@ def contest_overview(cid: int, user=Depends(exam_user)):
     with connect() as db:
         contest = db.execute('SELECT * FROM contests WHERE id=?', (cid,)).fetchone()
         if not contest: raise HTTPException(404, '比赛不存在')
-        problems = [dict(row) for row in db.execute(
-            'SELECT id,title,remote_problem_id FROM problems WHERE contest_id=? ORDER BY id', (cid,))]
+        problems = [dict(row) for row in db.execute('''SELECT problems.id,title,remote_problem_id,points,
+            (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
+                WHERE problem_id=problems.id AND users.is_admin=0) AS attempt_count,
+            (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
+                WHERE problem_id=problems.id AND status='Accepted' AND users.is_admin=0) AS accepted_count
+            FROM problems WHERE contest_id=? ORDER BY id''', (cid,))]
         return {**dict(contest), 'problem_count': len(problems), 'problems': problems}
+
+
+@app.get('/api/contests/{cid}/ranking')
+def contest_ranking(cid: int, user=Depends(exam_user)):
+    """Return the configured contest ranking and per-problem attempt counts."""
+    with connect() as db:
+        contest = db.execute('SELECT id,show_ranking,ranking_rule FROM contests WHERE id=?', (cid,)).fetchone()
+        if not contest: raise HTTPException(404, '比赛不存在')
+        problems = [dict(row) for row in db.execute('''SELECT problems.id,problems.title,problems.points,
+            (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
+                WHERE problem_id=problems.id AND users.is_admin=0) AS attempt_count,
+            (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
+                WHERE problem_id=problems.id AND status='Accepted' AND users.is_admin=0) AS accepted_count
+            FROM problems WHERE contest_id=? ORDER BY id''', (cid,))]
+        if not contest['show_ranking']:
+            return {'visible': False, 'ranking_rule': contest['ranking_rule'], 'problems': problems, 'rows': []}
+        users = list(db.execute('''SELECT DISTINCT users.id,users.username FROM submissions
+            JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
+            WHERE problems.contest_id=? AND users.is_admin=0''', (cid,)))
+        rows = []
+        for candidate in users:
+            per_problem = []
+            score = accepted = attempts = 0
+            first_accept = None
+            for problem in problems:
+                submissions = list(db.execute('''SELECT status,created FROM submissions
+                    WHERE user_id=? AND problem_id=? ORDER BY id''', (candidate['id'], problem['id'])))
+                accepted_rows = [row for row in submissions if row['status'] == 'Accepted']
+                solved = bool(accepted_rows)
+                attempts += len(submissions)
+                accepted += int(solved)
+                if solved:
+                    score += problem['points']
+                    solved_at = accepted_rows[0]['created']
+                    first_accept = solved_at if first_accept is None else min(first_accept, solved_at)
+                per_problem.append({'problem_id': problem['id'], 'attempts': len(submissions),
+                    'accepted': len(accepted_rows), 'solved': solved})
+            rows.append({'user_id': candidate['id'], 'username': candidate['username'], 'score': score,
+                'accepted_count': accepted, 'attempt_count': attempts, 'first_accepted_at': first_accept,
+                'problems': per_problem})
+        if contest['ranking_rule'] == 'acm':
+            rows.sort(key=lambda item: (-item['accepted_count'], item['attempt_count'], item['first_accepted_at'] or float('inf'), item['username'].casefold()))
+        else:
+            rows.sort(key=lambda item: (-item['score'], -item['accepted_count'], item['attempt_count'], item['first_accepted_at'] or float('inf'), item['username'].casefold()))
+        for rank, row in enumerate(rows, 1): row['rank'] = rank
+        return {'visible': True, 'ranking_rule': contest['ranking_rule'], 'problems': problems, 'rows': rows}
 
 @app.get('/api/admin/luogu/problem-suggestions')
 def luogu_problem_suggestions(q: str = Query(min_length=1, max_length=64), user=Depends(administrator)):
@@ -467,7 +527,8 @@ def luogu_problem_details(problem_id: str, user=Depends(administrator)):
 def create_contest(payload: Contest, user=Depends(administrator)):
     if payload.ends <= payload.starts: raise HTTPException(400, '结束时间必须晚于开始时间')
     with connect() as db:
-        iid = db.execute('INSERT INTO contests(title,starts,ends,judge_mode) VALUES (?,?,?,?)', (payload.title, payload.starts, payload.ends,payload.judge_mode)).lastrowid
+        iid = db.execute('INSERT INTO contests(title,starts,ends,judge_mode,show_ranking,ranking_rule) VALUES (?,?,?,?,?,?)',
+            (payload.title, payload.starts, payload.ends,payload.judge_mode,int(payload.show_ranking),payload.ranking_rule)).lastrowid
         problem_ids = []
         seen = set()
         for problem in payload.problems:
@@ -479,8 +540,8 @@ def create_contest(payload: Contest, user=Depends(administrator)):
                 seen.add(problem.remote_problem_id)
             elif not problem.tests or any(set(case) != {'input', 'output'} for case in problem.tests):
                 raise HTTPException(400, '本地评测需要至少一组 input/output 测试用例')
-            pid = db.execute('''INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,remote_problem_id,samples)
-                VALUES (?,?,?,?,?,?,?,?)''', (iid, *problem_values(problem))).lastrowid
+            pid = db.execute('''INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,remote_problem_id,samples,points)
+                VALUES (?,?,?,?,?,?,?,?,?)''', (iid, *problem_values(problem), problem.points)).lastrowid
             problem_ids.append(pid)
         return {'id': iid, 'problem_ids': problem_ids}
 
@@ -523,12 +584,12 @@ def update_contest(cid: int, payload: ContestUpdate, user=Depends(administrator)
                 if problem.id is not None and (not old or old['remote_problem_id'] != problem.remote_problem_id):
                     raise HTTPException(400, '题目不属于本比赛或题号发生变化，请重新打开编辑页')
                 if old:
-                    db.execute('''UPDATE problems SET title=?,statement=?,sample_input=?,sample_output=?,tests=?,remote_problem_id=?,samples=?
-                        WHERE id=?''', (*problem_values(problem), old['id']))
+                    db.execute('''UPDATE problems SET title=?,statement=?,sample_input=?,sample_output=?,tests=?,remote_problem_id=?,samples=?,points=?
+                        WHERE id=?''', (*problem_values(problem), problem.points, old['id']))
                     keep.append(old['id'])
                 else:
-                    pid = db.execute('''INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,remote_problem_id,samples)
-                        VALUES (?,?,?,?,?,?,?,?)''', (cid, *problem_values(problem))).lastrowid
+                    pid = db.execute('''INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,remote_problem_id,samples,points)
+                        VALUES (?,?,?,?,?,?,?,?,?)''', (cid, *problem_values(problem), problem.points)).lastrowid
                     keep.append(pid)
             for old in existing:
                 if old['id'] in keep: continue
@@ -536,7 +597,8 @@ def update_contest(cid: int, payload: ContestUpdate, user=Depends(administrator)
                     raise HTTPException(409, '不能移除已有提交记录的题目；可修改比赛信息或新增题目')
                 db.execute('DELETE FROM problems WHERE id=?', (old['id'],))
             ids = keep
-        db.execute('UPDATE contests SET title=?,starts=?,ends=? WHERE id=?', (payload.title, payload.starts, payload.ends, cid))
+        db.execute('UPDATE contests SET title=?,starts=?,ends=?,show_ranking=?,ranking_rule=? WHERE id=?',
+            (payload.title, payload.starts, payload.ends, int(payload.show_ranking), payload.ranking_rule, cid))
         return {'id': cid, 'problem_ids': ids}
 
 
@@ -581,7 +643,7 @@ def create_problem(cid: int, payload: Problem, user=Depends(administrator)):
             if not re.fullmatch(r'[A-Z]{1,4}[0-9]{1,8}', payload.remote_problem_id): raise HTTPException(400, '洛谷题目编号格式无效，例如 P1000')
         elif not payload.tests or any(set(case) != {'input', 'output'} for case in payload.tests):
             raise HTTPException(400, '本地评测需要至少一组 input/output 测试用例')
-        pid = db.execute('INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,remote_problem_id,samples) VALUES (?,?,?,?,?,?,?,?)', (cid, *problem_values(payload))).lastrowid
+        pid = db.execute('INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,remote_problem_id,samples,points) VALUES (?,?,?,?,?,?,?,?,?)', (cid, *problem_values(payload), payload.points)).lastrowid
         return {'id': pid}
 
 @app.get('/api/contests/{cid}/problems')
@@ -590,7 +652,13 @@ def problems(cid: int, user=Depends(exam_user)):
         contest = db.execute('SELECT * FROM contests WHERE id=?', (cid,)).fetchone()
         if not contest: raise HTTPException(404, '比赛不存在')
         if time.time() < contest['starts']: raise HTTPException(403, '比赛尚未开始')
-        return [{**public_problem(row), 'judge_mode': contest['judge_mode']} for row in db.execute('SELECT * FROM problems WHERE contest_id=? ORDER BY id', (cid,))]
+        return [{**public_problem(row), 'judge_mode': contest['judge_mode'],
+            'points': row['points'],
+            'attempt_count': db.execute('''SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
+                WHERE problem_id=? AND users.is_admin=0''', (row['id'],)).fetchone()[0],
+            'accepted_count': db.execute("""SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
+                WHERE problem_id=? AND status='Accepted' AND users.is_admin=0""", (row['id'],)).fetchone()[0]}
+            for row in db.execute('SELECT * FROM problems WHERE contest_id=? ORDER BY id', (cid,))]
 
 @app.post('/api/problems/{pid}/submissions')
 def submit(pid: int, payload: Submission, user=Depends(exam_user)):
@@ -598,6 +666,8 @@ def submit(pid: int, payload: Submission, user=Depends(exam_user)):
         p = db.execute('SELECT problems.*,contests.starts,contests.ends,contests.judge_mode FROM problems JOIN contests ON contests.id=problems.contest_id WHERE problems.id=?', (pid,)).fetchone()
         if not p: raise HTTPException(404, '题目不存在')
         if not p['starts'] <= time.time() <= p['ends']: raise HTTPException(403, '不在比赛时间内')
+        if p['judge_mode'] == 'docker' and payload.language != 'python3':
+            raise HTTPException(422, '历史本地评测比赛目前仅支持 Python 3')
         initial = 'Waiting for browser extension' if p['judge_mode'] == 'luogu' else 'Judging'
         sid = db.execute('INSERT INTO submissions(user_id,problem_id,language,source,status,created) VALUES (?,?,?,?,?,?)', (user['id'],pid,payload.language,payload.source,initial,time.time())).lastrowid
     if p['judge_mode'] == 'luogu': return {'id': sid, 'status': initial, 'judge_mode': 'luogu', 'remote_problem_id': p['remote_problem_id']}
@@ -626,7 +696,35 @@ def update_remote_submission(sid: int, payload: RemoteSubmissionResult, user=Dep
         return {'id':sid,'remote_submission_id':payload.remote_submission_id,'status':payload.status}
 
 @app.get('/api/submissions')
-def submissions(user=Depends(exam_user)):
+def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
+                contest_id: int | None = Query(default=None, ge=1), user=Depends(exam_user)):
     with connect() as db:
-        return [dict(row) for row in db.execute('''SELECT submissions.id,username,problem_id,language,status,created,remote_submission_id,detail
-            FROM submissions JOIN users ON users.id=submissions.user_id WHERE user_id=? ORDER BY submissions.id DESC''', (user['id'],))]
+        where = 'submissions.user_id=?'
+        params: list[object] = [user['id']]
+        if contest_id is not None:
+            where += ' AND problems.contest_id=?'
+            params.append(contest_id)
+        joins = 'JOIN problems ON problems.id=submissions.problem_id'
+        total = db.execute(f'SELECT COUNT(*) FROM submissions {joins} WHERE {where}', params).fetchone()[0]
+        rows = [dict(row) for row in db.execute(f'''SELECT submissions.id,username,problem_id,problems.title AS problem_title,
+            language,status,created,remote_submission_id,detail FROM submissions JOIN users ON users.id=submissions.user_id
+            {joins} WHERE {where} ORDER BY submissions.id DESC LIMIT ? OFFSET ?''', (*params,page_size,(page-1)*page_size))]
+        pages = (total + page_size - 1) // page_size
+        stats = db.execute(f'''SELECT SUM(CASE WHEN status='Accepted' THEN 1 ELSE 0 END) AS accepted,
+            SUM(CASE WHEN status IN ('Waiting for browser extension','Submitted','Judging') THEN 1 ELSE 0 END) AS judging
+            FROM submissions {joins} WHERE {where}''', params).fetchone()
+        return {'items': rows, 'total': total, 'page': page, 'page_size': page_size, 'pages': pages,
+            'stats': {'accepted': stats['accepted'] or 0, 'judging': stats['judging'] or 0}}
+
+
+@app.get('/api/submissions/{sid}')
+def submission_detail(sid: int, user=Depends(exam_user)):
+    """Return source and judge details only to the submission owner."""
+    with connect() as db:
+        row = db.execute('''SELECT submissions.id,submissions.user_id,submissions.problem_id,problems.title AS problem_title,
+            contests.title AS contest_title,submissions.language,submissions.source,submissions.status,submissions.created,
+            submissions.remote_submission_id,submissions.detail FROM submissions
+            JOIN problems ON problems.id=submissions.problem_id JOIN contests ON contests.id=problems.contest_id
+            WHERE submissions.id=? AND submissions.user_id=?''', (sid,user['id'])).fetchone()
+        if not row: raise HTTPException(404, '提交记录不存在')
+        return dict(row)

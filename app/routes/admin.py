@@ -5,7 +5,7 @@ import re
 from typing import Annotated
 from pathlib import Path
 from urllib.parse import urlsplit
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 from app.db import allocate_user_id, connect
@@ -335,12 +335,47 @@ def problems(cid: int):
     with connect() as db:
         if not db.execute('SELECT 1 FROM contests WHERE id=?', (cid,)).fetchone():
             raise HTTPException(404, '比赛不存在')
-        return [public_problem(row) for row in db.execute('SELECT * FROM problems WHERE contest_id=? ORDER BY id', (cid,))]
+        return [{**public_problem(row), 'points': row['points'],
+            'attempt_count': db.execute('''SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
+                WHERE problem_id=? AND users.is_admin=0''', (row['id'],)).fetchone()[0],
+            'accepted_count': db.execute("""SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
+                WHERE problem_id=? AND status='Accepted' AND users.is_admin=0""", (row['id'],)).fetchone()[0]}
+            for row in db.execute('SELECT * FROM problems WHERE contest_id=? ORDER BY id', (cid,))]
 
 
 @router.get('/submissions')
-def submissions(actor=Depends(administrator)):
+def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
+                contest_id: int | None = Query(default=None, ge=1), actor=Depends(administrator)):
     with connect() as db:
-        return [dict(row) for row in db.execute('''SELECT submissions.id,username,problem_id,language,status,created,remote_submission_id,detail
-            FROM submissions JOIN users ON users.id=submissions.user_id WHERE (? OR users.is_admin=0)
-            ORDER BY submissions.id DESC''', (actor['is_superadmin'],))]
+        clauses = []
+        params: list[object] = []
+        if not actor['is_superadmin']: clauses.append('users.is_admin=0')
+        if contest_id is not None:
+            clauses.append('problems.contest_id=?')
+            params.append(contest_id)
+        where = 'WHERE ' + ' AND '.join(clauses) if clauses else ''
+        total = db.execute(f'''SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
+            JOIN problems ON problems.id=submissions.problem_id {where}''', params).fetchone()[0]
+        rows = [dict(row) for row in db.execute(f'''SELECT submissions.id,username,problem_id,problems.title AS problem_title,
+            language,status,created,remote_submission_id,detail FROM submissions
+            JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
+            {where} ORDER BY submissions.id DESC LIMIT ? OFFSET ?''', (*params,page_size,(page-1)*page_size))]
+        stats = db.execute(f'''SELECT SUM(CASE WHEN status='Accepted' THEN 1 ELSE 0 END) AS accepted,
+            SUM(CASE WHEN status IN ('Waiting for browser extension','Submitted','Judging') THEN 1 ELSE 0 END) AS judging
+            FROM submissions JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id {where}''', params).fetchone()
+        return {'items': rows, 'total': total, 'page': page, 'page_size': page_size,
+            'pages': (total+page_size-1)//page_size,
+            'stats': {'accepted': stats['accepted'] or 0, 'judging': stats['judging'] or 0}}
+
+
+@router.get('/submissions/{sid}')
+def submission_detail(sid: int, actor=Depends(administrator)):
+    with connect() as db:
+        row = db.execute('''SELECT submissions.id,submissions.user_id,submissions.problem_id,users.username,
+            problems.title AS problem_title,contests.title AS contest_title,submissions.language,submissions.source,
+            submissions.status,submissions.created,submissions.remote_submission_id,submissions.detail
+            FROM submissions JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
+            JOIN contests ON contests.id=problems.contest_id WHERE submissions.id=? AND (? OR users.is_admin=0)''',
+            (sid,actor['is_superadmin'])).fetchone()
+        if not row: raise HTTPException(404, '提交记录不存在')
+        return dict(row)

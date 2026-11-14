@@ -1,7 +1,7 @@
 /** Daily practice cards, sequential review, favorites and private contributions. */
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
-import { selectField, pagination, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261114-training-v10';
+import { selectField, pagination, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261114-ui-v18';
 let generation = 0, homeData = null, session = null;
 let listRequest = 0;
 let section = 'interview';
@@ -30,6 +30,10 @@ export async function refreshTraining() {
   if (collection && !value.collections.some(c => c.id === collection)) collection='';
   render();
   if (tab !== 'home') await list();
+}
+
+export function selectTrainingSection(value) {
+  if (['interview','written_c','written_ai'].includes(value)) section = value;
 }
 function render() {
   listRequest++;

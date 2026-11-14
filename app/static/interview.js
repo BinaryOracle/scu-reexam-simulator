@@ -16,7 +16,8 @@ import {
   confirmAction,
   requestText,
   run,
-} from "./ui.js?v=20261114-ui-v17";
+  renderPagination,
+} from "./ui.js?v=20261114-ui-v18";
 
 let activeInterview = null;
 let selectedStage = 1;
@@ -27,6 +28,11 @@ const feedbackRequests = new Map();
 const feedbackViewDirty = new Set();
 const openUserArchives = new Set();
 let archiveQuery = "";
+let archivePage = 1;
+let interviewQuery = "";
+let interviewPage = 1;
+let interviewItems = [];
+const interviewPageSize = 8;
 let timerHandle = null;
 let timerInterviewId = null;
 let timerDock = null;
@@ -373,12 +379,17 @@ export async function refreshInterviews() {
     catch (error) { /* A restricted browser can still start and finish a session. */ }
     if (allItems.some(item => item.id === resumeId && item.status !== "finished")) await openInterview(resumeId);
   }
-  const items = allItems.filter(item => item.status === "finished");
-  $("interviewFinished").textContent = items.length;
+  interviewItems = allItems.filter(item => item.status === "finished");
+  $("interviewFinished").textContent = interviewItems.length;
+  renderInterviewList();
+}
+function renderInterviewList() {
   const list = $("interviewList");
   list.replaceChildren();
   list.classList.toggle("is-user-archive", reviewMode());
-  if (!items.length) {
+  $("interviewListToolbar").hidden = reviewMode() || !interviewItems.length;
+  $("interviewPagination").hidden = reviewMode();
+  if (!interviewItems.length) {
     list.append(
       emptyState(
         reviewMode() ? "还没有用户面试记录" : "你的第一次模拟，从这里开始",
@@ -389,7 +400,31 @@ export async function refreshInterviews() {
     );
     return;
   }
-  const cards = items.map(item => {
+  if (reviewMode()) {
+    renderUserArchives(list, interviewItems, interviewItems.map(renderInterviewCard));
+    return;
+  }
+  const query = interviewQuery.trim().toLocaleLowerCase();
+  const matching = interviewItems.filter(item =>
+    `${item.title || `计算机复试模拟 #${item.id}`} ${item.id} ${String(item.id).padStart(3, "0")} ${dateTime(item.created)}`
+      .toLocaleLowerCase().includes(query),
+  );
+  $("interviewResultCount").textContent = query ? `匹配 ${matching.length} 场` : `共 ${matching.length} 场`;
+  interviewPage = Math.min(interviewPage, Math.max(1, Math.ceil(matching.length / interviewPageSize)));
+  if (!matching.length) list.append(emptyState("没有匹配的面试记录", "请尝试其他面试名称或编号。"));
+  const start = (interviewPage - 1) * interviewPageSize;
+  list.append(...matching.slice(start, start + interviewPageSize).map(renderInterviewCard));
+  renderPagination($("interviewPagination"), interviewPage, matching.length, interviewPageSize, (page) => {
+    interviewPage = page;
+    renderInterviewList();
+  });
+}
+$("interviewSearch").addEventListener("input", () => {
+  interviewQuery = $("interviewSearch").value;
+  interviewPage = 1;
+  renderInterviewList();
+});
+function renderInterviewCard(item) {
     const statusLabel = item.status === "finished" ? "已完成" : item.status === "expired" ? "已超时" : item.status === "preparing" ? "待开始" : "进行中";
     const card = el("article", "", "record-card");
     const top = el("div", "", "record-top");
@@ -443,9 +478,6 @@ export async function refreshInterviews() {
     );
     card.append(top, el("h3", item.title || `计算机复试模拟 #${item.id}`), meta, bottom);
     return card;
-  });
-  if (reviewMode()) renderUserArchives(list, items, cards);
-  else list.append(...cards);
 }
 /** Group authorized records by stable user ID, keeping each user's archive collapsed initially. */
 function renderUserArchives(list, items, cards) {
@@ -465,12 +497,15 @@ function renderUserArchives(list, items, cards) {
   const count = el("span", `${groups.size} 位用户 · ${items.length} 场已完成面试`, "archive-count");
   toolbar.append(searchLabel, input, count);
   const results = el("div", "", "archive-groups");
+  const pagination = el("nav", "", "list-pagination");
   const render = () => {
     results.replaceChildren();
     const matching = [...groups.values()].filter(group => group.name.toLocaleLowerCase().includes(archiveQuery.trim().toLocaleLowerCase()))
       .sort((a, b) => b.latest - a.latest);
+    archivePage = Math.min(archivePage, Math.max(1, Math.ceil(matching.length / interviewPageSize)));
     if (!matching.length) results.append(emptyState("没有匹配的用户", "请尝试其他用户名。"));
-    for (const group of matching) {
+    const start = (archivePage - 1) * interviewPageSize;
+    for (const group of matching.slice(start, start + interviewPageSize)) {
       const archive = el("details", "", "archive-user");
       archive.open = openUserArchives.has(group.id);
       const summary = el("summary", "", "archive-user-summary");
@@ -487,9 +522,13 @@ function renderUserArchives(list, items, cards) {
       });
       results.append(archive);
     }
+    renderPagination(pagination, archivePage, matching.length, interviewPageSize, (page) => {
+      archivePage = page;
+      render();
+    });
   };
-  input.addEventListener("input", () => { archiveQuery = input.value; render(); });
-  list.append(toolbar, results);
+  input.addEventListener("input", () => { archiveQuery = input.value; archivePage = 1; render(); });
+  list.append(toolbar, results, pagination);
   render();
 }
 export async function startInterview() {
@@ -771,6 +810,14 @@ function renderInterview() {
     container.append(feedback);
   }
   if (answerReview.childElementCount) container.append(answerReview);
+  const reviewTranscript = answerReview.querySelector(".transcript-editor.is-review .answer-transcript");
+  if (reviewTranscript && !CSS.supports("field-sizing", "content")) {
+    requestAnimationFrame(() => {
+      if (!reviewTranscript.isConnected) return;
+      reviewTranscript.style.height = "auto";
+      reviewTranscript.style.height = `${Math.min(reviewTranscript.scrollHeight, window.innerHeight * 0.6)}px`;
+    });
+  }
   if (item.workflow_version >= 4) {
     const signature = JSON.stringify([item.id, readOnly, sessionAudio.active,
       sessionAudio.pending, item.recordings]);
@@ -1563,6 +1610,11 @@ export function clearInterviewState() {
   feedbackViewDirty.clear();
   openUserArchives.clear();
   archiveQuery = "";
+  archivePage = 1;
+  interviewQuery = "";
+  interviewPage = 1;
+  interviewItems = [];
+  $("interviewSearch").value = "";
   collapsedFeedback.clear();
   expertSpeechPlaying = false;
   preparationFile = null;
@@ -1596,6 +1648,8 @@ export function clearInterviewState() {
 }
 export function configureInterviewMode() {
   $("newInterview").hidden = reviewMode();
+  $("interviewListToolbar").hidden = reviewMode();
+  $("interviewPagination").hidden = reviewMode();
   if (reviewMode()) {
     $("interviewTitle").replaceChildren(
       document.createTextNode("面试记录"),

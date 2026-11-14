@@ -55,7 +55,10 @@ def test_contest_access_and_hidden_cases(client, monkeypatch):
     created=client.post('/api/admin/contests',headers=t,json=body).json()
     cid,pid=created['id'],created['problem_ids'][0]
     assert 'tests' not in client.get(f'/api/contests/{cid}/problems',headers=a).json()[0]
-    r=client.post(f'/api/problems/{pid}/submissions',headers=a,json={'source':'print(3)'})
+    unsupported=client.post(f'/api/problems/{pid}/submissions',headers=a,json={'source':'int main(){}','language':'cpp11'})
+    assert unsupported.status_code == 422
+    assert client.get(f'/api/contests/{cid}',headers=a).json()['problems'][0]['attempt_count'] == 0
+    r=client.post(f'/api/problems/{pid}/submissions',headers=a,json={'source':'print(3)','language':'python3'})
     assert r.json()['status']=='Accepted'
     expired=client.post('/api/admin/contests',headers=t,json={'title':'过期','starts':now-100,'ends':now-10,'judge_mode':'docker','problems':[
         {'title':'题','statement':'题','tests':[{'input':'','output':''}]}]}).json()['id']
@@ -80,7 +83,7 @@ def test_luogu_submission_waits_for_browser_bridge_and_accepts_remote_result(cli
     assert response.json()['status'] == 'Waiting for browser extension'
     assert response.json()['remote_problem_id'] == 'P1000'
     sid = response.json()['id']
-    assert client.get('/api/submissions', headers=alice).json()[0]['status'] == 'Waiting for browser extension'
+    assert client.get('/api/submissions', headers=alice).json()['items'][0]['status'] == 'Waiting for browser extension'
     assert client.post(f'/api/submissions/{sid}/remote-result', headers=alice, json={
         'remote_submission_id':'8123456','status':'Judging'
     }).status_code == 200
@@ -107,6 +110,61 @@ def test_luogu_submission_waits_for_browser_bridge_and_accepts_remote_result(cli
     assert client.post(f'/api/submissions/{sid}/remote-result', headers=login(client,'bob'), json={
         'remote_submission_id':'8123456','status':'Wrong Answer'
     }).status_code == 404
+
+def test_submissions_are_paginated_have_private_details_and_feed_contest_ranking(client):
+    manager, alice, bob = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
+    now = time.time()
+    contest = client.post('/api/admin/contests', headers=manager, json={
+        'title':'成绩赛','starts':now-10,'ends':now+100,'show_ranking':True,
+        'ranking_rule':'score','problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000','points':250}]
+    }).json()
+    pid = contest['problem_ids'][0]
+    admin_attempt = client.post(f'/api/problems/{pid}/submissions', headers=manager,
+                                json={'source':'int main(){return 0;}','language':'cpp11'})
+    assert admin_attempt.status_code == 200
+    assert client.get(f'/api/contests/{contest["id"]}', headers=alice).json()['problems'][0]['attempt_count'] == 0
+    first = client.post(f'/api/problems/{pid}/submissions', headers=alice, json={'source':'int main(){}','language':'cpp11'}).json()['id']
+    client.post(f'/api/submissions/{first}/remote-result', headers=alice, json={
+        'remote_submission_id':'8123456','status':'Wrong Answer','detail':'测试点 2 答案错误'
+    })
+    overview = client.get(f'/api/contests/{contest["id"]}', headers=alice).json()
+    assert overview['problems'][0]['attempt_count'] == 1
+    assert overview['problems'][0]['accepted_count'] == 0
+    second = client.post(f'/api/problems/{pid}/submissions', headers=alice, json={'source':'int main(){return 0;}','language':'cpp11'}).json()['id']
+    client.post(f'/api/submissions/{second}/remote-result', headers=alice, json={
+        'remote_submission_id':'8123457','status':'Accepted'
+    })
+
+    page = client.get('/api/submissions?page=1&page_size=1', headers=alice)
+    assert page.status_code == 200
+    assert page.json()['total'] == 2 and page.json()['pages'] == 2
+    detail = client.get(f'/api/submissions/{first}', headers=alice)
+    assert detail.status_code == 200
+    assert detail.json()['source'] == 'int main(){}'
+    assert detail.json()['detail'] == '测试点 2 答案错误'
+    assert client.get(f'/api/submissions/{first}', headers=bob).status_code == 404
+
+    overview = client.get(f'/api/contests/{contest["id"]}', headers=alice).json()
+    assert overview['problems'][0]['attempt_count'] == 2
+    assert overview['problems'][0]['accepted_count'] == 1
+    ranking = client.get(f'/api/contests/{contest["id"]}/ranking', headers=alice)
+    assert ranking.status_code == 200
+    assert ranking.json()['rows'][0]['username'] == 'alice'
+    assert ranking.json()['rows'][0]['score'] == 250
+    assert ranking.json()['rows'][0]['problems'][0]['attempts'] == 2
+
+def test_contest_ranking_can_be_hidden_and_invalid_language_is_rejected(client):
+    manager, alice = login(client, 'manager'), login(client, 'alice')
+    now = time.time()
+    contest = client.post('/api/admin/contests', headers=manager, json={
+        'title':'不公开榜单','starts':now-10,'ends':now+100,'show_ranking':False,
+        'problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000'}]
+    }).json()
+    response = client.get(f'/api/contests/{contest["id"]}/ranking', headers=alice)
+    assert response.status_code == 200 and response.json()['visible'] is False
+    invalid = client.post(f'/api/problems/{contest["problem_ids"][0]}/submissions', headers=alice,
+                          json={'source':'x','language':'brainfuck'})
+    assert invalid.status_code == 422
 
 def test_old_oj_schema_migrates_without_changing_local_judge_defaults(tmp_path, monkeypatch):
     config = Path('config.example.toml').read_text()
@@ -229,7 +287,7 @@ def test_admin_can_delete_contest_and_its_problem_submissions(client):
     assert client.delete(f'/api/admin/contests/{cid}', headers=alice).status_code == 403
     assert client.delete(f'/api/admin/contests/{cid}', headers=manager).status_code == 204
     assert all(row['id'] != cid for row in client.get('/api/contests', headers=alice).json())
-    assert client.get('/api/submissions', headers=alice).json() == []
+    assert client.get('/api/submissions', headers=alice).json()['items'] == []
     assert client.get(f'/api/contests/{cid}/problems', headers=alice).status_code == 404
 
 def test_audio_saved_when_asr_unconfigured(client):

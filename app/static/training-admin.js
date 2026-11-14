@@ -1,7 +1,7 @@
 /** Training-only administration; submission review never lists private drafts. */
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, notify, badge, requestText } from './ui.js?v=20261114-ui-v17';
-import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261114-training-v10';
+import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261114-ui-v18';
 let listRequest=0;
 let generation=0, settings=null, tab='pending', page=1, query='', collection='', section='';
 function live(key,token) { return key===generation && token===state.token && !$('trainingAdmin').hidden; }
@@ -17,10 +17,11 @@ function render() {
   const head=el('div','','page-heading');const title=el('div');title.append(el('span','DAILY PRACTICE','eyebrow'),el('h1','训练题库'),el('p','维护参考答案，认真对待每一份分享。','muted'));
   head.append(title,button('新增公开题',()=>questionEditor(settings.collections,null,async data=>{await api('/admin/training/questions',{method:'POST',body:JSON.stringify(data)});notify('公开训练题已保存');await list();},true,section||'interview',collection),'button primary'));root.append(head);
   const tabs=el('div','','learning-tabs');
-  for(const [value,label] of [['pending','投稿审核'],['public','公开题库'],['rewards','打卡奖励'],['settings','训练设置']]) {
+  for(const [value,label] of [['pending','投稿审核'],['public','公开题库'],['rewards','打卡奖励'],['contribution','投稿奖励'],['settings','训练设置']]) {
     const control=button(label,async()=>{tab=value;page=1;render();await list();},`button ${tab===value?'primary':'quiet'}`);control.setAttribute('aria-pressed',String(tab===value));tabs.append(control);
   }root.append(tabs);
   if(tab==='settings'){renderSettings(root);return;}
+  if(tab==='contribution'){renderContribution(root);return;}
   if(tab!=='rewards'){
     const filters=el('form','','learning-filters');
     const chapter=selectField('篇章筛选',[['','全部篇章'],...Object.entries(chapterNames)],section);
@@ -35,7 +36,7 @@ function render() {
   const listNode=el('div','','learning-list');listNode.id='trainingAdminList';root.append(listNode);
 }
 async function list() {
-  if(tab==='settings'||$('trainingAdmin').hidden||!state.user?.is_admin)return;
+  if(tab==='settings'||tab==='contribution'||$('trainingAdmin').hidden||!state.user?.is_admin)return;
   const request=++listRequest;
   const key=generation,token=state.token,current=tab;
   const params=new URLSearchParams({section_id:section,page,status:tab,collection_id:collection,q:query});
@@ -63,6 +64,24 @@ async function list() {
       }
     }row.append(info,actions);root.append(row);
   }pagination(root,result,async value=>{page=value;await list();});
+}
+
+async function renderContribution(root) {
+  const value=await api('/admin/training/contribution-rewards');
+  const panel=el('section','','panel contribution-admin');
+  const heading=el('div');heading.append(el('span','CONTRIBUTION REWARDS','eyebrow'),el('h2','题库投稿奖励'),el('p','仅统计规则生效后审核通过并公开的普通用户题目。规则变更不重算历史投稿。','muted'));
+  const form=el('form','','contribution-policy-form');
+  const questions=el('input');questions.type='number';questions.min='1';questions.max='10000';questions.required=true;questions.value=String(value.policy.questions_per_reward);
+  const credits=el('input');credits.type='number';credits.min='1';credits.max='1000000';credits.required=true;credits.value=String(value.policy.credits_per_reward);
+  for(const [text,input] of [['审核通过题数',questions],['奖励面试次数',credits]]){const label=el('label',text);label.append(input);form.append(label);}
+  form.append(button('保存新规则',async()=>{
+    await api('/admin/training/contribution-rewards',{method:'PUT',body:JSON.stringify({questions_per_reward:Number(questions.value),credits_per_reward:Number(credits.value)})});
+    notify('投稿奖励新规则已生效');await refreshTrainingAdmin();
+  },'button primary'));
+  panel.append(heading,form,el('p','当前统计 ' + value.total + ' 个普通用户 · 规则版本 ' + value.policy.id,'muted'));
+  const table=el('div','','contribution-admin-list');
+  for(const item of value.items){const row=el('div','','contribution-admin-row');row.append(el('strong',item.username),el('span',item.approved_count+' 道通过'),el('span','累计 +'+item.credits_earned+' 次'));table.append(row);}
+  panel.append(table);root.append(panel);
 }
 function renderSettings(root){
   const panel=el('section','','learning-setup');panel.append(el('h2','每日目标与练习长度'),el('p','目标修改对下一个自然日或当天尚未开始训练的用户生效，已开始用户保留当日目标。','muted'));

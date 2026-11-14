@@ -7,8 +7,8 @@
     <title>知序 · 复试模拟系统</title>
     <link rel="icon" href="/static/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=0.19.1" />
-    <link rel="stylesheet" href="/static/style.css?v=20261114-oj-v3" />
-    <link rel="stylesheet" href="/static/training.css?v=20261114-training-v10" />
+    <link rel="stylesheet" href="/static/style.css?v=20261114-captcha-v2" />
+    <link rel="stylesheet" href="/static/training.css?v=20261114-training-v11" />
     <link rel="stylesheet" href="/static/credits.css?v=20261114-ui-v18" />
   </head>
   <body>
@@ -140,8 +140,10 @@
         </div>
         <div class="sidebar-caption">学习与练习</div>
         <nav aria-label="主要导航">
+          <button type="button" class="nav-item" data-view="home" hidden><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">备考首页</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="training" hidden><span class="nav-icon" aria-hidden="true">◈</span><span class="nav-label">每日训练</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="trainingAdmin" hidden><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">训练题库</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+          <button type="button" class="nav-item" data-view="announcementsAdmin" hidden><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">公告管理</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="users" hidden>
             <span class="nav-icon" aria-hidden="true">◎</span
             ><span class="nav-label">用户管理</span
@@ -225,6 +227,8 @@
           </div>
         </header>
         <main id="mainContent" class="page-content" tabindex="-1">
+          <section id="home" aria-label="备考首页" hidden></section>
+          <section id="announcementsAdmin" aria-label="公告管理" hidden></section>
           <section id="users" aria-labelledby="usersTitle" hidden>
             <div class="page-heading">
               <div>
@@ -363,6 +367,7 @@
           <section id="profile" aria-labelledby="profileTitle" hidden>
             <div class="page-heading"><div><div class="eyebrow">YOUR ACCOUNT</div><h1 id="profileTitle">个人主页<span class="heading-dot">.</span></h1><p class="muted">你好，<span id="profileUsername"></span>。在这里管理你的账号与面试次数。</p><p id="profileLoginEmail" class="muted" hidden></p></div><div class="profile-heading-actions"><button id="profileBack" type="button" class="button secondary">← 返回工作台</button><button id="profileLogout" type="button" class="button secondary">退出登录</button></div></div>
             <div class="profile-stats"><article class="panel profile-stat"><span id="profileAllowanceLabel">剩余模拟面试次数</span><strong id="profileRemaining">—</strong><small id="profileAllowanceHint">正式开始一场面试消耗 1 次</small></article><article class="panel profile-stat"><span>累计兑换套餐金额</span><strong id="profileAmount">¥0.00</strong><small>按兑换卡密标价统计</small></article><article class="panel profile-stat"><span>已兑换卡密</span><strong id="profileRedeemCount">0 张</strong><small>每张卡密仅可使用一次</small></article></div>
+            <section id="profileContribution" class="panel contribution-profile"></section>
             <section id="profileTransfers" class="panel profile-account-settings" aria-label="面试次数转赠"></section>
             <section class="panel profile-account-settings" aria-labelledby="profileSettingsTitle">
               <div class="profile-settings-heading"><div><span class="eyebrow">ACCOUNT &amp; SECURITY</span><h2 id="profileSettingsTitle">账号与安全</h2></div><span class="profile-security-mark" aria-hidden="true">⌑</span></div>
@@ -502,7 +507,13 @@
                 ↻ 刷新记录
               </button>
             </div>
+            <div class="list-toolbar" id="interviewListToolbar">
+              <label for="interviewSearch">搜索面试</label>
+              <input id="interviewSearch" type="search" placeholder="输入面试名称或编号" />
+              <span id="interviewResultCount" aria-live="polite"></span>
+            </div>
             <div id="interviewList" class="record-grid"></div>
+            <nav id="interviewPagination" class="list-pagination" aria-label="面试列表分页" hidden></nav>
             <div id="interviewDetail" hidden></div>
             <div class="page-note">
               <span aria-hidden="true">ⓘ</span>
@@ -555,6 +566,11 @@
                     <label for="ends">结束时间</label
                     ><input id="ends" type="datetime-local" required />
                   </div>
+                  <div>
+                    <label for="rankingRule">排名规则</label>
+                    <select id="rankingRule"><option value="score">按题目分值</option><option value="acm">按通过题数</option></select>
+                  </div>
+                  <label class="contest-ranking-toggle"><input id="showRanking" type="checkbox" checked /> 向参赛者展示排名</label>
                   <div class="full-width">
                     <label for="luoguProblemSearch">选择洛谷题目</label>
                     <div class="luogu-question-search">
@@ -582,7 +598,13 @@
               </h2>
               <span class="subtle-label">在规定时间内提交作答</span>
             </div>
+            <div class="list-toolbar" id="contestListToolbar">
+              <label for="contestSearch">搜索比赛</label>
+              <input id="contestSearch" type="search" placeholder="输入比赛名称或编号" />
+              <span id="contestResultCount" aria-live="polite"></span>
+            </div>
             <div id="contestList" class="contest-grid"></div>
+            <nav id="contestPagination" class="list-pagination" aria-label="比赛列表分页" hidden></nav>
             <div id="problemList" hidden></div>
           </section>
 
@@ -596,7 +618,7 @@
                 <li>刷新知序页面；在同一浏览器新开洛谷并登录，保持洛谷标签页打开。</li>
                 <li>打开比赛题目工作区，点击“检测洛谷登录状态”。显示已连接后再开始答题。</li>
               </ol>
-              <p class="field-hint">代码仅由你的浏览器发往洛谷；本站不读取或保存洛谷密码、Cookie。若洛谷要求验证码，插件会打开对应题目页；请按洛谷页面提示完成验证，再回到知序重试。</p>
+              <p class="field-hint">代码和验证码答案仅由你的浏览器发往洛谷；本站不读取或保存洛谷密码、Cookie。若洛谷要求验证码，会在知序页面显示输入窗。</p>
               <a id="downloadLuoguExtension" class="button primary" href="/api/luogu-extension" download>下载浏览器插件</a>
             </div>
           </dialog>
@@ -794,6 +816,12 @@
         </div>
       </form>
     </dialog>
-    <script type="module" src="/static/app.js?v=20261114-luogu-captcha-v2"></script>
+    <dialog id="submissionDetailDialog" class="account-dialog submission-detail-dialog" aria-labelledby="submissionDetailTitle">
+      <div class="dialog-header"><div><span class="eyebrow">SUBMISSION DETAIL</span><h2 id="submissionDetailTitle">提交详情</h2></div><button id="closeSubmissionDetail" type="button" class="icon-button" aria-label="关闭提交详情">×</button></div>
+      <div id="submissionDetailBody" class="dialog-body"></div>
+      <div class="dialog-footer"><button id="closeSubmissionDetailFooter" type="button" class="button secondary">关闭</button></div>
+    </dialog>
+    <dialog id="announcementDialog" class="account-dialog announcement-dialog" aria-labelledby="announcementDialogTitle"><div class="dialog-header"><div><span class="eyebrow">公告</span><h2 id="announcementDialogTitle">公告详情</h2></div><button id="closeAnnouncementDialog" type="button" class="icon-button" aria-label="关闭公告">×</button></div><div id="announcementDialogContent" class="dialog-body announcement-dialog-content"></div></dialog>
+    <script type="module" src="/static/app.js?v=20261114-captcha-v2"></script>
   </body>
 </html>
