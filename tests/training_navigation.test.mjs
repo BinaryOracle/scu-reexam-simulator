@@ -142,3 +142,13 @@ test('an uninterrupted start still opens the question card', async () => {
   assert.equal(f.has('当前题目'), true);
   assert.equal(f.has('查看参考答案'), true);
 });
+
+test('an account without the shared practice grant can browse but cannot start a round', async () => {
+  let calls = 0;
+  const f = fixture(async () => { calls++; return round(); });
+  f.show(null, { ...home(), can_practice: false });
+  assert.equal(f.has('每日训练'), true);
+  await f.click('开始训练 →');
+  assert.equal(calls, 0);
+  assert.equal(f.read('session'), null);
+});
