@@ -5105,11 +5105,12 @@ td .badge {
 .contest-immersive .problem-rail-label { display: none; }
 .contest-immersive .problem-tabs { flex: 1; flex-direction: row; gap: 6px; min-width: 0; overflow-x: auto; }
 .contest-immersive .problem-tab { width: auto; min-width: 86px; min-height: 23px; flex: 0 0 auto; padding: 1px 7px; font-size: 10px; }
-.problem-source-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin: 2px 0 14px; }
+.problem-source-actions { display: flex; flex-flow: column nowrap; align-items: flex-start; gap: 12px; margin: 4px 0 16px; }
 .problem-source-actions .problem-source-link,
-.problem-source-actions .problem-refresh { display: inline-flex; align-items: center; min-height: 28px; margin: 0; line-height: 1.5; }
-.problem-source-actions .problem-refresh { min-height: 30px; padding: 3px 9px; color: #785338; background: #f8f3eb; border: 1px solid #e9dfd1; border-radius: 6px; }
-.contest-immersive .problem-source-actions { gap: 7px; margin-bottom: 10px; }
+.problem-source-actions .problem-refresh { display: inline-flex; align-items: center; min-height: 30px; max-width: 100%; margin: 0; line-height: 1.6; white-space: normal; }
+.problem-source-actions .problem-source-link { padding: 2px 0; }
+.problem-source-actions .problem-refresh { min-height: 34px; padding: 5px 10px; color: #785338; background: #f8f3eb; border: 1px solid #e9dfd1; border-radius: 6px; }
+.contest-immersive .problem-source-actions { gap: 11px; margin-bottom: 12px; }
 .contest-immersive .problem-source-actions .problem-source-link,
 .contest-immersive .problem-source-actions .problem-refresh { font-size: 11px; }
 .contest-immersive .problem-columns.candidate-workspace {
