@@ -55,3 +55,18 @@ test('opens a candidate workspace with usable editor controls and independent co
   assert.ok(workspace.querySelector('.problem-statement-content'));
   assert.equal(f.roots.get('problemList').hidden,false);
 });
+
+test('groups Luogu source and refresh actions with clear spacing when they wrap', () => {
+  const f = fixture();
+  f.context.currentProblems[0] = { ...f.context.currentProblems[0], remote_problem_id: 'P1000' };
+  f.context.managementMode = () => true;
+  f.context.canRevealLuoguSource = () => true;
+  f.context.renderWorkspace();
+  const workspace = f.roots.get('problemList').childNodes[0];
+  const actions = workspace.querySelector('.problem-source-actions');
+  assert.ok(actions);
+  assert.deepEqual(actions.childNodes.map(node => node.textContent), [
+    '在洛谷打开题目 ↗',
+    '从洛谷更新题面与样例',
+  ]);
+});

@@ -154,8 +154,9 @@ function renderQuestionBank() {
       if (!await confirmAction("已抽取到面试记录中的题目不会受影响。此操作无法撤销。", { title: "删除这道题目？", confirmText: "删除题目", danger: true })) return;
       await api(`/admin/question-bank/${row.id}`, { method: "DELETE" });
       if ($("questionBankId").value === String(row.id)) resetQuestionEditor();
-      await refreshQuestionBank();
       notify("题目已删除。");
+      try { await refreshQuestionBank(); }
+      catch { notify("题目已删除，但列表刷新失败。请点击刷新列表；不要重复删除。", "error"); }
     }, "text-button"));
     item.append(meta, content, actions);
     list.append(item);
@@ -193,8 +194,9 @@ async function submitQuestion(event) {
     body: JSON.stringify(payload),
   });
   resetQuestionEditor();
-  await refreshQuestionBank();
   notify(id ? "题目已更新。" : "题目已添加。");
+  try { await refreshQuestionBank(); }
+  catch { notify("题目已保存，但列表刷新失败。请点击刷新列表；不要重复提交。", "error"); }
   } finally { control.disabled = false; }
 }
 async function exportQuestionBank() {
@@ -335,7 +337,9 @@ function renderUsers() {
     if (!user.is_superadmin && user.id !== state.user.id) group.append(button("删除用户", async () => {
       if (!await confirmAction(`将删除「${user.username}」的账号、面试记录、录音、PPT 和提交记录，已兑换卡密不会恢复。此操作无法撤销。`, { title: "删除这个用户？", confirmText: "删除用户", danger: true })) return;
       await api(`/admin/users/${user.id}`, { method: "DELETE" });
-      await refreshUsers(); notify("用户及其记录已删除。");
+      notify("用户及其记录已删除。");
+      try { await refreshUsers(); }
+      catch { notify("用户已删除，但列表刷新失败。请点击刷新用户列表；不要重复删除。", "error"); }
     }, "text-button danger"));
     actions.append(group);
     row.append(name, password, email, credits, admin, active, actions);

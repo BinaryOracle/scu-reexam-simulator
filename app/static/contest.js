@@ -765,21 +765,23 @@ function renderWorkspace() {
   const problemStats = el("p", `尝试 ${problem.attempt_count || 0} 次 · 通过 ${problem.accepted_count || 0} 次`, "problem-attempt-stats");
   problemStats.id = `problemStats-${problem.id}`;
   statement.append(problemStats);
+  const sourceActions = el("div", "", "problem-source-actions");
   if (showSource) {
     const remote = el("a", "在洛谷打开题目 ↗", "text-button problem-source-link");
     remote.href = `https://www.luogu.com.cn/problem/${encodeURIComponent(problem.remote_problem_id)}`;
     remote.target = "_blank";
     remote.rel = "noopener noreferrer";
-    statement.append(remote);
+    sourceActions.append(remote);
   }
   if (managementMode() && problem.remote_problem_id) {
-    statement.append(button("从洛谷更新题面与样例", async () => {
+    sourceActions.append(button("从洛谷更新题面与样例", async () => {
       const refreshed = await api(`/admin/problems/${problem.id}/refresh`, { method: "POST" });
       currentProblems = currentProblems.map(item => item.id === refreshed.id ? { ...item, ...refreshed, judge_mode: selectedContest.judge_mode } : item);
       renderWorkspace();
       notify("题面与全部公开样例已从洛谷更新，提交记录保持不变。");
     }, "text-button problem-refresh"));
   }
+  if (sourceActions.childNodes.length) statement.append(sourceActions);
   appendProblemStatement(statement, problem.statement_html || `<pre>${problem.statement.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</pre>`);
   const samples = problem.samples?.length
     ? problem.samples

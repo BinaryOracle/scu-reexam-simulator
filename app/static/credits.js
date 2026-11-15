@@ -120,8 +120,16 @@ export async function refreshProfile() {
   $("profileAmount").textContent = money(data.redeemed_amount_fen);
   $("profileRedeemCount").textContent = `${data.redemptions.length} 张`;
   const shop = $("voucherShopLink");
+  const voucherSection = $("profileVoucherSection");
+  const redemptionStats = $("profileRedemptionStats");
+  const redemptionCount = $("profileRedemptionStatsCount");
+  const redemptionHistory = $("profileRedemptionHistorySection");
   const contributionRoot = $("profileContribution");
-  shop.hidden = !data.shop_url;
+  voucherSection.hidden = Boolean(data.is_admin);
+  redemptionStats.hidden = Boolean(data.is_admin);
+  redemptionCount.hidden = Boolean(data.is_admin);
+  redemptionHistory.hidden = Boolean(data.is_admin);
+  shop.hidden = !data.shop_url || Boolean(data.is_admin);
   if (data.shop_url) shop.href = data.shop_url;
   else shop.removeAttribute("href");
   if (!data.redemptions.length) {
@@ -184,7 +192,9 @@ export function setupCredits() {
       $("voucherBatch").value = ""; $("voucherSearch").value = ""; $("voucherStatus").value = "all";
       $("voucherGeneratePackage").replaceChildren();
       $("voucherPackageForm").reset();
-      await refreshVouchers(); notify("新套餐已添加，可以生成卡密了。");
+      notify("新套餐已添加，可以生成卡密了。");
+      try { await refreshVouchers(); }
+      catch { notify("新套餐已添加，但列表刷新失败。请点击重新加载；不要重复添加。", "error"); }
     }, event.submitter);
   });
   $("defaultCreditsForm").addEventListener("submit", event => {
@@ -203,8 +213,9 @@ export function setupCredits() {
       const cards = await api("/admin/vouchers", { method: "POST", body: JSON.stringify({ package: selected, count: Number($("voucherCount").value) }) });
       voucherPackage = selected; voucherPage = 1;
       $("voucherStatus").value = "all"; $("voucherSearch").value = ""; $("voucherBatch").value = cards[0].batch;
-      await refreshVouchers();
       notify(`已生成 ${cards.length} 张新卡密，当前仅展示本批次，可直接导出。`);
+      try { await refreshVouchers(); }
+      catch { notify(`已生成 ${cards.length} 张卡密，但列表刷新失败。请点击重新加载；不要重复生成。`, "error"); }
     }, event.submitter);
   });
   for (const id of ["voucherSearch", "voucherBatch"]) $(id).addEventListener("input", () => {
@@ -233,14 +244,20 @@ export function setupCredits() {
     event.preventDefault();
     run(async () => {
       $("redeemError").hidden = true;
+      let result;
       try {
-        const result = await api("/profile/redeem", { method: "POST", body: JSON.stringify({ code: $("redeemCode").value }) });
+        result = await api("/profile/redeem", { method: "POST", body: JSON.stringify({ code: $("redeemCode").value }) });
         $("redeemCode").value = "";
-        await refreshProfile();
-        notify(`兑换成功，当前剩余 ${result.remaining} 次模拟面试。`);
       } catch (error) {
         $("redeemError").textContent = error.message;
         $("redeemError").hidden = false;
+        return;
+      }
+      try {
+        await refreshProfile();
+        notify(`兑换成功，当前剩余 ${result.remaining} 次模拟面试。`);
+      } catch {
+        notify("兑换已成功，但余额刷新失败。请重新加载个人主页确认次数；不要重复兑换。", "error");
       }
     }, event.submitter);
   });

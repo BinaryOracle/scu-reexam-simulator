@@ -5105,7 +5105,13 @@ td .badge {
 .contest-immersive .problem-rail-label { display: none; }
 .contest-immersive .problem-tabs { flex: 1; flex-direction: row; gap: 6px; min-width: 0; overflow-x: auto; }
 .contest-immersive .problem-tab { width: auto; min-width: 86px; min-height: 23px; flex: 0 0 auto; padding: 1px 7px; font-size: 10px; }
-.contest-immersive .problem-source-link { display: inline-block; margin: 0 0 10px; font-size: 11px; }
+.problem-source-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px 20px; margin: 0 0 14px; }
+.problem-source-actions .problem-source-link,
+.problem-source-actions .problem-refresh { display: inline-flex; align-items: center; min-height: 28px; margin: 0; line-height: 1.5; }
+.problem-source-actions .problem-refresh { color: #785338; }
+.contest-immersive .problem-source-actions { gap: 8px 18px; margin-bottom: 10px; }
+.contest-immersive .problem-source-actions .problem-source-link,
+.contest-immersive .problem-source-actions .problem-refresh { font-size: 11px; }
 .contest-immersive .problem-columns.candidate-workspace {
   height: calc(100dvh - 56px);
   min-height: 400px;
