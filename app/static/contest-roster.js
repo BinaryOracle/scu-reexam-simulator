@@ -40,10 +40,11 @@ export async function loadContestRoster(cid = null) {
   const current = ++turn, token = state.token; owner = token; loaded = false; selected.clear(); query = ""; legacy = false; render();
   try {
     const [accounts, roster] = await Promise.all([api("/admin/contest-participants"), cid ? api(`/admin/contests/${cid}/participants`) : Promise.resolve({ participant_ids: [] })]);
-    if (current !== turn || token !== state.token) return;
+    if (current !== turn || token !== state.token) return false;
     users = accounts; selected = new Set(roster.participant_ids); legacy = Boolean(roster.legacy_open); loaded = true; render();
+    return true;
   } catch (error) {
-    if (current !== turn || token !== state.token) return;
+    if (current !== turn || token !== state.token) return false;
     $("contestParticipants").replaceChildren(el("p", error.message, "form-error"), button("重新加载名单", () => loadContestRoster(cid), "button secondary"));
     throw error;
   }

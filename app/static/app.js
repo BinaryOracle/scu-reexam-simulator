@@ -17,7 +17,7 @@ import {
   suspendContestWorkspace,
   setupContestCreation,
   requestLuoguSubmit,
-} from "./contest.js?v=20261115-access-layout-v1";
+} from "./contest.js?v=20261115-access-layout-v2";
 import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-access-layout-v1";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261115-profile-independent-sections-v1";
 import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";

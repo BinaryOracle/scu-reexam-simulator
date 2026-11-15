@@ -23,7 +23,7 @@ import { contestTiming, canOpenContestProblems } from "./contest-timing.mjs?v=20
 import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261115-drafts-v3";
 import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261115-workspace-v3";
 import { openContestRecords, closeContestRecords } from "./contest-records.js?v=20261115-contest-records-v1";
-import { loadContestRoster, resetContestRoster, contestParticipantIds, setupContestRoster } from "./contest-roster.js?v=20261115-access-v1";
+import { loadContestRoster, resetContestRoster, contestParticipantIds, setupContestRoster } from "./contest-roster.js?v=20261115-access-v2";
 
 let contests = [];
 let selectedContest = null;
@@ -38,6 +38,7 @@ let luoguStatusChecked = false;
 let luoguConnectionRequest = null;
 let selectedLuoguProblems = [];
 let editingContestId = null;
+let contestEditRevision = 0;
 let contestOverview = null;
 let contestNavigationRevision = 0;
 let problemSearchTimer;
@@ -1478,6 +1479,7 @@ async function loadUserSubmissionPage(group, user, page) {
   }
 }
 export async function createContest() {
+  if ($("contestForm").inert) throw new Error("比赛信息正在加载，请稍后保存");
   if (!editingContestId && !selectedLuoguProblems.length)
     throw new Error("至少添加一道洛谷题目后才能创建比赛。");
   const starts = new Date($("starts").value).getTime() / 1000;
@@ -1523,7 +1525,19 @@ function dateTimeInput(timestamp) {
   return date.toISOString().slice(0, 16);
 }
 async function beginEditContest(contest) {
-  await loadContestRoster(contest.id);
+  const revision = ++contestEditRevision;
+  const form = $("contestForm"); form.inert = true;
+  let problems;
+  try {
+    if (!await loadContestRoster(contest.id) || revision !== contestEditRevision) return;
+    problems = contest.judge_mode === "luogu" ? await api(`/admin/contests/${contest.id}/problems`) : [];
+    if (revision !== contestEditRevision) return;
+  } catch (error) {
+    if (revision === contestEditRevision) cancelContestEditing();
+    throw error;
+  } finally {
+    if (revision === contestEditRevision) form.inert = false;
+  }
   if (selectedContest?.id === contest.id) {
     writeAppRoute("contest");
     selectedContest = null;
@@ -1542,8 +1556,7 @@ async function beginEditContest(contest) {
   const questionFields = document.querySelectorAll(".contest-question-fields");
   for (const field of questionFields) field.hidden = contest.judge_mode !== "luogu";
   if (contest.judge_mode === "luogu") {
-    selectedLuoguProblems = await api(`/admin/contests/${contest.id}/problems`);
-    selectedLuoguProblems = selectedLuoguProblems.map(problem => ({
+    selectedLuoguProblems = problems.map(problem => ({
       ...problem,
       id: problem.id,
       remote_problem_id: problem.remote_problem_id,
@@ -1565,6 +1578,8 @@ async function beginEditContest(contest) {
   $("contestForm").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 function cancelContestEditing() {
+  contestEditRevision++;
+  $("contestForm").inert = false;
   resetContestRoster();
   editingContestId = null;
   editingContestJudgeMode = "luogu";
