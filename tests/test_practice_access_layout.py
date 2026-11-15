@@ -21,6 +21,28 @@ def test_practice_grant_applies_to_both_modules_and_revokes_live_sessions(client
     assert client.get(f"/api/training/sessions/{started['id']}", headers=alice).status_code == 200
 
 
+def test_training_and_coding_permissions_are_independent(client):
+    manager, alice = login(client, 'manager'), login(client, 'alice')
+    uid = client.get('/api/me', headers=alice).json()['id']
+    assert client.patch(f'/api/admin/users/{uid}', headers=manager,
+                        json={'can_training': True, 'can_coding': False}).status_code == 200
+    profile = client.get('/api/me', headers=alice).json()
+    assert profile['can_training'] is True
+    assert profile['can_coding'] is False
+    assert client.post('/api/training/sessions', headers=alice,
+                       json={'collection_id': 'data_structures'}).status_code == 201
+    assert client.post('/api/coding/daily', headers=alice).status_code == 403
+
+    assert client.patch(f'/api/admin/users/{uid}', headers=manager,
+                        json={'can_training': False, 'can_coding': True}).status_code == 200
+    profile = client.get('/api/me', headers=alice).json()
+    assert profile['can_training'] is False
+    assert profile['can_coding'] is True
+    assert client.post('/api/training/sessions', headers=alice,
+                       json={'collection_id': 'data_structures'}).status_code == 403
+    assert client.post('/api/coding/daily', headers=alice).status_code in (200, 409)
+
+
 def test_new_accounts_default_to_no_practice_and_admin_has_effective_grant(client):
     manager = login(client, 'manager')
     new = client.post('/api/admin/users', headers=manager, json={'username':'new', 'password':'x'}).json()

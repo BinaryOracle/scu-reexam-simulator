@@ -22,8 +22,15 @@ let bankPage = 1;
 let bankFilterKey = "";
 let questionEditorBaseline = null;
 const visiblePasswords = new Set();
+let usersRevision = 0;
 export function clearVisiblePasswords() {
   for (const hide of visiblePasswords) hide();
+}
+function accountCell(label, className = "") {
+  const cell = el("td", "", className);
+  cell.dataset.label = label;
+  cell.append(el("span", label, "account-cell-label"));
+  return cell;
 }
 function passwordControl(user) {
   let timeout;
@@ -68,7 +75,10 @@ const categoryNames = { professional: "专业课", translation: "英文段落翻
 const subjectNames = { data_structures: "数据结构", operating_systems: "操作系统", computer_networks: "计算机网络" };
 
 export async function refreshUsers() {
-  accounts = await api("/admin/users");
+  const revision = ++usersRevision;
+  const refreshed = await api("/admin/users");
+  if (revision !== usersRevision) return;
+  accounts = refreshed;
   $("userTotal").textContent = accounts.length;
   $("userActive").textContent = accounts.filter(
     (user) => user.is_active,
@@ -78,6 +88,21 @@ export async function refreshUsers() {
   ).length;
   $("userExam").textContent = accounts.filter((user) => user.is_admin).length;
   renderUsers();
+}
+async function saveUserFields(user, fields, successMessage) {
+  await api(`/admin/users/${user.id}`, {
+    method: "PATCH",
+    body: JSON.stringify(fields),
+  });
+  Object.assign(accounts.find((account) => account.id === user.id) || user, fields);
+  renderUsers();
+  try {
+    await refreshUsers();
+  } catch {
+    notify(`${successMessage} 用户列表暂时未能刷新，当前状态已更新。请点击“刷新用户列表”重新读取。`, "info");
+    return;
+  }
+  notify(successMessage);
 }
 export async function refreshQuestionBank() {
   bankQuestions = await api("/admin/question-bank");
@@ -227,7 +252,7 @@ function renderUsers() {
     );
     return;
   }
-  const wrap = el("div", "", "table-scroll");
+  const wrap = el("div", "", "account-table-wrap");
   const table = document.createElement("table");
   table.className = "account-table";
   table.append(el("caption", "账号、邮箱、面试次数与状态", "sr-only"));
@@ -238,7 +263,8 @@ function renderUsers() {
     "密码",
     "邮箱",
     "面试次数",
-    "练习权限",
+    "每日训练权限",
+    "算法题带刷权限",
     "管理权限",
     "账号状态",
     "操作",
@@ -252,7 +278,7 @@ function renderUsers() {
   for (const user of visible) {
     const row = document.createElement("tr");
     if (!user.is_active) row.className = "account-disabled";
-    const name = el("td");
+    const name = accountCell("用户");
     const cell = el("div", "", "account-name");
     const text = el("div");
     text.append(
@@ -271,11 +297,11 @@ function renderUsers() {
       text,
     );
     name.append(cell);
-    const password = el("td", "", "account-password-cell");
+    const password = accountCell("密码", "account-password-cell");
     password.append(passwordControl(user));
-    const email = el("td", "", "account-email-cell");
+    const email = accountCell("邮箱", "account-email-cell");
     email.append(el("span", user.email || "未绑定", "account-email-address"));
-    const credits = el("td", "", "account-credits-cell");
+    const credits = accountCell("面试次数", "account-credits-cell");
     if (user.is_admin) credits.append(el("span", "已开通", "muted"));
     else {
       const form = el("form", "", "inline-credit-form");
@@ -298,24 +324,19 @@ function renderUsers() {
       });
       form.append(input, el("span", "次"), save); credits.append(form);
     }
-    const admin = el("td");
+    const admin = accountCell("管理权限");
     admin.append(
       badge(
         user.is_superadmin ? "超级管理员" : user.is_admin ? "管理员" : "普通用户",
         user.is_admin ? "orange" : "gray",
       ),
     );
-    const active = el("td");
+    const active = accountCell("账号状态");
     const statusControl = button(
       user.is_active ? "已启用" : "已停用",
       async () => {
         const next = !user.is_active;
-        await api(`/admin/users/${user.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ is_active: next }),
-        });
-        await refreshUsers();
-        notify(`${user.username} 已${next ? "启用" : "停用"}。`);
+        await saveUserFields(user, { is_active: next }, `${user.username} 已${next ? "启用" : "停用"}。`);
       },
       `account-status-button ${user.is_active ? "active" : "inactive"}`,
     );
@@ -329,7 +350,7 @@ function renderUsers() {
       ? "不能停用当前登录账号"
       : `点击${user.is_active ? "停用" : "启用"}账号`;
     active.append(statusControl);
-    const actions = el("td");
+    const actions = accountCell("操作");
     const group = el("div", "", "table-actions");
     group.append(
       button("重置用户名", () => openUsername(user), "text-button"),
@@ -343,30 +364,36 @@ function renderUsers() {
       catch { notify("用户已删除，但列表刷新失败。请点击刷新用户列表；不要重复删除。", "error"); }
     }, "text-button danger"));
     actions.append(group);
-    const practice = el("td");
-    if (user.is_admin) practice.append(el("span", "默认开通", "muted"));
-    else {
-      const control = button(user.can_practice ? "已开通" : "未开通", async () => {
-        await api(`/admin/users/${user.id}`, { method: "PATCH", body: JSON.stringify({ can_practice: !user.can_practice }) });
-        await refreshUsers(); notify("每日训练与算法题带刷权限已更新。");
-      }, `account-status-button ${user.can_practice ? "active" : "inactive"}`);
-      control.setAttribute("aria-label", `${user.can_practice ? "关闭" : "开通"} ${user.username} 的练习权限`);
-      control.setAttribute("aria-pressed", String(user.can_practice)); practice.append(control);
-    }
-    row.append(name, password, email, credits, practice, admin, active, actions);
+    const permissionCell = (key, label) => {
+      const cell = accountCell(label);
+      const enabled = Boolean(user[key]);
+      if (user.is_admin) cell.append(el("span", "默认开通", "muted"));
+      else {
+        const control = button(enabled ? "已开通" : "未开通", async () => {
+          const next = !Boolean(user[key]);
+          await saveUserFields(user, { [key]: next }, `${user.username} 的${label}已${next ? "开启" : "关闭"}。`);
+        }, `account-status-button ${enabled ? "active" : "inactive"}`);
+        control.setAttribute("aria-label", `${enabled ? "关闭" : "开通"} ${user.username} 的${label}`);
+        control.setAttribute("aria-pressed", String(enabled)); cell.append(control);
+      }
+      return cell;
+    };
+    const trainingPermission = permissionCell("can_training", "每日训练权限");
+    const codingPermission = permissionCell("can_coding", "算法题带刷权限");
+    row.append(name, password, email, credits, trainingPermission, codingPermission, admin, active, actions);
     body.append(row);
   }
   table.append(head, body);
   wrap.append(table);
-  wrap.tabIndex = 0;
-  wrap.setAttribute("aria-label", "账号列表，可左右滑动查看全部信息和操作");
-  $("userList").replaceChildren(el("p", "左右滑动表格，查看全部信息与账号操作 →", "mobile-table-hint"), wrap);
+  wrap.setAttribute("aria-label", "用户账号列表");
+  $("userList").replaceChildren(wrap);
 }
 function syncAccountType() {
   const admin = $("accountTypeAdmin").checked;
   $("initialCreditsField").hidden = admin;
   $("accountCredits").disabled = admin;
-  $("practicePermissionField").hidden = admin;
+  $("trainingPermissionField").hidden = admin;
+  $("codingPermissionField").hidden = admin;
 }
 async function openAccount() {
   const settings = await readCreditSettings();
@@ -443,7 +470,8 @@ async function submitAccount(event) {
       is_admin: $("accountTypeAdmin").checked,
       email: $("accountEmail").value.trim() || null,
       interview_credits: Number($("accountCredits").value),
-      can_practice: $("accountPractice").checked,
+      can_training: $("accountTraining").checked,
+      can_coding: $("accountCoding").checked,
     };
     await api("/admin/users", {
       method: "POST",

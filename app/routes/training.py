@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, ValidationError
 from app.db import connect
 from app.config import load_config
-from app.services.auth import current_user, administrator, practice_user, require_practice
+from app.services.auth import current_user, administrator, training_user, require_training
 from app.services import training as practice
 from app.services import training_catalog as catalog
 from app.services.training_schema import ASSETS
@@ -106,20 +106,20 @@ def contribution_policy(payload:ContributionPolicy,user=Depends(administrator)):
 
 
 @router.post('/api/training/sessions', status_code=201)
-def start(payload: Round, user=Depends(practice_user)):
+def start(payload: Round, user=Depends(training_user)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         return practice.start_session(db, user, payload.collection_id, payload.source, payload.mode, payload.question_count, payload.section_id)
 
 
 @router.get('/api/training/sessions/{sid}')
-def session(sid: int, user=Depends(practice_user)):
+def session(sid: int, user=Depends(training_user)):
     with connect() as db:
         return practice.get_session(db, sid, user['id'])
 
 
 @router.post('/api/training/sessions/{sid}/cards/{card_id}/complete')
-def complete(sid: int, card_id: int, payload: Rating, user=Depends(practice_user)):
+def complete(sid: int, card_id: int, payload: Rating, user=Depends(training_user)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         return practice.complete(db, user, sid, card_id, payload.rating)
@@ -134,7 +134,7 @@ def end(sid: int, user=Depends(current_user)):
 
 
 @router.post('/api/training/checkin')
-def checkin(user=Depends(practice_user)):
+def checkin(user=Depends(training_user)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         return practice.checkin(db, user)
@@ -144,7 +144,7 @@ def checkin(user=Depends(practice_user)):
 def questions(section_id: str = Query('interview', max_length=40), mine: bool = False, favorites: bool = False, collection_id: str = Query('', max_length=40),
               q: str = Query('', max_length=200), page: int = Query(1, ge=1), user=Depends(current_user)):
     if not mine:
-        require_practice(user)
+        require_training(user)
     with connect() as db:
         return catalog.list_questions(db, user, mine=mine, favorites=favorites, collection_id=collection_id, q=q, page=page, section_id=section_id)
 
@@ -203,7 +203,7 @@ def image(qid: int, index: int, user=Depends(current_user)):
     with connect() as db:
         row = catalog.get_question(db, qid)
         if row['owner_user_id'] != user['id']:
-            require_practice(user)
+            require_training(user)
         if not catalog.accessible(row, user['id']):
             if not user['is_admin']:
                 raise HTTPException(404, '图片不存在')

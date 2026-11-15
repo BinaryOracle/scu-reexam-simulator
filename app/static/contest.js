@@ -21,7 +21,7 @@ import { writeAppRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 import { readLuoguConnection, writeLuoguConnection } from "./luogu-connection.mjs?v=20261115-navigation-v3";
 import { contestTiming, canOpenContestProblems } from "./contest-timing.mjs?v=20261115-contest-focus-v1";
 import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261115-drafts-v3";
-import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261115-workspace-v3";
+import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261115-workspace-v6";
 import { openContestRecords, closeContestRecords } from "./contest-records.js?v=20261115-contest-records-v1";
 import { loadContestRoster, resetContestRoster, contestParticipantIds, setupContestRoster } from "./contest-roster.js?v=20261115-access-v2";
 
@@ -766,28 +766,30 @@ function renderWorkspace() {
   expandAll.hidden = true;
   restoreBar.append(expandAll);
   const statement = el("article", "", "panel problem-statement");
-  statement.append(
-    el("span", showSource ? `洛谷题号 · ${problem.remote_problem_id}` : `题目编号 · #${problem.id}`, "eyebrow"),
-    el("h3", problem.title),
-  );
+  if (showSource) statement.append(el("span", `洛谷题号 · ${problem.remote_problem_id}`, "eyebrow"));
+  statement.append(el("h3", problem.title));
   const problemStats = el("p", `尝试 ${problem.attempt_count || 0} 次 · 通过 ${problem.accepted_count || 0} 次`, "problem-attempt-stats");
   problemStats.id = `problemStats-${problem.id}`;
   statement.append(problemStats);
   const sourceActions = el("div", "", "problem-source-actions");
   if (showSource) {
+    const sourceLinkRow = el("div", "", "problem-source-action-row");
     const remote = el("a", "在洛谷打开题目 ↗", "text-button problem-source-link");
     remote.href = `https://www.luogu.com.cn/problem/${encodeURIComponent(problem.remote_problem_id)}`;
     remote.target = "_blank";
     remote.rel = "noopener noreferrer";
-    sourceActions.append(remote);
+    sourceLinkRow.append(remote);
+    sourceActions.append(sourceLinkRow);
   }
   if (managementMode() && problem.remote_problem_id) {
-    sourceActions.append(button("从洛谷更新题面与样例", async () => {
+    const refreshRow = el("div", "", "problem-source-action-row");
+    refreshRow.append(button("从洛谷更新题面与样例", async () => {
       const refreshed = await api(`/admin/problems/${problem.id}/refresh`, { method: "POST" });
       currentProblems = currentProblems.map(item => item.id === refreshed.id ? { ...item, ...refreshed, judge_mode: selectedContest.judge_mode } : item);
       renderWorkspace();
       notify("题面与全部公开样例已从洛谷更新，提交记录保持不变。");
     }, "text-button problem-refresh"));
+    sourceActions.append(refreshRow);
   }
   if (sourceActions.childNodes.length) statement.append(sourceActions);
   appendProblemStatement(statement, problem.statement_html || `<pre>${problem.statement.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")}</pre>`);
@@ -831,7 +833,9 @@ function renderWorkspace() {
     const closeStatement = button("×", () => {}, "workspace-icon-button workspace-pane-close");
     closeStatement.setAttribute("aria-label", "收起题面"); closeStatement.title = "收起题面";
     closeControls.statement = closeStatement;
-    statementHeading.append(el("span", "题目描述", "workspace-panel-label"), statementControl, closeStatement);
+    const statementActions = el("div", "", "workspace-pane-actions");
+    statementActions.append(statementControl, closeStatement);
+    statementHeading.append(el("span", "题目描述", "workspace-panel-label"), statementActions);
     const statementBody = el("div", "", "workspace-statement-content");
     statementBody.append(...statement.childNodes);
     statement.replaceChildren(statementHeading, statementBody);
@@ -851,29 +855,33 @@ function renderWorkspace() {
     const closeEditor = button("×", () => {}, "workspace-icon-button workspace-pane-close");
     closeEditor.setAttribute("aria-label", "收起代码区"); closeEditor.title = "收起代码区";
     closeControls.editor = closeEditor;
-    editor.querySelector(".editor-heading").append(closeEditor);
     const closePanels = button("×", () => {}, "workspace-icon-button workspace-pane-close");
     closePanels.setAttribute("aria-label", "收起样例与提交记录"); closePanels.title = "收起样例与提交记录";
     closeControls.panels = closePanels;
-    panels.querySelector(".auxiliary-panel-heading").append(closePanels);
     const editorControl = expandPaneButton();
-    editor.querySelector(".editor-heading").append(editorControl);
+    const editorActions = el("div", "", "workspace-pane-actions");
+    editorActions.append(editorControl, closeEditor);
+    editor.querySelector(".editor-heading-tools").append(editorActions);
+    const panelControl = panels.querySelector(".pane-expand");
+    const panelActions = el("div", "", "workspace-pane-actions");
+    panelActions.append(panelControl, closePanels);
+    panels.querySelector(".auxiliary-panel-heading").append(panelActions);
     editorStack.append(editor, verticalSplitter, panels);
     columns.append(splitter, editorStack);
     layoutNodes = {
       columns, stack: editorStack, horizontal: splitter, vertical: verticalSplitter,
-      controls: { statement: statementControl, editor: editorControl, panels: panels.querySelector(".pane-expand") },
+      controls: { statement: statementControl, editor: editorControl, panels: panelControl },
       closeControls, regions: { statement, editor, panels }, restoreControls, expandAll,
       reset: resetLayout, store: layoutPreferences(),
     };
     paneSwitcher = renderMobilePaneSwitcher(columns);
+    layoutNodes.paneSwitcher = paneSwitcher;
   } else {
     columns.style.gridTemplateColumns = "minmax(0, 1fr)";
     statement.append(samplePanel);
   }
   workbench.append(columns);
-  if (paneSwitcher) workbench.insertBefore(restoreBar, columns);
-  if (paneSwitcher) workbench.insertBefore(paneSwitcher, columns);
+  if (paneSwitcher) workspace.append(restoreBar, paneSwitcher);
   workspace.append(workbench);
   container.replaceChildren(workspace);
   const selectedTab = tabs.querySelector('.problem-tab.selected');
@@ -964,6 +972,7 @@ function renderMobilePaneSwitcher(columns) {
     }, `workspace-pane-tab${mobilePane === pane ? " selected" : ""}`);
     tab.setAttribute("role", "tab");
     tab.setAttribute("aria-selected", String(mobilePane === pane));
+    tab.dataset.pane = pane;
     tab.tabIndex = mobilePane === pane ? 0 : -1;
     tabs.push([pane, tab]);
     switcher.append(tab);
@@ -982,12 +991,13 @@ function renderEditor(problem) {
     : LANGUAGES;
   for (const [value, label] of availableLanguages) { const option = el("option", label); option.value = value; language.append(option); }
   language.value = availableLanguages[0][0];
-  heading.append(language);
+  const headingTools = el("div", "", "editor-heading-tools");
+  headingTools.append(language, copyCodeButton(() => input.value));
+  heading.append(headingTools);
   const area = el("div", "", "code-area");
   const numbers = el("pre", "", "line-numbers");
   numbers.setAttribute("aria-hidden", "true");
   const input = el("textarea", "", "code-editor mono");
-  heading.append(copyCodeButton(() => input.value));
   input.setAttribute("aria-label", `${languageName(language.value)} 代码`);
   input.spellcheck = false;
   input.autocapitalize = "off";
@@ -1138,6 +1148,14 @@ function setLuoguConnection(account) {
     status.textContent = luoguConnected ? `插件已连接 · ${luoguConnected}` : "需先配置";
     status.className = `badge ${luoguConnected ? "green" : "orange"} luogu-connection-status`;
   }
+  if (luoguConnected) {
+    const panel = document.querySelector(".luogu-setup");
+    if (panel?.classList.contains("has-error")) {
+      panel.classList.remove("has-error");
+      panel.querySelector(".luogu-bridge-error")?.remove();
+      panel.open = false;
+    }
+  }
 }
 async function refreshLuoguBridgeConnection({ force = false } = {}) {
   prepareLuoguConnection();
@@ -1157,11 +1175,10 @@ async function refreshLuoguBridgeConnection({ force = false } = {}) {
       setLuoguConnection(response.connected ? response.account || "已连接" : "");
       return response;
     } catch (error) {
+      showLuoguBridgeHelp(error.message || "插件未响应，请检查插件配置后重试。");
       const currentStatus = document.querySelector(".luogu-connection-status");
-      if (currentStatus) {
+      if (currentStatus)
         currentStatus.textContent = luoguConnected ? `上次连接 · ${luoguConnected}（等待确认）` : "插件未响应";
-        currentStatus.className = "badge orange luogu-connection-status";
-      }
       if (force) throw error;
       return { connected: false, reason: error.message };
     }

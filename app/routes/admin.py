@@ -28,7 +28,9 @@ class AccountCreate(BaseModel):
     is_admin: StrictBool = False
     email: str | None = None
     is_active: StrictBool = True
-    can_practice: StrictBool = False
+    can_training: StrictBool = False
+    can_coding: StrictBool = False
+    can_practice: StrictBool | None = None
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
 
     @field_validator('email')
@@ -45,6 +47,9 @@ class AccountUpdate(BaseModel):
     model_config = ConfigDict(extra='forbid')
     is_admin: StrictBool | None = None
     is_active: StrictBool | None = None
+    can_training: StrictBool | None = None
+    can_coding: StrictBool | None = None
+    # Kept for one release so older clients can update the former combined grant.
     can_practice: StrictBool | None = None
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
 
@@ -228,9 +233,12 @@ def create_user(payload: AccountCreate, actor=Depends(administrator)):
         db.execute('BEGIN IMMEDIATE')
         initial = credits.ADMIN_CREDITS if payload.is_admin else payload.interview_credits if payload.interview_credits is not None else credits.default_credits(db)
         try:
-            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits,can_practice)
-                VALUES (?,?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
-                payload.email, payload.is_active, 0, payload.can_practice)).lastrowid
+            legacy_grant = payload.can_practice
+            training = payload.can_training if legacy_grant is None else legacy_grant
+            coding = payload.can_coding if legacy_grant is None else legacy_grant
+            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits,can_practice,can_training,can_coding)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
+                payload.email, payload.is_active, 0, int(training and coding), training, coding)).lastrowid
         except sqlite3.IntegrityError as error:
             raise HTTPException(409, '用户名或邮箱已存在，请使用其他用户名或邮箱') from error
         credits.adjust(db, uid, initial, kind='initial')
@@ -253,6 +261,15 @@ def update_user(uid: int, payload: AccountUpdate, actor=Depends(administrator)):
             count = db.execute('SELECT COUNT(*) FROM users WHERE is_admin=1 AND is_active=1').fetchone()[0]
             if count <= 1:
                 raise HTTPException(409, '至少保留一个启用的管理员账号')
+        legacy_grant = bool(old['can_practice'] and not old['can_training'] and not old['can_coding'])
+        current_training = bool(old['can_training'] or legacy_grant)
+        current_coding = bool(old['can_coding'] or legacy_grant)
+        if 'can_practice' in changes:
+            current_training = current_coding = changes.pop('can_practice')
+        current_training = changes.get('can_training', current_training)
+        current_coding = changes.get('can_coding', current_coding)
+        if 'can_training' in changes or 'can_coding' in changes or 'can_practice' in payload.model_fields_set:
+            changes['can_practice'] = int(current_training and current_coding)
         if changes.get('is_admin', old['is_admin']):
             changes['interview_credits'] = credits.ADMIN_CREDITS
         if 'interview_credits' in changes:

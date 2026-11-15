@@ -2798,7 +2798,7 @@ td .badge {
     margin-top: 22px;
     font-size: 10px;
     padding: 9px 11px;
-    min-height: 35px;
+    min-height: 44px;
     gap: 4px;
   }
   .interview-banner {
@@ -3395,9 +3395,12 @@ td .badge {
   font-size: 11px;
 }
 .account-filters select {
-  width: 115px;
-  padding: 9px 12px;
+  flex: 0 0 132px;
+  width: 132px;
+  min-width: 0;
+  padding: 9px 32px 9px 12px;
   font-size: 11px;
+  white-space: nowrap;
 }
 .account-filters .button {
   font-size: 11px;
@@ -3767,22 +3770,29 @@ td .badge {
     align-self: flex-start;
   }
   .admin-mode .sidebar nav {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    align-items: start;
+    display: flex;
+    align-items: stretch;
     gap: 4px;
-    overflow: visible;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+    padding-bottom: 3px;
   }
   .admin-mode .nav-item {
-    font-size: 9px;
+    flex: 0 0 72px;
+    font-size: 11px;
     gap: 4px;
     white-space: normal;
-    min-width: 0;
-    min-height: 48px;
-    padding: 6px 2px;
+    min-width: 72px;
+    min-height: 54px;
+    padding: 7px 4px;
     text-align: center;
     flex-direction: column;
     justify-content: center;
+    scroll-snap-align: start;
   }
   .admin-mode .nav-item .nav-label { line-height: 1.2; white-space: nowrap; }
   .admin-mode .nav-item .nav-arrow { display: none; }
@@ -3815,7 +3825,34 @@ td .badge {
     flex: 1;
   }
   .account-filters select {
-    width: 105px;
+    flex: 0 1 132px;
+    width: auto;
+    max-width: 100%;
+    min-height: 38px;
+    font-size: 12px;
+  }
+  .account-filters input {
+    min-width: 0;
+  }
+  .account-filters .button {
+    flex: 0 0 auto;
+  }
+}
+@media (max-width: 420px) {
+  .account-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .account-filters input {
+    grid-column: 1;
+  }
+  .account-filters select {
+    width: 100%;
+    flex: initial;
+  }
+  .account-filters .button {
+    width: 100%;
   }
   .account-filters .button {
     font-size: 10px;
@@ -4852,6 +4889,7 @@ td .badge {
 .luogu-setup-title { color: var(--ink); font-weight: 650; }
 .luogu-setup-heading .badge { padding: 2px 7px; font-size: 10px; }
 .luogu-setup p { margin: 0 0 3px; color: #78695e; font-size: 11px; line-height: 1.45; }
+.luogu-setup .luogu-bridge-error { margin: 5px 0 7px; padding: 7px 9px; border-left: 2px solid #b85b42; background: #fff4ef; color: #8b3e30; font-size: 11px; line-height: 1.55; }
 .luogu-setup > .text-button { white-space: nowrap; }
 .luogu-setup[open] {
   display: grid;
@@ -5107,12 +5145,13 @@ td .badge {
 .contest-immersive .problem-rail-label { display: none; }
 .contest-immersive .problem-tabs { flex: 1; flex-direction: row; gap: 6px; min-width: 0; overflow-x: auto; }
 .contest-immersive .problem-tab { width: auto; min-width: 86px; min-height: 23px; flex: 0 0 auto; padding: 1px 7px; font-size: 10px; }
-.problem-source-actions { display: flex; flex-flow: column nowrap; align-items: flex-start; gap: 12px; margin: 4px 0 16px; }
+.problem-source-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; margin: 12px 0 20px; }
+.problem-source-action-row { display: flex; align-items: center; width: 100%; min-width: 0; min-height: 36px; }
 .problem-source-actions .problem-source-link,
-.problem-source-actions .problem-refresh { display: inline-flex; align-items: center; min-height: 30px; max-width: 100%; margin: 0; line-height: 1.6; white-space: normal; }
-.problem-source-actions .problem-source-link { padding: 2px 0; }
-.problem-source-actions .problem-refresh { min-height: 34px; padding: 5px 10px; color: #785338; background: #f8f3eb; border: 1px solid #e9dfd1; border-radius: 6px; }
-.contest-immersive .problem-source-actions { gap: 11px; margin-bottom: 12px; }
+.problem-source-actions .problem-refresh { display: inline-flex; align-items: center; min-height: 34px; max-width: 100%; margin: 0; line-height: 1.7; white-space: normal; }
+.problem-source-actions .problem-source-link { padding: 1px 0; color: #805244; font-size: 12px; font-weight: 650; }
+.problem-source-actions .problem-refresh { min-height: 36px; padding: 6px 11px; color: #785338; background: #f8f3eb; border: 1px solid #e9dfd1; border-radius: 6px; font-size: 12px; }
+.contest-immersive .problem-source-actions { gap: 14px; margin: 10px 0 16px; }
 .contest-immersive .problem-source-actions .problem-source-link,
 .contest-immersive .problem-source-actions .problem-refresh { font-size: 11px; }
 .contest-immersive .problem-columns.candidate-workspace {
@@ -5223,3 +5262,61 @@ td .badge {
 .home-actions { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 1100px) { .home-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .home-actions { grid-template-columns: 1fr; } }
+
+.account-table-wrap { overflow-x: auto; }
+.account-cell-label { display: none; }
+@media (max-width: 620px) {
+  .account-table-wrap { overflow: visible; }
+  .account-table { display: block !important; width: 100% !important; min-width: 0 !important; max-width: 100% !important; table-layout: fixed; white-space: normal; }
+  .account-table thead { display: none; }
+  .account-table tbody { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; width: 100%; min-width: 0; box-sizing: border-box; padding: 12px; }
+  .account-table tbody tr { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); width: auto; min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  .account-table td { display: grid; align-content: start; gap: 6px; min-width: 0; padding: 10px 12px !important; border: 0; border-bottom: 1px solid #f1ece5; white-space: normal; overflow-wrap: anywhere; }
+  .account-cell-label { display: block; color: var(--muted); font-size: 10px; line-height: 1.4; }
+  .account-table td:nth-child(1), .account-table td:nth-child(2), .account-table td:nth-child(3), .account-table td:nth-child(8), .account-table td:last-child { grid-column: 1 / -1; }
+  .account-table td:last-child { border-bottom: 0; }
+  .account-table td > .badge { justify-self: start; }
+  .account-name { min-width: 0; }
+  .account-name strong { max-width: 100%; overflow-wrap: anywhere; }
+  .account-password-cell .password-control { display: flex; align-items: center; gap: 6px; }
+  .account-password-cell input { width: auto; min-width: 0; flex: 1; }
+  .table-actions { flex-wrap: wrap; gap: 6px; }
+  .account-table .table-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); justify-items: stretch !important; }
+  .account-table .table-actions .text-button { width: 100%; min-height: 36px; padding: 7px 9px !important; border: 1px solid var(--line); border-radius: 6px; background: #fff; text-align: center; }
+  .account-table .table-actions .text-button.danger { color: #a34234; border-color: #ead1c7; background: #fff9f7; }
+  .account-credits-cell .inline-credit-form { display: flex; align-items: center; gap: 4px; min-width: 0; }
+  .account-credits-cell input { width: 70px; min-width: 0; }
+}
+
+/* Contest participant selection */
+.contest-roster { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.contest-roster-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.contest-roster-heading h3 { margin: 0; color: var(--ink); font-size: 16px; }
+.contest-roster-count { flex: none; padding: 6px 10px; border-radius: 999px; background: #f3ede3; color: #704b3e; font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.contest-roster > .field-help { margin: 7px 0 14px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.contest-roster-tools { display: grid; grid-template-columns: minmax(180px, 1fr) auto; align-items: center; gap: 12px; margin-bottom: 10px; }
+.contest-roster-search { min-width: 0; width: 100%; height: 42px; padding: 0 13px; border: 1px solid #ded5c9; border-radius: 7px; background: #fffefa; color: var(--ink); font: inherit; font-size: 13px; }
+.contest-roster-search:focus { border-color: #a35b45; outline: 3px solid rgb(163 91 69 / 14%); }
+.contest-roster-actions { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.contest-roster-actions .text-button { min-height: 36px; padding: 7px 9px; font-size: 12px; white-space: nowrap; }
+.contest-roster-list { display: grid; max-height: 280px; overflow: auto; overscroll-behavior: contain; border: 1px solid #e4dcd1; border-radius: 8px; background: #fffefa; }
+.contest-roster-user { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: center; gap: 12px; min-height: 62px; padding: 9px 14px; border-bottom: 1px solid #eee8df; cursor: pointer; transition: background 140ms ease; }
+.contest-roster-user:last-child { border-bottom: 0; }
+.contest-roster-user:hover { background: #faf5eb; }
+.contest-roster-user[data-selected="true"] { background: #f8f1e6; }
+.contest-roster-checkbox { width: 17px; height: 17px; margin: 0; accent-color: #9a4d3b; cursor: pointer; }
+.contest-roster-user-identity { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.contest-roster-user-avatar { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 50%; background: #eee4d5; color: #794638; font-size: 13px; font-weight: 750; }
+.contest-roster-user[data-selected="true"] .contest-roster-user-avatar { background: #ead6c4; color: #733a30; }
+.contest-roster-user-copy { display: grid; gap: 3px; min-width: 0; }
+.contest-roster-user-copy strong { overflow: hidden; color: var(--ink); font-size: 13px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.contest-roster-user-copy small { overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.contest-roster-user-state { color: #8a5b45; font-size: 11px; font-weight: 650; }
+.contest-roster-list > .muted { grid-column: 1 / -1; margin: 0; padding: 24px 16px; text-align: center; }
+@media (max-width: 620px) {
+  .contest-roster { margin-top: 20px; padding-top: 16px; }
+  .contest-roster-tools { grid-template-columns: minmax(0, 1fr); gap: 7px; }
+  .contest-roster-actions { justify-content: flex-start; }
+  .contest-roster-user { min-height: 58px; gap: 9px; padding: 8px 10px; }
+  .contest-roster-user-state { font-size: 10px; }
+}

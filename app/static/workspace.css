@@ -71,6 +71,7 @@
   border-bottom: 1px solid var(--line);
   background: #f9f5ee;
 }
+.workspace-pane-actions { display: flex; flex: none; align-items: center; gap: 2px; margin-left: auto; }
 .workspace-panel-label { color: #706053; font-size: 12px; font-weight: 650; }
 .workspace-pane-restores { display: flex; flex: none; align-items: center; gap: 6px; min-height: 34px; }
 .workspace-pane-restore,
@@ -117,6 +118,8 @@
 .candidate-workspace[data-editor-hidden="true"] .editor-splitter,
 .candidate-workspace[data-panels-hidden="true"] .editor-bottom-panel { display: none; }
 .candidate-workspace[data-editor-hidden="true"] > .editor-stack { grid-template-rows: minmax(0, 1fr); }
+.candidate-workspace[data-editor-hidden="true"]:not([data-panels-hidden="true"]) > .problem-splitter { display: none; }
+.candidate-workspace[data-editor-hidden="true"]:not([data-panels-hidden="true"]) > .editor-stack { grid-column: 2 / -1; }
 .candidate-workspace[data-panels-hidden="true"] > .editor-stack { grid-template-rows: minmax(0, 1fr); }
 .candidate-workspace[data-editor-hidden="true"][data-panels-hidden="true"] > .problem-splitter,
 .candidate-workspace[data-editor-hidden="true"][data-panels-hidden="true"] > .editor-stack { display: none; }
@@ -124,7 +127,9 @@
 .candidate-workspace[data-statement-hidden="true"][data-editor-hidden="true"][data-panels-hidden="true"] { display: none; }
 .candidate-workspace .editor-heading { min-height: 42px; padding: 5px 10px 5px 16px; gap: 10px; }
 .candidate-workspace .editor-heading h4 { font-size: 12px; color: #706053; }
-.candidate-workspace .language-select { flex: 0 0 140px; width: 140px; margin-left: auto; min-width: 115px; height: 30px; }
+.candidate-workspace .editor-heading-tools { display: flex; flex: none; align-items: center; gap: 8px; min-width: 0; margin-left: auto; }
+.candidate-workspace .editor-heading-tools .workspace-pane-actions { margin-left: 0; }
+.candidate-workspace .language-select { flex: 0 0 140px; width: 140px; min-width: 115px; height: 30px; }
 .candidate-workspace .editor-panel,
 .candidate-workspace .editor-bottom-panel { border-radius: 9px; overflow: hidden; }
 .candidate-workspace .editor-panel { container-type: inline-size; container-name: code-pane; }

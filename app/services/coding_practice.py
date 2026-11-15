@@ -104,10 +104,12 @@ def home(db, user):
             AND (q.visibility='public' OR q.owner_user_id=?)""", (user['id'], stage['id'], user['id'])).fetchone()
         stages.append(stage | dict(counts))
     daily_info = daily(db, user)
-    if not user.get('can_practice', user['is_admin']):
+    can_coding = user.get('can_coding', user.get('can_practice', user['is_admin']))
+    if not can_coding:
         daily_info = {**daily_info, 'question_id': None, 'question_title': ''}
     return {'stages': stages, 'progress': {key: sum(stage[key] for stage in stages) for key in ('total', 'solved')},
-            'daily': daily_info, 'can_practice': user.get('can_practice', user['is_admin']),
+            'daily': daily_info, 'can_coding': can_coding,
+            'can_practice': user.get('can_practice', user['is_admin']),
             'contribution': contribution(db, user), 'judge': coding_judge.availability()}
 
 

@@ -7,12 +7,12 @@
     <title>知序 · 复试模拟系统</title>
     <link rel="icon" href="/static/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=0.19.1" />
-    <link rel="stylesheet" href="/static/style.css?v=20261115-ui-audit-v1" />
-    <link rel="stylesheet" href="/static/workspace.css?v=20261115-workspace-v4" />
+    <link rel="stylesheet" href="/static/style.css?v=20261115-ui-audit-v15" />
+    <link rel="stylesheet" href="/static/workspace.css?v=20261115-workspace-v7" />
     <link rel="stylesheet" href="/static/contest-focus.css?v=20261115-contest-records-v2" />
     <link rel="stylesheet" href="/static/coding.css?v=20261115-coding-integrated-v2" />
     <link rel="stylesheet" href="/static/home-layout.css?v=20261115-layout-v1" />
-    <link rel="stylesheet" href="/static/training.css?v=20261114-training-v11" />
+    <link rel="stylesheet" href="/static/training.css?v=20261115-empty-state-v1" />
     <link rel="stylesheet" href="/static/credits.css?v=20261115-mobile-targets-v2" />
     <script>
       try {
@@ -739,7 +739,8 @@
             />
           </div>
           <div id="initialCreditsField"><label for="accountCredits">初始模拟面试次数</label><input id="accountCredits" type="number" min="0" max="1000000" value="1" required /><p class="field-help">设置该用户正式开始模拟面试的可用次数。</p></div>
-          <label id="practicePermissionField" class="permission-switch"><input id="accountPractice" type="checkbox" /><span class="switch-track" aria-hidden="true"></span><span>开通每日训练与算法题带刷</span></label>
+          <label id="trainingPermissionField" class="permission-switch"><input id="accountTraining" type="checkbox" /><span class="switch-track" aria-hidden="true"></span><span>开通每日训练权限</span></label>
+          <label id="codingPermissionField" class="permission-switch"><input id="accountCoding" type="checkbox" /><span class="switch-track" aria-hidden="true"></span><span>开通算法题带刷权限</span></label>
           <p id="userFormError" class="form-error" role="alert" hidden></p>
         </div>
         <div class="dialog-footer">

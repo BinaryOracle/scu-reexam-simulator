@@ -13,26 +13,44 @@ let legacy = false;
 function render() {
   const root = $("contestParticipants"); root.replaceChildren(); root.className = "full-width contest-roster";
   const heading = el("div", "", "contest-roster-heading");
-  const count = el("span", `已选择 ${selected.size} 位用户`, "muted"); heading.append(el("h3", "参赛用户"), count); root.append(heading);
+  const count = el("span", `已选 ${selected.size} / ${users.length} 位`, "contest-roster-count"); heading.append(el("h3", "参赛用户"), count); root.append(heading);
   root.append(el("p", legacy ? "历史比赛原为所有用户开放；本次保存后按以下名单授权。管理员默认可查看和管理比赛。" : "仅选中用户可进入比赛和查看赛后题目；管理员默认可查看和管理比赛。", "field-help"));
   if (!loaded) { root.append(el("p", "正在加载用户名单…", "muted")); return; }
   const tools = el("div", "", "contest-roster-tools");
-  const search = el("input"); search.type = "search"; search.placeholder = "搜索用户名或邮箱"; search.setAttribute("aria-label", "搜索参赛用户"); search.value = query;
+  const search = el("input", "", "contest-roster-search"); search.type = "search"; search.placeholder = "搜索用户名或邮箱"; search.setAttribute("aria-label", "搜索参赛用户"); search.value = query;
   const list = el("div", "", "contest-roster-list"); list.setAttribute("aria-label", "可参加比赛的用户");
   const filtered = () => users.filter(user => `${user.username} ${user.email || ""}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
   const draw = () => {
-    list.replaceChildren(); count.textContent = `已选择 ${selected.size} / ${users.length} 位用户`;
+    list.replaceChildren(); count.textContent = `已选 ${selected.size} / ${users.length} 位`;
     for (const user of filtered()) {
-      const label = el("label", "", "contest-roster-user"); const check = el("input"); check.type = "checkbox"; check.checked = selected.has(user.id);
+      const label = el("label", "", "contest-roster-user");
+      const check = el("input", "", "contest-roster-checkbox"); check.type = "checkbox"; check.checked = selected.has(user.id);
+      label.dataset.selected = String(check.checked);
       check.setAttribute("aria-label", `允许 ${user.username} 参加比赛`);
-      check.addEventListener("change", () => { if (check.checked) selected.add(user.id); else selected.delete(user.id); count.textContent = `已选择 ${selected.size} / ${users.length} 位用户`; });
-      const copy = el("span", user.username); if (user.email || !user.is_active) copy.append(el("small", [user.email, !user.is_active ? "账号已停用" : ""].filter(Boolean).join(" · ")));
-      label.append(check, copy); list.append(label);
+      check.addEventListener("change", () => {
+        if (check.checked) selected.add(user.id); else selected.delete(user.id);
+        label.dataset.selected = String(check.checked);
+        count.textContent = `已选 ${selected.size} / ${users.length} 位`;
+      });
+      const identity = el("span", "", "contest-roster-user-identity");
+      identity.append(el("span", user.username.slice(0, 1).toLocaleUpperCase(), "contest-roster-user-avatar"));
+      const copy = el("span", "", "contest-roster-user-copy");
+      copy.append(el("strong", user.username));
+      const details = [user.email, !user.is_active ? "账号已停用" : ""].filter(Boolean);
+      if (details.length) copy.append(el("small", details.join(" · ")));
+      identity.append(copy);
+      const state = el("span", check.checked ? "已选择" : "", "contest-roster-user-state");
+      label.append(check, identity, state); list.append(label);
     }
     if (!filtered().length) list.append(el("p", "没有匹配的用户", "muted"));
   };
   search.addEventListener("input", () => { query = search.value.trim(); draw(); });
-  tools.append(search, button("选择筛选结果", () => { filtered().forEach(user => selected.add(user.id)); draw(); }, "text-button"), button("清空选择", () => { selected.clear(); draw(); }, "text-button"));
+  const actions = el("div", "", "contest-roster-actions");
+  actions.append(
+    button("选择筛选结果", () => { filtered().forEach(user => selected.add(user.id)); draw(); }, "text-button"),
+    button("清空选择", () => { selected.clear(); draw(); }, "text-button"),
+  );
+  tools.append(search, actions);
   root.append(tools, list); draw();
 }
 

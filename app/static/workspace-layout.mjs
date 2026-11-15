@@ -53,7 +53,7 @@ export function createLayoutStore(storage, key) {
 }
 
 /** Attach resizing and pane focus without replacing editor or result DOM nodes. */
-export function mountWorkspaceLayout({ columns, stack, horizontal, vertical, controls, closeControls, regions, restoreControls, expandAll, reset, store }) {
+export function mountWorkspaceLayout({ columns, stack, horizontal, vertical, controls, closeControls, regions, restoreControls, expandAll, reset, store, paneSwitcher }) {
   const doc = columns.ownerDocument;
   const view = doc.defaultView;
   const lifecycle = new view.AbortController();
@@ -88,9 +88,18 @@ export function mountWorkspaceLayout({ columns, stack, horizontal, vertical, con
     }
     expandAll.hidden = !Object.values(current.collapsed).some(Boolean);
     if (narrow.matches && columns.dataset.activePane) {
-      const activePane = columns.dataset.activePane === "statement" ? "statement" : "editor";
-      const alternatePane = activePane === "statement" ? "editor" : "statement";
-      if (current.collapsed[activePane] && !current.collapsed[alternatePane]) columns.dataset.activePane = alternatePane;
+      const statementVisible = !current.collapsed.statement;
+      const codeStackVisible = !current.collapsed.editor || !current.collapsed.panels;
+      if (columns.dataset.activePane === "statement" && !statementVisible && codeStackVisible)
+        columns.dataset.activePane = "editor";
+      else if (columns.dataset.activePane === "editor" && !codeStackVisible && statementVisible)
+        columns.dataset.activePane = "statement";
+      for (const tab of paneSwitcher?.querySelectorAll?.("[data-pane]") ?? []) {
+        const selected = tab.dataset.pane === columns.dataset.activePane;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        tab.classList.toggle("selected", selected);
+      }
     }
     for (const [axis, handle] of [["statement", horizontal], ["editor", vertical]]) {
       const ratio = displayedRatio(axis);
@@ -123,7 +132,7 @@ export function mountWorkspaceLayout({ columns, stack, horizontal, vertical, con
     ["statement", horizontal, "ArrowLeft", "ArrowRight"],
     ["editor", vertical, "ArrowUp", "ArrowDown"],
   ]) {
-    handle.title = "拖动调整大小 · 方向键微调 · 双击恢复默认比例";
+    handle.title = "拖动调整 · 拖到边缘收起相邻区域 · 双击放大/还原";
     handle.addEventListener("pointerdown", event => {
       if (event.button !== 0 || event.isPrimary === false || store.read().focused) return;
       event.preventDefault();
@@ -142,7 +151,26 @@ export function mountWorkspaceLayout({ columns, stack, horizontal, vertical, con
     handle.addEventListener("pointermove", event => {
       if (drag?.handle !== handle || drag.pointerId !== event.pointerId) return;
       const coordinate = axis === "statement" ? event.clientX : event.clientY;
+      const container = axis === "statement" ? columns : stack;
+      const rect = container.getBoundingClientRect();
+      const start = axis === "statement" ? rect.left : rect.top;
+      const size = axis === "statement" ? rect.width : rect.height;
+      if (coordinate - start < 32 || start + size - coordinate < 32) {
+        const nearStart = coordinate - start < 32;
+        finishDrag();
+        if (axis === "statement") {
+          if (nearStart) store.collapse("statement");
+          else { store.collapse("editor"); store.collapse("panels"); }
+        } else store.collapse(nearStart ? "editor" : "panels");
+        paint();
+        return;
+      }
       store.resize(axis, clamp(drag.ratio + (coordinate - drag.start) / drag.size, ...bounds(axis)), false);
+      paint();
+    }, { signal });
+    handle.addEventListener("dblclick", () => {
+      const pane = axis === "statement" ? "editor" : "panels";
+      store.focus(pane);
       paint();
     }, { signal });
     for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
@@ -159,7 +187,6 @@ export function mountWorkspaceLayout({ columns, stack, horizontal, vertical, con
       store.resize(axis, clamp(value, min, max));
       paint();
     }, { signal });
-    handle.addEventListener("dblclick", () => { store.resize(axis, defaults[axis]); paint(); }, { signal });
   }
   for (const [pane, control] of Object.entries(controls)) {
     control.addEventListener("click", () => {
@@ -172,6 +199,7 @@ export function mountWorkspaceLayout({ columns, stack, horizontal, vertical, con
   for (const [pane, control] of Object.entries(closeControls)) {
     control.addEventListener("click", () => {
       finishDrag();
+      if (pane === "statement") store.resize("editor", 0.5);
       store.collapse(pane);
       paint();
       restoreControls[pane].focus({ preventScroll: true });

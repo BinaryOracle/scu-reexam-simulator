@@ -49,6 +49,7 @@ function environment(api = async () => ({})) {
   const button = (text, action, className) => { const node = el('button', text, className); node.action = action; return node; };
   const context = vm.createContext({ document, el, button, api, state: { token: 'token', user: { is_admin: true } },
     $: id => body.querySelector(`#${id}`), notify: (...args) => notices.push(args), badge: text => el('span', text),
+    emptyState: (title, description, icon = '◉') => { const node = el('div', '', 'empty-state'); node.append(el('span', icon, 'empty-icon'), el('h3', title), el('p', description)); return node; },
     confirmAction: async (...args) => { confirmations.push(args); return confirmation; }, crypto: { randomUUID: () => 'id' },
     URLSearchParams, URL, FormData: class { append() {} }, setTimeout, clearTimeout });
   return { body, context, notices, confirmations, el, choose: value => { confirmation = value; },

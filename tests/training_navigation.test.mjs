@@ -15,7 +15,7 @@ function home(active = null) {
   return { sections: [{ id: 'interview', name: '面试篇', count: 2 }, { id: 'written_ai', name: 'AI 篇', count: 2 }],
     collections: [{ id: 'data_structures', section_id: 'interview', name: '数据结构', count: 2, favorites: 0 },
       { id: 'ai_ml', section_id: 'written_ai', name: '机器学习', count: 2, favorites: 0 }],
-    active_session: active, can_practice: true, completed: 0, goal: 5, recent_days: [], rewards: [], mastery: { again: 0, known: 0 },
+    active_session: active, can_training: true, can_practice: true, completed: 0, goal: 5, recent_days: [], rewards: [], mastery: { again: 0, known: 0 },
     max_round_questions: 100, default_round_size: 2 };
 }
 function round(completed = 0) {
@@ -143,12 +143,19 @@ test('an uninterrupted start still opens the question card', async () => {
   assert.equal(f.has('查看参考答案'), true);
 });
 
-test('an account without the shared practice grant can browse but cannot start a round', async () => {
+test('an account without daily training permission can browse but cannot start a round', async () => {
   let calls = 0;
   const f = fixture(async () => { calls++; return round(); });
-  f.show(null, { ...home(), can_practice: false });
+  f.show(null, { ...home(), can_training: false, can_practice: true });
   assert.equal(f.has('每日训练'), true);
   await f.click('开始训练 →');
   assert.equal(calls, 0);
   assert.equal(f.read('session'), null);
+});
+
+test('explains that an existing round can continue without permission for new rounds', () => {
+  const f = fixture(async () => home());
+  f.show(null, { ...home({ id: 1, section_id: 'interview', completed: 0, total: 1 }), can_training: false });
+  assert.equal(f.has('每日训练权限尚未开通。你仍可浏览篇目、管理个人题目，并继续已开始的练习轮次；开始新一轮前请联系管理员开通。'), true);
+  assert.equal(f.has('继续练习'), true);
 });

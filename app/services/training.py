@@ -61,7 +61,9 @@ def home(db, user, section_id='interview'):
     dates = {row[0] for row in db.execute('SELECT date FROM training_checkins WHERE user_id=? ORDER BY date DESC LIMIT 7', (uid,))}
     recent = [(today() - timedelta(days=n)).isoformat() for n in reversed(range(7))]
     rewards = [dict(row) for row in db.execute('SELECT date,streak,credits FROM training_reward_grants WHERE user_id=? ORDER BY date DESC LIMIT 12', (uid,))]
-    return dict(date=date, goal=goal, completed=completed, checked_in=checked, streak=streak, can_practice=user.get('can_practice', user['is_admin']),
+    return dict(date=date, goal=goal, completed=completed, checked_in=checked, streak=streak,
+                can_training=user.get('can_training', user.get('can_practice', user['is_admin'])),
+                can_practice=user.get('can_practice', user['is_admin']),
                 default_round_size=settings(db)['round_size'], max_round_questions=load_config()['training']['max_round_questions'],
                 mastery={status: db.execute('''SELECT COUNT(*) FROM training_mastery m
                     JOIN training_questions q ON q.id=m.question_id JOIN training_collections c ON c.id=q.collection_id

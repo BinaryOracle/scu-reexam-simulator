@@ -1,6 +1,6 @@
 /** Training-only administration; submission review never lists private drafts. */
 import { api, state } from './api.js?v=20261114-ui-v17';
-import { $, el, button, notify, badge, requestText } from './ui.js?v=20261114-ui-v17';
+import { $, el, button, emptyState, notify, badge, requestText } from './ui.js?v=20261114-ui-v17';
 import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
 let listRequest=0;
 let generation=0, settings=null, tab='pending', page=1, query='', collection='', section='';
@@ -50,7 +50,14 @@ async function list() {
   if(!live(key,token)||current!==tab||request!==listRequest)return;
   const root=$('trainingAdminList');if(!root)return;root.replaceChildren();
   root.append(el('p',`共 ${result.total} 条`,'muted'));
-  if(!result.items.length)root.append(el('div',tab==='pending'?'目前没有待审核投稿。':tab==='rewards'?'还没有打卡奖励发放记录。':'没有匹配的题目。','empty-state'));
+  if(!result.items.length){
+    const empty=tab==='pending'
+      ?emptyState('当前没有待审核投稿','用户提交题目后会显示在这里；审核通过的题目会进入公开题库。','◇')
+      :tab==='rewards'
+        ?emptyState('暂无打卡奖励记录','用户达到奖励条件后，发放记录会显示在这里。','◇')
+        :emptyState('没有找到匹配的题目','调整篇章、题目集合或搜索词，也可以新增公开题目。','◇');
+    root.append(empty);
+  }
   for(const item of result.items){
     const row=el('article','','learning-list-item');const info=el('div'),actions=el('div','','learning-list-actions');
     if(tab==='rewards'){

@@ -88,14 +88,14 @@ class Pane extends EventTarget {
     this.dataset = {};
     this.attributes = new Map();
     this.classes = new Set();
-    this.classList = { add: value => this.classes.add(value), remove: value => this.classes.delete(value) };
+    this.classList = { add: value => this.classes.add(value), remove: value => this.classes.delete(value), toggle: (value, enabled) => enabled ? this.classes.add(value) : this.classes.delete(value) };
     this.style = { setProperty() {} };
     this.clientWidth = 1400;
     this.clientHeight = 800;
   }
   setAttribute(name, value) { this.attributes.set(name, value); }
   removeAttribute(name) { delete this.dataset[name.replace(/^data-/, "").replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())]; }
-  getBoundingClientRect() { return { width: this.clientWidth, height: this.clientHeight }; }
+  getBoundingClientRect() { return { left: 0, top: 0, width: this.clientWidth, height: this.clientHeight }; }
   getClientRects() { return [{}]; }
   setPointerCapture(id) { this.pointer = id; }
   hasPointerCapture(id) { return this.pointer === id; }
@@ -107,6 +107,7 @@ function interactionFixture() {
   const columns = new Pane();
   const doc = new EventTarget();
   const media = new EventTarget();
+  media.matches = false;
   let disconnected = false;
   doc.querySelector = () => null;
   doc.defaultView = {
@@ -117,9 +118,11 @@ function interactionFixture() {
   const regions = { statement: new Pane(), editor: new Pane(), panels: new Pane() };
   const restoreControls = { statement: new Pane(), editor: new Pane(), panels: new Pane() };
   const closeControls = { statement: new Pane(), editor: new Pane(), panels: new Pane() };
+  const paneTabs = ["statement", "editor"].map(pane => { const tab = new Pane(); tab.dataset.pane = pane; return tab; });
+  const paneSwitcher = new Pane(); paneSwitcher.querySelectorAll = () => paneTabs;
   const nodes = { columns, stack: new Pane(), horizontal: new Pane(), vertical: new Pane(), regions, restoreControls, closeControls, expandAll: new Pane(),
     controls: { statement: new Pane(), editor: new Pane(), panels: new Pane() },
-    reset: new Pane(), store: createLayoutStore(storage(), "candidate") };
+    paneSwitcher, reset: new Pane(), store: createLayoutStore(storage(), "candidate") };
   const dispose = mountWorkspaceLayout(nodes);
   const emit = (target, type, values = {}) => {
     const event = new Event(type, { cancelable: true });
@@ -182,6 +185,11 @@ test("hides closed workspace panes and exposes one-click restore controls", () =
   assert.equal(f.regions.statement.hidden, true);
   assert.equal(f.restoreControls.statement.hidden, false);
   assert.equal(f.horizontal.hidden, true);
+  assert.equal(f.store.read().editor, 0.5);
+  f.emit(f.vertical, "pointerdown", { clientY: 400 });
+  f.emit(f.vertical, "pointermove", { clientY: 480 });
+  assert.ok(f.store.read().editor > 0.5);
+  f.emit(f.vertical, "pointerup");
   f.emit(f.restoreControls.statement, "click");
   assert.equal(f.regions.statement.hidden, false);
   assert.equal(f.horizontal.hidden, false);
@@ -191,5 +199,47 @@ test("hides closed workspace panes and exposes one-click restore controls", () =
   assert.equal(f.regions.panels.hidden, true);
   f.emit(f.expandAll, "click");
   assert.deepEqual(f.store.read().collapsed, { statement: false, editor: false, panels: false });
+  f.dispose();
+});
+
+test("dragging a splitter to an edge collapses the adjacent pane and double-click focuses it", () => {
+  const f = interactionFixture();
+  f.emit(f.horizontal, "pointerdown", { clientX: 600 });
+  f.emit(f.horizontal, "pointermove", { clientX: 10 });
+  assert.equal(f.store.read().collapsed.statement, true);
+  assert.equal(f.regions.statement.hidden, true);
+  assert.equal(f.horizontal.pointer, null);
+
+  f.emit(f.restoreControls.statement, "click");
+  f.emit(f.horizontal, "dblclick");
+  assert.equal(f.store.read().focused, "editor");
+  f.emit(f.horizontal, "dblclick");
+  assert.equal(f.store.read().focused, "");
+  f.dispose();
+});
+
+test("narrow layout selects the remaining sample panel after both statement and editor close", () => {
+  const f = interactionFixture();
+  f.media.matches = true;
+  f.columns.dataset.activePane = "statement";
+  f.emit(f.closeControls.statement, "click");
+  assert.equal(f.columns.dataset.activePane, "editor");
+  assert.equal(f.paneSwitcher.querySelectorAll()[1].attributes.get("aria-selected"), "true");
+  f.emit(f.closeControls.editor, "click");
+  assert.equal(f.columns.dataset.activePane, "editor");
+  assert.equal(f.regions.panels.hidden, false);
+  assert.equal(f.paneSwitcher.querySelectorAll()[1].attributes.get("aria-selected"), "true");
+  f.dispose();
+});
+
+test("keeps the mobile code stack selected when closing its editor but leaving submissions open", () => {
+  const f = interactionFixture();
+  f.media.matches = true;
+  f.columns.dataset.activePane = "editor";
+  f.emit(f.closeControls.editor, "click");
+  assert.equal(f.columns.dataset.activePane, "editor");
+  assert.equal(f.regions.editor.hidden, true);
+  assert.equal(f.regions.panels.hidden, false);
+  assert.equal(f.paneSwitcher.querySelectorAll()[1].attributes.get("aria-selected"), "true");
   f.dispose();
 });

@@ -3,7 +3,7 @@ import { $, el, button, badge, emptyState, notify, confirmAction, statusBadge, r
 import { appendProblemStatement } from "./problem-content.js?v=20261115-resource-limits-v1";
 import { writeAppRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261115-drafts-v3";
-import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261115-workspace-v3";
+import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261115-workspace-v5";
 import { editCodingQuestion, codingDialog } from "./coding-form.mjs?v=20261115-coding-v1";
 import { codingQuestionId, filterCodingQuestions, codingDraftKey, acceptsCodingStatus } from "./coding-model.mjs?v=20261115-coding-v1";
 
@@ -110,8 +110,8 @@ function renderHome() {
     checkin.title = "通过当天抽中的题目后即可打卡"; dailyActions.append(checkin);
   }
   daily.append(dailyText);
-  if (home.can_practice) daily.append(dailyActions);
-  else daily.append(el("p", "每日训练与算法题带刷尚未开通，请联系管理员。", "practice-access-notice"));
+  if (home.can_coding) daily.append(dailyActions);
+  else daily.append(el("p", "算法题带刷权限尚未开通，题目浏览与个人投稿仍可使用。", "practice-access-notice"));
   const tabs = el("div", "", "coding-mode-tabs");
   for (const [key, label] of [["roadmap", "阶段题单"], ["mine", "我的投稿"]]) {
     const tab = button(label, () => { mode = key; stageId = ""; topic = ""; page = 1; renderHome(); return refreshList(); }, `button ${mode === key ? "primary" : "secondary"}`);
@@ -123,7 +123,7 @@ function renderHome() {
     for (const [index, stage] of home.stages.entries()) {
       const card = button("", () => { stageId = String(stage.id); topic = ""; renderHome(); return refreshList(); }, `coding-stage ${String(stage.id) === stageId ? "selected" : ""}`);
       card.setAttribute("aria-pressed", String(String(stage.id) === stageId));
-      card.disabled = !home.can_practice;
+      card.disabled = !home.can_coding;
       const top = el("div", "", "coding-stage-top"); top.append(el("span", String(index + 1).padStart(2, "0"), "coding-stage-number"), badge(stage.total && stage.solved >= stage.total ? "已完成" : `${stage.solved}/${stage.total}`, stage.total && stage.solved >= stage.total ? "green" : "gray"));
       card.append(top, el("h3", stage.title), el("p", stage.description));
       const meter = el("progress"); meter.max = Math.max(stage.total, 1); meter.value = stage.solved; meter.setAttribute("aria-label", `${stage.title}已通过 ${stage.solved} / ${stage.total} 题`); card.append(meter); roadmap.append(card);
@@ -133,7 +133,7 @@ function renderHome() {
     const contribution = el("div", "", "coding-contribution panel");
     contribution.append(el("div", `已公开 ${home.contribution.approved_count} 道 · 已获得 ${home.contribution.credits_earned} 次面试奖励`), el("p", `每 ${home.contribution.questions_per_reward} 道首次审核通过，获得 ${home.contribution.credits_per_reward} 次面试。私人题只对自己可见，也参与自己的每日抽题。`, "muted"), button("＋ 添加我的题目", () => editQuestion(), "button primary")); root.append(contribution);
   }
-  if (!home.can_practice && mode !== "mine") return;
+  if (!home.can_coding && mode !== "mine") return;
   const toolbar = el("div", "", "coding-toolbar");
   const search = el("input"); search.type = "search"; search.placeholder = "搜索题目或知识点"; search.setAttribute("aria-label", "搜索题目或知识点"); search.value = query;
   search.addEventListener("input", () => { query = search.value; clearTimeout(searchTimer); searchTimer = setTimeout(() => { void refreshList(); }, 250); });
@@ -177,7 +177,7 @@ function questionRow(question) {
   const row = el("div", "", "coding-question-row");
   const mark = el("span", question.solved ? "✓" : String(question.position + 1).padStart(2, "0"), `coding-solve-mark ${question.solved ? "solved" : ""}`);
   const main = el("div", "", "coding-question-main");
-  main.append(home.can_practice ? button(question.title, () => openQuestion(question.id), "coding-question-title") : el("strong", question.title));
+  main.append(home.can_coding ? button(question.title, () => openQuestion(question.id), "coding-question-title") : el("strong", question.title));
   const tags = el("div", "", "coding-question-tags"); tags.append(el("span", question.topic), el("span", `难度 ${question.difficulty}/5`), el("span", question.judge_mode === "luogu" ? "洛谷评测" : "公开样例练习"));
   if (mode === "mine") tags.append(badge(reviewLabels[question.review_status] || question.review_status, question.review_status === "approved" ? "green" : "gray"));
   main.append(tags);
@@ -223,7 +223,8 @@ function renderWorkspace(question, request, userId) {
   const expandAll = button("展开全部", () => {}, "workspace-expand-all"); expandAll.hidden = true; restoreBar.append(expandAll);
   const statement = el("article", "", "panel problem-statement"); const statementHead = el("div", "", "workspace-panel-heading statement-panel-heading"); const statementControl = paneControl();
   const closeStatement = closePaneControl("题面"); closeControls.statement = closeStatement;
-  statementHead.append(button("← 返回题单", goHome, "button secondary workspace-back"), el("span", "题目描述", "workspace-panel-label"), statementControl, closeStatement);
+  const statementActions = el("div", "", "workspace-pane-actions"); statementActions.append(statementControl, closeStatement);
+  statementHead.append(button("← 返回题单", goHome, "button secondary workspace-back"), el("span", "题目描述", "workspace-panel-label"), statementActions);
   const content = el("div", "", "workspace-statement-content");
   content.append(el("h3", question.title), el("p", [question.topic, `难度 ${question.difficulty}/5`, "★".repeat(question.stars)].filter(Boolean).join(" · "), "coding-stars"));
   if (question.statement_html) appendProblemStatement(content, question.statement_html); else content.append(el("pre", question.statement, "coding-statement-text"));
@@ -263,7 +264,9 @@ function renderWorkspace(question, request, userId) {
     judgeWarning.title = judgeWarning.textContent;
     editorHead.append(judgeWarning);
   }
-  editorHead.append(language, reset, editorControl, closeEditor);
+  const editorActions = el("div", "", "workspace-pane-actions"); editorActions.append(editorControl, closeEditor);
+  const headingTools = el("div", "", "editor-heading-tools"); headingTools.append(language, reset, editorActions);
+  editorHead.append(headingTools);
   const area = el("div", "", "code-area"); const numbers = el("pre", "", "line-numbers"); numbers.setAttribute("aria-hidden", "true");
   const input = el("textarea", "", "code-editor mono"); input.spellcheck = false; input.autocapitalize = "off"; input.wrap = "off"; input.maxLength = 30000; input.setAttribute("aria-label", "练习代码"); input.placeholder = "// 从标准输入读取，向标准输出输出\n// 按自己的节奏完成这道题";
   const saved = el("span", "草稿自动保存在此浏览器", "muted"); let previous = language.value;
@@ -336,15 +339,19 @@ function renderWorkspace(question, request, userId) {
     control.setAttribute("aria-pressed", String(pane === samples)); tabButtons.push([control,pane]); tabsInner.append(control);
   }
   const closePanels = closePaneControl("样例与提交记录"); closeControls.panels = closePanels;
-  tabs.append(tabsInner, panelControl, closePanels); panels.append(tabs, samples, records);
+  const panelActions = el("div", "", "workspace-pane-actions"); panelActions.append(panelControl, closePanels);
+  tabs.append(tabsInner, panelActions); panels.append(tabs, samples, records);
   const horizontal = splitter("problem-splitter", "调整题面和代码区宽度", "vertical"); const vertical = splitter("editor-splitter", "调整代码与样例区高度", "horizontal");
   stack.append(editor, vertical, panels); columns.append(statement, horizontal, stack);
   const mobile = el("div", "", "workspace-pane-switcher");
-  for (const [name, label] of [["statement","题目描述"],["editor","代码与评测"]]) mobile.append(button(label, () => { columns.dataset.activePane = name; columns.dispatchEvent(new Event("workspacepanechange")); for (const node of mobile.children) node.setAttribute("aria-pressed", String(node.textContent === label)); }, "workspace-pane-tab"));
+  for (const [name, label] of [["statement","题目描述"],["editor","代码与评测"]]) {
+    const tab = button(label, () => { columns.dataset.activePane = name; columns.dispatchEvent(new Event("workspacepanechange")); for (const node of mobile.children) node.setAttribute("aria-pressed", String(node.dataset.pane === name)); }, "workspace-pane-tab");
+    tab.dataset.pane = name; mobile.append(tab);
+  }
   mobile.children[0].setAttribute("aria-pressed", "true"); mobile.children[1].setAttribute("aria-pressed", "false");
   workspace.append(mobile, restoreBar, columns); root.replaceChildren(workspace);
   let storage; try { storage = window.localStorage; } catch { /* Layout still works without persistent storage. */ }
-  disposeLayout = mountWorkspaceLayout({ columns, stack, horizontal, vertical, controls: { statement: statementControl, editor: editorControl, panels: panelControl }, closeControls, regions: { statement, editor, panels }, restoreControls, expandAll, reset, store: createLayoutStore(storage, `scu:${userId}:coding-layout:v1`) });
+  disposeLayout = mountWorkspaceLayout({ columns, stack, horizontal, vertical, controls: { statement: statementControl, editor: editorControl, panels: panelControl }, closeControls, regions: { statement, editor, panels }, restoreControls, expandAll, reset, paneSwitcher: mobile, store: createLayoutStore(storage, `scu:${userId}:coding-layout:v1`) });
   void loadRecords(question.id, request, userId);
 }
 function renderResult(target, result) {

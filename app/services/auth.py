@@ -5,14 +5,20 @@ from fastapi import Depends, Header, HTTPException
 from app.db import connect
 from app.services.credits import ADMIN_CREDITS
 
-PUBLIC_USER_FIELDS = 'id,username,email,is_admin,is_superadmin,is_active,interview_credits,can_practice'
+PUBLIC_USER_FIELDS = 'id,username,email,is_admin,is_superadmin,is_active,interview_credits,can_practice,can_training,can_coding'
 FLAGS = ('is_admin', 'is_superadmin', 'is_active')
 
 
 def public_user(row, *, admin_view=False):
     """Return only safe account fields with JSON boolean account state."""
+    # Rows written by pre-v29 clients may still carry only the combined grant.
+    legacy_grant = bool(row['can_practice'] and not row['can_training'] and not row['can_coding'])
+    training = bool(row['is_admin'] or row['can_training'] or legacy_grant)
+    coding = bool(row['is_admin'] or row['can_coding'] or legacy_grant)
     return {'id': row['id'], 'username': row['username'], 'email': row['email'],
-            'can_practice': bool(row['is_admin'] or row['can_practice']),
+            'can_training': training,
+            'can_coding': coding,
+            'can_practice': bool(training and coding),
             'interview_credits': (ADMIN_CREDITS if admin_view else None) if row['is_admin'] else row['interview_credits'],
             **{key: bool(row[key]) for key in FLAGS}}
 
@@ -59,10 +65,32 @@ def exam_user(user=Depends(current_user)):
     return user
 
 
+def require_training(user):
+    """Require the account's daily training grant."""
+    if not user['can_training']:
+        raise HTTPException(403, '尚未开通每日训练权限，请联系管理员开通')
+    return user
+
+
+def training_user(user=Depends(current_user)):
+    return require_training(user)
+
+
+def require_coding(user):
+    """Require the account's algorithm practice grant."""
+    if not user['can_coding']:
+        raise HTTPException(403, '尚未开通算法题带刷权限，请联系管理员开通')
+    return user
+
+
+def coding_user(user=Depends(current_user)):
+    return require_coding(user)
+
+
 def require_practice(user):
-    """Apply the same grant to daily training and algorithm practice."""
+    """Retain the former combined permission check for compatible callers."""
     if not user['can_practice']:
-        raise HTTPException(403, '尚未开通练习权限，请联系管理员开通每日训练与算法题带刷')
+        raise HTTPException(403, '尚未开通练习权限，请联系管理员开通')
     return user
 
 

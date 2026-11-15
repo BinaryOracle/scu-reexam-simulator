@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 28
+SCHEMA_VERSION = 29
 
 
 @contextmanager
@@ -86,6 +86,12 @@ def initialize():
         if 'can_practice' not in columns:
             db.execute('ALTER TABLE users ADD COLUMN can_practice INTEGER NOT NULL DEFAULT 0 CHECK(can_practice IN (0,1))')
             db.execute('UPDATE users SET can_practice=1')
+        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
+        for field in ('can_training', 'can_coding'):
+            if field not in columns:
+                db.execute(f'ALTER TABLE users ADD COLUMN {field} INTEGER NOT NULL DEFAULT 0 CHECK({field} IN (0,1))')
+                db.execute(f'UPDATE users SET {field}=can_practice')
+        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
         contest_columns = {row['name'] for row in db.execute('PRAGMA table_info(contests)')}
         if 'access_mode' not in contest_columns:
             db.execute("ALTER TABLE contests ADD COLUMN access_mode TEXT NOT NULL DEFAULT 'selected' CHECK(access_mode IN ('all','selected'))")
