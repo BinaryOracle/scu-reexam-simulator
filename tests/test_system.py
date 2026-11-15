@@ -14,7 +14,7 @@ def client(tmp_path, monkeypatch):
     initialize()
     with connect() as db:
         for name in ['manager', 'alice', 'bob']:
-            db.execute('INSERT INTO users(username,password,is_admin) VALUES (?,?,?)', (name,hash_password('password123'),name=='manager'))
+            db.execute('INSERT INTO users(username,password,is_admin,can_practice) VALUES (?,?,?,1)', (name,hash_password('password123'),name=='manager'))
     # Route fixtures use placeholder audio bytes; conversion is covered by provider tests.
     from app.services import ai
     monkeypatch.setattr(ai, 'media_audio', lambda paths: [{'type': 'input_audio', 'input_audio': {'data': 'route-test-audio'}}])
@@ -49,7 +49,7 @@ def test_contest_access_and_hidden_cases(client, monkeypatch):
     monkeypatch.setattr(judge,'judge',lambda language,source,tests: 'Accepted')
     t,a=login(client,'manager'),login(client,'alice')
     now=time.time()
-    body={'title':'比赛','starts':now-10,'ends':now+100,'judge_mode':'docker','problems':[
+    body={'participant_ids':[3,4],'title':'比赛','starts':now-10,'ends':now+100,'judge_mode':'docker','problems':[
         {'title':'加法','statement':'求和','tests':[{'input':'1 2','output':'3'}]}]}
     assert client.post('/api/admin/contests',headers=a,json=body).status_code == 403
     created=client.post('/api/admin/contests',headers=t,json=body).json()
@@ -60,7 +60,7 @@ def test_contest_access_and_hidden_cases(client, monkeypatch):
     assert client.get(f'/api/contests/{cid}',headers=a).json()['problems'][0]['attempt_count'] == 0
     r=client.post(f'/api/problems/{pid}/submissions',headers=a,json={'source':'print(3)','language':'python3'})
     assert r.json()['status']=='Accepted'
-    expired=client.post('/api/admin/contests',headers=t,json={'title':'过期','starts':now-100,'ends':now-10,'judge_mode':'docker','problems':[
+    expired=client.post('/api/admin/contests',headers=t,json={'participant_ids':[3,4],'title':'过期','starts':now-100,'ends':now-10,'judge_mode':'docker','problems':[
         {'title':'题','statement':'题','tests':[{'input':'','output':''}]}]}).json()['id']
     p=client.get(f'/api/contests/{expired}/problems',headers=a).json()[0]['id']
     assert client.post(f'/api/problems/{p}/submissions',headers=a,json={'source':'pass'}).status_code == 403
@@ -69,7 +69,7 @@ def test_luogu_submission_waits_for_browser_bridge_and_accepts_remote_result(cli
     manager, alice = login(client, 'manager'), login(client, 'alice')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'洛谷赛','starts':now-10,'ends':now+100,
+        'participant_ids':[3,4], 'title':'洛谷赛','starts':now-10,'ends':now+100,
         'problems':[{'title':'加法','statement':'求和','remote_problem_id':'P1000'}]
     })
     cid = contest.json()['id']
@@ -115,7 +115,7 @@ def test_submissions_are_paginated_have_private_details_and_feed_contest_ranking
     manager, alice, bob = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'成绩赛','starts':now-10,'ends':now+100,'show_ranking':True,
+        'participant_ids':[3,4], 'title':'成绩赛','starts':now-10,'ends':now+100,'show_ranking':True,
         'ranking_rule':'score','problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000','points':250}]
     }).json()
     pid = contest['problem_ids'][0]
@@ -169,7 +169,7 @@ def test_contest_ranking_awards_ceiling_proportional_score_for_partial_luogu_res
     manager, alice = login(client, 'manager'), login(client, 'alice')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'部分分赛','starts':now-10,'ends':now+100,'show_ranking':True,
+        'participant_ids':[3,4], 'title':'部分分赛','starts':now-10,'ends':now+100,'show_ranking':True,
         'ranking_rule':'score','problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000','points':100}]
     }).json()
     pid = contest['problem_ids'][0]
@@ -191,7 +191,7 @@ def test_admin_submission_directory_and_each_users_submissions_are_paginated_sep
     manager, alice, bob = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'分层分页赛','starts':now-10,'ends':now+100,
+        'participant_ids':[3,4], 'title':'分层分页赛','starts':now-10,'ends':now+100,
         'problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000'}]
     }).json()
     pid = contest['problem_ids'][0]
@@ -224,7 +224,7 @@ def test_contest_ranking_can_be_hidden_and_invalid_language_is_rejected(client):
     manager, alice = login(client, 'manager'), login(client, 'alice')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'不公开榜单','starts':now-10,'ends':now+100,'show_ranking':False,
+        'participant_ids':[3,4], 'title':'不公开榜单','starts':now-10,'ends':now+100,'show_ranking':False,
         'problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000'}]
     }).json()
     response = client.get(f'/api/contests/{contest["id"]}/ranking', headers=alice)
@@ -294,7 +294,7 @@ def test_admin_manages_luogu_extension_origin_and_rejects_unsafe_urls(client):
 def test_luogu_contest_requires_a_problem_and_creates_it_atomically(client):
     manager, alice = login(client, 'manager'), login(client, 'alice')
     now = time.time()
-    base = {'title':'洛谷模拟赛','starts':now-10,'ends':now+100}
+    base = {'participant_ids':[3,4], 'title':'洛谷模拟赛','starts':now-10,'ends':now+100}
     assert client.post('/api/admin/contests', headers=manager, json=base).status_code == 422
     created = client.post('/api/admin/contests', headers=manager, json={
         **base,
@@ -345,7 +345,7 @@ def test_admin_can_delete_contest_and_its_problem_submissions(client):
     manager, alice = login(client, 'manager'), login(client, 'alice')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'待删除比赛','starts':now-10,'ends':now+100,
+        'participant_ids':[3,4], 'title':'待删除比赛','starts':now-10,'ends':now+100,
         'problems':[{'title':'题目','statement':'描述','remote_problem_id':'P1000'}]
     }).json()
     cid = contest['id']

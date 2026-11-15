@@ -15,7 +15,7 @@ function home(active = null) {
   return { sections: [{ id: 'interview', name: '面试篇', count: 2 }, { id: 'written_ai', name: 'AI 篇', count: 2 }],
     collections: [{ id: 'data_structures', section_id: 'interview', name: '数据结构', count: 2, favorites: 0 },
       { id: 'ai_ml', section_id: 'written_ai', name: '机器学习', count: 2, favorites: 0 }],
-    active_session: active, completed: 0, goal: 5, recent_days: [], rewards: [], mastery: { again: 0, known: 0 },
+    active_session: active, can_practice: true, completed: 0, goal: 5, recent_days: [], rewards: [], mastery: { again: 0, known: 0 },
     max_round_questions: 100, default_round_size: 2 };
 }
 function round(completed = 0) {

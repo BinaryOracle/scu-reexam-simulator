@@ -238,6 +238,7 @@ function renderUsers() {
     "密码",
     "邮箱",
     "面试次数",
+    "练习权限",
     "管理权限",
     "账号状态",
     "操作",
@@ -342,7 +343,17 @@ function renderUsers() {
       catch { notify("用户已删除，但列表刷新失败。请点击刷新用户列表；不要重复删除。", "error"); }
     }, "text-button danger"));
     actions.append(group);
-    row.append(name, password, email, credits, admin, active, actions);
+    const practice = el("td");
+    if (user.is_admin) practice.append(el("span", "默认开通", "muted"));
+    else {
+      const control = button(user.can_practice ? "已开通" : "未开通", async () => {
+        await api(`/admin/users/${user.id}`, { method: "PATCH", body: JSON.stringify({ can_practice: !user.can_practice }) });
+        await refreshUsers(); notify("每日训练与算法题带刷权限已更新。");
+      }, `account-status-button ${user.can_practice ? "active" : "inactive"}`);
+      control.setAttribute("aria-label", `${user.can_practice ? "关闭" : "开通"} ${user.username} 的练习权限`);
+      control.setAttribute("aria-pressed", String(user.can_practice)); practice.append(control);
+    }
+    row.append(name, password, email, credits, practice, admin, active, actions);
     body.append(row);
   }
   table.append(head, body);
@@ -355,6 +366,7 @@ function syncAccountType() {
   const admin = $("accountTypeAdmin").checked;
   $("initialCreditsField").hidden = admin;
   $("accountCredits").disabled = admin;
+  $("practicePermissionField").hidden = admin;
 }
 async function openAccount() {
   const settings = await readCreditSettings();
@@ -431,6 +443,7 @@ async function submitAccount(event) {
       is_admin: $("accountTypeAdmin").checked,
       email: $("accountEmail").value.trim() || null,
       interview_credits: Number($("accountCredits").value),
+      can_practice: $("accountPractice").checked,
     };
     await api("/admin/users", {
       method: "POST",

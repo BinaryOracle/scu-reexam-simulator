@@ -5,13 +5,14 @@ from fastapi import Depends, Header, HTTPException
 from app.db import connect
 from app.services.credits import ADMIN_CREDITS
 
-PUBLIC_USER_FIELDS = 'id,username,email,is_admin,is_superadmin,is_active,interview_credits'
+PUBLIC_USER_FIELDS = 'id,username,email,is_admin,is_superadmin,is_active,interview_credits,can_practice'
 FLAGS = ('is_admin', 'is_superadmin', 'is_active')
 
 
 def public_user(row, *, admin_view=False):
     """Return only safe account fields with JSON boolean account state."""
     return {'id': row['id'], 'username': row['username'], 'email': row['email'],
+            'can_practice': bool(row['is_admin'] or row['can_practice']),
             'interview_credits': (ADMIN_CREDITS if admin_view else None) if row['is_admin'] else row['interview_credits'],
             **{key: bool(row[key]) for key in FLAGS}}
 
@@ -56,3 +57,14 @@ def interview_user(user=Depends(current_user)):
 def exam_user(user=Depends(current_user)):
     """Allow every authenticated active account to use the programming module."""
     return user
+
+
+def require_practice(user):
+    """Apply the same grant to daily training and algorithm practice."""
+    if not user['can_practice']:
+        raise HTTPException(403, '尚未开通练习权限，请联系管理员开通每日训练与算法题带刷')
+    return user
+
+
+def practice_user(user=Depends(current_user)):
+    return require_practice(user)

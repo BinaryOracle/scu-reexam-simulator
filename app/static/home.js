@@ -1,10 +1,13 @@
 /** Renders the authenticated preparation home and published announcement reader. */
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, el, button, notify, confirmAction } from "./ui.js?v=20261114-ui-v17";
+import { renderHomeBlocks } from "./home-layout.js?v=20261115-layout-v1";
 
 let notices = [];
+let announcementIndex = 0;
 let announcementsUnavailable = false;
 let releaseAnnouncementImages = null;
+let homeRevision = 0;
 
 /** Load private images with the current session; closing the reader cancels and releases them. */
 function prepareAnnouncementImage(image, source, session) {
@@ -107,29 +110,40 @@ function renderNotices(root) {
   const band = el("section", "", "home-announcement-band");
   band.setAttribute("aria-label", "平台公告");
   const viewport = el("div", "", "home-announcement-viewport");
-  const track = el("div", "", "home-announcement-track");
+  const controls = el("div", "", "home-announcement-controls");
+  viewport.setAttribute("aria-live", "polite");
   if (announcementsUnavailable) {
     viewport.append(el("span", "公告暂时无法加载", "home-announcement-error"),
       button("重试", () => { void refreshHome(); }, "text-button home-announcement-retry"));
   } else if (!notices.length) viewport.append(el("span", "暂无公告"));
   else {
-    for (let copy = 0; copy < 2; copy++) {
-      const group = el("div", "", "home-announcement-group");
-      if (copy) group.setAttribute("aria-hidden", "true");
-      for (const item of notices) {
-        const link = button(item.title, () => openAnnouncement(item), "home-announcement-title");
-        if (copy) link.tabIndex = -1;
-        group.append(link);
-      }
-      track.append(group);
+    announcementIndex %= notices.length;
+    const title = button("", () => openAnnouncement(notices[announcementIndex]), "home-announcement-title");
+    const position = el("span", "", "home-announcement-position");
+    const showNotice = () => {
+      title.textContent = notices[announcementIndex].title;
+      position.textContent = notices.length > 1 ? `${announcementIndex + 1} / ${notices.length}` : "";
+    };
+    showNotice();
+    viewport.append(title);
+    if (notices.length > 1) {
+      const previous = button("‹", () => {
+        announcementIndex = (announcementIndex - 1 + notices.length) % notices.length;
+        showNotice();
+      }, "icon-button");
+      previous.setAttribute("aria-label", "上一条公告");
+      const next = button("›", () => {
+        announcementIndex = (announcementIndex + 1) % notices.length;
+        showNotice();
+      }, "icon-button");
+      next.setAttribute("aria-label", "下一条公告");
+      controls.append(position, previous, next);
     }
-    track.classList.add("is-rotating");
-    track.style.setProperty("--announcement-duration", `${24 * notices.length}s`);
-    viewport.append(track);
   }
   const label = button("公告", openAnnouncementList, "home-announcement-label");
   label.title = "查看全部公告";
   band.append(label, viewport);
+  if (controls.childNodes.length) band.append(controls);
   root.append(band);
 }
 
@@ -158,49 +172,20 @@ function renderHome() {
     actions.append(control);
   }
   hero.append(actions); root.append(hero);
-  const roadmap = el("section", "", "home-roadmap");
-  const heading = el("div", "", "home-section-heading");
-  heading.append(el("div", "复试准备路线", "eyebrow"), el("h2", "先夯实基础，再练习表达"));
-  roadmap.append(heading);
-  const stages = el("div", "", "home-roadmap-steps");
-  for (const item of [
-    ["01", "基础与 AI", "数学基础 · 机器学习 · 深度学习 · LLM"],
-    ["02", "笔试与机试", "软件工程 · AI 笔试 · 文献翻译 · 算法题"],
-    ["03", "面试准备", "专业课 · 英文 · PPT 自我介绍 · 专家问答"],
-  ]) {
-    const stage = el("article", "", "home-roadmap-stage");
-    stage.append(el("span", item[0], "home-stage-number"), el("h3", item[1]), el("p", item[2]));
-    stages.append(stage);
-  }
-  roadmap.append(stages); root.append(roadmap);
-  fetch("/api/home/resources", { headers: { Authorization: "Bearer " + state.token } }).then(response => {
-    if (!response.ok) throw new Error("备考资源暂时无法读取");
-    return response.json();
-  }).then(resources => {
-    if ($("home").hidden) return;
-    const groups = [...new Set(resources.map(item => item.group))];
-    for (const group of groups) {
-      const section = el("section", "", "home-resource-section");
-      section.append(el("div", group, "eyebrow"));
-      const grid = el("div", "", "home-resource-grid");
-      for (const item of resources.filter(resource => resource.group === group)) {
-        const control = button("", () => {
-          if (item.kind === "external") window.open(item.url, "_blank", "noopener,noreferrer");
-          else navigate(item.view, item.section);
-        }, "home-resource-card");
-        control.append(el("span", "★".repeat(item.stars) + "☆".repeat(5-item.stars), "home-resource-stars"),
-          el("strong", item.title), el("span", item.summary, "home-resource-summary"));
-        if (item.notice) control.append(el("small", item.notice, "home-resource-notice"));
-        if (item.kind === "external") control.append(el("span", "外部资料 ↗", "home-resource-type"));
-        grid.append(control);
-      }
-      section.append(grid); root.append(section);
-    }
-  }).catch(error => notify(error.message, "error"));
+  const content = el("div"); root.append(content);
+  const token = state.token, revision = ++homeRevision;
+  content.append(el("p", "正在加载备考内容…", "muted"));
+  api("/home/layout").then(layout => {
+    if (revision !== homeRevision || token !== state.token || !content.isConnected) return;
+    content.replaceChildren(); renderHomeBlocks(content, layout.blocks, navigate);
+  }).catch(error => {
+    if (revision === homeRevision && token === state.token && content.isConnected)
+      content.replaceChildren(el("p", error.message, "form-error"), button("重新加载", refreshHome, "button secondary"));
+  });
 }
 
 export async function refreshHome() {
-  try { notices = await api("/announcements"); announcementsUnavailable = false; }
+  try { notices = await api("/announcements"); announcementIndex = 0; announcementsUnavailable = false; }
   catch { notices = []; announcementsUnavailable = true; }
   renderHome();
 }

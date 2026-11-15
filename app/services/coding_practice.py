@@ -103,8 +103,12 @@ def home(db, user):
             FROM coding_questions q WHERE q.stage_id=? AND q.active=1 AND q.deleted=0
             AND (q.visibility='public' OR q.owner_user_id=?)""", (user['id'], stage['id'], user['id'])).fetchone()
         stages.append(stage | dict(counts))
+    daily_info = daily(db, user)
+    if not user.get('can_practice', user['is_admin']):
+        daily_info = {**daily_info, 'question_id': None, 'question_title': ''}
     return {'stages': stages, 'progress': {key: sum(stage[key] for stage in stages) for key in ('total', 'solved')},
-            'daily': daily(db, user), 'contribution': contribution(db, user), 'judge': coding_judge.availability()}
+            'daily': daily_info, 'can_practice': user.get('can_practice', user['is_admin']),
+            'contribution': contribution(db, user), 'judge': coding_judge.availability()}
 
 
 def assign_daily(db, user):

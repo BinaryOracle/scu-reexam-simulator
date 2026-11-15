@@ -6,7 +6,7 @@ from test_system import client, login
 
 def make_contest(client, manager):
     now = time.time()
-    payload = {'title': '模拟赛', 'starts': now - 60, 'ends': now + 3600,
+    payload = {'participant_ids': [3,4], 'title': '模拟赛', 'starts': now - 60, 'ends': now + 3600,
                'problems': [{'title': '画画', 'statement': '**题意**：$n \\le 50$',
                              'remote_problem_id': 'P4708',
                              'samples': [{'input': '4', 'output': '3'}, {'input': '5', 'output': '7'}]}]}

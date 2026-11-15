@@ -23,6 +23,7 @@ import { contestTiming, canOpenContestProblems } from "./contest-timing.mjs?v=20
 import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261115-drafts-v3";
 import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261115-workspace-v3";
 import { openContestRecords, closeContestRecords } from "./contest-records.js?v=20261115-contest-records-v1";
+import { loadContestRoster, resetContestRoster, contestParticipantIds, setupContestRoster } from "./contest-roster.js?v=20261115-access-v1";
 
 let contests = [];
 let selectedContest = null;
@@ -159,9 +160,10 @@ function deadline(contest) {
   return `剩余 ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 }
 function contestCanEnter(contest) {
-  return canOpenContestProblems(contest, Date.now() / 1000, managementMode());
+  return (state.user.is_admin || contest.can_access !== false) && canOpenContestProblems(contest, Date.now() / 1000, managementMode());
 }
 function contestAvailability(contest) {
+  if (!state.user.is_admin && contest.can_access === false) return "未获本场比赛参赛权限，请联系管理员";
   return Date.now() / 1000 < contest.starts ? "比赛开始后开放题目" : "";
 }
 function contestEntryLabel(contest) {
@@ -278,7 +280,7 @@ async function restoreContestRoute() {
     return;
   }
   await openContest(contest, { recordHistory: false });
-  if (route.workspace) await enterContest({ recordHistory: false, problemId: route.problemId });
+  if (route.workspace && selectedContest) await enterContest({ recordHistory: false, problemId: route.problemId });
 }
 function renderContestList() {
   contestNavigationRevision++;
@@ -392,6 +394,11 @@ async function deleteContest(contest) {
   notify("比赛及其题目、提交记录已删除。");
 }
 async function openContest(contest, { recordHistory = true } = {}) {
+  if (!state.user.is_admin && contest.can_access === false) {
+    renderContestList();
+    if (!recordHistory) writeAppRoute("contest", { replace: true });
+    notify("你不在本场比赛的参赛名单中，请联系管理员", "error"); return;
+  }
   const navigationRevision = ++contestNavigationRevision;
   try {
     contestOverview = await api(`/contests/${contest.id}`);
@@ -1480,7 +1487,8 @@ export async function createContest() {
   if (ends <= starts) throw new Error("结束时间需要晚于开始时间。");
   const editing = editingContestId !== null;
   const body = { title: $("contestTitle").value.trim(), starts, ends,
-    show_ranking: $("showRanking").checked, ranking_rule: $("rankingRule").value };
+    show_ranking: $("showRanking").checked, ranking_rule: $("rankingRule").value,
+    participant_ids: contestParticipantIds() };
   if (editing) {
     body.judge_mode = editingContestJudgeMode;
     if (editingContestJudgeMode === "luogu") body.problems = selectedLuoguProblems;
@@ -1515,6 +1523,7 @@ function dateTimeInput(timestamp) {
   return date.toISOString().slice(0, 16);
 }
 async function beginEditContest(contest) {
+  await loadContestRoster(contest.id);
   if (selectedContest?.id === contest.id) {
     writeAppRoute("contest");
     selectedContest = null;
@@ -1556,6 +1565,7 @@ async function beginEditContest(contest) {
   $("contestForm").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 function cancelContestEditing() {
+  resetContestRoster();
   editingContestId = null;
   editingContestJudgeMode = "luogu";
   selectedLuoguProblems = [];
@@ -1570,6 +1580,7 @@ function cancelContestEditing() {
   renderSelectedLuoguProblems();
 }
 export function setupContestCreation() {
+  setupContestRoster();
   $("closeSubmissionDetail").addEventListener("click", () => $("submissionDetailDialog").close());
   $("closeSubmissionDetailFooter").addEventListener("click", () => $("submissionDetailDialog").close());
   const input = $("luoguProblemSearch");

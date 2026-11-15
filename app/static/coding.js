@@ -109,7 +109,9 @@ function renderHome() {
     checkin.disabled = !home.daily.solved;
     checkin.title = "通过当天抽中的题目后即可打卡"; dailyActions.append(checkin);
   }
-  daily.append(dailyText, dailyActions);
+  daily.append(dailyText);
+  if (home.can_practice) daily.append(dailyActions);
+  else daily.append(el("p", "每日训练与算法题带刷尚未开通，请联系管理员。", "practice-access-notice"));
   const tabs = el("div", "", "coding-mode-tabs");
   for (const [key, label] of [["roadmap", "阶段题单"], ["mine", "我的投稿"]]) {
     const tab = button(label, () => { mode = key; stageId = ""; topic = ""; page = 1; renderHome(); return refreshList(); }, `button ${mode === key ? "primary" : "secondary"}`);
@@ -121,6 +123,7 @@ function renderHome() {
     for (const [index, stage] of home.stages.entries()) {
       const card = button("", () => { stageId = String(stage.id); topic = ""; renderHome(); return refreshList(); }, `coding-stage ${String(stage.id) === stageId ? "selected" : ""}`);
       card.setAttribute("aria-pressed", String(String(stage.id) === stageId));
+      card.disabled = !home.can_practice;
       const top = el("div", "", "coding-stage-top"); top.append(el("span", String(index + 1).padStart(2, "0"), "coding-stage-number"), badge(stage.total && stage.solved >= stage.total ? "已完成" : `${stage.solved}/${stage.total}`, stage.total && stage.solved >= stage.total ? "green" : "gray"));
       card.append(top, el("h3", stage.title), el("p", stage.description));
       const meter = el("progress"); meter.max = Math.max(stage.total, 1); meter.value = stage.solved; meter.setAttribute("aria-label", `${stage.title}已通过 ${stage.solved} / ${stage.total} 题`); card.append(meter); roadmap.append(card);
@@ -130,6 +133,7 @@ function renderHome() {
     const contribution = el("div", "", "coding-contribution panel");
     contribution.append(el("div", `已公开 ${home.contribution.approved_count} 道 · 已获得 ${home.contribution.credits_earned} 次面试奖励`), el("p", `每 ${home.contribution.questions_per_reward} 道首次审核通过，获得 ${home.contribution.credits_per_reward} 次面试。私人题只对自己可见，也参与自己的每日抽题。`, "muted"), button("＋ 添加我的题目", () => editQuestion(), "button primary")); root.append(contribution);
   }
+  if (!home.can_practice && mode !== "mine") return;
   const toolbar = el("div", "", "coding-toolbar");
   const search = el("input"); search.type = "search"; search.placeholder = "搜索题目或知识点"; search.setAttribute("aria-label", "搜索题目或知识点"); search.value = query;
   search.addEventListener("input", () => { query = search.value; clearTimeout(searchTimer); searchTimer = setTimeout(() => { void refreshList(); }, 250); });
@@ -173,7 +177,7 @@ function questionRow(question) {
   const row = el("div", "", "coding-question-row");
   const mark = el("span", question.solved ? "✓" : String(question.position + 1).padStart(2, "0"), `coding-solve-mark ${question.solved ? "solved" : ""}`);
   const main = el("div", "", "coding-question-main");
-  main.append(button(question.title, () => openQuestion(question.id), "coding-question-title"));
+  main.append(home.can_practice ? button(question.title, () => openQuestion(question.id), "coding-question-title") : el("strong", question.title));
   const tags = el("div", "", "coding-question-tags"); tags.append(el("span", question.topic), el("span", `难度 ${question.difficulty}/5`), el("span", question.judge_mode === "luogu" ? "洛谷评测" : "公开样例练习"));
   if (mode === "mine") tags.append(badge(reviewLabels[question.review_status] || question.review_status, question.review_status === "approved" ? "green" : "gray"));
   main.append(tags);

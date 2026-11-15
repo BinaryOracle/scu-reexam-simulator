@@ -27,6 +27,7 @@ import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=
 
 import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
 import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-announcement-load-error-v1";
+import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
 import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261115-coding-integrated-v2";
@@ -37,6 +38,7 @@ configureCodingBridge(requestLuoguSubmit);
 const views = {
   home: { label: "备考首页", refresh: refreshHome },
   announcementsAdmin: { label: "公告管理", refresh: refreshAnnouncementsAdmin },
+  homeLayoutAdmin: { label: "首页编排", refresh: refreshHomeLayoutAdmin },
   coding: { label: "算法带刷", refresh: refreshCoding },
   codingAdmin: { label: "带刷题库", refresh: refreshCodingAdmin },
   training: { label: "每日训练", refresh: refreshTraining },
@@ -120,7 +122,7 @@ function syncSidebarToggle() {
 function allowedViews() {
   if (state.adminMode)
     return state.user.is_admin
-      ? ["users", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "vouchers", "systemSettings", "interview", "contest", "profile"]
+      ? ["users", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "homeLayoutAdmin", "vouchers", "systemSettings", "interview", "contest", "profile"]
       : ["adminDenied"];
   return ["home", "training", "coding", "interview", "contest", "submissions", "profile"];
 }

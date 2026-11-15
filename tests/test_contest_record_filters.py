@@ -11,7 +11,7 @@ def records(client):
     root = {'Authorization': 'Bearer ' + root_response.json()['token']}
     now = time.time()
     response = client.post('/api/admin/contests', headers=manager, json={
-        'title': '筛选比赛', 'starts': now - 60, 'ends': now + 3600,
+        'participant_ids': [3,4], 'title': '筛选比赛', 'starts': now - 60, 'ends': now + 3600,
         'problems': [{'title': '加法', 'statement': '求和', 'remote_problem_id': 'P1001'},
                      {'title': '问候', 'statement': '问候', 'remote_problem_id': 'B2002'}],
     })
@@ -19,7 +19,7 @@ def records(client):
     created = response.json()
     cid, (a, b) = created['id'], created['problem_ids']
     other = client.post('/api/admin/contests', headers=manager, json={
-        'title': '其他比赛', 'starts': now - 60, 'ends': now + 3600,
+        'participant_ids': [3,4], 'title': '其他比赛', 'starts': now - 60, 'ends': now + 3600,
         'problems': [{'title': '其他题', 'statement': '求和', 'remote_problem_id': 'P1001'}],
     }).json()['problem_ids'][0]
     ids = {}

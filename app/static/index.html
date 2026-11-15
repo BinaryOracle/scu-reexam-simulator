@@ -7,10 +7,11 @@
     <title>知序 · 复试模拟系统</title>
     <link rel="icon" href="/static/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=0.19.1" />
-    <link rel="stylesheet" href="/static/style.css?v=20261115-action-spacing-v1" />
+    <link rel="stylesheet" href="/static/style.css?v=20261115-problem-actions-spacing-v1" />
     <link rel="stylesheet" href="/static/workspace.css?v=20261115-workspace-v4" />
     <link rel="stylesheet" href="/static/contest-focus.css?v=20261115-contest-records-v2" />
     <link rel="stylesheet" href="/static/coding.css?v=20261115-coding-integrated-v2" />
+    <link rel="stylesheet" href="/static/home-layout.css?v=20261115-layout-v1" />
     <link rel="stylesheet" href="/static/training.css?v=20261114-training-v11" />
     <link rel="stylesheet" href="/static/credits.css?v=20261115-mobile-targets-v2" />
     <script>
@@ -156,6 +157,7 @@
           <button type="button" class="nav-item" data-view="codingAdmin" hidden><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">带刷题库</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="trainingAdmin" hidden><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">训练题库</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="announcementsAdmin" hidden><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">公告管理</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+          <button type="button" class="nav-item" data-view="homeLayoutAdmin" hidden><span class="nav-icon" aria-hidden="true">▦</span><span class="nav-label">首页编排</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="users" hidden>
             <span class="nav-icon" aria-hidden="true">◎</span
             ><span class="nav-label">用户管理</span
@@ -242,6 +244,7 @@
         </header>
         <main id="mainContent" class="page-content" tabindex="-1">
           <section id="home" aria-label="备考首页" hidden></section>
+          <section id="homeLayoutAdmin" aria-label="首页编排" hidden></section>
           <section id="announcementsAdmin" aria-label="公告管理" hidden></section>
           <section id="users" aria-labelledby="usersTitle" hidden>
             <div class="page-heading">
@@ -590,6 +593,7 @@
                   <div class="full-width contest-ranking-toggle-row">
                     <label class="contest-ranking-toggle" for="showRanking"><input id="showRanking" type="checkbox" checked /> <span>向参赛者展示排名</span></label>
                   </div>
+                  <div class="full-width" id="contestParticipants"></div>
                   <div class="full-width">
                     <label for="luoguProblemSearch">选择洛谷题目</label>
                     <div class="luogu-question-search">
@@ -735,6 +739,7 @@
             />
           </div>
           <div id="initialCreditsField"><label for="accountCredits">初始模拟面试次数</label><input id="accountCredits" type="number" min="0" max="1000000" value="1" required /><p class="field-help">设置该用户正式开始模拟面试的可用次数。</p></div>
+          <label id="practicePermissionField" class="permission-switch"><input id="accountPractice" type="checkbox" /><span class="switch-track" aria-hidden="true"></span><span>开通每日训练与算法题带刷</span></label>
           <p id="userFormError" class="form-error" role="alert" hidden></p>
         </div>
         <div class="dialog-footer">

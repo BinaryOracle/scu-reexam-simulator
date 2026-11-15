@@ -28,6 +28,7 @@ class AccountCreate(BaseModel):
     is_admin: StrictBool = False
     email: str | None = None
     is_active: StrictBool = True
+    can_practice: StrictBool = False
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
 
     @field_validator('email')
@@ -44,6 +45,7 @@ class AccountUpdate(BaseModel):
     model_config = ConfigDict(extra='forbid')
     is_admin: StrictBool | None = None
     is_active: StrictBool | None = None
+    can_practice: StrictBool | None = None
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
 
 
@@ -145,6 +147,24 @@ def users(actor=Depends(administrator)):
                                       (actor['is_superadmin'],))]
 
 
+@router.get('/contest-participants')
+def eligible_contest_users():
+    with connect() as db:
+        return [dict(row) for row in db.execute('SELECT id,username,email,is_active FROM users WHERE is_admin=0 ORDER BY username COLLATE NOCASE,id')]
+
+
+@router.get('/contests/{cid}/participants')
+def contest_roster(cid: int):
+    with connect() as db:
+        contest = db.execute('SELECT access_mode FROM contests WHERE id=?', (cid,)).fetchone()
+        if not contest:
+            raise HTTPException(404, '比赛不存在')
+        ids = [row[0] for row in db.execute('SELECT user_id FROM contest_participants WHERE contest_id=? ORDER BY user_id', (cid,))]
+        if contest['access_mode'] == 'all':
+            ids = [row[0] for row in db.execute('SELECT id FROM users WHERE is_admin=0')]
+        return {'participant_ids': ids, 'legacy_open': contest['access_mode'] == 'all'}
+
+
 @router.post('/users/{uid}/reveal-password')
 def reveal_password(uid: int, actor=Depends(administrator)):
     """Reveal one encrypted password only on an explicit administrator request."""
@@ -208,9 +228,9 @@ def create_user(payload: AccountCreate, actor=Depends(administrator)):
         db.execute('BEGIN IMMEDIATE')
         initial = credits.ADMIN_CREDITS if payload.is_admin else payload.interview_credits if payload.interview_credits is not None else credits.default_credits(db)
         try:
-            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits)
-                VALUES (?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
-                payload.email, payload.is_active, 0)).lastrowid
+            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits,can_practice)
+                VALUES (?,?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
+                payload.email, payload.is_active, 0, payload.can_practice)).lastrowid
         except sqlite3.IntegrityError as error:
             raise HTTPException(409, '用户名或邮箱已存在，请使用其他用户名或邮箱') from error
         credits.adjust(db, uid, initial, kind='initial')

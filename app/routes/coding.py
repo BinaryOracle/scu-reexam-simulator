@@ -3,7 +3,7 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator
 from app.db import connect
-from app.services.auth import administrator, current_user
+from app.services.auth import administrator, current_user, practice_user, require_practice
 from app.services import coding_catalog as catalog
 from app.services import coding_practice as practice
 from app.services import luogu_catalog
@@ -138,6 +138,8 @@ def home(user=Depends(current_user)):
 @router.get('/api/coding/questions')
 def questions(stage_id: str = Query('', max_length=100), q: str = Query('', max_length=300), mine: bool = False,
               page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), user=Depends(current_user)):
+    if not mine:
+        require_practice(user)
     with connect() as db:
         return catalog.list_questions(db, user, stage_id=stage_id, q=q, mine=mine, page=page, page_size=page_size)
 
@@ -145,7 +147,10 @@ def questions(stage_id: str = Query('', max_length=100), q: str = Query('', max_
 @router.get('/api/coding/questions/{qid}')
 def question(qid: int, user=Depends(current_user)):
     with connect() as db:
-        return catalog.serialize(db, catalog.require_access(db, qid, user['id']), user['id'])
+        row = catalog.require_access(db, qid, user['id'])
+        if row['owner_user_id'] != user['id']:
+            require_practice(user)
+        return catalog.serialize(db, row, user['id'])
 
 
 @router.post('/api/coding/questions', status_code=201)
@@ -178,21 +183,21 @@ def submit(qid: int, payload: Version, user=Depends(current_user)):
 
 
 @router.post('/api/coding/daily')
-def daily(user=Depends(current_user)):
+def daily(user=Depends(practice_user)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         return practice.assign_daily(db, user)
 
 
 @router.post('/api/coding/checkin')
-def checkin(user=Depends(current_user)):
+def checkin(user=Depends(practice_user)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         return practice.checkin(db, user)
 
 
 @router.post('/api/coding/questions/{qid}/submissions')
-def submission(qid: int, payload: Submission, user=Depends(current_user)):
+def submission(qid: int, payload: Submission, user=Depends(practice_user)):
     from app.services import coding_judge
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
@@ -218,7 +223,7 @@ def submission(qid: int, payload: Submission, user=Depends(current_user)):
 
 
 @router.get('/api/coding/questions/{qid}/submissions')
-def submissions(qid: int, user=Depends(current_user)):
+def submissions(qid: int, user=Depends(practice_user)):
     with connect() as db:
         # Personal history remains readable after a question is withdrawn or tombstoned.
         owned = db.execute('SELECT 1 FROM coding_submissions WHERE question_id=? AND user_id=? LIMIT 1', (qid, user['id'])).fetchone()
@@ -229,13 +234,13 @@ def submissions(qid: int, user=Depends(current_user)):
 
 
 @router.get('/api/coding/submissions/{sid}')
-def submission_detail(sid: int, user=Depends(current_user)):
+def submission_detail(sid: int, user=Depends(practice_user)):
     with connect() as db:
         return practice.submission(db, sid, user)
 
 
 @router.post('/api/coding/submissions/{sid}/remote-result')
-def remote_result(sid: int, payload: RemoteResult, user=Depends(current_user)):
+def remote_result(sid: int, payload: RemoteResult, user=Depends(practice_user)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         return practice.remote_result(db, sid, user, payload.model_dump())

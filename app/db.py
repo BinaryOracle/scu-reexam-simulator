@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 27
+SCHEMA_VERSION = 28
 
 
 @contextmanager
@@ -83,6 +83,18 @@ def initialize():
             if field not in fields:
                 db.execute(f'ALTER TABLE {table} ADD COLUMN {field} {declaration}')
         columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
+        if 'can_practice' not in columns:
+            db.execute('ALTER TABLE users ADD COLUMN can_practice INTEGER NOT NULL DEFAULT 0 CHECK(can_practice IN (0,1))')
+            db.execute('UPDATE users SET can_practice=1')
+        contest_columns = {row['name'] for row in db.execute('PRAGMA table_info(contests)')}
+        if 'access_mode' not in contest_columns:
+            db.execute("ALTER TABLE contests ADD COLUMN access_mode TEXT NOT NULL DEFAULT 'selected' CHECK(access_mode IN ('all','selected'))")
+            db.execute("UPDATE contests SET access_mode='all'")
+        db.execute('''CREATE TABLE IF NOT EXISTS contest_participants(
+            contest_id INTEGER NOT NULL REFERENCES contests(id) ON DELETE CASCADE,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            PRIMARY KEY(contest_id,user_id))''')
+        db.execute('CREATE INDEX IF NOT EXISTS participants_by_user ON contest_participants(user_id,contest_id)')
         if 'email' not in columns:
             db.execute('ALTER TABLE users ADD COLUMN email TEXT')
         db.execute('CREATE UNIQUE INDEX IF NOT EXISTS users_email ON users(email COLLATE NOCASE)')
@@ -235,4 +247,6 @@ def initialize():
         initialize_announcements(db)
         from .services.coding_schema import initialize_coding
         initialize_coding(db)
+        from .services.home_layout import initialize as initialize_home_layout
+        initialize_home_layout(db)
         db.execute(f'PRAGMA user_version={SCHEMA_VERSION}')

@@ -68,6 +68,7 @@ function render() {
   tabs.hidden = Boolean(session);
   for (const [value, label] of [['home','今日练习'],['favorites','重点回顾'],['mine','我的题目']]) {
     const control = button(label, async () => {
+      if (value === 'favorites' && !homeData.can_practice) { notify('尚未开通练习权限，请联系管理员', 'error'); return; }
       generation++;
       if (value === 'home' && !await loadHome()) return;
       tab = value; page = 1; session = null;
@@ -94,6 +95,7 @@ function checkinControl() {
   return control;
 }
 function renderHome(root) {
+  if (!homeData.can_practice) root.append(el('p', '每日训练与算法题带刷尚未开通。你可以浏览训练篇目、管理个人投稿，开始训练前请联系管理员开通。', 'practice-access-notice'));
   const overview = el('div', '', 'learning-overview');
   const goal = el('div', '', 'learning-goal');
   goal.append(el('span', 'TODAY', 'eyebrow'), el('h2', homeData.checked_in ? '今天的坚持，已记录。' : '今天，也向前一点。'));
@@ -167,6 +169,7 @@ function renderHome(root) {
   s.input.addEventListener('change', () => { source = s.input.value; updateCount(); });
   m.input.addEventListener('change', () => { mode = m.input.value; });
   const begin = button('开始训练 →', async () => {
+    if (!homeData.can_practice) { notify('尚未开通练习权限，请联系管理员', 'error'); return; }
     if (!form.reportValidity()) return;
     const key = ++generation, token = state.token;
     const value = await api('/training/sessions', { method: 'POST', body: JSON.stringify({ section_id: section, collection_id: collection, source, mode,
