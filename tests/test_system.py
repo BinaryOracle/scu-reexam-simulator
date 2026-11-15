@@ -160,8 +160,10 @@ def test_submissions_are_paginated_have_private_details_and_feed_contest_ranking
     admin_first = client.get('/api/admin/submissions?page=1&page_size=2', headers=manager).json()
     admin_second = client.get('/api/admin/submissions?page=2&page_size=2', headers=manager).json()
     assert admin_first['total']==admin_second['total']==4
-    assert [row['username'] for row in admin_first['items']]==['alice','alice']
-    assert [row['username'] for row in admin_second['items']]==['bob','bob']
+    assert [row['username'] for row in admin_first['items']]==['bob','bob']
+    assert [row['username'] for row in admin_second['items']]==['alice','alice']
+    all_ids = [row['id'] for row in admin_first['items'] + admin_second['items']]
+    assert all_ids == sorted(all_ids, reverse=True)
 
 def test_contest_ranking_awards_ceiling_proportional_score_for_partial_luogu_results(client):
     manager, alice = login(client, 'manager'), login(client, 'alice')

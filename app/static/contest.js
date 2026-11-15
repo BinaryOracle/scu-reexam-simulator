@@ -1252,7 +1252,7 @@ function submissionTable(rows, { groupedUser = false } = {}) {
   const caption = el("caption", "代码提交与评测结果", "sr-only");
   const head = document.createElement("thead");
   const headRow = document.createElement("tr");
-  for (const label of [
+  const labels = [
     "提交编号",
     ...(!groupedUser ? ["用户"] : []),
     "题目",
@@ -1260,7 +1260,8 @@ function submissionTable(rows, { groupedUser = false } = {}) {
     "评测结果",
     ...(managementMode() ? ["洛谷记录"] : []),
     "提交时间",
-  ]) {
+  ];
+  for (const label of labels) {
     const th = el("th", label);
     th.scope = "col";
     headRow.append(th);
@@ -1299,6 +1300,7 @@ function submissionTable(rows, { groupedUser = false } = {}) {
       status.setAttribute("aria-label", `${row.status}：${statusHint}`);
     }
     tr.append(...cells, el("td", dateTime(row.created)));
+    [...tr.children].forEach((cell, index) => { cell.dataset.label = labels[index]; });
     tr.addEventListener("click", event => {
       if (event.target.closest("a,button")) return;
       void openSubmissionDetail(row.id);

@@ -157,6 +157,8 @@ button.contest-problem-arrow:disabled { opacity: .5; cursor: not-allowed; }
 .contest-ranking-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .contest-records-trigger { border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .contest-records-user { padding: 7px 0; color: #82452f; text-decoration: underline; text-decoration-color: #cbb3a0; text-underline-offset: 4px; }
+.contest-ranking-table th.contest-rank-user:has(button) { padding: 0; }
+.contest-ranking-table .contest-records-user { display: block; width: 100%; padding: 20px 16px; }
 .contest-records-trigger:hover { color: #9b4934; }
 .contest-records-verdict { display: block; min-width: 76px; width: 100%; padding: 8px; margin: -8px; border-radius: 5px; }
 .contest-records-verdict:hover { background: #f2e5d3; }
@@ -191,4 +193,14 @@ button.contest-problem-arrow:disabled { opacity: .5; cursor: not-allowed; }
   .contest-records-toolbar { padding: 12px 16px; }
   .contest-records-dialog > .dialog-footer { padding: 12px; gap: 8px; }
   .contest-records-dialog .dialog-footer .button { min-width: 0; padding: 8px 10px; }
+  .contest-records-body table { display: block; min-width: 0; }
+  .contest-records-body thead { display: none; }
+  .contest-records-body tbody { display: block; }
+  .contest-records-body .submission-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .contest-records-body .submission-row td { display: flex; align-items: baseline; gap: 7px; min-width: 0; padding: 0; border: 0; white-space: normal; overflow-wrap: anywhere; font-size: 12px; }
+  .contest-records-body td::before { content: attr(data-label); flex: none; color: #8c7b6d; font-size: 11px; }
+  .contest-records-body td[data-label="题目"],
+  .contest-records-body td[data-label="提交时间"] { grid-column: 1 / -1; }
+  .contest-records-body td[data-label="提交编号"]::before { content: none; }
+  .contest-records-body .submission-open-button { padding: 0; }
 }
