@@ -17,20 +17,20 @@ import {
   suspendContestWorkspace,
   setupContestCreation,
   requestLuoguSubmit,
-} from "./contest.js?v=20261115-contest-records-v2";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-post-save-refresh-feedback-v1";
+} from "./contest.js?v=20261115-access-layout-v1";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-access-layout-v1";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261115-profile-independent-sections-v1";
 import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
 
-import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261115-retry-load-v1";
+import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261115-access-layout-v1";
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-dialog-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
-import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-announcement-load-error-v1";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-access-layout-v1";
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
-import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261115-coding-integrated-v2";
+import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261115-access-layout-v1";
 import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261115-coding-v1";
 
 configureCodingBridge(requestLuoguSubmit);
