@@ -2,6 +2,7 @@
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, el, button, notify, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import { renderHomeBlocks } from "./home-layout.js?v=20261115-layout-v1";
+import { homeLayoutErrorMessage } from "./home-feedback.mjs?v=20261115-home-feedback-v1";
 
 let notices = [];
 let announcementIndex = 0;
@@ -180,7 +181,7 @@ function renderHome() {
     content.replaceChildren(); renderHomeBlocks(content, layout.blocks, navigate);
   }).catch(error => {
     if (revision === homeRevision && token === state.token && content.isConnected)
-      content.replaceChildren(el("p", error.message, "form-error"), button("重新加载", refreshHome, "button secondary"));
+      content.replaceChildren(el("p", homeLayoutErrorMessage(error), "form-error"), button("重新加载", refreshHome, "button secondary"));
   });
 }
 

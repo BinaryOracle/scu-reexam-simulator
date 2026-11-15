@@ -1064,6 +1064,7 @@ function renderEditor(problem) {
             response.status = saved.status;
           } catch (error) {
             const message = formatLuoguSubmitError(error);
+            showLuoguBridgeHelp(message);
             await updateRemoteResult(response.id, { remote_submission_id: "", status: "Submission Failed", detail: message });
             throw new Error(message);
           }
@@ -1102,6 +1103,23 @@ function renderLuoguSetup() {
     }, "button secondary"),
   );
   return panel;
+}
+function showLuoguBridgeHelp(message) {
+  const panel = document.querySelector(".luogu-setup");
+  if (!panel) return;
+  panel.open = true;
+  panel.classList.add("has-error");
+  panel.querySelector(".luogu-bridge-error")?.remove();
+  const guidance = el("p", message, "luogu-bridge-error");
+  guidance.setAttribute("role", "alert");
+  const description = panel.querySelector(":scope > p:not(.luogu-bridge-error)");
+  if (description) description.after(guidance);
+  else panel.append(guidance);
+  const status = panel.querySelector(".luogu-connection-status");
+  if (status) {
+    status.textContent = "需要检查";
+    status.className = "badge orange luogu-connection-status";
+  }
 }
 function prepareLuoguConnection() {
   const userId = state.user?.id || null;

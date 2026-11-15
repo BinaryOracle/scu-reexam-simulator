@@ -28,6 +28,11 @@ test("persists the Luogu account and rechecks the extension after reload", () =>
   assert.match(contestSource, /refreshLuoguBridgeConnection/);
 });
 
+test("keeps submission history reachable when the desktop sidebar is collapsed", () => {
+  assert.doesNotMatch(styleSource, /\.sidebar-collapsed \.sidebar-subnav,\s*\.sidebar-collapsed \.nav-group-toggle \{ display: none !important;/);
+  assert.match(styleSource, /\.sidebar-collapsed \.sidebar-subnav:not\(\[hidden\]\) \{[^}]*display: grid/s);
+});
+
 test("does not flash the login screen while restoring an authenticated session", () => {
   const head = htmlSource.slice(0, htmlSource.indexOf("</head>"));
   assert.match(head, /sessionStorage\.getItem\(["']token["']\)/);

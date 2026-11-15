@@ -18,7 +18,7 @@ import {
   setupContestCreation,
   requestLuoguSubmit,
 } from "./contest.js?v=20261115-access-layout-v2";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-access-layout-v1";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-access-layout-v2";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261115-profile-independent-sections-v1";
 import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
 
@@ -26,7 +26,7 @@ import { refreshTraining, clearTraining, selectTrainingSection } from "./trainin
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-dialog-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
-import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-access-layout-v1";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-access-layout-v2";
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 

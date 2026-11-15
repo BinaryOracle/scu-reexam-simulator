@@ -34,14 +34,14 @@ function passwordControl(user) {
     group.title = "邮箱注册账号尚未设置可查看密码；旧账号可重置密码或使用密码登录一次后查看";
     return group;
   }
-  const field = el("input"); field.type = "password"; field.readOnly = true;
+  const field = el("input"); field.type = "text"; field.readOnly = true;
   field.value = "••••••"; field.setAttribute("aria-label", `${user.username} 的密码`);
   field.autocomplete = "off"; field.spellcheck = false;
   const control = button("查看", async () => {
     if (shown) { hide(); return; }
     const result = await api(`/admin/users/${user.id}/reveal-password`, { method: "POST" });
     if (!control.isConnected || document.hidden || $("users").hidden) return;
-    field.type = "text"; field.value = result.password;
+    field.value = result.password;
     control.textContent = "隐藏";
     shown = true;
     control.classList.add("revealed-password");
@@ -53,7 +53,7 @@ function passwordControl(user) {
   function hide() {
     clearTimeout(timeout);
     shown = false;
-    field.type = "password"; field.value = "••••••";
+    field.value = "••••••";
     control.textContent = "查看";
     control.classList.remove("revealed-password");
     control.title = "点击查看密码原文";

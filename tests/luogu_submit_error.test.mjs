@@ -27,6 +27,14 @@ test("leaves non-captcha failures unchanged", () => {
   assert.equal(formatLuoguSubmitError(new Error("洛谷未返回提交编号。")), "洛谷未返回提交编号。");
 });
 
+test("turns a silent extension timeout into clear recovery steps", () => {
+  assert.equal(
+    formatLuoguSubmitError(new Error("浏览器插件未响应，请检查插件安装和本站地址配置。")),
+    "没有收到洛谷插件响应。请确认扩展已启用且本站来源已配置，再检测洛谷登录状态；仍无法连接时请打开插件配置教程。",
+  );
+  assert.match(contestSource, /showLuoguBridgeHelp\(message\)/);
+});
+
 test("keeps captcha cancellation and retry guidance actionable", () => {
   assert.equal(formatLuoguSubmitError(new Error("已取消验证码，本次提交未被洛谷受理。")), "已取消验证码，本次提交未被洛谷受理。");
   assert.equal(formatLuoguSubmitError(new Error("洛谷未接受该验证码，请重新提交并输入新的验证码。")), "洛谷未接受该验证码，请重新提交并输入新的验证码。");
