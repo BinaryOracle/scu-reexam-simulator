@@ -36,6 +36,11 @@ def initialize_coding(db):
             remote_submission_id TEXT NOT NULL DEFAULT '',language TEXT NOT NULL,source TEXT NOT NULL,status TEXT NOT NULL,
             detail TEXT NOT NULL DEFAULT '',passed_cases INTEGER,total_cases INTEGER,created REAL NOT NULL,
             completed REAL,completed_date TEXT)''',
+        '''CREATE TABLE IF NOT EXISTS coding_favorites(
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            question_id INTEGER NOT NULL REFERENCES coding_questions(id) ON DELETE CASCADE,
+            created REAL NOT NULL,PRIMARY KEY(user_id,question_id))''',
+        'CREATE INDEX IF NOT EXISTS coding_favorites_by_question ON coding_favorites(question_id,user_id)',
         "CREATE UNIQUE INDEX IF NOT EXISTS coding_remote_submission ON coding_submissions(remote_submission_id) WHERE remote_submission_id<>''",
         'CREATE INDEX IF NOT EXISTS coding_submissions_progress ON coding_submissions(user_id,question_id,status,completed_date)',
         '''CREATE TABLE IF NOT EXISTS coding_daily(

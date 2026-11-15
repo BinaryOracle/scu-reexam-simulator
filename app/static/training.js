@@ -159,7 +159,7 @@ function renderHome(root) {
     const candidates = scoped.filter(item => !collection || item.id === collection);
     const count = candidates.reduce((n,item) => n + (source === 'favorites' ? item.favorites : item.count),0);
     const whole = countMode === 'all'; amount.disabled = whole; amountWrap.hidden = whole;
-    begin.disabled = Boolean(homeData.active_session) || count === 0;
+    begin.disabled = Boolean(homeData.active_session) || count === 0 || !homeData.can_training;
     countHint.textContent = `当前筛选共 ${count} 道可练题。${whole ? '本轮练完整个筛选集合，每题一次。' : '题量不足时只安排现有题目；顺序复习到集合末尾时结束本轮。'}`;
   };
   amountMode.input.addEventListener('change', () => { countMode = amountMode.input.value; updateCount(); });
@@ -177,7 +177,7 @@ function renderHome(root) {
     const value = await api('/training/sessions', { method: 'POST', body: JSON.stringify({ section_id: section, collection_id: collection, source, mode,
       question_count: countMode === 'all' ? 'all' : Number(amount.value) }) });
     if (!live(key, token)) return; session = value; render(); $('trainingContent').scrollIntoView({ behavior: 'smooth' });
-  }, 'button primary'); begin.disabled = Boolean(homeData.active_session);
+  }, 'button primary'); begin.disabled = Boolean(homeData.active_session) || !homeData.can_training;
   filters.append(c.wrap, s.wrap, m.wrap);
   roundOptions.append(amountMode.wrap, amountWrap, begin); updateCount();
   form.append(filters,roundOptions,countHint);

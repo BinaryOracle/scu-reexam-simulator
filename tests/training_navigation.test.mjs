@@ -60,6 +60,7 @@ function fixture(api) {
     show(value, data = home()) { context.value = value; context.data = data; vm.runInContext('homeData=data; session=value; render();', context); },
     read(expression) { return vm.runInContext(expression, context); },
     has(text) { return Boolean(find(content, node => node.textContent === text)); },
+    isDisabled(label) { const control = find(content, node => node.tag === 'button' && node.textContent === label); assert.ok(control, `Missing button ${label}`); return control.disabled; },
     async click(label) { const control = find(content, node => node.tag === 'button' && (node.textContent === label || node.children.some(child => child.textContent === label))); assert.ok(control, `Missing button ${label}`); return control.action(); },
   };
 }
@@ -148,6 +149,7 @@ test('an account without daily training permission can browse but cannot start a
   const f = fixture(async () => { calls++; return round(); });
   f.show(null, { ...home(), can_training: false, can_practice: true });
   assert.equal(f.has('每日训练'), true);
+  assert.equal(f.isDisabled('开始训练 →'), true);
   await f.click('开始训练 →');
   assert.equal(calls, 0);
   assert.equal(f.read('session'), null);

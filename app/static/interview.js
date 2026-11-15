@@ -418,7 +418,7 @@ export async function refreshInterviews() {
     catch (error) { /* A restricted browser can still start and finish a session. */ }
     if (allItems.some(item => item.id === resumeId && item.status !== "finished")) await openInterview(resumeId);
   }
-  interviewItems = allItems.filter(item => item.status === "finished");
+  interviewItems = allItems.filter(item => item.status === "finished" || item.status === "expired");
   $("interviewFinished").textContent = interviewItems.length;
   renderInterviewList();
 }
@@ -464,7 +464,8 @@ $("interviewSearch").addEventListener("input", () => {
   renderInterviewList();
 });
 function renderInterviewCard(item) {
-    const statusLabel = item.status === "finished" ? "已完成" : item.status === "expired" ? "已超时" : item.status === "preparing" ? "待开始" : "进行中";
+    const closed = item.status === "finished" || item.status === "expired";
+    const statusLabel = item.status === "expired" ? "已超时" : item.status === "finished" ? "已完成" : item.status === "preparing" ? "待开始" : "进行中";
     const card = el("article", "", "record-card");
     const top = el("div", "", "record-top");
     top.append(
@@ -483,7 +484,7 @@ function renderInterviewCard(item) {
     const bottom = el("div", "", "record-bottom");
     const actions = el("div", "", "record-actions");
     actions.append(button(
-      item.status === "finished" ? "查看详情 →" : reviewMode() ? "查看回答 →" : "继续面试 →",
+      closed ? "查看回顾 →" : reviewMode() ? "查看回答 →" : "继续面试 →",
       () => openInterview(item.id),
       "text-button",
     ));
@@ -507,7 +508,9 @@ function renderInterviewCard(item) {
     bottom.append(
       el(
         "span",
-        item.status === "finished"
+        item.status === "expired"
+          ? "时间已到，回答已保存，可查看回顾"
+          : item.status === "finished"
           ? feedbackRequests.has(item.id) ? "AI 点评正在生成，可先查看回答" : item.has_feedback ? "回答与点评已归档" : "面试已结束，回答已归档"
           : item.status === "preparing"
             ? "上传 PPT 后开始面试"

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { canRevealLuoguSource, normalizeSubmissionPage, refreshContestProblemStats, submissionPanelMessage } from "../app/static/contest-model.mjs";
+import { canRevealLuoguSource, contestSubmitGuidance, normalizeSubmissionPage, refreshContestProblemStats, submissionPanelMessage } from "../app/static/contest-model.mjs";
 
 test("gives contest submission panels explicit loading, empty and retry states", () => {
   assert.deepEqual(submissionPanelMessage("loading"), {
@@ -46,6 +46,13 @@ test("reveals Luogu source IDs to participants only after the contest ends", () 
   assert.equal(canRevealLuoguSource(contest, 200), false);
   assert.equal(canRevealLuoguSource(contest, 201), true);
   assert.equal(canRevealLuoguSource(contest, 150, true), true);
+});
+
+test("explains why submission is unavailable before and after a contest", () => {
+  const contest = { starts: 100, ends: 200 };
+  assert.match(contestSubmitGuidance(contest, 99), /比赛尚未开始/);
+  assert.equal(contestSubmitGuidance(contest, 150), "");
+  assert.match(contestSubmitGuidance(contest, 201), /提交已关闭，不会计入排名/);
 });
 
 test("normalizes legacy submission arrays for the current table and pagination controls", () => {

@@ -14,5 +14,6 @@ test("mobile user navigation keeps readable fixed-width items and reveals the ac
   const navigation = styleSource.slice(navigationStart, navigationEnd);
   assert.match(navigation, /\.sidebar nav \{[\s\S]*?overflow-x:\s*auto/);
   assert.match(navigation, /\.nav-item \{[\s\S]*?flex:\s*0 0 66px;[\s\S]*?min-width:\s*66px;/);
+  assert.match(navigation, /body:not\(\.admin-mode\) \.sidebar-nav-parent > \.nav-item \{\s*flex:\s*0 0 66px;\s*min-width:\s*66px;/);
   assert.match(appSource, /item\?\.scrollIntoView\(\{\s*behavior:\s*"instant",\s*block:\s*"nearest",\s*inline:\s*"nearest"\s*\}\)/);
 });

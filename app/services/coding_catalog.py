@@ -59,12 +59,14 @@ def serialize(db, row, uid):
     result['active'] = bool(row['active'])
     result['solved'] = bool(db.execute("""SELECT 1 FROM coding_submissions WHERE user_id=? AND question_id=?
         AND question_content_version=? AND status='Accepted' LIMIT 1""", (uid, row['id'], row['content_version'])).fetchone())
+    result['favorited'] = bool(db.execute('SELECT 1 FROM coding_favorites WHERE user_id=? AND question_id=?',
+                                          (uid, row['id'])).fetchone())
     result['content_available'] = bool(row['statement'].strip())
     result['content_notice'] = '' if result['content_available'] else '尚未缓存完整题面，请打开原题链接；管理员可重新导入洛谷题面。'
     return result
 
 
-def list_questions(db, user, *, stage_id='', q='', mine=False, status=None, page=1, page_size=20):
+def list_questions(db, user, *, stage_id='', q='', mine=False, status=None, view='roadmap', page=1, page_size=20):
     clauses, values = ['q.deleted=0'], []
     if status is not None:
         clauses.append("(q.visibility='public' OR q.review_status='pending')")
@@ -73,11 +75,21 @@ def list_questions(db, user, *, stage_id='', q='', mine=False, status=None, page
         if status and status != 'all':
             clauses.append('q.visibility=?' if status == 'public' else 'q.review_status=?')
             values.append(status)
-    elif mine:
+    elif mine or view == 'mine':
         clauses.append('q.owner_user_id=?'); values.append(user['id'])
     else:
         clauses.append("q.active=1 AND s.active=1 AND (q.visibility='public' OR q.owner_user_id=?)")
         values.append(user['id'])
+        if view == 'solved':
+            clauses.append("EXISTS (SELECT 1 FROM coding_submissions solved WHERE solved.user_id=? AND solved.question_id=q.id AND solved.question_content_version=q.content_version AND solved.status='Accepted')")
+            values.append(user['id'])
+        elif view == 'failed':
+            clauses.append("EXISTS (SELECT 1 FROM coding_submissions failed WHERE failed.user_id=? AND failed.question_id=q.id AND failed.question_content_version=q.content_version AND failed.status IN ('Wrong Answer','Output Limit Exceeded','Time Limit Exceeded','Memory Limit Exceeded','Runtime Error','Compile Error'))")
+            clauses.append("NOT EXISTS (SELECT 1 FROM coding_submissions solved WHERE solved.user_id=? AND solved.question_id=q.id AND solved.question_content_version=q.content_version AND solved.status='Accepted')")
+            values.extend([user['id'], user['id']])
+        elif view == 'favorites':
+            clauses.append('EXISTS (SELECT 1 FROM coding_favorites favorite WHERE favorite.user_id=? AND favorite.question_id=q.id)')
+            values.append(user['id'])
     if stage_id:
         clauses.append('q.stage_id=?'); values.append(stage_id)
     if q:

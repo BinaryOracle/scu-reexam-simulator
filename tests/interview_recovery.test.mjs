@@ -6,6 +6,12 @@ import vm from 'node:vm';
 
 const source = await readFile(new URL('../app/static/interview.js', import.meta.url), 'utf8');
 
+test('history keeps timed-out interviews available for review without listing active sessions', () => {
+  assert.match(source, /interviewItems = allItems\.filter\(item => item\.status === "finished" \|\| item\.status === "expired"\)/);
+  assert.match(source, /const closed = item\.status === "finished" \|\| item\.status === "expired"/);
+  assert.match(source, /closed \? "查看回顾 →" : reviewMode\(\) \? "查看回答 →" : "继续面试 →"/);
+});
+
 test('starting again after a lost response keeps the original request key', async () => {
   const headers = [];
   const item = { id: null, workflow_version: 5 };

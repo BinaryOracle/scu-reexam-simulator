@@ -143,6 +143,27 @@ test('saving a new announcement draft once returns to the list with the saved it
   assert.equal(root.querySelector('.announcement-admin-row').querySelector('strong').textContent, saved.title);
 });
 
+test('editing a published announcement warns that saving updates the public version', async () => {
+  const published = { id: 12, title: '已发布公告', summary: '摘要', status: 'published', body_markdown: '正文' };
+  const writes = [];
+  const env = environment(async (path, options) => {
+    if (options?.method === 'PUT') { writes.push(options); return published; }
+    return { items: [published], pages: 1, total: 1 };
+  });
+  env.load('home'); const root = env.el('section'); root.id = 'announcementsAdmin'; env.body.append(root);
+  for (const name of ['page-heading', 'announcement-admin-toolbar', 'announcement-admin-list']) root.append(env.el('div', '', name));
+  env.context.editNotice(published);
+  const form = root.querySelector('.announcement-editor');
+  assert.ok(form.querySelector('.announcement-published-warning'));
+  assert.equal(form.querySelector('.announcement-published-warning').textContent, '当前公告已发布；保存修改会立即更新所有用户可见的内容。');
+  env.choose(false); await env.find(form, '更新已发布公告').click();
+  assert.equal(writes.length, 0);
+  assert.match(env.confirmations[0][0], /立即更新所有用户可见的内容/);
+  env.choose(true); await env.find(form, '更新已发布公告').click();
+  assert.equal(writes.length, 1);
+  assert.ok(env.notices.some(([message]) => message === '已发布公告已更新'));
+});
+
 test('announcement status change returns an invalid filtered last page to the preceding page', async () => {
   let changed = false; const requests = [];
   const item = { id: 1, title: '公告', summary: '', status: 'published' };

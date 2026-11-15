@@ -33,14 +33,14 @@ function renderAnnouncements(notices) {
     el: (...args) => new Node(...args),
     button: (text, action, className) => Object.assign(new Node("button", text, className), { action }),
     openAnnouncement() {},
-    openAnnouncementList() {},
+    openAnnouncementList() { context.listOpened = true; },
     refreshHome() {},
   };
   vm.createContext(context);
   vm.runInContext(render, context);
   const root = new Node("main");
   context.renderNotices(root);
-  return { band: root.childNodes[0], intervals, clearedIntervals };
+  return { band: root.childNodes[0], intervals, clearedIntervals, context };
 }
 
 test("a single announcement remains readable and periodically rolls into view", () => {
@@ -56,21 +56,19 @@ test("a single announcement remains readable and periodically rolls into view", 
   assert.equal(viewport.attributes["aria-live"], "polite");
 });
 
-test("multiple announcements have keyboard-accessible previous and next controls", () => {
-  const { band, intervals } = renderAnnouncements([{ title: "第一条公告" }, { title: "第二条公告" }]);
+test("multiple announcements roll automatically and the label opens the full list", () => {
+  const { band, intervals, context } = renderAnnouncements([{ title: "第一条公告" }, { title: "第二条公告" }]);
   const viewport = band.childNodes[1];
   const controls = band.childNodes[2];
   assert.equal(viewport.childNodes[0].textContent, "第一条公告");
   assert.equal(controls.childNodes[0].textContent, "1 / 2");
-  assert.equal(controls.childNodes[2].attributes["aria-label"], "下一条公告");
-  controls.childNodes[2].action();
-  assert.equal(viewport.childNodes[0].textContent, "第二条公告");
-  assert.equal(controls.childNodes[0].textContent, "2 / 2");
-  controls.childNodes[1].action();
-  assert.equal(viewport.childNodes[0].textContent, "第一条公告");
+  assert.equal(controls.childNodes.length, 1);
+  band.childNodes[0].action();
+  assert.equal(context.listOpened, true);
   assert.equal(intervals.length, 1);
   assert.equal(intervals[0].delay, 5000);
   intervals[0].callback();
   assert.equal(viewport.childNodes[0].textContent, "第二条公告");
+  assert.equal(controls.childNodes[0].textContent, "2 / 2");
   assert.match(viewport.childNodes[0].className, /is-rolling/);
 });

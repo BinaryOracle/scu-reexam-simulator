@@ -13,6 +13,13 @@ export function canRevealLuoguSource(contest, now = Date.now() / 1000, isAdmin =
   return isAdmin || now > contest.ends;
 }
 
+/** Explain why contest submissions are unavailable before or after the contest. */
+export function contestSubmitGuidance(contest, now = Date.now() / 1000) {
+  if (now < contest.starts) return "比赛尚未开始，开始后即可提交；代码草稿保存在此浏览器。";
+  if (now > contest.ends) return "本场比赛已结束，可继续复盘题目；提交已关闭，不会计入排名。";
+  return "";
+}
+
 /** Normalize paginated and legacy submission responses before rendering. */
 export function normalizeSubmissionPage(response) {
   const countStatuses = (items) => ({

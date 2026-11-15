@@ -1,4 +1,5 @@
 """Authenticated coding study and administrator catalog/reward APIs."""
+import time
 from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator
@@ -137,11 +138,12 @@ def home(user=Depends(current_user)):
 
 @router.get('/api/coding/questions')
 def questions(stage_id: str = Query('', max_length=100), q: str = Query('', max_length=300), mine: bool = False,
+              view: Literal['roadmap', 'mine', 'solved', 'failed', 'favorites'] = 'roadmap',
               page: int = Query(1, ge=1), page_size: int = Query(20, ge=1, le=100), user=Depends(current_user)):
-    if not mine:
+    if not mine and view != 'mine':
         require_coding(user)
     with connect() as db:
-        return catalog.list_questions(db, user, stage_id=stage_id, q=q, mine=mine, page=page, page_size=page_size)
+        return catalog.list_questions(db, user, stage_id=stage_id, q=q, mine=mine, view=view, page=page, page_size=page_size)
 
 
 @router.get('/api/coding/questions/{qid}')
@@ -151,6 +153,25 @@ def question(qid: int, user=Depends(current_user)):
         if row['owner_user_id'] != user['id']:
             require_coding(user)
         return catalog.serialize(db, row, user['id'])
+
+
+@router.put('/api/coding/questions/{qid}/favorite')
+def favorite(qid: int, user=Depends(coding_user)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        catalog.require_access(db, qid, user['id'], practice=True)
+        db.execute('INSERT OR IGNORE INTO coding_favorites(user_id,question_id,created) VALUES (?,?,?)',
+                   (user['id'], qid, time.time()))
+        return {'favorited': True}
+
+
+@router.delete('/api/coding/questions/{qid}/favorite')
+def unfavorite(qid: int, user=Depends(coding_user)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        catalog.require_access(db, qid, user['id'])
+        db.execute('DELETE FROM coding_favorites WHERE user_id=? AND question_id=?', (user['id'], qid))
+        return {'favorited': False}
 
 
 @router.post('/api/coding/questions', status_code=201)

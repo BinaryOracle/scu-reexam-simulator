@@ -12,7 +12,9 @@
 .coding-daily p { margin: 7px 0 0; color: #816c58; font-size: 12px; }
 .coding-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .coding-daily .coding-actions { flex: none; }
-.coding-mode-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 18px; }
+.coding-mode-tabs { display: flex; flex-wrap: wrap; gap: 7px; margin: 26px 0 18px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.coding-mode-tabs .button { min-height: 40px; padding: 8px 15px; border-radius: 7px; font-size: 13px; }
+.coding-mode-tabs .button[aria-pressed="true"] { box-shadow: inset 0 -2px currentColor; }
 .coding-roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 13px; margin-bottom: 27px; }
 .coding-stage { appearance: none; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: #fffdf8; color: var(--ink); font: inherit; text-align: left; cursor: pointer; transition: background .15s, border-color .15s; }
 .coding-stage:hover { background: #fcf4e8; border-color: #c49e81; }
@@ -27,8 +29,8 @@
 .coding-stage progress::-webkit-progress-value { background: #a05c42; }
 .coding-stage progress::-moz-progress-bar { background: #a05c42; }
 .coding-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin: 18px 0; }
-.coding-toolbar input { flex: 1 1 220px; min-width: 0; }
-.coding-toolbar select { width: auto; min-width: 120px; flex: 0 1 auto; }
+.coding-toolbar input { flex: 1 1 260px; min-width: 190px; }
+.coding-toolbar select { width: auto; min-width: 120px; max-width: min(245px, 100%); flex: 0 1 auto; }
 .coding-question-list { padding: 0 22px; overflow: hidden; }
 .coding-list-heading { display: flex; justify-content: space-between; gap: 12px; padding: 18px 0; font-size: 13px; border-bottom: 1px solid var(--line); }
 .coding-question-row { display: grid; grid-template-columns: 35px minmax(0, 1fr) 80px auto; align-items: center; gap: 15px; padding: 19px 0; border-bottom: 1px solid #eee6dc; }
@@ -43,25 +45,40 @@
 .coding-contribution { padding: 24px; }
 .coding-contribution p { font-size: 13px; }
 .coding-loading { padding: 45px 20px; text-align: center; color: var(--muted); }
+.coding-favorite { min-width: 36px; min-height: 34px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: #fffdfa; color: #8b7768; font-size: 19px; line-height: 1; }
+.coding-favorite.is-favorite, .coding-workspace-favorite.is-favorite { color: #a05a29; border-color: #e3c9a8; background: #fbf2e5; }
+.coding-workspace-toolbar { display: flex; align-items: center; gap: 12px; min-height: 46px; margin-bottom: 8px; padding: 0 2px; }
+.coding-workspace { display: flex; flex-direction: column; min-height: 0; }
+.coding-immersive .coding-workspace { height: calc(100dvh - 24px); }
+.coding-immersive .coding-workspace-toolbar { min-height: 34px; margin-bottom: 5px; gap: 8px; }
+.coding-workspace-toolbar .workspace-back { flex: none; }
+.coding-workspace-title { min-width: 0; flex: 1; overflow: hidden; color: #4e3b2f; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.coding-workspace-favorite { flex: none; min-height: 34px; padding: 5px 10px; font-size: 12px; }
 .coding-workspace .statement-panel-heading { justify-content: flex-start; }
 .coding-workspace .statement-panel-heading .workspace-panel-label { margin-right: auto; }
 .coding-workspace .workspace-back { min-height: 28px; padding: 4px 9px; font-size: 11px; }
-.coding-workspace .candidate-workspace { height: max(600px, 74dvh); max-height: 1000px; }
+.coding-workspace .candidate-workspace { --statement-size: .43; flex: 1 1 0; height: auto; min-height: 0; max-height: none; }
+.coding-workspace .workspace-statement-content { padding: 16px 22px 26px; }
+.coding-statement-meta { margin: 0 0 16px; color: #927e6d; font-size: 11px; }
+.coding-workspace .workspace-statement-content > :first-child { margin-top: 0; }
 .coding-workspace .editor-heading { flex-wrap: wrap; gap: 8px; }
 .coding-workspace .editor-heading h4 { margin-right: auto; }
-.coding-workspace .editor-heading .badge { flex: none; }
 .coding-workspace .coding-tutorial-button { padding: 4px 2px; font-size: 11px; }
-.coding-workspace .editor-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px; }
+.coding-workspace .editor-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 9px 12px; }
+.coding-submit-tools { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.coding-workspace .editor-footer > .button { flex: none; }
 .coding-workspace .editor-footer > .muted { font-size: 10px; }
-.coding-workspace .submission-result { flex-basis: 100%; max-height: 140px; overflow: auto; }
+.coding-workspace .coding-submission-panel { min-height: 100%; overflow: auto; }
+.coding-workspace .submission-result { justify-content: flex-start; max-height: 140px; overflow: auto; border-top: 0; padding: 4px 0 10px; margin: 0 0 8px; color: var(--ink); font-size: 12px; }
 .coding-workspace .submission-result:empty { display: none; }
+.coding-workspace .coding-record-list { min-height: 40px; }
 .coding-workspace .pane-expand { font-size: 20px; line-height: 1; }
 .coding-workspace .workspace-pane-tab[aria-pressed="true"] { color: var(--accent); background: #fffdfa; }
 .coding-immersive .sidebar { display: none; }
 .coding-immersive .main-shell { margin-left: 0; }
 .coding-immersive .topbar, .coding-immersive .app-footer { display: none; }
 .coding-immersive .page-content { padding: 12px 20px; }
-.coding-immersive .coding-workspace .candidate-workspace { height: calc(100dvh - 24px); min-height: 420px; max-height: none; }
+.coding-immersive .coding-workspace .candidate-workspace { height: calc(100dvh - 78px); min-height: 360px; max-height: none; }
 .coding-statement-text, .coding-review-statement { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
 .coding-source-info { color: #978475; font-size: 11px; overflow-wrap: anywhere; }
 .coding-reference { margin-top: 24px; padding: 13px 0; border-top: 1px solid var(--line); }
@@ -99,7 +116,7 @@
 .coding-settings-note { max-width: 650px; color: #897361; font-size: 13px; }
 @media (max-width: 1050px) {
   .coding-daily { flex-wrap: wrap; }
-  .coding-workspace .candidate-workspace { height: max(560px, 72dvh); }
+  .coding-immersive .coding-workspace { height: calc(100dvh - 24px); }
 }
 @media (max-width: 700px) {
   .coding-hero { align-items: flex-start; gap: 18px; padding-top: 16px; }
@@ -117,13 +134,21 @@
   .coding-question-row .coding-stars { font-size: 10px; }
   .coding-toolbar { gap: 7px; }
   .coding-toolbar input { flex-basis: 100%; }
-  .coding-toolbar select { flex: 1 1 120px; min-width: 0; font-size: 12px; }
+  .coding-toolbar select { flex: 1 1 120px; min-width: 0; max-width: 100%; font-size: 12px; }
   .coding-admin-question { align-items: stretch; flex-direction: column; padding: 18px; }
   .coding-admin-question .coding-actions { justify-content: flex-end; }
+  .coding-mode-tabs { flex-wrap: nowrap; overflow-x: auto; margin: 18px -4px 14px; padding: 0 4px 8px; scrollbar-width: thin; }
+  .coding-mode-tabs .button { flex: 0 0 auto; }
+  .coding-workspace-toolbar { gap: 7px; min-height: 40px; }
+  .coding-workspace-toolbar .workspace-back { min-height: 32px; padding: 4px 8px; font-size: 11px; }
+  .coding-workspace-title { font-size: 12px; }
+  .coding-workspace-favorite { padding-inline: 7px; font-size: 11px; }
   .coding-workspace .statement-panel-heading { gap: 6px; padding-left: 9px; }
-  .coding-workspace .workspace-back { padding: 4px 6px; font-size: 10px; }
   .coding-immersive .page-content { padding: 8px; }
-  .coding-immersive .coding-workspace .candidate-workspace { height: calc(100dvh - 72px); min-height: 360px; }
+  .coding-immersive .coding-workspace { height: calc(100dvh - 16px); }
+  .coding-immersive .coding-workspace .candidate-workspace { flex: 1 1 0; height: auto; min-height: 0; }
+  .coding-immersive .coding-workspace-toolbar { margin-bottom: 4px; }
+  .coding-workspace .workspace-statement-content { padding: 14px; }
   .coding-form-grid, .coding-sample-edit { grid-template-columns: 1fr; }
   .coding-dialog .dialog-body { padding: 16px; }
   .coding-dialog .dialog-header, .coding-dialog .dialog-footer { padding: 14px 16px; }

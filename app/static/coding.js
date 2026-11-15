@@ -113,11 +113,13 @@ function renderHome() {
   if (home.can_coding) daily.append(dailyActions);
   else daily.append(el("p", "算法题带刷权限尚未开通，题目浏览与个人投稿仍可使用。", "practice-access-notice"));
   const tabs = el("div", "", "coding-mode-tabs");
-  for (const [key, label] of [["roadmap", "阶段题单"], ["mine", "我的投稿"]]) {
+  for (const [key, label] of [["roadmap", "阶段题单"], ["mine", "我的投稿"], ["solved", "已完成"], ["failed", "尝试未通过"], ["favorites", "收藏"]]) {
     const tab = button(label, () => { mode = key; stageId = ""; topic = ""; page = 1; renderHome(); return refreshList(); }, `button ${mode === key ? "primary" : "secondary"}`);
     tab.setAttribute("aria-pressed", String(mode === key)); tabs.append(tab);
   }
-  root.replaceChildren(hero, daily, tabs);
+  root.replaceChildren(hero);
+  if (mode === "roadmap") root.append(daily);
+  root.append(tabs);
   if (mode === "roadmap") {
     const roadmap = el("nav", "", "coding-roadmap"); roadmap.setAttribute("aria-label", "由易到难的学习阶段");
     for (const [index, stage] of home.stages.entries()) {
@@ -129,7 +131,7 @@ function renderHome() {
       const meter = el("progress"); meter.max = Math.max(stage.total, 1); meter.value = stage.solved; meter.setAttribute("aria-label", `${stage.title}已通过 ${stage.solved} / ${stage.total} 题`); card.append(meter); roadmap.append(card);
     }
     root.append(roadmap);
-  } else {
+  } else if (mode === "mine") {
     const contribution = el("div", "", "coding-contribution panel");
     contribution.append(el("div", `已公开 ${home.contribution.approved_count} 道 · 已获得 ${home.contribution.credits_earned} 次面试奖励`), el("p", `每 ${home.contribution.questions_per_reward} 道首次审核通过，获得 ${home.contribution.credits_per_reward} 次面试。私人题只对自己可见，也参与自己的每日抽题。`, "muted"), button("＋ 添加我的题目", () => editQuestion(), "button primary")); root.append(contribution);
   }
@@ -153,6 +155,7 @@ async function loadQuestions(request, userId) {
     if (stageId) params.set("stage_id", stageId);
     const items = []; let next = 1; let pages = 1;
     do {
+      params.set("view", mode); params.set("mine", String(mode === "mine"));
       params.set("page", String(next)); const result = await api(`/coding/questions?${params}`);
       if (!active(request, userId) || turn !== listRevision || !target.isConnected) return;
       items.push(...result.items); pages = result.pages; next++;
@@ -163,8 +166,13 @@ async function loadQuestions(request, userId) {
     const filtered = filterCodingQuestions(items, { topic, stars, order });
     const render = () => {
       const start = (page - 1) * 15; target.replaceChildren();
-      const heading = el("div", "", "coding-list-heading"); heading.append(el("strong", mode === "mine" ? "我的题库" : home.stages.find(stage => String(stage.id) === stageId)?.title || "全部练习"), el("span", `${filtered.length} 道题`, "muted")); target.append(heading);
-      if (!filtered.length) target.append(emptyState("这里还没有题目", "试试其他阶段或筛选条件，也可以添加自己的题目。"));
+      const titles = { mine: "我的题库", solved: "已完成题目", failed: "尝试未通过", favorites: "收藏题目" };
+      const heading = el("div", "", "coding-list-heading"); heading.append(el("strong", mode === "roadmap" ? home.stages.find(stage => String(stage.id) === stageId)?.title || "全部练习" : titles[mode]), el("span", `${filtered.length} 道题`, "muted")); target.append(heading);
+      const emptyCopy = mode === "favorites" ? ["还没有收藏题目", "在题单或写题页点击收藏，方便之后继续练习。"]
+        : mode === "solved" ? ["还没有已完成题目", "通过评测的题目会集中显示在这里。"]
+        : mode === "failed" ? ["没有待复盘的题目", "完成评测但尚未通过的题目会显示在这里。"]
+        : ["这里还没有题目", "试试其他阶段或筛选条件，也可以添加自己的题目。"];
+      if (!filtered.length) target.append(emptyState(...emptyCopy));
       for (const item of filtered.slice(start, start + 15)) target.append(questionRow(item));
       renderPagination($("codingPagination"), page, filtered.length, 15, value => { page = value; render(); });
     };
@@ -184,6 +192,16 @@ function questionRow(question) {
   if (question.review_reason && mode === "mine") main.append(el("p", `审核意见：${question.review_reason}`, "coding-review-reason"));
   const importance = el("span", "★".repeat(question.stars), "coding-stars"); importance.setAttribute("aria-label", `重要性 ${question.stars} 星`);
   const actions = el("div", "", "coding-actions");
+  if (home.can_coding) {
+    const favorite = button(question.favorited ? "★" : "☆", async () => {
+      await api(`/coding/questions/${question.id}/favorite`, { method: question.favorited ? "DELETE" : "PUT" });
+      if (active(revision, state.user.id)) await refreshList();
+    }, `coding-favorite${question.favorited ? " is-favorite" : ""}`);
+    favorite.title = question.favorited ? "取消收藏" : "收藏题目";
+    favorite.setAttribute("aria-label", favorite.title);
+    favorite.setAttribute("aria-pressed", String(Boolean(question.favorited)));
+    actions.append(favorite);
+  }
   if (mode === "mine") {
     actions.append(button("编辑", () => editQuestion(question), "text-button"));
     if (question.review_status !== "pending" && question.review_status !== "approved") actions.append(button("送审", async () => {
@@ -215,6 +233,20 @@ function splitter(className, label, orientation) {
 }
 function renderWorkspace(question, request, userId) {
   const root = $("codingContent"); const workspace = el("div", "", "coding-workspace problem-workspace");
+  const navigation = el("div", "", "coding-workspace-toolbar");
+  navigation.append(button("← 返回题单", goHome, "button secondary workspace-back"), el("strong", question.title, "coding-workspace-title"));
+  const favorite = button(question.favorited ? "★ 已收藏" : "☆ 收藏", async () => {
+    const favorited = !question.favorited;
+    await api(`/coding/questions/${question.id}/favorite`, { method: favorited ? "PUT" : "DELETE" });
+    if (!active(request, userId)) return;
+    question.favorited = favorited;
+    favorite.textContent = favorited ? "★ 已收藏" : "☆ 收藏";
+    favorite.setAttribute("aria-pressed", String(favorited));
+    favorite.setAttribute("aria-label", favorited ? "取消收藏题目" : "收藏题目");
+  }, `button secondary coding-workspace-favorite${question.favorited ? " is-favorite" : ""}`);
+  favorite.setAttribute("aria-pressed", String(Boolean(question.favorited)));
+  favorite.setAttribute("aria-label", question.favorited ? "取消收藏题目" : "收藏题目");
+  navigation.append(favorite);
   const columns = el("div", "", "problem-columns candidate-workspace"); columns.dataset.activePane = "statement";
   const restoreBar = el("div", "", "workspace-pane-restores"); const restoreControls = {}; const closeControls = {};
   for (const [pane, label] of [["statement", "题面"], ["editor", "代码区"], ["panels", "样例与提交记录"]]) {
@@ -224,9 +256,9 @@ function renderWorkspace(question, request, userId) {
   const statement = el("article", "", "panel problem-statement"); const statementHead = el("div", "", "workspace-panel-heading statement-panel-heading"); const statementControl = paneControl();
   const closeStatement = closePaneControl("题面"); closeControls.statement = closeStatement;
   const statementActions = el("div", "", "workspace-pane-actions"); statementActions.append(statementControl, closeStatement);
-  statementHead.append(button("← 返回题单", goHome, "button secondary workspace-back"), el("span", "题目描述", "workspace-panel-label"), statementActions);
+  statementHead.append(el("span", "题目描述", "workspace-panel-label"), statementActions);
   const content = el("div", "", "workspace-statement-content");
-  content.append(el("h3", question.title), el("p", [question.topic, `难度 ${question.difficulty}/5`, "★".repeat(question.stars)].filter(Boolean).join(" · "), "coding-stars"));
+  content.append(el("p", [question.topic, `难度 ${question.difficulty}/5`, "★".repeat(question.stars)].filter(Boolean).join(" · "), "coding-statement-meta"));
   if (question.statement_html) appendProblemStatement(content, question.statement_html); else content.append(el("pre", question.statement, "coding-statement-text"));
   if (/^https?:\/\//i.test(question.source_url || "")) { const link = el("a", "查看原题与来源 ↗", "text-button"); link.href = question.source_url; link.target = "_blank"; link.rel = "noopener noreferrer"; content.append(link); }
   const sourceInfo = question.source_info;
@@ -257,10 +289,9 @@ function renderWorkspace(question, request, userId) {
   const reset = button("恢复布局", () => {}, "workspace-layout-reset"); reset.title = "恢复默认分栏比例";
   const judgeBadge = badge(question.judge_mode === "luogu" ? "洛谷评测" : "公开样例", "blue");
   judgeBadge.title = question.judge_mode === "luogu" ? "不限时练习 · 通过浏览器插件提交至洛谷" : "不限时练习 · 只校验公开样例，通过不代表通过完整隐藏测试";
-  editorHead.append(el("h4", "代码工作区"), judgeBadge);
-  if (question.judge_mode === "luogu") editorHead.append(button("插件教程", () => $("luoguTutorial")?.showModal(), "text-button coding-tutorial-button"));
+  editorHead.append(el("h4", "代码工作区"));
   if (question.judge_mode === "samples" && !home.judge.available) {
-    const judgeWarning = el("span", home.judge.notice || "样例评测暂不可用，请联系管理员。", "coding-form-error");
+    const judgeWarning = el("span", "本站公开样例评测暂不可用，请稍后再试或联系管理员。", "coding-form-error");
     judgeWarning.title = judgeWarning.textContent;
     editorHead.append(judgeWarning);
   }
@@ -281,9 +312,11 @@ function renderWorkspace(question, request, userId) {
   });
   language.addEventListener("change", () => { save(previous); previous = language.value; input.value = drafts.read(codingDraftKey(userId, question.id, previous)); update(); }); update(); area.append(numbers, input);
   const footer = el("div", "", "editor-footer"); const result = el("div", "", "submission-result"); result.setAttribute("role", "status"); result.setAttribute("aria-live", "polite");
+  let activateRecords = () => {};
   const submit = button(question.judge_mode === "luogu" ? "提交洛谷评测 →" : "运行公开样例 →", async () => {
-    if (!input.value.trim()) throw new Error("请先输入代码。");
-    const source = input.value; const lang = language.value; result.textContent = "正在评测…";
+    activateRecords();
+    if (!input.value.trim()) { result.replaceChildren(el("span", "请先输入代码，再提交评测。", "coding-form-error")); return; }
+    const source = input.value; const lang = language.value; result.replaceChildren(el("span", "正在评测…", "muted"));
     let remotePayload = null; let submissionId = null;
     try {
       let response = await api(`/coding/questions/${question.id}/submissions`, { method: "POST", body: JSON.stringify({ language: lang, source }) });
@@ -312,19 +345,22 @@ function renderWorkspace(question, request, userId) {
       renderResult(result, response); await loadRecords(question.id, request, userId);
     } catch (error) {
       if (active(request, userId)) {
-        result.replaceChildren(el("span", error.message));
+        result.replaceChildren(el("span", error.message, "coding-form-error"));
         if (remotePayload?.remote_submission_id && submissionId) result.append(button("重新同步评测结果", async () => {
-          const synced = await saveRemote(submissionId, remotePayload);
-          if (!active(request, userId)) return;
-          renderResult(result, synced); await loadRecords(question.id, request, userId);
+          try {
+            const synced = await saveRemote(submissionId, remotePayload);
+            if (!active(request, userId)) return;
+            renderResult(result, synced); await loadRecords(question.id, request, userId);
+          } catch (syncError) { result.replaceChildren(el("span", syncError.message, "coding-form-error")); }
         }, "text-button"));
         await loadRecords(question.id, request, userId);
-        throw error;
       }
     }
   }, "button primary");
   if (question.judge_mode === "samples" && !home.judge.available) submit.disabled = true;
-  footer.append(submit, saved, result); editor.append(editorHead, area, footer);
+  const submitTools = el("div", "", "coding-submit-tools"); submitTools.append(judgeBadge);
+  if (question.judge_mode === "luogu") submitTools.append(button("插件教程", () => $("luoguTutorial")?.showModal(), "text-button coding-tutorial-button"));
+  footer.append(submitTools, saved, submit); editor.append(editorHead, area, footer);
   const panels = el("section", "", "editor-bottom-panel"); const tabs = el("div", "", "workspace-panel-heading auxiliary-panel-heading"); const tabsInner = el("div", "", "editor-bottom-tabs"); const panelControl = paneControl();
   const samples = el("div", "", "editor-bottom-content");
   for (const [index, sample] of (question.samples || []).entries()) {
@@ -332,12 +368,19 @@ function renderWorkspace(question, request, userId) {
     for (const [name, value] of [["输入", sample.input], ["期望输出", sample.output]]) { const part = el("div", "", "sample-value"); part.append(el("div", name, "sample-value-heading"), el("pre", value)); pair.append(part); } block.append(pair); samples.append(block);
   }
   if (!question.samples?.length) samples.append(el("p", "此题未提供公开样例。", "muted"));
-  const records = el("div", "", "editor-bottom-content"); records.hidden = true; recordTarget = records;
+  const records = el("div", "", "editor-bottom-content coding-submission-panel"); records.hidden = true; records.append(result);
+  const recordList = el("div", "", "coding-record-list"); records.append(recordList); recordTarget = recordList;
   const tabButtons = [];
   for (const [label, pane] of [["公开样例", samples], ["提交记录", records]]) {
     const control = button(label, () => { samples.hidden = pane !== samples; records.hidden = pane !== records; tabButtons.forEach(([button, target]) => { button.classList.toggle("selected", pane === target); button.setAttribute("aria-pressed", String(pane === target)); }); }, `editor-bottom-tab${pane === samples ? " selected" : ""}`);
     control.setAttribute("aria-pressed", String(pane === samples)); tabButtons.push([control,pane]); tabsInner.append(control);
   }
+  const layoutStore = createLayoutStore((() => { try { return window.localStorage; } catch { return undefined; } })(), `scu:${userId}:coding-layout:v1`);
+  activateRecords = () => {
+    samples.hidden = true; records.hidden = false;
+    tabButtons.forEach(([tab, target]) => { tab.classList.toggle("selected", target === records); tab.setAttribute("aria-pressed", String(target === records)); });
+    if (layoutStore.read().collapsed.panels) restoreControls.panels.click();
+  };
   const closePanels = closePaneControl("样例与提交记录"); closeControls.panels = closePanels;
   const panelActions = el("div", "", "workspace-pane-actions"); panelActions.append(panelControl, closePanels);
   tabs.append(tabsInner, panelActions); panels.append(tabs, samples, records);
@@ -345,13 +388,12 @@ function renderWorkspace(question, request, userId) {
   stack.append(editor, vertical, panels); columns.append(statement, horizontal, stack);
   const mobile = el("div", "", "workspace-pane-switcher");
   for (const [name, label] of [["statement","题目描述"],["editor","代码与评测"]]) {
-    const tab = button(label, () => { columns.dataset.activePane = name; columns.dispatchEvent(new Event("workspacepanechange")); for (const node of mobile.children) node.setAttribute("aria-pressed", String(node.dataset.pane === name)); }, "workspace-pane-tab");
+    const tab = button(label, () => { columns.dataset.activePane = name; columns.dispatchEvent(new Event("workspacepanechange")); for (const node of mobile.children) { const selected = node.dataset.pane === name; node.setAttribute("aria-pressed", String(selected)); node.classList.toggle("selected", selected); } }, "workspace-pane-tab");
     tab.dataset.pane = name; mobile.append(tab);
   }
-  mobile.children[0].setAttribute("aria-pressed", "true"); mobile.children[1].setAttribute("aria-pressed", "false");
-  workspace.append(mobile, restoreBar, columns); root.replaceChildren(workspace);
-  let storage; try { storage = window.localStorage; } catch { /* Layout still works without persistent storage. */ }
-  disposeLayout = mountWorkspaceLayout({ columns, stack, horizontal, vertical, controls: { statement: statementControl, editor: editorControl, panels: panelControl }, closeControls, regions: { statement, editor, panels }, restoreControls, expandAll, reset, paneSwitcher: mobile, store: createLayoutStore(storage, `scu:${userId}:coding-layout:v1`) });
+  mobile.children[0].setAttribute("aria-pressed", "true"); mobile.children[0].classList.add("selected"); mobile.children[1].setAttribute("aria-pressed", "false");
+  workspace.append(navigation, mobile, restoreBar, columns); root.replaceChildren(workspace);
+  disposeLayout = mountWorkspaceLayout({ columns, stack, horizontal, vertical, controls: { statement: statementControl, editor: editorControl, panels: panelControl }, closeControls, regions: { statement, editor, panels }, restoreControls, expandAll, reset, paneSwitcher: mobile, store: layoutStore });
   void loadRecords(question.id, request, userId);
 }
 function renderResult(target, result) {

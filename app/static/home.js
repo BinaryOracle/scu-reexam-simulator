@@ -136,17 +136,7 @@ function renderNotices(root) {
     showNotice();
     viewport.append(title);
     if (notices.length > 1) {
-      const previous = button("‹", () => {
-        announcementIndex = (announcementIndex - 1 + notices.length) % notices.length;
-        showNotice(true);
-      }, "icon-button");
-      previous.setAttribute("aria-label", "上一条公告");
-      const next = button("›", () => {
-        announcementIndex = (announcementIndex + 1) % notices.length;
-        showNotice(true);
-      }, "icon-button");
-      next.setAttribute("aria-label", "下一条公告");
-      controls.append(position, previous, next);
+      controls.append(position);
     }
     announcementTimer = setInterval(() => {
       announcementIndex = (announcementIndex + 1) % notices.length;
@@ -329,6 +319,8 @@ function editNotice(item) {
   });
   const blockHeading=el("div","","announcement-editor-heading");
   blockHeading.append(el("h2","公告正文 · Markdown"),el("p","支持标题、列表、引用、表格和链接。将图片粘贴到正文框，会自动上传并插入图片引用。","muted"));
+  if(item?.status==="published")form.append(el("p","当前公告已发布；保存修改会立即更新所有用户可见的内容。","announcement-published-warning"));
+  else if(item?.status==="withdrawn")form.append(el("p","当前公告已撤下；保存内容不会重新发布。","announcement-withdrawn-note"));
   const imageInput=el("input");imageInput.type="file";imageInput.accept="image/png,image/jpeg,image/webp";imageInput.hidden=true;
   const addImage=button("插入图片",()=>imageInput.click(),"button quiet");
   imageInput.addEventListener("change",async()=>{
@@ -356,11 +348,13 @@ function editNotice(item) {
       openAnnouncement(preview);
     }catch(error){notify(error.message,"error");}
   },"button secondary"));
-  actions.append(button("保存草稿",async()=>{
+  const saveLabel=item?.status==="published"?"更新已发布公告":item?.status==="withdrawn"?"保存修改（保持撤下）":"保存草稿";
+  actions.append(button(saveLabel,async()=>{
+    if(item?.status==="published"&&!await confirmAction("这条公告当前已经发布。保存后会立即更新所有用户可见的内容，确定继续吗？"))return;
     const payload={title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value};
     await api(item?"/admin/announcements/"+item.id:"/admin/announcements",{
       method:item?"PUT":"POST",body:JSON.stringify(payload)});
-    notify("公告草稿已保存");
+    notify(item?.status==="published"?"已发布公告已更新":item?.status==="withdrawn"?"已撤下公告已保存修改，仍保持撤下":"公告草稿已保存");
     form.remove();
     for(const node of [heading,toolbar,list])if(node)node.hidden=false;
     try { await refreshAnnouncementsAdmin(); }

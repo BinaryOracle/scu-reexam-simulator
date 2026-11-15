@@ -16,7 +16,7 @@ import { appendProblemStatement, normalizeProblemStatementHtml, renderProblemMat
 import { formatLuoguSubmitError, isLuoguExtensionOutdated } from "./luogu-errors.mjs?v=20261115-coding-v1";
 import { submitWithLuoguVerification } from "./luogu-submit.mjs?v=20261114-captcha-v2";
 import { requestLuoguCaptcha } from "./luogu-captcha.js?v=20261114-captcha-v2";
-import { canRevealLuoguSource, normalizeSubmissionPage, refreshContestProblemStats, submissionPanelMessage } from "./contest-model.mjs?v=20261115-contest-submission-states-v1";
+import { canRevealLuoguSource, contestSubmitGuidance, normalizeSubmissionPage, refreshContestProblemStats, submissionPanelMessage } from "./contest-model.mjs?v=20261115-submit-guidance-v1";
 import { writeAppRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 import { readLuoguConnection, writeLuoguConnection } from "./luogu-connection.mjs?v=20261115-navigation-v3";
 import { contestTiming, canOpenContestProblems } from "./contest-timing.mjs?v=20261115-contest-focus-v1";
@@ -247,6 +247,13 @@ function tick() {
     node.textContent = label;
     node.className = `badge ${color} workspace-status`;
   });
+  const guidance = document.querySelector(".contest-submit-guidance");
+  if (guidance && selectedContest) updateContestSubmitGuidance(guidance, selectedContest);
+}
+function updateContestSubmitGuidance(node, contest) {
+  const message = managementMode() ? "" : contestSubmitGuidance(contest);
+  node.textContent = message;
+  node.hidden = !message;
 }
 export async function refreshContests() {
   contests = await api(contestPath("/contests"));
@@ -1092,7 +1099,11 @@ function renderEditor(problem) {
   submit.id = "submitCode";
   if (selectedContest.judge_mode === "luogu") row.append(renderLuoguSetup());
   row.append(saved, submit);
-  footer.append(row);
+  const guidance = el("p", "", "contest-submit-guidance");
+  guidance.setAttribute("role", "status");
+  guidance.setAttribute("aria-live", "polite");
+  updateContestSubmitGuidance(guidance, selectedContest);
+  footer.append(row, guidance);
   panel.append(heading, area, footer);
   return panel;
 }
@@ -1114,10 +1125,10 @@ function renderLuoguSetup() {
   );
   return panel;
 }
-function showLuoguBridgeHelp(message) {
+function showLuoguBridgeHelp(message, { reveal = true } = {}) {
   const panel = document.querySelector(".luogu-setup");
   if (!panel) return;
-  panel.open = true;
+  if (reveal) panel.open = true;
   panel.classList.add("has-error");
   panel.querySelector(".luogu-bridge-error")?.remove();
   const guidance = el("p", message, "luogu-bridge-error");
@@ -1175,7 +1186,7 @@ async function refreshLuoguBridgeConnection({ force = false } = {}) {
       setLuoguConnection(response.connected ? response.account || "已连接" : "");
       return response;
     } catch (error) {
-      showLuoguBridgeHelp(error.message || "插件未响应，请检查插件配置后重试。");
+      showLuoguBridgeHelp(error.message || "插件未响应，请检查插件配置后重试。", { reveal: force });
       const currentStatus = document.querySelector(".luogu-connection-status");
       if (currentStatus)
         currentStatus.textContent = luoguConnected ? `上次连接 · ${luoguConnected}（等待确认）` : "插件未响应";

@@ -8,7 +8,7 @@ import {
   hasUnsavedWork,
   pauseInterviewAudio,
   clearInterviewState,
-} from "./interview.js?v=20261115-ui-v24";
+} from "./interview.js?v=20261115-history-expired-v1";
 import {
   refreshContests,
   refreshSubmissions,
@@ -17,20 +17,20 @@ import {
   suspendContestWorkspace,
   setupContestCreation,
   requestLuoguSubmit,
-} from "./contest.js?v=20261115-access-layout-v5";
+} from "./contest.js?v=20261115-submit-guidance-v1";
 import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-access-layout-v5";
-import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261115-profile-independent-sections-v1";
+import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261115-voucher-export-v2";
 import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
 
 import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261115-access-layout-v2";
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-empty-state-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
-import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-announcement-roll-v1";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-announcement-controls-v2";
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
-import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261115-access-layout-v2";
+import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261115-coding-judge-status-v4";
 import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261115-coding-v1";
 
 configureCodingBridge(requestLuoguSubmit);

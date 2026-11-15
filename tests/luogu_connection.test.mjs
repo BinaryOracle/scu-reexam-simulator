@@ -31,12 +31,13 @@ test("continues when browser storage is unavailable", () => {
   assert.doesNotThrow(() => writeLuoguConnection(storage, 4, "candidate"));
 });
 
-test("opens actionable bridge recovery after a failed status check and clears it after reconnecting", () => {
+test("keeps startup bridge failures compact and reveals recovery only after user action", () => {
   const connection = contestSource.slice(contestSource.indexOf("function setLuoguConnection("), contestSource.indexOf("async function refreshLuoguBridgeConnection("));
   const refresh = contestSource.slice(contestSource.indexOf("async function refreshLuoguBridgeConnection("), contestSource.indexOf("function sendLuoguBridge("));
-  assert.match(refresh, /showLuoguBridgeHelp\(error\.message/);
+  const help = contestSource.slice(contestSource.indexOf("function showLuoguBridgeHelp("), contestSource.indexOf("function prepareLuoguConnection("));
+  assert.match(refresh, /showLuoguBridgeHelp\(error\.message \|\| "插件未响应，请检查插件配置后重试。", \{ reveal: force \}\)/);
+  assert.match(help, /if \(reveal\) panel\.open = true/);
   assert.match(connection, /if \(panel\?\.classList\.contains\("has-error"\)\)\s*\{[\s\S]*?panel\.classList\.remove\("has-error"\)/);
   assert.match(connection, /if \(panel\?\.classList\.contains\("has-error"\)\)\s*\{[\s\S]*?querySelector\("\.luogu-bridge-error"\)\?\.remove\(\)/);
   assert.match(connection, /if \(panel\?\.classList\.contains\("has-error"\)\)\s*\{[\s\S]*?panel\.open = false/);
-  assert.match(contestSource, /function showLuoguBridgeHelp\(message\) \{[\s\S]*?panel\.open = true/);
 });

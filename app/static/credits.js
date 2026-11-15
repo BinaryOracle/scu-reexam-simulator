@@ -1,6 +1,6 @@
 /** Interview balances and voucher administration have no external shop API. */
 import { api, state } from "./api.js?v=20261114-ui-v17";
-import { $, el, button, emptyState, notify, run, dateTime, badge } from "./ui.js?v=20261114-ui-v17";
+import { $, el, button, emptyState, notify, run, dateTime, badge, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import { refreshAccountSettings, setupAccountSettings } from "./profile-account.js?v=20261114-ui-v17";
 
 import { refreshTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
@@ -71,6 +71,7 @@ export async function refreshVouchers() {
   }
   const wrap = el("div", "", "table-scroll");
   const table = el("table", "", "voucher-table");
+  const mobileList = el("div", "", "voucher-mobile-list");
   const head = el("thead"); const titles = el("tr");
   for (const title of ["卡密", "批次", "次数 / 标价", "兑换状态", "兑换用户", "兑换时间"]) {
     const cell = el("th", title); cell.scope = "col"; titles.append(cell);
@@ -80,23 +81,53 @@ export async function refreshVouchers() {
   for (const item of data.items) {
     const row = el("tr");
     const code = el("td");
-    const copy = button(item.code, async () => {
-      await navigator.clipboard.writeText(item.code);
-      notify("卡密已复制。");
-    }, "voucher-code");
-    copy.title = "复制此卡密"; code.append(copy);
+    const makeCopyButton = () => {
+      const copy = button(item.code, async () => {
+        await navigator.clipboard.writeText(item.code);
+        notify("卡密已复制。");
+      }, "voucher-code");
+      copy.title = "复制此卡密";
+      return copy;
+    };
+    code.append(makeCopyButton());
     const batch = el("td");
-    const batchButton = button(item.batch.slice(0, 8), () => {
-      $("voucherBatch").value = item.batch; voucherPage = 1; return refreshVouchers();
-    }, "text-button mono");
-    batchButton.title = `筛选批次 ${item.batch} · 生成于 ${dateTime(item.created)}`;
-    batch.append(batchButton);
-    const status = el("td"); status.append(badge(item.redeemed_at ? "已兑换" : "未兑换", item.redeemed_at ? "green" : "orange"));
+    const makeBatchButton = () => {
+      const batchButton = button(item.batch.slice(0, 8), () => {
+        $("voucherBatch").value = item.batch; voucherPage = 1; return refreshVouchers();
+      }, "text-button mono");
+      batchButton.title = `筛选批次 ${item.batch} · 生成于 ${dateTime(item.created)}`;
+      return batchButton;
+    };
+    batch.append(makeBatchButton());
+    const redeemed = Boolean(item.redeemed_at);
+    const status = el("td"); status.append(badge(redeemed ? "已兑换" : "未兑换", redeemed ? "green" : "orange"));
     row.append(code, batch, el("td", `${item.credits} 次 / ${money(item.price_fen)}`), status,
       el("td", item.redeemed_by || "—"), el("td", item.redeemed_at ? dateTime(item.redeemed_at) : "—"));
     body.append(row);
+
+    const card = el("article", "", "voucher-mobile-card");
+    const cardHeading = el("div", "", "voucher-mobile-heading");
+    const cardCode = el("div", "", "voucher-mobile-code");
+    cardCode.append(el("span", "卡密"), makeCopyButton());
+    cardHeading.append(cardCode, badge(redeemed ? "已兑换" : "未兑换", redeemed ? "green" : "orange"));
+    const details = el("dl", "", "voucher-mobile-details");
+    const addField = (label, value) => {
+      const field = el("div", "", "voucher-mobile-field");
+      field.append(el("dt", label), el("dd", value));
+      details.append(field);
+      return field.querySelector("dd");
+    };
+    addField("批次", "").append(makeBatchButton());
+    addField("套餐", `${item.credits} 次 / ${money(item.price_fen)}`);
+    addField("兑换用户", item.redeemed_by || "—");
+    addField("兑换时间", item.redeemed_at ? dateTime(item.redeemed_at) : "—");
+    card.append(cardHeading, details);
+    mobileList.append(card);
   }
-  table.append(head, body); wrap.append(table); $("voucherList").replaceChildren(wrap);
+  table.append(head, body); wrap.append(table);
+  const results = el("div", "", "voucher-results");
+  results.append(wrap, mobileList);
+  $("voucherList").replaceChildren(results);
   } catch (error) {
     if (request !== voucherRequest) return;
     $("voucherList").removeAttribute("aria-busy");
@@ -189,7 +220,7 @@ export function setupCredits() {
       const price_fen = Number(yuan) * 100 + Number(fraction.padEnd(2, "0"));
       const result = await api("/admin/voucher-packages", { method: "POST", body: JSON.stringify({ price_fen, credits: Number($("packageCredits").value) }) });
       voucherPackage = result.id; voucherPage = 1;
-      $("voucherBatch").value = ""; $("voucherSearch").value = ""; $("voucherStatus").value = "all";
+      $("voucherBatch").value = ""; $("voucherSearch").value = ""; $("voucherStatus").value = "unused";
       $("voucherGeneratePackage").replaceChildren();
       $("voucherPackageForm").reset();
       notify("新套餐已添加，可以生成卡密了。");
@@ -212,7 +243,7 @@ export function setupCredits() {
       const selected = $("voucherGeneratePackage").value;
       const cards = await api("/admin/vouchers", { method: "POST", body: JSON.stringify({ package: selected, count: Number($("voucherCount").value) }) });
       voucherPackage = selected; voucherPage = 1;
-      $("voucherStatus").value = "all"; $("voucherSearch").value = ""; $("voucherBatch").value = cards[0].batch;
+      $("voucherStatus").value = "unused"; $("voucherSearch").value = ""; $("voucherBatch").value = cards[0].batch;
       notify(`已生成 ${cards.length} 张新卡密，当前仅展示本批次，可直接导出。`);
       try { await refreshVouchers(); }
       catch { notify(`已生成 ${cards.length} 张卡密，但列表刷新失败。请点击重新加载；不要重复生成。`, "error"); }
@@ -227,12 +258,14 @@ export function setupCredits() {
   });
   $("voucherStatus").addEventListener("change", () => { voucherPage = 1; run(refreshVouchers); });
   $("clearVoucherFilters").addEventListener("click", () => {
-    $("voucherSearch").value = ""; $("voucherBatch").value = ""; $("voucherStatus").value = "all"; voucherPage = 1; run(refreshVouchers);
+    $("voucherSearch").value = ""; $("voucherBatch").value = ""; $("voucherStatus").value = "unused"; voucherPage = 1; run(refreshVouchers);
   });
   $("voucherPrevious").addEventListener("click", () => { voucherPage--; run(refreshVouchers); });
   $("voucherNext").addEventListener("click", () => { voucherPage++; run(refreshVouchers); });
   $("exportVouchers").addEventListener("click", event => run(async () => {
-    const query = new URLSearchParams({ package: voucherPackage, status: $("voucherStatus").value, q: $("voucherSearch").value.trim(), batch: $("voucherBatch").value.trim() });
+    const status = $("voucherStatus").value;
+    if (status !== "unused" && !await confirmAction("当前导出范围可能包含已兑换卡密，不能用于商品上架。若用于联动小铺发货，请取消并选择「未兑换」。是否仍要导出用于核对？", { title: "导出包含已兑换卡密的记录？", confirmText: "仅用于核对，继续导出" })) return;
+    const query = new URLSearchParams({ package: voucherPackage, status, q: $("voucherSearch").value.trim(), batch: $("voucherBatch").value.trim() });
     const response = await fetch(`/api/admin/vouchers/export?${query}`, { headers: { Authorization: `Bearer ${state.token}` } });
     if (!response.ok) throw new Error("卡密导出失败，请重新登录后重试");
     const value = await response.text();

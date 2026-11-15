@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 29
+SCHEMA_VERSION = 30
 
 
 @contextmanager

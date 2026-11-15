@@ -110,6 +110,34 @@ def test_stage_order_stars_pagination_disable_and_delete_protection(client):
     assert client.delete(f"/api/admin/coding/stages/{second['id']}", headers=admin).status_code == 204
 
 
+def test_solved_failed_and_favorite_views_are_user_scoped_and_persist(client, monkeypatch):
+    from app.services import coding_judge
+    alice, bob, admin = (login(client, name) for name in ('alice', 'bob', 'manager'))
+    stage = _stage(client, admin)
+    solved = _question(client, admin, stage, official=True, title='已完成题目')
+    failed = _question(client, admin, stage, official=True, title='尝试未通过题目')
+    _judge(monkeypatch)
+    monkeypatch.setattr(coding_judge, 'evaluate', lambda language, source, samples: {
+        'status': 'Accepted' if 'accepted' in source else 'Wrong Answer',
+        'detail': '评测完成', 'passed_cases': 1 if 'accepted' in source else 0, 'total_cases': 1})
+    for qid, code in ((solved['id'], 'accepted'), (failed['id'], 'failed')):
+        response = client.post(f'/api/coding/questions/{qid}/submissions', headers=alice,
+                               json={'language': 'cpp11', 'source': f'// {code}'})
+        assert response.status_code == 200, response.text
+
+    assert [item['id'] for item in client.get('/api/coding/questions?view=solved', headers=alice).json()['items']] == [solved['id']]
+    assert [item['id'] for item in client.get('/api/coding/questions?view=failed', headers=alice).json()['items']] == [failed['id']]
+    assert client.get('/api/coding/questions?view=failed', headers=bob).json()['items'] == []
+
+    favorite = client.put(f"/api/coding/questions/{failed['id']}/favorite", headers=alice)
+    assert favorite.status_code == 200 and favorite.json()['favorited'] is True
+    assert client.get('/api/coding/questions?view=favorites', headers=alice).json()['items'][0]['id'] == failed['id']
+    assert client.get('/api/coding/questions?view=favorites', headers=bob).json()['items'] == []
+    assert client.get(f"/api/coding/questions/{failed['id']}", headers=alice).json()['favorited'] is True
+    assert client.delete(f"/api/coding/questions/{failed['id']}/favorite", headers=alice).json()['favorited'] is False
+    assert client.get('/api/coding/questions?view=favorites', headers=alice).json()['items'] == []
+
+
 def test_daily_assignment_is_concurrent_fixed_private_and_requires_todays_pass(client, monkeypatch):
     from concurrent.futures import ThreadPoolExecutor
     from app.db import connect
