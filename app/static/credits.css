@@ -48,11 +48,11 @@
 .package-create-panel p { font-size: 12px; }
 .package-create-fields { display: grid; grid-template-columns: minmax(120px, 150px) minmax(100px, 130px) auto; align-items: end; gap: 12px; }
 .inline-credit-form { display: flex; align-items: center; gap: 6px; font-size: 12px; }
-.inline-credit-form input { width: 88px; min-width: 0; padding: 7px 8px; min-height: 34px; font-size: 12px; }
+.inline-credit-form input { width: 64px; min-width: 0; padding: 7px 7px; min-height: 34px; font-size: 12px; }
 .inline-credit-form button { padding: 4px; white-space: nowrap; }
 .inline-credit-form button:disabled { visibility: hidden; }
-.password-control { display: flex; align-items: center; gap: 6px; width: 186px; }
-.password-control input { width: 122px; min-width: 0; padding: 7px 8px; min-height: 34px; height: 34px; font-size: 12px; font-family: ui-monospace, monospace; background: #faf7f2; }
+.password-control { display: flex; align-items: center; gap: 5px; width: 170px; }
+.password-control input { width: 108px; min-width: 0; padding: 7px 8px; min-height: 34px; height: 34px; font-size: 12px; font-family: ui-monospace, monospace; background: #faf7f2; }
 .password-control .password-reveal-button { min-width: 50px; padding: 5px; letter-spacing: 0; font-size: 11px; font-family: inherit; }
 .password-control .password-unavailable { font-size: 11px; }
 .account-table th, .account-table td { padding: 16px 12px; }
@@ -79,7 +79,7 @@
 .redemption-price { color: #a27454; font-size: 17px; }
 .account-credits-cell > strong { display: block; font-size: 12px; white-space: nowrap; font-weight: 500; }
 .account-credits-cell > .text-button { padding: 0; font-size: 10px; }
-.account-table { min-width: 1030px; }
+.account-table { min-width: 970px; }
 #initialCreditsField { margin: 18px 0; }
 .user-profile .avatar { flex-shrink: 0; cursor: pointer; }
 .user-profile .avatar:hover { box-shadow: 0 0 0 3px #a3423418; }
@@ -90,7 +90,7 @@
   .voucher-toolbar { flex-wrap: wrap; }
 }
 @media (max-width: 620px) {
-  .user-profile .avatar { display: grid; width: 26px; height: 26px; font-size: 10px; }
+  .user-profile .avatar { display: grid; width: 36px; height: 36px; font-size: 10px; }
   .profile-stats { grid-template-columns: 1fr; gap: 10px; }
   .profile-stat { padding: 18px; }
   .profile-stat > strong { font-size: 24px; }

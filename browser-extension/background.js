@@ -5,6 +5,69 @@ const LUOGU_PATTERNS = ["https://www.luogu.com.cn/*"];
 const LUOGU_LANGUAGE_IDS = { cpp11: 4, c: 2, python3: 7, java: 8, go: 14 };
 const PENDING_STATUS_PREFIX = "pendingLuoguStatus:";
 
+function summarizeLuoguTestcases(detail) {
+  if (!detail) return "";
+  if (typeof detail === "string") {
+    try { detail = JSON.parse(detail); }
+    catch { return ""; }
+  }
+  const cases = [];
+  const verdicts = new Map([[2, "CE"], [3, "OLE"], [4, "MLE"], [5, "TLE"], [6, "WA"], [7, "RE"], [11, "SE"], [12, "AC"], [14, "WA"]]);
+  const visit = value => {
+    if (Array.isArray(value)) {
+      for (const item of value) visit(item);
+      return;
+    }
+    if (!value || typeof value !== "object") return;
+    const before = cases.length;
+    for (const item of Object.values(value)) {
+      if (item && typeof item === "object") visit(item);
+    }
+    const status = value.status ?? value.result ?? value.state;
+    const statusCode = Number(status);
+    const statusText = String(status).toLocaleLowerCase();
+    const verdict = verdicts.get(statusCode) || ({ accepted: "AC", "wrong answer": "WA", "runtime error": "RE", "time limit exceeded": "TLE", "memory limit exceeded": "MLE", "output limit exceeded": "OLE", "compile error": "CE" })[statusText];
+    if (cases.length === before && verdict) {
+      cases.push(verdict);
+    }
+  };
+  visit(detail);
+  if (!cases.length) return "";
+  const passed = cases.filter(verdict => verdict === "AC").length;
+  const summary = `通过测试用例数：${passed} / ${cases.length}`;
+  const lines = [];
+  let length = summary.length;
+  for (const [index, verdict] of cases.entries()) {
+    const line = `测试点 #${index + 1}：${verdict}`;
+    if (length + line.length + 1 > 9800) break;
+    lines.push(line);
+    length += line.length + 1;
+  }
+  if (lines.length < cases.length) lines.push(`另有 ${cases.length - lines.length} 个测试点未展开`);
+  return [summary, ...lines].join("\n");
+}
+
+function evaluationDetail(status, detail) {
+  const summary = summarizeLuoguTestcases(detail);
+  if (summary) return summary;
+  if (status === "Accepted") return "全部测试用例通过。";
+  if (status !== "Compile Error") return `${status}。洛谷暂未提供测试点明细，无法统计通过数。`;
+  let parsed = detail;
+  if (typeof detail === "string") {
+    try { parsed = JSON.parse(detail); } catch { /* Plain compiler output is already readable. */ }
+  }
+  const messages = [];
+  const visit = value => {
+    if (typeof value === "string") { messages.push(value); return; }
+    if (!value || typeof value !== "object") return;
+    for (const [key, child] of Object.entries(value)) {
+      if (/message|error|output|log|detail|compile|stderr/i.test(key)) visit(child);
+    }
+  };
+  visit(parsed);
+  return `编译错误，未运行测试用例。\n${messages.join("\n").slice(0, 9700) || "洛谷暂未提供编译器错误详情。"}`;
+}
+
 async function publishStatus(appTabId, payload) {
   const key = `${PENDING_STATUS_PREFIX}${payload.remote_submission_id}`;
   try {
@@ -76,48 +139,6 @@ async function findLoggedInTab() {
   return null;
 }
 
-async function readProblemPage(tabId, problemId) {
-  const [page] = await chrome.scripting.executeScript({
-    target: { tabId }, world: "MAIN", args: [problemId],
-    func: expectedProblemId => {
-      const expectedPath = `/problem/${expectedProblemId}`;
-      if (window.location.pathname !== expectedPath) return null;
-      const context = document.querySelector("#lentille-context");
-      const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
-      if (!context || !csrf) return { ready: false };
-      try {
-        const data = JSON.parse(context.textContent);
-        return data.user
-          ? { ready: true, loggedIn: true, username: data.user.name || data.user.username || data.user.uid || "洛谷用户" }
-          : { ready: true, loggedIn: false };
-      } catch { return { ready: false }; }
-    },
-  });
-  return page.result;
-}
-
-async function waitForTabLoad(tabId) {
-  for (let attempt = 0; attempt < 40; attempt++) {
-    const tab = await chrome.tabs.get(tabId);
-    if (tab.status === "complete") return;
-    await new Promise(resolve => setTimeout(resolve, 250));
-  }
-  throw new Error("洛谷题目页加载超时，请稍后重试。");
-}
-
-async function findProblemTab(problemId) {
-  const url = `https://www.luogu.com.cn/problem/${encodeURIComponent(problemId)}`;
-  const tabs = await chrome.tabs.query({ url: `${url}*` });
-  for (const tab of tabs) {
-    if (!tab.id) continue;
-    try {
-      const page = await readProblemPage(tab.id, problemId);
-      if (page?.ready && page.loggedIn) return { tab, account: page.username };
-    } catch { /* The page may navigate or close during inspection. */ }
-  }
-  return null;
-}
-
 async function handleRequest(type, payload = {}, appTabId) {
   if (type === "PING") {
     await flushPendingStatuses(appTabId);
@@ -127,29 +148,15 @@ async function handleRequest(type, payload = {}, appTabId) {
       : { connected: false, reason: "请在浏览器中打开洛谷并登录，再返回此处检测。", extension_version: chrome.runtime.getManifest().version };
   }
   if (type !== "SUBMIT") throw new Error("不支持的桥接操作");
-  if (!/^[A-Z]{1,4}[0-9]{1,8}$/.test(payload.problem_id || "")) throw new Error("洛谷题号格式无效。");
+  if (!/^[A-Z][A-Z0-9_-]{0,31}$/.test(payload.problem_id || "")) throw new Error("洛谷题号格式无效。");
   if (!Object.hasOwn(LUOGU_LANGUAGE_IDS, payload.language) || typeof payload.source !== "string" || payload.source.length < 1 || payload.source.length > 30000)
     throw new Error("编程语言不受支持，或代码长度超过 30000 字符。");
   if (payload.captcha != null && (typeof payload.captcha !== "string" || payload.captcha.length > 16))
     throw new Error("验证码格式无效，请重新输入。");
   const signedIn = await findLoggedInTab();
   if (!signedIn) throw new Error("洛谷登录状态已失效，请重新登录后提交。");
-  let problemPage = await findProblemTab(payload.problem_id);
-  if (!problemPage) {
-    const tab = await chrome.tabs.create({
-      url: `https://www.luogu.com.cn/problem/${encodeURIComponent(payload.problem_id)}`,
-      active: false,
-    });
-    await waitForTabLoad(tab.id);
-    const page = await readProblemPage(tab.id, payload.problem_id);
-    if (!page?.ready || !page.loggedIn) {
-      await chrome.tabs.update(tab.id, { active: true });
-      throw new Error("已打开本题的洛谷页面，但页面尚未准备好。请确认账号仍已登录且题目页加载完成，再回到知序重试。");
-    }
-    problemPage = { tab, account: page.username };
-  }
   const [submitted] = await chrome.scripting.executeScript({
-    target: { tabId: problemPage.tab.id }, world: "MAIN",
+    target: { tabId: signedIn.tab.id }, world: "MAIN",
     args: [payload.problem_id, payload.source, LUOGU_LANGUAGE_IDS[payload.language], payload.captcha?.trim() || ""],
     func: async (problemId, source, languageId, captcha) => {
       const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -210,31 +217,17 @@ async function handleRequest(type, payload = {}, appTabId) {
       category: "manual_verification_required",
     };
     console.info("[SCU Luogu bridge] submission rejected", diagnostic);
-    let opened = false;
-    try {
-      await chrome.tabs.update(problemPage.tab.id, { active: true });
-      opened = true;
-    } catch (openError) {
-      console.warn("Unable to open the Luogu problem page for manual verification.", openError);
-      try {
-        await chrome.tabs.create({ url: `https://www.luogu.com.cn/problem/${encodeURIComponent(payload.problem_id)}`, active: true });
-        opened = true;
-      } catch (fallbackError) {
-        console.warn("Unable to open a Luogu page for manual verification.", fallbackError);
-      }
-    }
-    const page = opened ? `已切换到洛谷题目页（${payload.problem_id}）` : `请切换到洛谷题目页（${payload.problem_id}）`;
     const diagnosticText = [
       diagnostic.http_status ? `HTTP ${diagnostic.http_status}` : "",
       diagnostic.error_code !== "unknown" ? `错误码 ${diagnostic.error_code}` : "",
     ].filter(Boolean).join("，");
     const diagnosticSuffix = diagnosticText ? `（${diagnosticText}）` : "";
-    throw new Error(`洛谷返回“${submitted.result?.error || "安全验证"}”${diagnosticSuffix}，自动提交未成功。${page}。请确认账号已登录，并按洛谷页面提示手动完成验证；若题目页未显示验证，请在该题的洛谷提交区域查看页面提示。处理后回到知序重新提交。`);
+    throw new Error(`洛谷返回“${submitted.result?.error || "安全验证"}”${diagnosticSuffix}，自动提交未成功。请在已登录的洛谷页面处理安全验证，再回到知序重新提交。`);
   }
   const remoteId = submitted.result?.id;
   if (!remoteId) throw new Error(submitted.result?.error || "洛谷提交失败。");
-  void trackResult(problemPage.tab.id, appTabId, { ...payload, remote_submission_id: remoteId });
-  return { remote_submission_id: remoteId, status: "Submitted", detail: `洛谷提交 #${remoteId}` };
+  void trackResult(signedIn.tab.id, appTabId, { ...payload, remote_submission_id: remoteId });
+  return { remote_submission_id: remoteId, status: "Submitted", detail: "评测中" };
 }
 
 async function trackResult(luoguTabId, appTabId, submission) {
@@ -258,7 +251,7 @@ async function trackResult(luoguTabId, appTabId, submission) {
           const statuses = { 0: "Judging", 1: "Judging", 2: "Compile Error", 3: "Output Limit Exceeded", 4: "Memory Limit Exceeded", 5: "Time Limit Exceeded", 6: "Wrong Answer", 7: "Runtime Error", 11: "System Error", 12: "Accepted", 14: "Wrong Answer" };
           const status = statuses[record.status];
           return status
-            ? { status, detail: status === "Accepted" ? "Accepted" : "" }
+            ? { status, detail: record.detail || record.subtasks || record.testcases || record.testCases || record.compileResult || "" }
             : { status: "System Error", detail: `洛谷返回暂不支持的状态码 ${record.status}` };
         },
       });
@@ -268,13 +261,18 @@ async function trackResult(luoguTabId, appTabId, submission) {
       failureReported = false;
       if (result.status === prior) continue;
       prior = result.status;
-      await publishStatus(appTabId, { submission_id: submission.submission_id, remote_submission_id: submission.remote_submission_id, ...result });
+      const isTerminal = !["Judging", "Submitted"].includes(result.status);
+      const detail = isTerminal
+        ? evaluationDetail(result.status, result.detail)
+        : "评测中";
+      await publishStatus(appTabId, { context: submission.context, submission_id: submission.submission_id, remote_submission_id: submission.remote_submission_id, ...result, detail });
       if (!["Judging", "Submitted"].includes(prior)) return;
     } catch (error) {
       consecutiveErrors += 1;
       if (consecutiveErrors >= 3 && !failureReported) {
         failureReported = true;
         await publishStatus(appTabId, {
+          context: submission.context,
           submission_id: submission.submission_id,
           remote_submission_id: submission.remote_submission_id,
           status: prior,
@@ -284,6 +282,7 @@ async function trackResult(luoguTabId, appTabId, submission) {
     }
   }
   await publishStatus(appTabId, {
+    context: submission.context,
     submission_id: submission.submission_id,
     remote_submission_id: submission.remote_submission_id,
     status: prior,

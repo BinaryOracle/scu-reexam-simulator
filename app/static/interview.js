@@ -1,9 +1,9 @@
-import { SessionAudio, microphoneCheck, stopMicrophoneTest } from "./interview-audio.js?v=20261114-ui-v17";
+import { SessionAudio, microphoneCheck, stopMicrophoneTest } from "./interview-audio.js?v=20261115-interview-recovery-v1";
 import {
   presentationView,
   releasePresentation,
   clearPresentation,
-} from "./presentation.js?v=20261114-ui-v17";
+} from "./presentation.js?v=20261115-mouse-navigation-v1";
 import { api, audioBlob, state } from "./api.js?v=20261114-ui-v17";
 import {
   $,
@@ -41,8 +41,19 @@ let interviewClock = null;
 let preparationFile = null;
 const drafts = new Map();
 const interimTexts = new Map();
+const transcriptionNotices = new Map();
 const collapsedFeedback = new Set();
 let liveSaveTimer = null;
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || document.querySelector("dialog[open]")) return;
+  const drawer = document.querySelector(".stage-drawer.is-open");
+  const toggle = drawer?.querySelector(".stage-drawer-toggle");
+  if (!toggle) return;
+  event.preventDefault();
+  toggle.focus();
+  toggle.click();
+});
 let expertSpeechPlaying = false;
 let stageSpeech = null;
 const sessionAudio = new SessionAudio({
@@ -55,6 +66,11 @@ function updateRecordingStatus() {
     node.textContent = sessionAudio.active ? "● 全程录音中 · 切换环节不中断" : sessionAudio.pending ? "录音待保存，请重试上传" : "全程录音已停止";
     node.classList.toggle("is-recording", sessionAudio.active);
   });
+  const notice = $("interviewRecordingNotice");
+  if (notice) {
+    notice.textContent = [sessionAudio.backupError, sessionAudio.liveError].filter(Boolean).join(" ");
+    notice.hidden = !notice.textContent;
+  }
 }
 function receiveLiveText(stage, final, interim) {
   const item = activeInterview;
@@ -131,6 +147,29 @@ const stageName = (answer, item) => answer.stage === item.expert_stage ? "专家
 const reviewMode = () => state.adminMode;
 const interviewPath = (path) => `${reviewMode() ? "/admin" : ""}${path}`;
 const resumeKey = () => `scu:${state.user.id}:interview-in-session`;
+function startRequestKey(file) {
+  const storageKey = `${resumeKey()}:start`;
+  const identity = JSON.stringify([file.name, file.size, file.lastModified]);
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(storageKey) || "null");
+    if (saved?.identity === identity && /^[0-9a-f-]{36}$/i.test(saved.key)) return saved.key;
+  } catch (error) { /* The current preparation keeps its request key in memory. */ }
+  const key = crypto.randomUUID();
+  try { sessionStorage.setItem(storageKey, JSON.stringify({ identity, key })); }
+  catch (error) { /* Retry remains stable until the preparation page is left. */ }
+  return key;
+}
+function clearStartRequestKey(key) {
+  try {
+    const storageKey = `${resumeKey()}:start`;
+    if (JSON.parse(sessionStorage.getItem(storageKey) || "null")?.key === key)
+      sessionStorage.removeItem(storageKey);
+  } catch (error) { /* A completed start does not depend on browser storage. */ }
+}
+function rememberTranscriptionResult(key, transcript) {
+  if (transcript.trim()) transcriptionNotices.delete(key);
+  else transcriptionNotices.set(key, "没有识别到语音内容，请检查录音或直接填写回答。");
+}
 function rememberInterview(item) {
   if (reviewMode() || !item.id) return;
   try {
@@ -158,7 +197,7 @@ export function allowNavigation() {
   return true;
 }
 export function hasUnsavedWork() {
-  return sessionAudio.active || sessionAudio.pending || recording || uploading || ending || drafts.size > 0;
+  return sessionAudio.active || sessionAudio.pending || recording || uploading || ending || drafts.size > 0 || Boolean(preparationFile);
 }
 export function pauseInterviewAudio() {
   cancelStageSpeech();
@@ -589,9 +628,9 @@ function renderInterview() {
   root.hidden = false;
   $("interviewOverview").hidden = true;
   $("newInterview").hidden = true;
-  $("refreshInterviews").parentElement.hidden = !reviewMode();
+  $("refreshInterviews").parentElement.hidden = true;
   $("interviewList").classList.add("compact");
-  $("interviewListTitle").hidden = !reviewMode();
+  $("interviewListTitle").hidden = true;
   const topline = el("div", "", "detail-topline");
   const title = el("div", "", "detail-title");
   title.append(
@@ -610,6 +649,7 @@ function renderInterview() {
       await endCurrentInterview({ automatic: true });
     }
     if (!allowNavigation()) return;
+    if (preparationFile && !await confirmAction("返回后需要重新选择 PPT，是否继续？", { title: "离开面试准备？", confirmText: "返回面试记录" })) return;
     preparationFile = null;
     activeInterview = null;
     document.body.classList.remove("interview-immersive", "interview-shell-open");
@@ -764,17 +804,15 @@ function renderInterview() {
   drawer.addEventListener("focusout", event => {
     if (!pointerInsideDrawer && !drawer.contains(event.relatedTarget)) setDrawerOpen(false);
   });
-  drawer.addEventListener("keydown", event => {
-    if (event.key === "Escape") {
-      stageToggle.focus();
-      setDrawerOpen(false);
-    }
-  });
   workspace.append(drawer);
   const answerReview = el("section", "", "panel answer-review-panel");
   answerReview.id = "answerReview";
   if (answer) workspace.append(renderAnswer(item, answer, readOnly, answerReview));
-  container.replaceChildren(topline, workspace);
+  const recordingNotice = el("p", "", "field-hint live-transcription-status");
+  recordingNotice.id = "interviewRecordingNotice";
+  recordingNotice.setAttribute("role", "status");
+  recordingNotice.hidden = true;
+  container.replaceChildren(topline, recordingNotice, workspace);
   if (feedbackRequests.has(item.id)) {
     const progress = el("section", "", "panel feedback-progress");
     progress.setAttribute("role", "status");
@@ -1056,7 +1094,7 @@ function sessionPlaybackControl(item, part, index, panel) {
     if (length <= 0) return;
     duration.textContent = formatPlaybackTime(length);
     seek.disabled = false;
-    updateProgress();
+    if (!seeking) updateProgress();
   };
   const probeDuration = () => {
     if (audio.duration !== Infinity) return;
@@ -1087,7 +1125,10 @@ function sessionPlaybackControl(item, part, index, panel) {
     updateProgress();
   };
   seek.addEventListener("change", commitSeek);
-  seek.addEventListener("pointercancel", commitSeek);
+  seek.addEventListener("pointercancel", () => {
+    seeking = false;
+    updateProgress();
+  });
   audio.addEventListener("loadedmetadata", () => { updateDuration(); probeDuration(); });
   audio.addEventListener("durationchange", updateDuration);
   audio.addEventListener("seeked", updateDuration);
@@ -1270,6 +1311,7 @@ function renderAnswer(item, answer, readOnly, reviewContainer) {
   label.append(inputLabel, status);
   const count = el("span", `${input.value.length} / 20000`);
   input.addEventListener("input", () => {
+    transcriptionNotices.delete(key);
     if (input.value === answer.transcript) drafts.delete(key);
     else drafts.set(key, input.value);
     status.textContent = drafts.has(key) ? "有修改尚未保存" : "回答已保存";
@@ -1290,6 +1332,8 @@ function renderAnswer(item, answer, readOnly, reviewContainer) {
     ),
     count,
   );
+  if (transcriptionNotices.has(key))
+    help.prepend(el("span", transcriptionNotices.get(key), "transcription-warning"));
   editor.append(help);
   const actions = el("div", "", "answer-actions");
   const left = el("div", "", "action-group");
@@ -1331,8 +1375,10 @@ function renderAnswer(item, answer, readOnly, reviewContainer) {
           );
           answer.transcript = result.transcript;
           drafts.delete(key);
+          rememberTranscriptionResult(key, result.transcript);
           renderInterview();
-          notify("转写已保存，请检查专业名词并修正。");
+          notify(result.transcript.trim() ? "转写已保存，请检查专业名词并修正。" : "没有识别到语音内容，请检查录音或直接填写回答。",
+            result.transcript.trim() ? "success" : "info");
         },
         "button soft",
       ),
@@ -1462,7 +1508,10 @@ function presentationControls() {
           if (!preparationFile) throw new Error("请先选择自己的复试 PPT。");
           const form = new FormData();
           form.append("file", preparationFile);
-          updated = await api("/interviews/start", { method: "POST", body: form });
+          item.startRequestKey ||= startRequestKey(preparationFile);
+          updated = await api("/interviews/start", { method: "POST", body: form,
+            headers: { "Idempotency-Key": item.startRequestKey } });
+          clearStartRequestKey(item.startRequestKey);
           preparationFile = null;
         } else {
           updated = await api(`/interviews/${item.id}/start`, { method: "POST" });
@@ -1623,6 +1672,7 @@ export function clearInterviewState() {
   sessionAudio.clear();
   interimTexts.clear();
   drafts.clear();
+  transcriptionNotices.clear();
   clearPresentation();
   activeInterview = null;
   document.body.classList.remove("interview-immersive", "interview-shell-open");

@@ -54,6 +54,12 @@ def load_config():
     _email_auth_config(config)
     judge = config['judge']
     judge.setdefault('cleanup_timeout_seconds', 5)
+    for key, default, maximum in [('compile_timeout_seconds', 30, 120),
+                                   ('output_limit_bytes', 65536, 1048576),
+                                   ('artifact_limit_bytes', 16777216, 67108864)]:
+        judge.setdefault(key, default)
+        if type(judge[key]) is not int or not 1 <= judge[key] <= maximum:
+            raise ValueError(f'judge.{key} 必须在 1 到 {maximum} 之间')
     if type(judge['cleanup_timeout_seconds']) is not int or judge['cleanup_timeout_seconds'] <= 0:
         raise ValueError('judge.cleanup_timeout_seconds 必须是正整数')
     for key in ('database', 'upload_dir'):

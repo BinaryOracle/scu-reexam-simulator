@@ -1,0 +1,6922 @@
+{
+  "file": "机试历年真题大全 + 全程算法带刷题单！！！.pdf",
+  "sha256": "45c41c07bb92cbbe1803491b52876f254a4b9150bd80e244000934fd04b0e97c",
+  "pages": [
+    {
+      "page": 1,
+      "text": "机试历年真题大全 + 全程算法带刷题单！！！​\n写在最前面：​\n恭喜大家成功顺利通过初试的考验。老生常谈，复试十分重要，川大的复试初试5:5分成，复试的1分\n可以抵初试的5分，所以复试也非常重要。​\n按照25年以前的规则，机试是不算分的。但是从25年开始，机试在复试中占比30分（折合初试150\n分），是大头中的大头。​\n25年因为临时通知机试要算分，所以大家准备不及时，平均分就13分左右。今年考生都知道了，所\n以肯定会好好准备，所以要准备得更加充分才能在这上面拉开分数，实现逆袭。​\n​\n①赛制为ioi赛制:不限制提交次数；无罚时；自行处理IO；一个题多个样例，每个都有分；提交平台\n只会返回分数或TLE；​\n②使用语言为C/C++，不允许使用python、java。​\n机试情况介绍：\n③使用的软件是Red Panda,下载链接：http://royqh.net/redpandacpp/​\n④刷题平台推荐洛谷(网站:www.luogu.com.cn;风格与机试非常接近，甚至去年所有题都来自于洛\n谷)。练习时可以看题目之后在本地写代码调试之后提交。​\n⑤去年真题除去签到题，专硕为2黄2橙，学硕为1红2橙1黄；黄≈easy，橙≈mid~hard，红色=白给\n题。有难度，但是大家也不用太过焦虑，只要你认真刷题，经过这一段时间的练习，是肯定可以取得\n不错的分数的。​\n⑥按照去年的情况，并非越难的题分数越高:签到题1分,第一道题为9分，第二道10分，第三第四道\n(难题)各5分。​\n",
+      "links": [
+        {
+          "url": "http://royqh.net/redpandacpp/",
+          "anchor": "：http://royqh.net/redpandacpp/",
+          "context": "②使用语言为C/C++，不允许使用python、java。\n③使用的软件是Red Panda,下载链接：http://royqh.net/redpandacpp/\n④刷题平台推荐洛谷(网站:www.luogu.com.cn;风格与机试非常接近，甚至去年所有题都来自于洛",
+          "rect": [
+            246.0,
+            615.0,
+            421.5,
+            633.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "http://www.luogu.com.cn/",
+          "anchor": ":www.luogu.com.cn;",
+          "context": "③使用的软件是Red Panda,下载链接：http://royqh.net/redpandacpp/\n④刷题平台推荐洛谷(网站:www.luogu.com.cn;风格与机试非常接近，甚至去年所有题都来自于洛\n谷)。练习时可以看题目之后在本地写代码调试之后提交。",
+          "rect": [
+            178.5,
+            640.5,
+            286.5,
+            658.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        }
+      ]
+    },
+    {
+      "page": 2,
+      "text": "⑦强烈提醒！！！！一定要学会怎么在黑框里粘贴内容！！！去年我机试的时候就是不会，所以\ndebug的时候自己手敲二维矩阵，非常耽搁时间！！！！​\n​\n机试学习路径：​\n①对于完全没有算法基础的同学，可以简单学一下Acwing(https://www.acwing.com/)yxc老师的算\n法基础课(看基础)【不要看提高进阶课，太难了用不上，浪费时间】。【对于基础课资源获取，相信参\n与了考研的各位各有神通，我就不在这里赘述】。​\n②刷题题单里的题目会按照各个模块进行依次排版，每个模块中题目比较多，后期会比较难，如果全\n刷完刷懂能AK几乎所有9中机试难度爆炸的院校（如炸大），所以心理压力不用太大，每天都要刷，\n",
+      "links": [
+        {
+          "url": "https://www.acwing.com/",
+          "anchor": "https://www.acwing.com/",
+          "context": "机试学习路径：\n①对于完全没有算法基础的同学，可以简单学一下Acwing(https://www.acwing.com/)yxc老师的算\n法基础课(看基础)【不要看提高进阶课，太难了用不上，浪费时间】。【对于基础课资源获取，相信参",
+          "rect": [
+            348.0,
+            711.0,
+            493.5,
+            729.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        }
+      ]
+    },
+    {
+      "page": 3,
+      "text": "尽力去刷就好。​\n机试真题:​\n因24年之前无机试环节，故真题为24年及25年真题，会有内容扩充，部分题洛谷中无收录，会给出\nLeetCode链接。若都无，会给出题目和答案；​\n24年：​\n一：交换单链表中的节点​\n扩充：​\na.两两交换链表中的节点\nb.约瑟夫环问题​\n​\n二：求矩阵的鞍点​\n​\n三：八皇后问题组：​\na.八皇后\nb.八皇后 Checker Challenge​\nc.带权值的八皇后​\n d. 不甘心的八皇后（24年考察的八皇后真题，代码实现查看：​\n历年笔试/上机算法题归类汇总 (模\n版题为主)）​\n​\n四：特别的除法：Decimal 小数/浮点数相除(真题) ，题目描述与代码实现查询：​\n历年笔试/上机算\n法题归类汇总 (模版题为主)\n​\n五：分解质因数：质因数分解/分解质因数(真题)，题目描述与代码实现查询：​\n历年笔试/上机算法\n题归类汇总 (模版题为主)\n​\n六：输出柱状图：垂直柱状图/输出垂直柱状图(非真题，无原题，但是类似)，题目描述与代码实现\n查询：​\n历年笔试/上机算法题归类汇总 (模版题为主)​\n​\n七：点阵数字显示(简单模拟题，就是需要绘制出类似下面的这种点阵图)：   显示屏 (可作为练手，非\n真题)​\n",
+      "links": [
+        {
+          "url": "https://leetcode.cn/problems/swapping-nodes-in-a-linked-list/",
+          "anchor": "交换单链表中的节点",
+          "context": "24年：\n一：交换单链表中的节点\n扩充：",
+          "rect": [
+            63.75,
+            189.0,
+            171.75,
+            207.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://leetcode.cn/problems/swap-nodes-in-pairs/description/",
+          "anchor": "两两交换链表中的节点",
+          "context": "扩充：\na.两两交换链表中的节点\nb.约瑟夫环问题",
+          "rect": [
+            49.5,
+            228.0,
+            169.5,
+            246.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1996",
+          "anchor": "约瑟夫环问题",
+          "context": "a.两两交换链表中的节点\nb.约瑟夫环问题",
+          "rect": [
+            50.25,
+            253.5,
+            122.25,
+            271.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B2102",
+          "anchor": "求矩阵的鞍点",
+          "context": "二：求矩阵的鞍点",
+          "rect": [
+            63.75,
+            304.5,
+            135.75,
+            322.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://leetcode.cn/problems/eight-queens-lcci/description/",
+          "anchor": "八皇后",
+          "context": "三：八皇后问题组：\na.八皇后\nb.八皇后 Checker Challenge",
+          "rect": [
+            49.5,
+            375.0,
+            85.5,
+            393.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1219",
+          "anchor": "八皇后 Checker Challenge",
+          "context": "a.八皇后\nb.八皇后 Checker Challenge\nc.带权值的八皇后",
+          "rect": [
+            50.25,
+            394.5,
+            192.75,
+            412.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/UVA167#submit",
+          "anchor": ".带权值的八皇后",
+          "context": "b.八皇后 Checker Challenge\nc.带权值的八皇后\n d. 不甘心的八皇后（24年考察的八皇后真题，代码实现查看：\n历年笔试/上机算法题归类汇总 (模",
+          "rect": [
+            48.75,
+            414.0,
+            132.75,
+            432.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "历年笔试/上机算法题归类汇总 (模",
+          "context": "c.带权值的八皇后\n d. 不甘心的八皇后（24年考察的八皇后真题，代码实现查看：\n历年笔试/上机算法题归类汇总 (模\n版题为主)）",
+          "rect": [
+            369.0,
+            437.25,
+            563.25,
+            459.75
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://vjudge.net/problem/SCU-1082",
+          "anchor": "不甘心的八皇后",
+          "context": "c.带权值的八皇后\n d. 不甘心的八皇后（24年考察的八皇后真题，代码实现查看：\n历年笔试/上机算法题归类汇总 (模\n版题为主)）",
+          "rect": [
+            55.5,
+            439.5,
+            139.5,
+            457.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "c.带权值的八皇后\n d. 不甘心的八皇后（24年考察的八皇后真题，代码实现查看：\n历年笔试/上机算法题归类汇总 (模\n版题为主)）",
+          "rect": [
+            370.5,
+            442.5,
+            382.5,
+            454.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "c.带权值的八皇后\n d. 不甘心的八皇后（24年考察的八皇后真题，代码实现查看：\n历年笔试/上机算法题归类汇总 (模\n版题为主)）",
+          "rect": [
+            370.5,
+            442.5,
+            382.5,
+            454.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "版题为主)）",
+          "context": "d. 不甘心的八皇后（24年考察的八皇后真题，代码实现查看：\n历年笔试/上机算法题归类汇总 (模\n版题为主)）",
+          "rect": [
+            39.75,
+            456.75,
+            93.0,
+            479.25
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "历年笔试/上机算",
+          "context": "四：特别的除法：Decimal 小数/浮点数相除(真题) ，题目描述与代码实现查询：\n历年笔试/上机算\n法题归类汇总 (模版题为主)",
+          "rect": [
+            463.5,
+            507.75,
+            567.0,
+            530.25
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "四：特别的除法：Decimal 小数/浮点数相除(真题) ，题目描述与代码实现查询：\n历年笔试/上机算\n法题归类汇总 (模版题为主)",
+          "rect": [
+            465.0,
+            513.0,
+            477.0,
+            525.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "四：特别的除法：Decimal 小数/浮点数相除(真题) ，题目描述与代码实现查询：\n历年笔试/上机算\n法题归类汇总 (模版题为主)",
+          "rect": [
+            465.0,
+            513.0,
+            477.0,
+            525.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "法题归类汇总 (模版题为主)",
+          "context": "四：特别的除法：Decimal 小数/浮点数相除(真题) ，题目描述与代码实现查询：\n历年笔试/上机算\n法题归类汇总 (模版题为主)",
+          "rect": [
+            39.75,
+            527.25,
+            183.75,
+            549.75
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "历年笔试/上机算法",
+          "context": "五：分解质因数：质因数分解/分解质因数(真题)，题目描述与代码实现查询：\n历年笔试/上机算法\n题归类汇总 (模版题为主)",
+          "rect": [
+            448.5,
+            578.25,
+            564.0,
+            600.75
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "五：分解质因数：质因数分解/分解质因数(真题)，题目描述与代码实现查询：\n历年笔试/上机算法\n题归类汇总 (模版题为主)",
+          "rect": [
+            450.0,
+            583.5,
+            462.0,
+            595.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "五：分解质因数：质因数分解/分解质因数(真题)，题目描述与代码实现查询：\n历年笔试/上机算法\n题归类汇总 (模版题为主)",
+          "rect": [
+            450.0,
+            583.5,
+            462.0,
+            595.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "题归类汇总 (模版题为主)",
+          "context": "五：分解质因数：质因数分解/分解质因数(真题)，题目描述与代码实现查询：\n历年笔试/上机算法\n题归类汇总 (模版题为主)",
+          "rect": [
+            39.75,
+            597.75,
+            171.75,
+            620.25
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "历年笔试/上机算法题归类汇总 (模版题为主)",
+          "context": "六：输出柱状图：垂直柱状图/输出垂直柱状图(非真题，无原题，但是类似)，题目描述与代码实现\n查询：\n历年笔试/上机算法题归类汇总 (模版题为主)",
+          "rect": [
+            75.75,
+            668.25,
+            323.25,
+            690.75
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "六：输出柱状图：垂直柱状图/输出垂直柱状图(非真题，无原题，但是类似)，题目描述与代码实现\n查询：\n历年笔试/上机算法题归类汇总 (模版题为主)",
+          "rect": [
+            77.25,
+            673.5,
+            89.25,
+            685.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "六：输出柱状图：垂直柱状图/输出垂直柱状图(非真题，无原题，但是类似)，题目描述与代码实现\n查询：\n历年笔试/上机算法题归类汇总 (模版题为主)",
+          "rect": [
+            77.25,
+            673.5,
+            89.25,
+            685.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5730",
+          "anchor": "显示屏",
+          "context": "七：点阵数字显示(简单模拟题，就是需要绘制出类似下面的这种点阵图)：   显示屏 (可作为练手，非\n真题)",
+          "rect": [
+            439.5,
+            721.5,
+            475.5,
+            739.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        }
+      ]
+    },
+    {
+      "page": 4,
+      "text": "                                                  模拟输出题:   重点注意空格，换行，间隔距离等小细节问题！​\n八： 字符串编辑距离(经典模版题，真题):  题目描述与代码实现查询：​\n历年笔试/上机算法题归类\n汇总 (模版题为主)\n​\n九： 极大连通图的个数(BFS经典模版题，真题): 题目描述与代码实现查询：​\n历年笔试/上机算法题\n归类汇总 (模版题为主)\n25年：​\n专硕：​\n①最大差值​\n②单词矩阵​\n③矩阵链乘：​\n这个题非常恐怖；b站：BV1dW4y1Z7Hh；\ncsdn:https://blog.csdn.net/ZChuashifeng/article/details/148882548\n不过这个题机试的时候数据范围好像会小一些，没那么变态。希望能帮到你们。​\n④最长路​\n学硕：​\n①扑克牌​\n②IPV6​\n③栈​\n④逆序对​\n带刷题单：​\n食用指南：​\n首先要明确一点，题目是刷不完的。所以大家不要为了刷题而刷题，要把题目背后的每一个知识点弄\n懂，下次遇到类似的题目的时候能触类旁通快速做出来，如果不能完成每天对应的任务也没事，尽力\n去刷就好了！同时不要把时间全丢给机试，笔试等内容也需要花时间去准备。​\n①对于完全没接触过算法的同学来说，不用着急立马开始刷，可以先将yxc的基础课看完之后再上\n手。​\n",
+      "links": [
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "历年笔试/上机算法题归类",
+          "context": "模拟输出题:   重点注意空格，换行，间隔距离等小细节问题！\n八： 字符串编辑距离(经典模版题，真题):  题目描述与代码实现查询：\n历年笔试/上机算法题归类\n汇总 (模版题为主)",
+          "rect": [
+            407.25,
+            141.75,
+            558.75,
+            164.25
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "模拟输出题:   重点注意空格，换行，间隔距离等小细节问题！\n八： 字符串编辑距离(经典模版题，真题):  题目描述与代码实现查询：\n历年笔试/上机算法题归类\n汇总 (模版题为主)",
+          "rect": [
+            408.75,
+            147.0,
+            420.75,
+            159.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "模拟输出题:   重点注意空格，换行，间隔距离等小细节问题！\n八： 字符串编辑距离(经典模版题，真题):  题目描述与代码实现查询：\n历年笔试/上机算法题归类\n汇总 (模版题为主)",
+          "rect": [
+            408.75,
+            147.0,
+            420.75,
+            159.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "汇总 (模版题为主)",
+          "context": "八： 字符串编辑距离(经典模版题，真题):  题目描述与代码实现查询：\n历年笔试/上机算法题归类\n汇总 (模版题为主)",
+          "rect": [
+            39.75,
+            161.25,
+            135.75,
+            183.75
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "历年笔试/上机算法题",
+          "context": "九： 极大连通图的个数(BFS经典模版题，真题): 题目描述与代码实现查询：\n历年笔试/上机算法题\n归类汇总 (模版题为主)",
+          "rect": [
+            438.0,
+            212.25,
+            565.5,
+            234.75
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "九： 极大连通图的个数(BFS经典模版题，真题): 题目描述与代码实现查询：\n历年笔试/上机算法题\n归类汇总 (模版题为主)",
+          "rect": [
+            439.5,
+            217.5,
+            451.5,
+            229.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "",
+          "context": "九： 极大连通图的个数(BFS经典模版题，真题): 题目描述与代码实现查询：\n历年笔试/上机算法题\n归类汇总 (模版题为主)",
+          "rect": [
+            439.5,
+            217.5,
+            451.5,
+            229.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://my.feishu.cn/docx/J80adWd2FowJ9Ax9tGtcSYoAnzb",
+          "anchor": "归类汇总 (模版题为主)",
+          "context": "九： 极大连通图的个数(BFS经典模版题，真题): 题目描述与代码实现查询：\n历年笔试/上机算法题\n归类汇总 (模版题为主)\n25年：",
+          "rect": [
+            39.75,
+            231.75,
+            159.75,
+            254.25
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5146",
+          "anchor": "最大差值",
+          "context": "专硕：\n①最大差值\n②单词矩阵",
+          "rect": [
+            51.75,
+            304.5,
+            99.75,
+            322.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1101",
+          "anchor": "单词矩阵",
+          "context": "①最大差值\n②单词矩阵\n③矩阵链乘：",
+          "rect": [
+            51.75,
+            324.0,
+            99.75,
+            342.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1753",
+          "anchor": "矩阵链乘：",
+          "context": "②单词矩阵\n③矩阵链乘：\n这个题非常恐怖；b站：BV1dW4y1Z7Hh；",
+          "rect": [
+            51.75,
+            343.5,
+            99.75,
+            361.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://blog.csdn.net/ZChuashifeng/article/details/148882548",
+          "anchor": ":https://blog.csdn.net/ZChuashifeng/article/details/148882548",
+          "context": "这个题非常恐怖；b站：BV1dW4y1Z7Hh；\ncsdn:https://blog.csdn.net/ZChuashifeng/article/details/148882548\n不过这个题机试的时候数据范围好像会小一些，没那么变态。希望能帮到你们。",
+          "rect": [
+            69.0,
+            388.5,
+            415.5,
+            406.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1807",
+          "anchor": "最长路",
+          "context": "不过这个题机试的时候数据范围好像会小一些，没那么变态。希望能帮到你们。\n④最长路\n学硕：",
+          "rect": [
+            51.75,
+            439.5,
+            87.75,
+            457.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P11227",
+          "anchor": "扑克牌",
+          "context": "学硕：\n①扑克牌\n②IPV6",
+          "rect": [
+            51.75,
+            484.5,
+            87.75,
+            502.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B4148",
+          "anchor": "IPV6",
+          "context": "①扑克牌\n②IPV6\n③栈",
+          "rect": [
+            51.75,
+            504.0,
+            75.75,
+            522.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1044",
+          "anchor": "栈",
+          "context": "②IPV6\n③栈\n④逆序对",
+          "rect": [
+            51.75,
+            523.5,
+            63.75,
+            541.5
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1908",
+          "anchor": "逆序对",
+          "context": "③栈\n④逆序对",
+          "rect": [
+            51.75,
+            543.0,
+            87.75,
+            561.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        }
+      ]
+    },
+    {
+      "page": 5,
+      "text": "②算法和数学有异曲同工之妙，如果不回顾做过的题，那么效果会很差。如果觉得学有余力，那么就\n可以去洛谷上的比赛中找Div.3/Div.4的比赛去打，可以找已经结束的，自己给自己严格掐表。​\n③对于第二点的补充:一开始可以打难度Div.3>Div.4，一开始可以打Div.4，但是2-3周以后必须打\nDiv.3。同时，我非常推荐去打这种比赛，能够考察你在面对未知题目时候的临场反应。同时如果是\n已知题目，也可以考察能否快速写出来。​\n④我们的目标是刷题过机试，切忌刷题上头！！！我们的目标是机试，而不是去打算法竞赛！！！不\n要贪图过难的题目！！！​\n⑤如果跨考、零基础的同学觉得上手太痛苦，可以先去力扣找一些题单刷两天，找到感觉了之后再\n来。​\n⑥但是无论如何，至少需要完成阶段一和阶段二大部分的练习！，并且自己掐点刷一些模拟卷！！​\n⑦补充一点，部分Day因为需要将知识点完整归纳，所以会有题目数量比较多的情况，大家不要紧\n张，也不要因为不能当天完成焦虑，尽力刷就好。​\n个人看法​\n先叠个甲，这个是我个人的看法，不负责任，也不涉及歧视，只是分享一些真心话。​\n①对于稍微有算法基础的同学应该知道，DP、贪心这两种算法，对于人的要求比较高，并不是你练\n习了就能做出来，甚至题目稍有改动，你就完全不会做了，这是很正常的，大家不要焦虑，如果实在\n学不下来可以适当放弃。甚至你在考场上都认不出来这是DP(如去年矩阵相乘，绝大多数同学没做到\n这个题，但对做到这个题的同学，也有极大部分将这个DP题看成了贪心)。【叠甲:学不下来肯定只能\n放弃，把精力放在能拿分的地方。并不是说不会考】​\n②对于博弈论、过难的图论(分层图)等，实在不行可以先放弃，理由同上【同上叠甲】。​\n时间紧张的同学直接刷阶段一题目即可，阶段二和阶段三的题目相对较难，考察概率较小。​\n阶段一：​\n目标：解决语法熟练度，覆盖语法、数组、字符串、基础数据结构与简单搜索。 强度：每天 8-10 题\n（以红/橙题为主）​\nWeek1:​\nDay1：热身​\nA+B​\n陶陶摘苹果​\n小玉买文具​\n不高兴的津津​\n买铅笔​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/contest/list",
+          "anchor": "比赛中",
+          "context": "②算法和数学有异曲同工之妙，如果不回顾做过的题，那么效果会很差。如果觉得学有余力，那么就\n可以去洛谷上的比赛中找Div.3/Div.4的比赛去打，可以找已经结束的，自己给自己严格掐表。\n③对于第二点的补充:一开始可以打难度Div.3>Div.4，一开始可以打Div.4，但是2-3周以后必须打",
+          "rect": [
+            123.75,
+            48.0,
+            147.75,
+            66.0
+          ],
+          "pdf_stage": "历史题与扩展",
+          "section": "历年题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1001",
+          "anchor": "A+B",
+          "context": "Day1：热身\nA+B\n陶陶摘苹果",
+          "rect": [
+            39.75,
+            687.0,
+            61.5,
+            705.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1046",
+          "anchor": "陶陶摘苹果",
+          "context": "A+B\n陶陶摘苹果\n小玉买文具",
+          "rect": [
+            39.75,
+            712.5,
+            99.75,
+            730.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1421",
+          "anchor": "小玉买文具",
+          "context": "陶陶摘苹果\n小玉买文具\n不高兴的津津",
+          "rect": [
+            39.75,
+            738.0,
+            99.75,
+            756.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1085",
+          "anchor": "不高兴的津津",
+          "context": "小玉买文具\n不高兴的津津\n买铅笔",
+          "rect": [
+            39.75,
+            763.5,
+            111.75,
+            781.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1909",
+          "anchor": "买铅笔",
+          "context": "不高兴的津津\n买铅笔",
+          "rect": [
+            39.75,
+            789.0,
+            75.75,
+            807.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        }
+      ]
+    },
+    {
+      "page": 6,
+      "text": "阶乘之和​\n级数求和​\n小鱼的游泳时间​\n谁拿了最多奖学金​\n小玉买文具​\n买铅笔​\nDay2:数组逻辑​\n校门外的树​\n小鱼的数字游戏​\n小鱼比可爱​\n乒乓球​\n珠心算验算​\n神奇的幻方​\n冰雹猜想​\n彩票中奖​\nDay3:字符串基础​\n标题统计​\nISBN 号码​\n统计单词数​\n凯撒密码​\n笨小猴​\n自动修正​\n文字处理软件​\n口算练习题​\n字符串哈希​\n数字反转（升级版）​\nDay4:数学基础​\n进制转换​\n幂次方​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1009",
+          "anchor": "阶乘之和",
+          "context": "阶乘之和\n级数求和",
+          "rect": [
+            39.75,
+            28.5,
+            87.75,
+            46.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1035",
+          "anchor": "级数求和",
+          "context": "阶乘之和\n级数求和\n小鱼的游泳时间",
+          "rect": [
+            39.75,
+            54.0,
+            87.75,
+            72.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1425",
+          "anchor": "小鱼的游泳时间",
+          "context": "级数求和\n小鱼的游泳时间\n谁拿了最多奖学金",
+          "rect": [
+            39.75,
+            79.5,
+            123.75,
+            97.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1051",
+          "anchor": "谁拿了最多奖学金",
+          "context": "小鱼的游泳时间\n谁拿了最多奖学金\n小玉买文具",
+          "rect": [
+            39.75,
+            105.0,
+            135.75,
+            123.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1421",
+          "anchor": "小玉买文具",
+          "context": "谁拿了最多奖学金\n小玉买文具\n买铅笔",
+          "rect": [
+            39.75,
+            130.5,
+            99.75,
+            148.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1909",
+          "anchor": "买铅笔",
+          "context": "小玉买文具\n买铅笔",
+          "rect": [
+            39.75,
+            156.0,
+            75.75,
+            174.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day1：热身"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1047",
+          "anchor": "校门外的树",
+          "context": "Day2:数组逻辑\n校门外的树\n小鱼的数字游戏",
+          "rect": [
+            39.75,
+            217.5,
+            99.75,
+            235.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day2:数组逻辑"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1427",
+          "anchor": "小鱼的数字游戏",
+          "context": "校门外的树\n小鱼的数字游戏\n小鱼比可爱",
+          "rect": [
+            39.75,
+            243.0,
+            123.75,
+            261.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day2:数组逻辑"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1428",
+          "anchor": "小鱼比可爱",
+          "context": "小鱼的数字游戏\n小鱼比可爱\n乒乓球",
+          "rect": [
+            39.75,
+            268.5,
+            99.75,
+            286.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day2:数组逻辑"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1042",
+          "anchor": "乒乓球",
+          "context": "小鱼比可爱\n乒乓球\n珠心算验算",
+          "rect": [
+            39.75,
+            294.0,
+            75.75,
+            312.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day2:数组逻辑"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2141",
+          "anchor": "珠心算验算",
+          "context": "乒乓球\n珠心算验算\n神奇的幻方",
+          "rect": [
+            39.75,
+            319.5,
+            99.75,
+            337.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day2:数组逻辑"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2615",
+          "anchor": "神奇的幻方",
+          "context": "珠心算验算\n神奇的幻方\n冰雹猜想",
+          "rect": [
+            39.75,
+            345.0,
+            99.75,
+            363.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day2:数组逻辑"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5727",
+          "anchor": "冰雹猜想",
+          "context": "神奇的幻方\n冰雹猜想\n彩票中奖",
+          "rect": [
+            39.75,
+            370.5,
+            87.75,
+            388.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day2:数组逻辑"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2550",
+          "anchor": "彩票中奖",
+          "context": "冰雹猜想\n彩票中奖",
+          "rect": [
+            39.75,
+            396.0,
+            87.75,
+            414.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day2:数组逻辑"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5015",
+          "anchor": "标题统计",
+          "context": "Day3:字符串基础\n标题统计\nISBN 号码",
+          "rect": [
+            39.75,
+            457.5,
+            87.75,
+            475.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1055",
+          "anchor": "ISBN 号码",
+          "context": "标题统计\nISBN 号码\n统计单词数",
+          "rect": [
+            39.75,
+            483.0,
+            93.0,
+            501.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1308",
+          "anchor": "统计单词数",
+          "context": "ISBN 号码\n统计单词数\n凯撒密码",
+          "rect": [
+            39.75,
+            508.5,
+            99.75,
+            526.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1914",
+          "anchor": "凯撒密码",
+          "context": "统计单词数\n凯撒密码\n笨小猴",
+          "rect": [
+            39.75,
+            534.0,
+            87.75,
+            552.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1125",
+          "anchor": "笨小猴",
+          "context": "凯撒密码\n笨小猴\n自动修正",
+          "rect": [
+            39.75,
+            559.5,
+            75.75,
+            577.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5733",
+          "anchor": "自动修正",
+          "context": "笨小猴\n自动修正\n文字处理软件",
+          "rect": [
+            39.75,
+            585.0,
+            87.75,
+            603.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5734",
+          "anchor": "文字处理软件",
+          "context": "自动修正\n文字处理软件\n口算练习题",
+          "rect": [
+            39.75,
+            610.5,
+            111.75,
+            628.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1957",
+          "anchor": "口算练习题",
+          "context": "文字处理软件\n口算练习题\n字符串哈希",
+          "rect": [
+            39.75,
+            636.0,
+            99.75,
+            654.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3370",
+          "anchor": "字符串哈希",
+          "context": "口算练习题\n字符串哈希\n数字反转（升级版）",
+          "rect": [
+            39.75,
+            661.5,
+            99.75,
+            679.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1553",
+          "anchor": "数字反转（升级版）",
+          "context": "字符串哈希\n数字反转（升级版）",
+          "rect": [
+            39.75,
+            687.0,
+            147.75,
+            705.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day3:字符串基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1143",
+          "anchor": "进制转换",
+          "context": "Day4:数学基础\n进制转换\n幂次方",
+          "rect": [
+            39.75,
+            748.5,
+            87.75,
+            766.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day4:数学基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1010",
+          "anchor": "幂次方",
+          "context": "进制转换\n幂次方",
+          "rect": [
+            39.75,
+            774.0,
+            75.75,
+            792.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day4:数学基础"
+        }
+      ]
+    },
+    {
+      "page": 7,
+      "text": "最大公约数和最小公倍数问题​\n快速幂​\n线性筛素数​\n编号​\n质因数分解​\n找筷子​\nDay5:栈与队列​\n栈​\n队列​\n括号表达式匹配​\n约瑟夫问题​\n后缀表达式​\n队列安排​\n海港​\n机器翻译​\nDay6:递归与分治​\n数的计算​\nFunction​\n数楼梯​\n台阶问题​\n栈(卡特兰数)​\n逆序对(归并)​\n排序​\nDay7:复盘+几个小题​\nKMP模板​\n无线传输​\n明明的随机数​\n查找​\n补充:高精度章节​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1029",
+          "anchor": "最大公约数和最小公倍数问题",
+          "context": "最大公约数和最小公倍数问题\n快速幂",
+          "rect": [
+            39.75,
+            28.5,
+            195.75,
+            46.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day4:数学基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1226",
+          "anchor": "快速幂",
+          "context": "最大公约数和最小公倍数问题\n快速幂\n线性筛素数",
+          "rect": [
+            39.75,
+            54.0,
+            75.75,
+            72.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day4:数学基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3383",
+          "anchor": "线性筛素数",
+          "context": "快速幂\n线性筛素数\n编号",
+          "rect": [
+            39.75,
+            79.5,
+            99.75,
+            97.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day4:数学基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1866",
+          "anchor": "编号",
+          "context": "线性筛素数\n编号\n质因数分解",
+          "rect": [
+            39.75,
+            105.0,
+            63.75,
+            123.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day4:数学基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1075",
+          "anchor": "质因数分解",
+          "context": "编号\n质因数分解\n找筷子",
+          "rect": [
+            39.75,
+            130.5,
+            99.75,
+            148.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day4:数学基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1469",
+          "anchor": "找筷子",
+          "context": "质因数分解\n找筷子",
+          "rect": [
+            39.75,
+            156.0,
+            75.75,
+            174.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day4:数学基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3614",
+          "anchor": "栈",
+          "context": "Day5:栈与队列\n栈\n队列",
+          "rect": [
+            39.75,
+            217.5,
+            51.75,
+            235.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day5:栈与队列"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3616",
+          "anchor": "队列",
+          "context": "栈\n队列\n括号表达式匹配",
+          "rect": [
+            39.75,
+            243.0,
+            63.75,
+            261.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day5:栈与队列"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1739",
+          "anchor": "括号表达式匹配",
+          "context": "队列\n括号表达式匹配\n约瑟夫问题",
+          "rect": [
+            39.75,
+            268.5,
+            123.75,
+            286.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day5:栈与队列"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1996",
+          "anchor": "约瑟夫问题",
+          "context": "括号表达式匹配\n约瑟夫问题\n后缀表达式",
+          "rect": [
+            39.75,
+            294.0,
+            99.75,
+            312.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day5:栈与队列"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1449",
+          "anchor": "后缀表达式",
+          "context": "约瑟夫问题\n后缀表达式\n队列安排",
+          "rect": [
+            39.75,
+            319.5,
+            99.75,
+            337.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day5:栈与队列"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1160",
+          "anchor": "队列安排",
+          "context": "后缀表达式\n队列安排\n海港",
+          "rect": [
+            39.75,
+            345.0,
+            87.75,
+            363.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day5:栈与队列"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2058",
+          "anchor": "海港",
+          "context": "队列安排\n海港\n机器翻译",
+          "rect": [
+            39.75,
+            370.5,
+            63.75,
+            388.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day5:栈与队列"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1540",
+          "anchor": "机器翻译",
+          "context": "海港\n机器翻译",
+          "rect": [
+            39.75,
+            396.0,
+            87.75,
+            414.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day5:栈与队列"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1028",
+          "anchor": "数的计算",
+          "context": "Day6:递归与分治\n数的计算\nFunction",
+          "rect": [
+            39.75,
+            457.5,
+            87.75,
+            475.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day6:递归与分治"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1464",
+          "anchor": "Function",
+          "context": "数的计算\nFunction\n数楼梯",
+          "rect": [
+            39.75,
+            483.0,
+            88.5,
+            501.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day6:递归与分治"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1255",
+          "anchor": "数楼梯",
+          "context": "Function\n数楼梯\n台阶问题",
+          "rect": [
+            39.75,
+            508.5,
+            75.75,
+            526.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day6:递归与分治"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1192",
+          "anchor": "台阶问题",
+          "context": "数楼梯\n台阶问题\n栈(卡特兰数)",
+          "rect": [
+            39.75,
+            534.0,
+            87.75,
+            552.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day6:递归与分治"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1044",
+          "anchor": "栈(卡特兰数)",
+          "context": "台阶问题\n栈(卡特兰数)\n逆序对(归并)",
+          "rect": [
+            39.75,
+            559.5,
+            107.25,
+            577.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day6:递归与分治"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1908",
+          "anchor": "逆序对(归并)",
+          "context": "栈(卡特兰数)\n逆序对(归并)\n排序",
+          "rect": [
+            39.75,
+            585.0,
+            107.25,
+            603.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day6:递归与分治"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1177",
+          "anchor": "排序",
+          "context": "逆序对(归并)\n排序",
+          "rect": [
+            39.75,
+            610.5,
+            63.75,
+            628.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day6:递归与分治"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3375",
+          "anchor": "KMP模板",
+          "context": "Day7:复盘+几个小题\nKMP模板\n无线传输",
+          "rect": [
+            39.75,
+            672.0,
+            88.5,
+            690.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day7:复盘+几个小题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4391",
+          "anchor": "无线传输",
+          "context": "KMP模板\n无线传输\n明明的随机数",
+          "rect": [
+            39.75,
+            697.5,
+            87.75,
+            715.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day7:复盘+几个小题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1059",
+          "anchor": "明明的随机数",
+          "context": "无线传输\n明明的随机数\n查找",
+          "rect": [
+            39.75,
+            723.0,
+            111.75,
+            741.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day7:复盘+几个小题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2249",
+          "anchor": "查找",
+          "context": "明明的随机数\n查找",
+          "rect": [
+            39.75,
+            748.5,
+            63.75,
+            766.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day7:复盘+几个小题"
+        }
+      ]
+    },
+    {
+      "page": 8,
+      "text": "高精度加法​\n高精度减法​\n高精度乘法​\n高精除低精​\nWeek2:​\nDay8:模拟进阶​\n谁拿了最多奖学金​\n玩具谜题​\n生活大爆炸版石头剪刀布​\n多项式输出​\n阶乘数码​\n你的飞碟在这​\n字符串的展开​\nDay9:贪心基础​\n合并果子​\n纪念品分组​\n混合牛奶​\n排队接水​\n凌乱的yyy​\n小A的糖果​\n删数问题​\n部分背包问题​\nDay10:DFS 入门​\n全排列问题​\n组合的输出​\n八皇后 Checker Challenge​\n枚举元组​\n枚举子集​\n枚举排列​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1601",
+          "anchor": "高精度加法",
+          "context": "高精度加法\n高精度减法",
+          "rect": [
+            39.75,
+            28.5,
+            99.75,
+            46.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day7:复盘+几个小题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2142",
+          "anchor": "高精度减法",
+          "context": "高精度加法\n高精度减法\n高精度乘法",
+          "rect": [
+            39.75,
+            54.0,
+            99.75,
+            72.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day7:复盘+几个小题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1303",
+          "anchor": "高精度乘法",
+          "context": "高精度减法\n高精度乘法\n高精除低精",
+          "rect": [
+            39.75,
+            79.5,
+            99.75,
+            97.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day7:复盘+几个小题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1480",
+          "anchor": "高精除低精",
+          "context": "高精度乘法\n高精除低精",
+          "rect": [
+            39.75,
+            105.0,
+            99.75,
+            123.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day7:复盘+几个小题"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1051",
+          "anchor": "谁拿了最多奖学金",
+          "context": "Day8:模拟进阶\n谁拿了最多奖学金\n玩具谜题",
+          "rect": [
+            39.75,
+            206.25,
+            135.75,
+            224.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day8:模拟进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1563",
+          "anchor": "玩具谜题",
+          "context": "谁拿了最多奖学金\n玩具谜题\n生活大爆炸版石头剪刀布",
+          "rect": [
+            39.75,
+            231.75,
+            87.75,
+            249.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day8:模拟进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1328",
+          "anchor": "生活大爆炸版石头剪刀布",
+          "context": "玩具谜题\n生活大爆炸版石头剪刀布\n多项式输出",
+          "rect": [
+            39.75,
+            257.25,
+            171.75,
+            275.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day8:模拟进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1067",
+          "anchor": "多项式输出",
+          "context": "生活大爆炸版石头剪刀布\n多项式输出\n阶乘数码",
+          "rect": [
+            39.75,
+            282.75,
+            99.75,
+            300.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day8:模拟进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1591",
+          "anchor": "阶乘数码",
+          "context": "多项式输出\n阶乘数码\n你的飞碟在这",
+          "rect": [
+            39.75,
+            308.25,
+            87.75,
+            326.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day8:模拟进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1200",
+          "anchor": "你的飞碟在这",
+          "context": "阶乘数码\n你的飞碟在这\n字符串的展开",
+          "rect": [
+            39.75,
+            333.75,
+            111.75,
+            351.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day8:模拟进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1200",
+          "anchor": "字符串的展开",
+          "context": "你的飞碟在这\n字符串的展开",
+          "rect": [
+            39.75,
+            359.25,
+            111.75,
+            377.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day8:模拟进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1090",
+          "anchor": "合并果子",
+          "context": "Day9:贪心基础\n合并果子\n纪念品分组",
+          "rect": [
+            39.75,
+            420.75,
+            87.75,
+            438.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day9:贪心基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1094",
+          "anchor": "纪念品分组",
+          "context": "合并果子\n纪念品分组\n混合牛奶",
+          "rect": [
+            39.75,
+            446.25,
+            99.75,
+            464.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day9:贪心基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1208",
+          "anchor": "混合牛奶",
+          "context": "纪念品分组\n混合牛奶\n排队接水",
+          "rect": [
+            39.75,
+            471.75,
+            87.75,
+            489.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day9:贪心基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1223",
+          "anchor": "排队接水",
+          "context": "混合牛奶\n排队接水\n凌乱的yyy",
+          "rect": [
+            39.75,
+            497.25,
+            87.75,
+            515.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day9:贪心基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1803",
+          "anchor": "凌乱的yyy",
+          "context": "排队接水\n凌乱的yyy\n小A的糖果",
+          "rect": [
+            39.75,
+            522.75,
+            94.5,
+            540.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day9:贪心基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3817",
+          "anchor": "小A的糖果",
+          "context": "凌乱的yyy\n小A的糖果\n删数问题",
+          "rect": [
+            39.75,
+            548.25,
+            94.5,
+            566.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day9:贪心基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1106",
+          "anchor": "删数问题",
+          "context": "小A的糖果\n删数问题\n部分背包问题",
+          "rect": [
+            39.75,
+            573.75,
+            87.75,
+            591.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day9:贪心基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2240",
+          "anchor": "部分背包问题",
+          "context": "删数问题\n部分背包问题",
+          "rect": [
+            39.75,
+            599.25,
+            111.75,
+            617.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day9:贪心基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1706",
+          "anchor": "全排列问题",
+          "context": "Day10:DFS 入门\n全排列问题\n组合的输出",
+          "rect": [
+            39.75,
+            660.75,
+            99.75,
+            678.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day10:DFS 入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1157",
+          "anchor": "组合的输出",
+          "context": "全排列问题\n组合的输出\n八皇后 Checker Challenge",
+          "rect": [
+            39.75,
+            686.25,
+            99.75,
+            704.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day10:DFS 入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1219",
+          "anchor": "八皇后 Checker Challenge",
+          "context": "组合的输出\n八皇后 Checker Challenge\n枚举元组",
+          "rect": [
+            39.75,
+            711.75,
+            182.25,
+            729.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day10:DFS 入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3621",
+          "anchor": "枚举元组",
+          "context": "八皇后 Checker Challenge\n枚举元组\n枚举子集",
+          "rect": [
+            39.75,
+            737.25,
+            87.75,
+            755.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day10:DFS 入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3622",
+          "anchor": "枚举子集",
+          "context": "枚举元组\n枚举子集\n枚举排列",
+          "rect": [
+            39.75,
+            762.75,
+            87.75,
+            780.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day10:DFS 入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3623",
+          "anchor": "枚举排列",
+          "context": "枚举子集\n枚举排列",
+          "rect": [
+            39.75,
+            788.25,
+            87.75,
+            806.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day10:DFS 入门"
+        }
+      ]
+    },
+    {
+      "page": 9,
+      "text": "三连击​\n烤鸡​\nDay11:BFS入门​\n马的遍历​\n奇怪的电梯​\n填涂颜色​\n离开中山路​\nMeteor Shower S​\n迷宫​\nLake Counting S​\n血色先锋队​\nDay12:树的基础​\n先序​\nFBI树​\n二叉树深度​\n美国血统 American Heritage​\n新二叉树​\nDay13:图论基础​\n查找文献​\n图的遍历​\n杂务​\n【模板】拓扑排序 / 家谱树​\n最大食物链计数（偏难）​\n最长路​\n车站分级(偏难，可加深对于拓扑排序的理解)​\n词链（偏难）​\nDay14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两\n三道即可，不需要全刷）​\n亲戚​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1618",
+          "anchor": "三连击",
+          "context": "三连击\n烤鸡",
+          "rect": [
+            39.75,
+            28.5,
+            75.75,
+            46.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day10:DFS 入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2089",
+          "anchor": "烤鸡",
+          "context": "三连击\n烤鸡",
+          "rect": [
+            39.75,
+            54.0,
+            63.75,
+            72.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day10:DFS 入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1443",
+          "anchor": "马的遍历",
+          "context": "Day11:BFS入门\n马的遍历\n奇怪的电梯",
+          "rect": [
+            39.75,
+            115.5,
+            87.75,
+            133.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day11:BFS入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1135",
+          "anchor": "奇怪的电梯",
+          "context": "马的遍历\n奇怪的电梯\n填涂颜色",
+          "rect": [
+            39.75,
+            141.0,
+            99.75,
+            159.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day11:BFS入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1162",
+          "anchor": "填涂颜色",
+          "context": "奇怪的电梯\n填涂颜色\n离开中山路",
+          "rect": [
+            39.75,
+            166.5,
+            87.75,
+            184.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day11:BFS入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1746",
+          "anchor": "离开中山路",
+          "context": "填涂颜色\n离开中山路\nMeteor Shower S",
+          "rect": [
+            39.75,
+            192.0,
+            99.75,
+            210.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day11:BFS入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2895",
+          "anchor": "Meteor Shower S",
+          "context": "离开中山路\nMeteor Shower S\n迷宫",
+          "rect": [
+            39.75,
+            217.5,
+            133.5,
+            235.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day11:BFS入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1605",
+          "anchor": "迷宫",
+          "context": "Meteor Shower S\n迷宫\nLake Counting S",
+          "rect": [
+            39.75,
+            243.0,
+            63.75,
+            261.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day11:BFS入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1596",
+          "anchor": "Lake Counting S",
+          "context": "迷宫\nLake Counting S\n血色先锋队",
+          "rect": [
+            39.75,
+            268.5,
+            129.75,
+            286.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day11:BFS入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1332",
+          "anchor": "血色先锋队",
+          "context": "Lake Counting S\n血色先锋队",
+          "rect": [
+            39.75,
+            294.0,
+            99.75,
+            312.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day11:BFS入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1030",
+          "anchor": "先序",
+          "context": "Day12:树的基础\n先序\nFBI树",
+          "rect": [
+            39.75,
+            355.5,
+            63.75,
+            373.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day12:树的基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1087",
+          "anchor": "FBI树",
+          "context": "先序\nFBI树\n二叉树深度",
+          "rect": [
+            39.75,
+            381.0,
+            69.75,
+            399.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day12:树的基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4913",
+          "anchor": "二叉树深度",
+          "context": "FBI树\n二叉树深度\n美国血统 American Heritage",
+          "rect": [
+            39.75,
+            406.5,
+            99.75,
+            424.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day12:树的基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1827",
+          "anchor": "美国血统 American Heritage",
+          "context": "二叉树深度\n美国血统 American Heritage\n新二叉树",
+          "rect": [
+            39.75,
+            432.0,
+            193.5,
+            450.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day12:树的基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1305",
+          "anchor": "新二叉树",
+          "context": "美国血统 American Heritage\n新二叉树",
+          "rect": [
+            39.75,
+            457.5,
+            87.75,
+            475.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day12:树的基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5318",
+          "anchor": "查找文献",
+          "context": "Day13:图论基础\n查找文献\n图的遍历",
+          "rect": [
+            39.75,
+            519.0,
+            87.75,
+            537.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3916",
+          "anchor": "图的遍历",
+          "context": "查找文献\n图的遍历\n杂务",
+          "rect": [
+            39.75,
+            544.5,
+            87.75,
+            562.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1113",
+          "anchor": "杂务",
+          "context": "图的遍历\n杂务\n【模板】拓扑排序 / 家谱树",
+          "rect": [
+            39.75,
+            570.0,
+            63.75,
+            588.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3644",
+          "anchor": "【模板】拓扑排序 / 家谱树",
+          "context": "杂务\n【模板】拓扑排序 / 家谱树\n最大食物链计数（偏难）",
+          "rect": [
+            39.75,
+            595.5,
+            181.5,
+            613.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4017",
+          "anchor": "最大食物链计数",
+          "context": "【模板】拓扑排序 / 家谱树\n最大食物链计数（偏难）\n最长路",
+          "rect": [
+            39.75,
+            621.0,
+            111.75,
+            639.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4017",
+          "anchor": "数（偏难）",
+          "context": "【模板】拓扑排序 / 家谱树\n最大食物链计数（偏难）\n最长路",
+          "rect": [
+            111.75,
+            621.0,
+            171.75,
+            639.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1807",
+          "anchor": "最长路",
+          "context": "最大食物链计数（偏难）\n最长路\n车站分级(偏难，可加深对于拓扑排序的理解)",
+          "rect": [
+            39.75,
+            646.5,
+            75.75,
+            664.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1983",
+          "anchor": "车站分级",
+          "context": "最长路\n车站分级(偏难，可加深对于拓扑排序的理解)\n词链（偏难）",
+          "rect": [
+            39.75,
+            672.0,
+            75.75,
+            690.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1983",
+          "anchor": "级(偏难，可加深对于拓扑排序的理解)",
+          "context": "最长路\n车站分级(偏难，可加深对于拓扑排序的理解)\n词链（偏难）",
+          "rect": [
+            75.75,
+            672.0,
+            275.25,
+            690.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1127",
+          "anchor": "词链（偏难）",
+          "context": "车站分级(偏难，可加深对于拓扑排序的理解)\n词链（偏难）",
+          "rect": [
+            39.75,
+            697.5,
+            111.75,
+            715.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day13:图论基础"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1551",
+          "anchor": "亲戚",
+          "context": "三道即可，不需要全刷）\n亲戚",
+          "rect": [
+            39.75,
+            780.0,
+            63.75,
+            798.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        }
+      ]
+    },
+    {
+      "page": 10,
+      "text": "【模板】并查集​\n村村通​\n修复公路​\n朋友​\n家谱​\n【模板】堆​\n食物链（经典题，建议做下）​\n拓展题-关押罪犯（难，不会可跳过）​\nWeek3:​\nDay15:DP入门 (线性)​\n数字三角形​\n最大子段和​\n采药​\n过河卒​\n滑雪（记忆化搜索经典模板题）​\n5倍经验日​\n挖地雷​\nDay16 :DP入门 (序列)​\n导弹拦截​\n最长上升子序列（必做，经典模板题）​\n合唱队形​\n两个排列的最长公共子序列​\n编辑距离​\n相似基因​\n尼克的任务​\n数的划分（偏难）​\nDay17:综合搜索练习​\n自然数的拆分​\n选数​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P3367",
+          "anchor": "【模板】并查集",
+          "context": "【模板】并查集\n村村通",
+          "rect": [
+            39.75,
+            28.5,
+            123.75,
+            46.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1536",
+          "anchor": "村村通",
+          "context": "【模板】并查集\n村村通\n修复公路",
+          "rect": [
+            39.75,
+            54.0,
+            75.75,
+            72.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1111",
+          "anchor": "修复公路",
+          "context": "村村通\n修复公路\n朋友",
+          "rect": [
+            39.75,
+            79.5,
+            87.75,
+            97.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2078",
+          "anchor": "朋友",
+          "context": "修复公路\n朋友\n家谱",
+          "rect": [
+            39.75,
+            105.0,
+            63.75,
+            123.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2814",
+          "anchor": "家谱",
+          "context": "朋友\n家谱\n【模板】堆",
+          "rect": [
+            39.75,
+            130.5,
+            63.75,
+            148.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3378",
+          "anchor": "【模板】堆",
+          "context": "家谱\n【模板】堆\n食物链（经典题，建议做下）",
+          "rect": [
+            39.75,
+            156.0,
+            99.75,
+            174.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2024",
+          "anchor": "食物链",
+          "context": "【模板】堆\n食物链（经典题，建议做下）\n拓展题-关押罪犯（难，不会可跳过）",
+          "rect": [
+            39.75,
+            181.5,
+            63.75,
+            199.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2024",
+          "anchor": "链（经典题，建议做下）",
+          "context": "【模板】堆\n食物链（经典题，建议做下）\n拓展题-关押罪犯（难，不会可跳过）",
+          "rect": [
+            63.75,
+            181.5,
+            195.75,
+            199.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1525",
+          "anchor": "拓展题-关押",
+          "context": "食物链（经典题，建议做下）\n拓展题-关押罪犯（难，不会可跳过）",
+          "rect": [
+            39.75,
+            207.0,
+            103.5,
+            225.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1525",
+          "anchor": "押罪犯（难，不会可跳过）",
+          "context": "食物链（经典题，建议做下）\n拓展题-关押罪犯（难，不会可跳过）",
+          "rect": [
+            103.5,
+            207.0,
+            235.5,
+            225.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day14:并查集基础（学会并查集模板后可刷几道应用题加深理解，此部分刷个两"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1216",
+          "anchor": "数字三角形",
+          "context": "Day15:DP入门 (线性)\n数字三角形\n最大子段和",
+          "rect": [
+            39.75,
+            308.25,
+            99.75,
+            326.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day15:DP入门 (线性)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1115",
+          "anchor": "最大子段和",
+          "context": "数字三角形\n最大子段和\n采药",
+          "rect": [
+            39.75,
+            333.75,
+            99.75,
+            351.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day15:DP入门 (线性)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1048",
+          "anchor": "采药",
+          "context": "最大子段和\n采药\n过河卒",
+          "rect": [
+            39.75,
+            359.25,
+            63.75,
+            377.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day15:DP入门 (线性)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1002",
+          "anchor": "过河卒",
+          "context": "采药\n过河卒\n滑雪（记忆化搜索经典模板题）",
+          "rect": [
+            39.75,
+            384.75,
+            75.75,
+            402.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day15:DP入门 (线性)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1434",
+          "anchor": "滑雪",
+          "context": "过河卒\n滑雪（记忆化搜索经典模板题）\n5倍经验日",
+          "rect": [
+            39.75,
+            410.25,
+            51.75,
+            428.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day15:DP入门 (线性)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1434",
+          "anchor": "雪（记忆化搜索经典模板题）",
+          "context": "过河卒\n滑雪（记忆化搜索经典模板题）\n5倍经验日",
+          "rect": [
+            51.75,
+            410.25,
+            207.75,
+            428.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day15:DP入门 (线性)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1802",
+          "anchor": "5倍经验日",
+          "context": "滑雪（记忆化搜索经典模板题）\n5倍经验日\n挖地雷",
+          "rect": [
+            39.75,
+            435.75,
+            93.75,
+            453.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day15:DP入门 (线性)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2196",
+          "anchor": "挖地雷",
+          "context": "5倍经验日\n挖地雷",
+          "rect": [
+            39.75,
+            461.25,
+            75.75,
+            479.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day15:DP入门 (线性)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1020",
+          "anchor": "导弹拦截",
+          "context": "Day16 :DP入门 (序列)\n导弹拦截\n最长上升子序列（必做，经典模板题）",
+          "rect": [
+            39.75,
+            522.75,
+            87.75,
+            540.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3637",
+          "anchor": "最长上升子序列",
+          "context": "导弹拦截\n最长上升子序列（必做，经典模板题）\n合唱队形",
+          "rect": [
+            39.75,
+            548.25,
+            111.75,
+            566.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3637",
+          "anchor": "列（必做，经典模板题）",
+          "context": "导弹拦截\n最长上升子序列（必做，经典模板题）\n合唱队形",
+          "rect": [
+            111.75,
+            548.25,
+            243.75,
+            566.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1091",
+          "anchor": "合唱队形",
+          "context": "最长上升子序列（必做，经典模板题）\n合唱队形\n两个排列的最长公共子序列",
+          "rect": [
+            39.75,
+            573.75,
+            87.75,
+            591.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1439",
+          "anchor": "两个排列的最长公共子序列",
+          "context": "合唱队形\n两个排列的最长公共子序列\n编辑距离",
+          "rect": [
+            39.75,
+            599.25,
+            183.75,
+            617.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2758",
+          "anchor": "编辑距离",
+          "context": "两个排列的最长公共子序列\n编辑距离\n相似基因",
+          "rect": [
+            39.75,
+            624.75,
+            87.75,
+            642.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1140",
+          "anchor": "相似基因",
+          "context": "编辑距离\n相似基因\n尼克的任务",
+          "rect": [
+            39.75,
+            650.25,
+            87.75,
+            668.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1280",
+          "anchor": "尼克的任务",
+          "context": "相似基因\n尼克的任务\n数的划分（偏难）",
+          "rect": [
+            39.75,
+            675.75,
+            99.75,
+            693.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1025",
+          "anchor": "数的划分",
+          "context": "尼克的任务\n数的划分（偏难）",
+          "rect": [
+            39.75,
+            701.25,
+            75.75,
+            719.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1025",
+          "anchor": "分（偏难）",
+          "context": "尼克的任务\n数的划分（偏难）",
+          "rect": [
+            75.75,
+            701.25,
+            135.75,
+            719.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day16 :DP入门 (序列)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2404",
+          "anchor": "自然数的拆分",
+          "context": "Day17:综合搜索练习\n自然数的拆分\n选数",
+          "rect": [
+            39.75,
+            762.75,
+            111.75,
+            780.75
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day17:综合搜索练习"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1036",
+          "anchor": "选数",
+          "context": "自然数的拆分\n选数",
+          "rect": [
+            39.75,
+            788.25,
+            63.75,
+            806.25
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day17:综合搜索练习"
+        }
+      ]
+    },
+    {
+      "page": 11,
+      "text": "吃奶酪​\n八数码难题​\n单词方阵​\n八皇后​\n数独​\nDay18:初级数据结构​\n【模板】堆​\n合并果子​\n瑞瑞的木板​\n中位数​\n逛画展​\n不重复的数字(Map)​\n学籍管理(Map)​\nA-B数对(Map)【双指针也要会】​\n【模板】字符串哈希​\n字典树​\n拓展题-字典树应用-于是他错误的点名开始了​\nDay19:初级数学应用​\n集合求和​\n线性筛【复习】​\n编号​\n计算分数​\n裴蜀定理【进阶模板题】​\n最大公约数和最小公倍数问题​\nHankson 的趣味题​\nzzc种田​\nDay20:差分前缀和​\n求区间和​\n领地选择​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1433",
+          "anchor": "吃奶酪",
+          "context": "吃奶酪\n八数码难题",
+          "rect": [
+            39.75,
+            28.5,
+            75.75,
+            46.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day17:综合搜索练习"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1379",
+          "anchor": "八数码难题",
+          "context": "吃奶酪\n八数码难题\n单词方阵",
+          "rect": [
+            39.75,
+            54.0,
+            99.75,
+            72.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day17:综合搜索练习"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1101",
+          "anchor": "单词方阵",
+          "context": "八数码难题\n单词方阵\n八皇后",
+          "rect": [
+            39.75,
+            79.5,
+            87.75,
+            97.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day17:综合搜索练习"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1219",
+          "anchor": "八皇后",
+          "context": "单词方阵\n八皇后\n数独",
+          "rect": [
+            39.75,
+            105.0,
+            75.75,
+            123.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day17:综合搜索练习"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1784",
+          "anchor": "数独",
+          "context": "八皇后\n数独",
+          "rect": [
+            39.75,
+            130.5,
+            63.75,
+            148.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day17:综合搜索练习"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3378",
+          "anchor": "【模板】堆",
+          "context": "Day18:初级数据结构\n【模板】堆\n合并果子",
+          "rect": [
+            39.75,
+            192.0,
+            99.75,
+            210.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1090",
+          "anchor": "合并果子",
+          "context": "【模板】堆\n合并果子\n瑞瑞的木板",
+          "rect": [
+            39.75,
+            217.5,
+            87.75,
+            235.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1334",
+          "anchor": "瑞瑞的木板",
+          "context": "合并果子\n瑞瑞的木板\n中位数",
+          "rect": [
+            39.75,
+            243.0,
+            99.75,
+            261.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1168",
+          "anchor": "中位数",
+          "context": "瑞瑞的木板\n中位数\n逛画展",
+          "rect": [
+            39.75,
+            268.5,
+            75.75,
+            286.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1638",
+          "anchor": "逛画展",
+          "context": "中位数\n逛画展\n不重复的数字(Map)",
+          "rect": [
+            39.75,
+            294.0,
+            75.75,
+            312.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4305",
+          "anchor": "不重复的数字(Map)",
+          "context": "逛画展\n不重复的数字(Map)\n学籍管理(Map)",
+          "rect": [
+            39.75,
+            319.5,
+            143.25,
+            337.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5266",
+          "anchor": "学籍管理(Map)",
+          "context": "不重复的数字(Map)\n学籍管理(Map)\nA-B数对(Map)【双指针也要会】",
+          "rect": [
+            39.75,
+            345.0,
+            119.25,
+            363.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1102",
+          "anchor": "A-B数对(Map)【双指针也要会】",
+          "context": "学籍管理(Map)\nA-B数对(Map)【双指针也要会】\n【模板】字符串哈希",
+          "rect": [
+            39.75,
+            370.5,
+            210.75,
+            388.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3370",
+          "anchor": "【模板】字符串哈希",
+          "context": "A-B数对(Map)【双指针也要会】\n【模板】字符串哈希\n字典树",
+          "rect": [
+            39.75,
+            396.0,
+            147.75,
+            414.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P8306",
+          "anchor": "字典树",
+          "context": "【模板】字符串哈希\n字典树\n拓展题-字典树应用-于是他错误的点名开始了",
+          "rect": [
+            39.75,
+            421.5,
+            75.75,
+            439.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2580",
+          "anchor": "拓展题-字典树应用-于是他错误的点名开始了",
+          "context": "字典树\n拓展题-字典树应用-于是他错误的点名开始了",
+          "rect": [
+            39.75,
+            447.0,
+            276.0,
+            465.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day18:初级数据结构"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2415",
+          "anchor": "集合求和",
+          "context": "Day19:初级数学应用\n集合求和\n线性筛【复习】",
+          "rect": [
+            39.75,
+            508.5,
+            87.75,
+            526.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day19:初级数学应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3383",
+          "anchor": "线性筛【复习】",
+          "context": "集合求和\n线性筛【复习】\n编号",
+          "rect": [
+            39.75,
+            534.0,
+            123.75,
+            552.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day19:初级数学应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1866",
+          "anchor": "编号",
+          "context": "线性筛【复习】\n编号\n计算分数",
+          "rect": [
+            39.75,
+            559.5,
+            63.75,
+            577.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day19:初级数学应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1572",
+          "anchor": "计算分数",
+          "context": "编号\n计算分数\n裴蜀定理【进阶模板题】",
+          "rect": [
+            39.75,
+            585.0,
+            87.75,
+            603.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day19:初级数学应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4549",
+          "anchor": "裴蜀定理",
+          "context": "计算分数\n裴蜀定理【进阶模板题】\n最大公约数和最小公倍数问题",
+          "rect": [
+            39.75,
+            610.5,
+            75.75,
+            628.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day19:初级数学应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4549",
+          "anchor": "理【进阶模板题】",
+          "context": "计算分数\n裴蜀定理【进阶模板题】\n最大公约数和最小公倍数问题",
+          "rect": [
+            75.75,
+            610.5,
+            171.75,
+            628.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day19:初级数学应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1029",
+          "anchor": "最大公约数和最小公倍数问题",
+          "context": "裴蜀定理【进阶模板题】\n最大公约数和最小公倍数问题\nHankson 的趣味题",
+          "rect": [
+            39.75,
+            636.0,
+            195.75,
+            654.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day19:初级数学应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1072",
+          "anchor": "Hankson 的趣味题",
+          "context": "最大公约数和最小公倍数问题\nHankson 的趣味题\nzzc种田",
+          "rect": [
+            39.75,
+            661.5,
+            139.5,
+            679.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day19:初级数学应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2660",
+          "anchor": "zzc种田",
+          "context": "Hankson 的趣味题\nzzc种田",
+          "rect": [
+            39.75,
+            687.0,
+            81.0,
+            705.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day19:初级数学应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P8218",
+          "anchor": "求区间和",
+          "context": "Day20:差分前缀和\n求区间和\n领地选择",
+          "rect": [
+            39.75,
+            748.5,
+            87.75,
+            766.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day20:差分前缀和"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2004",
+          "anchor": "领地选择",
+          "context": "求区间和\n领地选择",
+          "rect": [
+            39.75,
+            774.0,
+            87.75,
+            792.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day20:差分前缀和"
+        }
+      ]
+    },
+    {
+      "page": 12,
+      "text": "最大子段和​\n语文成绩​\n地毯​\n海底高铁​\nSubsequences Summing to Sevens S​\n借教室​\nDay21:背包问题 (一)​\n采药​\n疯狂的采药​\n小A点菜​\n开心的金明​\nBuying Hay S​\n装箱问题​\n摆花​\nDay22:背包问题 (二)​\nNASA食物计划​\n通天之分组背包​\n樱花​\n精卫填海​\n通天之潜水​\nDay23:一阶段验收​\n铺地毯​\n最大加权矩形​\n明明的随机数​\n奖学金​\n快排​\n过河卒​\n逆序对​\nA+B Problem（高精）​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1115",
+          "anchor": "最大子段和",
+          "context": "最大子段和\n语文成绩",
+          "rect": [
+            39.75,
+            28.5,
+            99.75,
+            46.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day20:差分前缀和"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2367",
+          "anchor": "语文成绩",
+          "context": "最大子段和\n语文成绩\n地毯",
+          "rect": [
+            39.75,
+            54.0,
+            87.75,
+            72.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day20:差分前缀和"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3397",
+          "anchor": "地毯",
+          "context": "语文成绩\n地毯\n海底高铁",
+          "rect": [
+            39.75,
+            79.5,
+            63.75,
+            97.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day20:差分前缀和"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3406",
+          "anchor": "海底高铁",
+          "context": "地毯\n海底高铁\nSubsequences Summing to Sevens S",
+          "rect": [
+            39.75,
+            105.0,
+            87.75,
+            123.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day20:差分前缀和"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3131",
+          "anchor": "Subsequences Summing to Sevens S",
+          "context": "海底高铁\nSubsequences Summing to Sevens S\n借教室",
+          "rect": [
+            39.75,
+            130.5,
+            243.75,
+            148.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day20:差分前缀和"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1083",
+          "anchor": "借教室",
+          "context": "Subsequences Summing to Sevens S\n借教室",
+          "rect": [
+            39.75,
+            156.0,
+            75.75,
+            174.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day20:差分前缀和"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1048",
+          "anchor": "采药",
+          "context": "Day21:背包问题 (一)\n采药\n疯狂的采药",
+          "rect": [
+            39.75,
+            217.5,
+            63.75,
+            235.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day21:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1616",
+          "anchor": "疯狂的采药",
+          "context": "采药\n疯狂的采药\n小A点菜",
+          "rect": [
+            39.75,
+            243.0,
+            99.75,
+            261.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day21:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1164",
+          "anchor": "小A点菜",
+          "context": "疯狂的采药\n小A点菜\n开心的金明",
+          "rect": [
+            39.75,
+            268.5,
+            82.5,
+            286.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day21:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1060",
+          "anchor": "开心的金明",
+          "context": "小A点菜\n开心的金明\nBuying Hay S",
+          "rect": [
+            39.75,
+            294.0,
+            99.75,
+            312.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day21:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2918",
+          "anchor": "Buying Hay S",
+          "context": "开心的金明\nBuying Hay S\n装箱问题",
+          "rect": [
+            39.75,
+            319.5,
+            112.5,
+            337.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day21:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1049",
+          "anchor": "装箱问题",
+          "context": "Buying Hay S\n装箱问题\n摆花",
+          "rect": [
+            39.75,
+            345.0,
+            87.75,
+            363.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day21:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1077",
+          "anchor": "摆花",
+          "context": "装箱问题\n摆花",
+          "rect": [
+            39.75,
+            370.5,
+            63.75,
+            388.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day21:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1507",
+          "anchor": "NASA食物计划",
+          "context": "Day22:背包问题 (二)\nNASA食物计划\n通天之分组背包",
+          "rect": [
+            39.75,
+            432.0,
+            117.75,
+            450.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day22:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1757",
+          "anchor": "通天之分组背包",
+          "context": "NASA食物计划\n通天之分组背包\n樱花",
+          "rect": [
+            39.75,
+            457.5,
+            123.75,
+            475.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day22:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1833",
+          "anchor": "樱花",
+          "context": "通天之分组背包\n樱花\n精卫填海",
+          "rect": [
+            39.75,
+            483.0,
+            63.75,
+            501.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day22:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1510",
+          "anchor": "精卫填海",
+          "context": "樱花\n精卫填海\n通天之潜水",
+          "rect": [
+            39.75,
+            508.5,
+            87.75,
+            526.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day22:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1759",
+          "anchor": "通天之潜水",
+          "context": "精卫填海\n通天之潜水",
+          "rect": [
+            39.75,
+            534.0,
+            99.75,
+            552.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day22:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1003",
+          "anchor": "铺地毯",
+          "context": "Day23:一阶段验收\n铺地毯\n最大加权矩形",
+          "rect": [
+            39.75,
+            595.5,
+            75.75,
+            613.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day23:一阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1719",
+          "anchor": "最大加权矩形",
+          "context": "铺地毯\n最大加权矩形\n明明的随机数",
+          "rect": [
+            39.75,
+            621.0,
+            111.75,
+            639.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day23:一阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1059",
+          "anchor": "明明的随机数",
+          "context": "最大加权矩形\n明明的随机数\n奖学金",
+          "rect": [
+            39.75,
+            646.5,
+            111.75,
+            664.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day23:一阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1093",
+          "anchor": "奖学金",
+          "context": "明明的随机数\n奖学金\n快排",
+          "rect": [
+            39.75,
+            672.0,
+            75.75,
+            690.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day23:一阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1177",
+          "anchor": "快排",
+          "context": "奖学金\n快排\n过河卒",
+          "rect": [
+            39.75,
+            697.5,
+            63.75,
+            715.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day23:一阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1002",
+          "anchor": "过河卒",
+          "context": "快排\n过河卒\n逆序对",
+          "rect": [
+            39.75,
+            723.0,
+            75.75,
+            741.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day23:一阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1908",
+          "anchor": "逆序对",
+          "context": "过河卒\n逆序对\nA+B Problem（高精）",
+          "rect": [
+            39.75,
+            748.5,
+            75.75,
+            766.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day23:一阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1601",
+          "anchor": "A+B Problem（高精）",
+          "context": "逆序对\nA+B Problem（高精）",
+          "rect": [
+            39.75,
+            774.0,
+            159.75,
+            792.0
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day23:一阶段验收"
+        }
+      ]
+    },
+    {
+      "page": 13,
+      "text": "蜜蜂路线（高精+斐波那契数列）​\n阶段二：​\n目标：优先掌握算法的核心模型（背包问题，最短路、MST、DP模型、二分答案），同时再刷搜索进\n阶，复杂模拟，学有余力的可以再去学习树形DP，Tarjin专项，状压DP，树状数组等冲击满分！​\n强度：每天 5-7 题（黄题/绿题为主）​\nWeek1:​\nDay1:搜索进阶​\nkkksc03考前临时抱佛脚​\n字串变换​\nIncDec Sequence(差分)​\n砝码称重​\n产生数​\nDay2:背包问题 (一)​\n采药​\n疯狂的采药​\n小A点菜​\n开心的金明​\nBuying Hay S​\n装箱问题​\n摆花​\nDay3:背包问题 (二)​\nNASA食物计划​\n通天之分组背包​\n樱花​\n精卫填海​\n通天之潜水​\nDay4:背包问题(三)​\n金明的预算方案​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P2437",
+          "anchor": "蜜蜂路线（高精+斐波那契数列）",
+          "context": "蜜蜂路线（高精+斐波那契数列）",
+          "rect": [
+            39.75,
+            28.5,
+            213.75,
+            46.5
+          ],
+          "pdf_stage": "阶段一：",
+          "section": "Day23:一阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2392",
+          "anchor": "kkksc03考前临时抱佛脚",
+          "context": "Day1:搜索进阶\nkkksc03考前临时抱佛脚\n字串变换",
+          "rect": [
+            39.75,
+            248.25,
+            168.0,
+            266.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day1:搜索进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1032",
+          "anchor": "字串变换",
+          "context": "kkksc03考前临时抱佛脚\n字串变换\nIncDec Sequence(差分)",
+          "rect": [
+            39.75,
+            273.75,
+            87.75,
+            291.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day1:搜索进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4552",
+          "anchor": "IncDec Sequence(差分)",
+          "context": "字串变换\nIncDec Sequence(差分)\n砝码称重",
+          "rect": [
+            39.75,
+            299.25,
+            167.25,
+            317.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day1:搜索进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2347",
+          "anchor": "砝码称重",
+          "context": "IncDec Sequence(差分)\n砝码称重\n产生数",
+          "rect": [
+            39.75,
+            324.75,
+            87.75,
+            342.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day1:搜索进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1037",
+          "anchor": "产生数",
+          "context": "砝码称重\n产生数",
+          "rect": [
+            39.75,
+            350.25,
+            75.75,
+            368.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day1:搜索进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1048",
+          "anchor": "采药",
+          "context": "Day2:背包问题 (一)\n采药\n疯狂的采药",
+          "rect": [
+            39.75,
+            411.75,
+            63.75,
+            429.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day2:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1616",
+          "anchor": "疯狂的采药",
+          "context": "采药\n疯狂的采药\n小A点菜",
+          "rect": [
+            39.75,
+            437.25,
+            99.75,
+            455.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day2:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1164",
+          "anchor": "小A点菜",
+          "context": "疯狂的采药\n小A点菜\n开心的金明",
+          "rect": [
+            39.75,
+            462.75,
+            82.5,
+            480.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day2:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1060",
+          "anchor": "开心的金明",
+          "context": "小A点菜\n开心的金明\nBuying Hay S",
+          "rect": [
+            39.75,
+            488.25,
+            99.75,
+            506.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day2:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2918",
+          "anchor": "Buying Hay S",
+          "context": "开心的金明\nBuying Hay S\n装箱问题",
+          "rect": [
+            39.75,
+            513.75,
+            112.5,
+            531.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day2:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1049",
+          "anchor": "装箱问题",
+          "context": "Buying Hay S\n装箱问题\n摆花",
+          "rect": [
+            39.75,
+            539.25,
+            87.75,
+            557.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day2:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1077",
+          "anchor": "摆花",
+          "context": "装箱问题\n摆花",
+          "rect": [
+            39.75,
+            564.75,
+            63.75,
+            582.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day2:背包问题 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1507",
+          "anchor": "NASA食物计划",
+          "context": "Day3:背包问题 (二)\nNASA食物计划\n通天之分组背包",
+          "rect": [
+            39.75,
+            626.25,
+            117.75,
+            644.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day3:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1757",
+          "anchor": "通天之分组背包",
+          "context": "NASA食物计划\n通天之分组背包\n樱花",
+          "rect": [
+            39.75,
+            651.75,
+            123.75,
+            669.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day3:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1833",
+          "anchor": "樱花",
+          "context": "通天之分组背包\n樱花\n精卫填海",
+          "rect": [
+            39.75,
+            677.25,
+            63.75,
+            695.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day3:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1510",
+          "anchor": "精卫填海",
+          "context": "樱花\n精卫填海\n通天之潜水",
+          "rect": [
+            39.75,
+            702.75,
+            87.75,
+            720.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day3:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1759",
+          "anchor": "通天之潜水",
+          "context": "精卫填海\n通天之潜水",
+          "rect": [
+            39.75,
+            728.25,
+            99.75,
+            746.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day3:背包问题 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1064",
+          "anchor": "金明的预算方案",
+          "context": "Day4:背包问题(三)\n金明的预算方案",
+          "rect": [
+            39.75,
+            789.75,
+            123.75,
+            807.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day4:背包问题(三)"
+        }
+      ]
+    },
+    {
+      "page": 14,
+      "text": "搭配购买​\n砝码称重​\n排兵布阵​\n宝物筛选【二进制+单调队列】​\nDay5:背包问题(四)​\n烹调方案​\n货币系统​\n选课​\nCharm Bracelet S​\n严酷的训练​\nDay6:区间DP​\n石子合并​\n能量项链【我认为这个实际上才是去年矩阵相乘的原题】​\n248 G​\n乘积最大​\nDay7:图论最短路(一)​\n【模板】单源最短路径（标准版）【dj、优先队列优化dj和spfa都要会】​\n【模板】Floyd​\nClear And Present Danger S​\n医院设置​\n最小花费​\n邮递员送信​\nWeek2:​\nDay8:图论最短路 (二)​\n最短路计数​\n公路修建​\n回家 Bessie Come Home​\n通往奥格瑞玛的道路​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1455",
+          "anchor": "搭配购买",
+          "context": "搭配购买\n砝码称重",
+          "rect": [
+            39.75,
+            28.5,
+            87.75,
+            46.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day4:背包问题(三)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2347",
+          "anchor": "砝码称重",
+          "context": "搭配购买\n砝码称重\n排兵布阵",
+          "rect": [
+            39.75,
+            54.0,
+            87.75,
+            72.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day4:背包问题(三)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5322",
+          "anchor": "排兵布阵",
+          "context": "砝码称重\n排兵布阵\n宝物筛选【二进制+单调队列】",
+          "rect": [
+            39.75,
+            79.5,
+            87.75,
+            97.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day4:背包问题(三)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1776",
+          "anchor": "宝物筛选【二进制+单调队列】",
+          "context": "排兵布阵\n宝物筛选【二进制+单调队列】",
+          "rect": [
+            39.75,
+            105.0,
+            201.75,
+            123.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day4:背包问题(三)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1417",
+          "anchor": "烹调方案",
+          "context": "Day5:背包问题(四)\n烹调方案\n货币系统",
+          "rect": [
+            39.75,
+            166.5,
+            87.75,
+            184.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day5:背包问题(四)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5020",
+          "anchor": "货币系统",
+          "context": "烹调方案\n货币系统\n选课",
+          "rect": [
+            39.75,
+            192.0,
+            87.75,
+            210.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day5:背包问题(四)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2014",
+          "anchor": "选课",
+          "context": "货币系统\n选课\nCharm Bracelet S",
+          "rect": [
+            39.75,
+            217.5,
+            63.75,
+            235.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day5:背包问题(四)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2871",
+          "anchor": "Charm Bracelet S",
+          "context": "选课\nCharm Bracelet S\n严酷的训练",
+          "rect": [
+            39.75,
+            243.0,
+            135.0,
+            261.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day5:背包问题(四)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2430",
+          "anchor": "严酷的训练",
+          "context": "Charm Bracelet S\n严酷的训练",
+          "rect": [
+            39.75,
+            268.5,
+            99.75,
+            286.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day5:背包问题(四)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1880",
+          "anchor": "石子合并",
+          "context": "Day6:区间DP\n石子合并\n能量项链【我认为这个实际上才是去年矩阵相乘的原题】",
+          "rect": [
+            39.75,
+            330.0,
+            87.75,
+            348.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day6:区间DP"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1063",
+          "anchor": "能量项链【我认为这个实际上才是去年矩阵相乘的原题】",
+          "context": "石子合并\n能量项链【我认为这个实际上才是去年矩阵相乘的原题】\n248 G",
+          "rect": [
+            39.75,
+            355.5,
+            339.75,
+            373.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day6:区间DP"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3146",
+          "anchor": "248 G",
+          "context": "能量项链【我认为这个实际上才是去年矩阵相乘的原题】\n248 G\n乘积最大",
+          "rect": [
+            39.75,
+            381.0,
+            70.5,
+            399.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day6:区间DP"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1018",
+          "anchor": "乘积最大",
+          "context": "248 G\n乘积最大",
+          "rect": [
+            39.75,
+            406.5,
+            87.75,
+            424.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day6:区间DP"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4779",
+          "anchor": "【模板】单源最短路径（标准版）【dj、优先队列优化dj和spfa都要会】",
+          "context": "Day7:图论最短路(一)\n【模板】单源最短路径（标准版）【dj、优先队列优化dj和spfa都要会】\n【模板】Floyd",
+          "rect": [
+            39.75,
+            468.0,
+            414.0,
+            486.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day7:图论最短路(一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3647",
+          "anchor": "【模板】Floyd",
+          "context": "【模板】单源最短路径（标准版）【dj、优先队列优化dj和spfa都要会】\n【模板】Floyd\nClear And Present Danger S",
+          "rect": [
+            39.75,
+            493.5,
+            118.5,
+            511.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day7:图论最短路(一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2910",
+          "anchor": "Clear And Present Danger S",
+          "context": "【模板】Floyd\nClear And Present Danger S\n医院设置",
+          "rect": [
+            39.75,
+            519.0,
+            191.25,
+            537.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day7:图论最短路(一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1364",
+          "anchor": "医院设置",
+          "context": "Clear And Present Danger S\n医院设置\n最小花费",
+          "rect": [
+            39.75,
+            544.5,
+            87.75,
+            562.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day7:图论最短路(一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1576",
+          "anchor": "最小花费",
+          "context": "医院设置\n最小花费\n邮递员送信",
+          "rect": [
+            39.75,
+            570.0,
+            87.75,
+            588.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day7:图论最短路(一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1629",
+          "anchor": "邮递员送信",
+          "context": "最小花费\n邮递员送信",
+          "rect": [
+            39.75,
+            595.5,
+            99.75,
+            613.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day7:图论最短路(一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1144",
+          "anchor": "最短路计数",
+          "context": "Day8:图论最短路 (二)\n最短路计数\n公路修建",
+          "rect": [
+            39.75,
+            696.75,
+            99.75,
+            714.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day8:图论最短路 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1265",
+          "anchor": "公路修建",
+          "context": "最短路计数\n公路修建\n回家 Bessie Come Home",
+          "rect": [
+            39.75,
+            722.25,
+            87.75,
+            740.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day8:图论最短路 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1529",
+          "anchor": "回家 Bessie Come Home",
+          "context": "公路修建\n回家 Bessie Come Home\n通往奥格瑞玛的道路",
+          "rect": [
+            39.75,
+            747.75,
+            173.25,
+            765.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day8:图论最短路 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1462",
+          "anchor": "通往奥格瑞玛的道路",
+          "context": "回家 Bessie Come Home\n通往奥格瑞玛的道路",
+          "rect": [
+            39.75,
+            773.25,
+            147.75,
+            791.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day8:图论最短路 (二)"
+        }
+      ]
+    },
+    {
+      "page": 15,
+      "text": "电车​\n【模板】负环​\n【模板】差分约束(判负环)​\nDay9:最小生成树 (MST)​\n最小生成树​\n口袋的天空​\n繁忙的都市​\nWatering Hole G​\n部落划分​\nBuilding Roads S​\n【模板】割点（割顶）​\n封锁阳光大学​\nDay10:二分答案​\n跳石头​\n砍树​\n木材加工​\n路标设置​\n数列分段 Section II​\nDay11:进阶搜索 (剪枝)​\n小木棍​\nCow Travelling S​\n靶形数独​\n八数码难题​\nIcy Perimeter S​\nDay12:线段树/树状数组入门​\n【模板】树状数组 1​\n【模板】树状数组 2​\n逆序对(BIT解法)​\n统计和​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1346",
+          "anchor": "电车",
+          "context": "电车\n【模板】负环",
+          "rect": [
+            39.75,
+            28.5,
+            63.75,
+            46.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day8:图论最短路 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3385",
+          "anchor": "【模板】负环",
+          "context": "电车\n【模板】负环\n【模板】差分约束(判负环)",
+          "rect": [
+            39.75,
+            54.0,
+            111.75,
+            72.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day8:图论最短路 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5960",
+          "anchor": "【模板】差分约束(判负环)",
+          "context": "【模板】负环\n【模板】差分约束(判负环)",
+          "rect": [
+            39.75,
+            79.5,
+            179.25,
+            97.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day8:图论最短路 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3366",
+          "anchor": "最小生成树",
+          "context": "Day9:最小生成树 (MST)\n最小生成树\n口袋的天空",
+          "rect": [
+            39.75,
+            141.0,
+            99.75,
+            159.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day9:最小生成树 (MST)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1195",
+          "anchor": "口袋的天空",
+          "context": "最小生成树\n口袋的天空\n繁忙的都市",
+          "rect": [
+            39.75,
+            166.5,
+            99.75,
+            184.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day9:最小生成树 (MST)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2330",
+          "anchor": "繁忙的都市",
+          "context": "口袋的天空\n繁忙的都市\nWatering Hole G",
+          "rect": [
+            39.75,
+            192.0,
+            99.75,
+            210.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day9:最小生成树 (MST)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1550",
+          "anchor": "Watering Hole G",
+          "context": "繁忙的都市\nWatering Hole G\n部落划分",
+          "rect": [
+            39.75,
+            217.5,
+            129.0,
+            235.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day9:最小生成树 (MST)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4047",
+          "anchor": "部落划分",
+          "context": "Watering Hole G\n部落划分\nBuilding Roads S",
+          "rect": [
+            39.75,
+            243.0,
+            87.75,
+            261.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day9:最小生成树 (MST)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2872",
+          "anchor": "Building Roads S",
+          "context": "部落划分\nBuilding Roads S\n【模板】割点（割顶）",
+          "rect": [
+            39.75,
+            268.5,
+            132.75,
+            286.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day9:最小生成树 (MST)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3388",
+          "anchor": "【模板】割点（割顶）",
+          "context": "Building Roads S\n【模板】割点（割顶）\n封锁阳光大学",
+          "rect": [
+            39.75,
+            294.0,
+            159.75,
+            312.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day9:最小生成树 (MST)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1330",
+          "anchor": "封锁阳光大学",
+          "context": "【模板】割点（割顶）\n封锁阳光大学",
+          "rect": [
+            39.75,
+            319.5,
+            111.75,
+            337.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day9:最小生成树 (MST)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2678",
+          "anchor": "跳石头",
+          "context": "Day10:二分答案\n跳石头\n砍树",
+          "rect": [
+            39.75,
+            381.0,
+            75.75,
+            399.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day10:二分答案"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1873",
+          "anchor": "砍树",
+          "context": "跳石头\n砍树\n木材加工",
+          "rect": [
+            39.75,
+            406.5,
+            63.75,
+            424.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day10:二分答案"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2440",
+          "anchor": "木材加工",
+          "context": "砍树\n木材加工\n路标设置",
+          "rect": [
+            39.75,
+            432.0,
+            87.75,
+            450.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day10:二分答案"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3853",
+          "anchor": "路标设置",
+          "context": "木材加工\n路标设置\n数列分段 Section II",
+          "rect": [
+            39.75,
+            457.5,
+            87.75,
+            475.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day10:二分答案"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1182",
+          "anchor": "数列分段 Section II",
+          "context": "路标设置\n数列分段 Section II",
+          "rect": [
+            39.75,
+            483.0,
+            141.75,
+            501.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day10:二分答案"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1120",
+          "anchor": "小木棍",
+          "context": "Day11:进阶搜索 (剪枝)\n小木棍\nCow Travelling S",
+          "rect": [
+            39.75,
+            544.5,
+            75.75,
+            562.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day11:进阶搜索 (剪枝)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1535",
+          "anchor": "Cow Travelling S",
+          "context": "小木棍\nCow Travelling S\n靶形数独",
+          "rect": [
+            39.75,
+            570.0,
+            131.25,
+            588.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day11:进阶搜索 (剪枝)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1074",
+          "anchor": "靶形数独",
+          "context": "Cow Travelling S\n靶形数独\n八数码难题",
+          "rect": [
+            39.75,
+            595.5,
+            87.75,
+            613.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day11:进阶搜索 (剪枝)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1379",
+          "anchor": "八数码难题",
+          "context": "靶形数独\n八数码难题\nIcy Perimeter S",
+          "rect": [
+            39.75,
+            621.0,
+            99.75,
+            639.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day11:进阶搜索 (剪枝)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5198",
+          "anchor": "Icy Perimeter S",
+          "context": "八数码难题\nIcy Perimeter S",
+          "rect": [
+            39.75,
+            646.5,
+            123.0,
+            664.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day11:进阶搜索 (剪枝)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3374",
+          "anchor": "【模板】树状数组 1",
+          "context": "Day12:线段树/树状数组入门\n【模板】树状数组 1\n【模板】树状数组 2",
+          "rect": [
+            39.75,
+            708.0,
+            144.75,
+            726.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day12:线段树/树状数组入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3368",
+          "anchor": "【模板】树状数组 2",
+          "context": "【模板】树状数组 1\n【模板】树状数组 2\n逆序对(BIT解法)",
+          "rect": [
+            39.75,
+            733.5,
+            144.75,
+            751.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day12:线段树/树状数组入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1908",
+          "anchor": "逆序对(BIT解法)",
+          "context": "【模板】树状数组 2\n逆序对(BIT解法)\n统计和",
+          "rect": [
+            39.75,
+            759.0,
+            126.0,
+            777.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day12:线段树/树状数组入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2068",
+          "anchor": "统计和",
+          "context": "逆序对(BIT解法)\n统计和",
+          "rect": [
+            39.75,
+            784.5,
+            75.75,
+            802.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day12:线段树/树状数组入门"
+        }
+      ]
+    },
+    {
+      "page": 16,
+      "text": "最大数​\n火烧赤壁(离散化)​\n程序自动分析(离散化+并查集)​\nDay13:进阶贪心​\n国王游戏​\n分组​\n修理牛棚​\n神秘数字​\n跳跳！​\nDay14:复盘​\n同余方程​\n青蛙的约会​\nWeek3:​\nDay15:树形 DP (一)​\n没有上司的舞会​\n战略游戏​\n二叉苹果树​\n最大子树和​\n选课​\nDay16:树形 DP (二)​\n会议​\n生命之树​\n三色二叉树​\n核心城市【树的直径】​\n有线电视网​\n重建道路​\n【模板】最近公共祖先（LCA）​\nDay17:Tarjan专项​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1198",
+          "anchor": "最大数",
+          "context": "最大数\n火烧赤壁(离散化)",
+          "rect": [
+            39.75,
+            28.5,
+            75.75,
+            46.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day12:线段树/树状数组入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1496",
+          "anchor": "火烧赤壁(离散化)",
+          "context": "最大数\n火烧赤壁(离散化)\n程序自动分析(离散化+并查集)",
+          "rect": [
+            39.75,
+            54.0,
+            131.25,
+            72.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day12:线段树/树状数组入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1955",
+          "anchor": "程序自动分析(离散化+并查集)",
+          "context": "火烧赤壁(离散化)\n程序自动分析(离散化+并查集)",
+          "rect": [
+            39.75,
+            79.5,
+            198.0,
+            97.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day12:线段树/树状数组入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1080",
+          "anchor": "国王游戏",
+          "context": "Day13:进阶贪心\n国王游戏\n分组",
+          "rect": [
+            39.75,
+            141.0,
+            87.75,
+            159.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day13:进阶贪心"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4447",
+          "anchor": "分组",
+          "context": "国王游戏\n分组\n修理牛棚",
+          "rect": [
+            39.75,
+            166.5,
+            63.75,
+            184.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day13:进阶贪心"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1209",
+          "anchor": "修理牛棚",
+          "context": "分组\n修理牛棚\n神秘数字",
+          "rect": [
+            39.75,
+            192.0,
+            87.75,
+            210.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day13:进阶贪心"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2804",
+          "anchor": "神秘数字",
+          "context": "修理牛棚\n神秘数字\n跳跳！",
+          "rect": [
+            39.75,
+            217.5,
+            87.75,
+            235.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day13:进阶贪心"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4995",
+          "anchor": "跳跳！",
+          "context": "神秘数字\n跳跳！",
+          "rect": [
+            39.75,
+            243.0,
+            75.75,
+            261.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day13:进阶贪心"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1082",
+          "anchor": "同余方程",
+          "context": "Day14:复盘\n同余方程\n青蛙的约会",
+          "rect": [
+            39.75,
+            304.5,
+            87.75,
+            322.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day14:复盘"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1516",
+          "anchor": "青蛙的约会",
+          "context": "同余方程\n青蛙的约会",
+          "rect": [
+            39.75,
+            330.0,
+            99.75,
+            348.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day14:复盘"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1352",
+          "anchor": "没有上司的舞会",
+          "context": "Day15:树形 DP (一)\n没有上司的舞会\n战略游戏",
+          "rect": [
+            39.75,
+            431.25,
+            123.75,
+            449.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day15:树形 DP (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2016",
+          "anchor": "战略游戏",
+          "context": "没有上司的舞会\n战略游戏\n二叉苹果树",
+          "rect": [
+            39.75,
+            456.75,
+            87.75,
+            474.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day15:树形 DP (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2015",
+          "anchor": "二叉苹果树",
+          "context": "战略游戏\n二叉苹果树\n最大子树和",
+          "rect": [
+            39.75,
+            482.25,
+            99.75,
+            500.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day15:树形 DP (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1122",
+          "anchor": "最大子树和",
+          "context": "二叉苹果树\n最大子树和\n选课",
+          "rect": [
+            39.75,
+            507.75,
+            99.75,
+            525.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day15:树形 DP (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2014",
+          "anchor": "选课",
+          "context": "最大子树和\n选课",
+          "rect": [
+            39.75,
+            533.25,
+            63.75,
+            551.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day15:树形 DP (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1395",
+          "anchor": "会议",
+          "context": "Day16:树形 DP (二)\n会议\n生命之树",
+          "rect": [
+            39.75,
+            594.75,
+            63.75,
+            612.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day16:树形 DP (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P8625",
+          "anchor": "生命之树",
+          "context": "会议\n生命之树\n三色二叉树",
+          "rect": [
+            39.75,
+            620.25,
+            87.75,
+            638.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day16:树形 DP (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2585",
+          "anchor": "三色二叉树",
+          "context": "生命之树\n三色二叉树\n核心城市【树的直径】",
+          "rect": [
+            39.75,
+            645.75,
+            99.75,
+            663.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day16:树形 DP (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5536",
+          "anchor": "核心城市【树的直径】",
+          "context": "三色二叉树\n核心城市【树的直径】\n有线电视网",
+          "rect": [
+            39.75,
+            671.25,
+            159.75,
+            689.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day16:树形 DP (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1273",
+          "anchor": "有线电视网",
+          "context": "核心城市【树的直径】\n有线电视网\n重建道路",
+          "rect": [
+            39.75,
+            696.75,
+            99.75,
+            714.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day16:树形 DP (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1272",
+          "anchor": "重建道路",
+          "context": "有线电视网\n重建道路\n【模板】最近公共祖先（LCA）",
+          "rect": [
+            39.75,
+            722.25,
+            87.75,
+            740.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day16:树形 DP (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3379",
+          "anchor": "【模板】最近公共祖先（LCA）",
+          "context": "重建道路\n【模板】最近公共祖先（LCA）",
+          "rect": [
+            39.75,
+            747.75,
+            204.75,
+            765.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day16:树形 DP (二)"
+        }
+      ]
+    },
+    {
+      "page": 17,
+      "text": "缩点【Tarjan求强连通分量】​\n飞行路线​\n间谍网络​\n危险系数​\n海战​\nCow Picnic S​\n最受欢迎的牛G​\nDay18:数论专项​\nHankson 的趣味题​\n组合数问题【杨辉三角+前缀和】​\n仪仗队​\n余数求和​\n模意义下的乘法逆元​\n组合数问题​\nDay19:博弈论入门​\n【模板】Nim 游戏​\n取数游戏 II​\n取火柴​\n公约数数列​\n欧几里德的游戏​\npb的游戏（1）​\n【模板】威佐夫博弈 / [SHOI2002] 取石子游戏​\nDay20:状态压缩 DP​\n互不侵犯​\nCorn Fields G​\n炮兵阵地​\n吃奶酪【状压解法】​\nMixed Up Cows G​\nDay21:复盘​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P3387",
+          "anchor": "缩点【Tarjan求强连通分量】",
+          "context": "缩点【Tarjan求强连通分量】\n飞行路线",
+          "rect": [
+            39.75,
+            28.5,
+            194.25,
+            46.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day17:Tarjan专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4568",
+          "anchor": "飞行路线",
+          "context": "缩点【Tarjan求强连通分量】\n飞行路线\n间谍网络",
+          "rect": [
+            39.75,
+            54.0,
+            87.75,
+            72.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day17:Tarjan专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1262",
+          "anchor": "间谍网络",
+          "context": "飞行路线\n间谍网络\n危险系数",
+          "rect": [
+            39.75,
+            79.5,
+            87.75,
+            97.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day17:Tarjan专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P8604",
+          "anchor": "危险系数",
+          "context": "间谍网络\n危险系数\n海战",
+          "rect": [
+            39.75,
+            105.0,
+            87.75,
+            123.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day17:Tarjan专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1331",
+          "anchor": "海战",
+          "context": "危险系数\n海战\nCow Picnic S",
+          "rect": [
+            39.75,
+            130.5,
+            63.75,
+            148.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day17:Tarjan专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2853",
+          "anchor": "Cow Picnic S",
+          "context": "海战\nCow Picnic S\n最受欢迎的牛G",
+          "rect": [
+            39.75,
+            156.0,
+            110.25,
+            174.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day17:Tarjan专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2341",
+          "anchor": "最受欢迎的牛G",
+          "context": "Cow Picnic S\n最受欢迎的牛G",
+          "rect": [
+            39.75,
+            181.5,
+            120.0,
+            199.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day17:Tarjan专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1072",
+          "anchor": "Hankson 的趣味题",
+          "context": "Day18:数论专项\nHankson 的趣味题\n组合数问题【杨辉三角+前缀和】",
+          "rect": [
+            39.75,
+            243.0,
+            139.5,
+            261.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day18:数论专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2822",
+          "anchor": "组合数问题【杨辉三角+前缀和】",
+          "context": "Hankson 的趣味题\n组合数问题【杨辉三角+前缀和】\n仪仗队",
+          "rect": [
+            39.75,
+            268.5,
+            213.75,
+            286.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day18:数论专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2158",
+          "anchor": "仪仗队",
+          "context": "组合数问题【杨辉三角+前缀和】\n仪仗队\n余数求和",
+          "rect": [
+            39.75,
+            294.0,
+            75.75,
+            312.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day18:数论专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2261",
+          "anchor": "余数求和",
+          "context": "仪仗队\n余数求和\n模意义下的乘法逆元",
+          "rect": [
+            39.75,
+            319.5,
+            87.75,
+            337.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day18:数论专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3811",
+          "anchor": "模意义下的乘法逆元",
+          "context": "余数求和\n模意义下的乘法逆元\n组合数问题",
+          "rect": [
+            39.75,
+            345.0,
+            147.75,
+            363.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day18:数论专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2822",
+          "anchor": "组合数问题",
+          "context": "模意义下的乘法逆元\n组合数问题",
+          "rect": [
+            39.75,
+            370.5,
+            99.75,
+            388.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day18:数论专项"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2197",
+          "anchor": "【模板】Nim 游戏",
+          "context": "Day19:博弈论入门\n【模板】Nim 游戏\n取数游戏 II",
+          "rect": [
+            39.75,
+            432.0,
+            137.25,
+            450.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day19:博弈论入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1288",
+          "anchor": "取数游戏 II",
+          "context": "【模板】Nim 游戏\n取数游戏 II\n取火柴",
+          "rect": [
+            39.75,
+            457.5,
+            96.75,
+            475.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day19:博弈论入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1247",
+          "anchor": "取火柴",
+          "context": "取数游戏 II\n取火柴\n公约数数列",
+          "rect": [
+            39.75,
+            483.0,
+            75.75,
+            501.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day19:博弈论入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4108",
+          "anchor": "公约数数列",
+          "context": "取火柴\n公约数数列\n欧几里德的游戏",
+          "rect": [
+            39.75,
+            508.5,
+            99.75,
+            526.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day19:博弈论入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1290",
+          "anchor": "欧几里德的游戏",
+          "context": "公约数数列\n欧几里德的游戏\npb的游戏（1）",
+          "rect": [
+            39.75,
+            534.0,
+            123.75,
+            552.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day19:博弈论入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3150",
+          "anchor": "pb的游戏（1）",
+          "context": "欧几里德的游戏\npb的游戏（1）\n【模板】威佐夫博弈 / [SHOI2002] 取石子游戏",
+          "rect": [
+            39.75,
+            559.5,
+            120.75,
+            577.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day19:博弈论入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2252",
+          "anchor": "【模板】威佐夫博弈 / [SHOI2002] 取石子游戏",
+          "context": "pb的游戏（1）\n【模板】威佐夫博弈 / [SHOI2002] 取石子游戏",
+          "rect": [
+            39.75,
+            585.0,
+            283.5,
+            603.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day19:博弈论入门"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1896",
+          "anchor": "互不侵犯",
+          "context": "Day20:状态压缩 DP\n互不侵犯\nCorn Fields G",
+          "rect": [
+            39.75,
+            646.5,
+            87.75,
+            664.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day20:状态压缩 DP"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1879",
+          "anchor": "Corn Fields G",
+          "context": "互不侵犯\nCorn Fields G\n炮兵阵地",
+          "rect": [
+            39.75,
+            672.0,
+            113.25,
+            690.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day20:状态压缩 DP"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2704",
+          "anchor": "炮兵阵地",
+          "context": "Corn Fields G\n炮兵阵地\n吃奶酪【状压解法】",
+          "rect": [
+            39.75,
+            697.5,
+            87.75,
+            715.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day20:状态压缩 DP"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1433",
+          "anchor": "吃奶酪【状压解法】",
+          "context": "炮兵阵地\n吃奶酪【状压解法】\nMixed Up Cows G",
+          "rect": [
+            39.75,
+            723.0,
+            147.75,
+            741.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day20:状态压缩 DP"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2915",
+          "anchor": "Mixed Up Cows G",
+          "context": "吃奶酪【状压解法】\nMixed Up Cows G",
+          "rect": [
+            39.75,
+            748.5,
+            135.0,
+            766.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day20:状态压缩 DP"
+        }
+      ]
+    },
+    {
+      "page": 18,
+      "text": "补充:【模板】ST 表 & RMQ 问题​\n忠诚​\nWeek4:​\nDay22:单调队列优化​\n【模板】单调栈​\nBad Hair Day S​\n单调队列 / 滑动窗口​\n琪露诺​\n选择数字​\n好消息，坏消息​\n切蛋糕​\nDay23:复杂模拟 (一)​\n数楼梯​\n作业调度方案​\n魔法少女小Scarlet​\n排座椅​\n均分纸牌​\nDay24:复杂模拟 (二)​\n立体图​\n花生采摘​\n税收与补贴问题​\n垂直柱状图​\n多边形的面积​\nDay25:综合练习 (搜索)​\n靶形数独​\nBackward Digit Sums G/S​\n邮递员送信​\n斗地主​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P3865",
+          "anchor": "【模板】ST 表 & RMQ 问题",
+          "context": "补充:【模板】ST 表 & RMQ 问题\n忠诚",
+          "rect": [
+            66.75,
+            28.5,
+            210.0,
+            46.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day21:复盘"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1816",
+          "anchor": "忠诚",
+          "context": "补充:【模板】ST 表 & RMQ 问题\n忠诚",
+          "rect": [
+            39.75,
+            54.0,
+            63.75,
+            72.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day21:复盘"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5788",
+          "anchor": "【模板】单调栈",
+          "context": "Day22:单调队列优化\n【模板】单调栈\nBad Hair Day S",
+          "rect": [
+            39.75,
+            155.25,
+            123.75,
+            173.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day22:单调队列优化"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2866",
+          "anchor": "Bad Hair Day S",
+          "context": "【模板】单调栈\nBad Hair Day S\n单调队列 / 滑动窗口",
+          "rect": [
+            39.75,
+            180.75,
+            121.5,
+            198.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day22:单调队列优化"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1886",
+          "anchor": "单调队列 / 滑动窗口",
+          "context": "Bad Hair Day S\n单调队列 / 滑动窗口\n琪露诺",
+          "rect": [
+            39.75,
+            206.25,
+            145.5,
+            224.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day22:单调队列优化"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1725",
+          "anchor": "琪露诺",
+          "context": "单调队列 / 滑动窗口\n琪露诺\n选择数字",
+          "rect": [
+            39.75,
+            231.75,
+            75.75,
+            249.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day22:单调队列优化"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2034",
+          "anchor": "选择数字",
+          "context": "琪露诺\n选择数字\n好消息，坏消息",
+          "rect": [
+            39.75,
+            257.25,
+            87.75,
+            275.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day22:单调队列优化"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2629",
+          "anchor": "好消息，坏消息",
+          "context": "选择数字\n好消息，坏消息\n切蛋糕",
+          "rect": [
+            39.75,
+            282.75,
+            123.75,
+            300.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day22:单调队列优化"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1714",
+          "anchor": "切蛋糕",
+          "context": "好消息，坏消息\n切蛋糕",
+          "rect": [
+            39.75,
+            308.25,
+            75.75,
+            326.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day22:单调队列优化"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1255",
+          "anchor": "数楼梯",
+          "context": "Day23:复杂模拟 (一)\n数楼梯\n作业调度方案",
+          "rect": [
+            39.75,
+            369.75,
+            75.75,
+            387.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day23:复杂模拟 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1065",
+          "anchor": "作业调度方案",
+          "context": "数楼梯\n作业调度方案\n魔法少女小Scarlet",
+          "rect": [
+            39.75,
+            395.25,
+            111.75,
+            413.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day23:复杂模拟 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4924",
+          "anchor": "魔法少女小Scarlet",
+          "context": "作业调度方案\n魔法少女小Scarlet\n排座椅",
+          "rect": [
+            39.75,
+            420.75,
+            138.75,
+            438.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day23:复杂模拟 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1098",
+          "anchor": "排座椅",
+          "context": "魔法少女小Scarlet\n排座椅\n均分纸牌",
+          "rect": [
+            39.75,
+            446.25,
+            75.75,
+            464.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day23:复杂模拟 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1031",
+          "anchor": "均分纸牌",
+          "context": "排座椅\n均分纸牌",
+          "rect": [
+            39.75,
+            471.75,
+            87.75,
+            489.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day23:复杂模拟 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1058",
+          "anchor": "立体图",
+          "context": "Day24:复杂模拟 (二)\n立体图\n花生采摘",
+          "rect": [
+            39.75,
+            533.25,
+            75.75,
+            551.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day24:复杂模拟 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1086",
+          "anchor": "花生采摘",
+          "context": "立体图\n花生采摘\n税收与补贴问题",
+          "rect": [
+            39.75,
+            558.75,
+            87.75,
+            576.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day24:复杂模拟 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1023",
+          "anchor": "税收与补贴问题",
+          "context": "花生采摘\n税收与补贴问题\n垂直柱状图",
+          "rect": [
+            39.75,
+            584.25,
+            123.75,
+            602.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day24:复杂模拟 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1598",
+          "anchor": "垂直柱状图",
+          "context": "税收与补贴问题\n垂直柱状图\n多边形的面积",
+          "rect": [
+            39.75,
+            609.75,
+            99.75,
+            627.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day24:复杂模拟 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1183",
+          "anchor": "多边形的面积",
+          "context": "垂直柱状图\n多边形的面积",
+          "rect": [
+            39.75,
+            635.25,
+            111.75,
+            653.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day24:复杂模拟 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1074",
+          "anchor": "靶形数独",
+          "context": "Day25:综合练习 (搜索)\n靶形数独\nBackward Digit Sums G/S",
+          "rect": [
+            39.75,
+            696.75,
+            87.75,
+            714.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day25:综合练习 (搜索)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1118",
+          "anchor": "Backward Digit Sums G/S",
+          "context": "靶形数独\nBackward Digit Sums G/S\n邮递员送信",
+          "rect": [
+            39.75,
+            722.25,
+            180.75,
+            740.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day25:综合练习 (搜索)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1629",
+          "anchor": "邮递员送信",
+          "context": "Backward Digit Sums G/S\n邮递员送信\n斗地主",
+          "rect": [
+            39.75,
+            747.75,
+            99.75,
+            765.75
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day25:综合练习 (搜索)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2668",
+          "anchor": "斗地主",
+          "context": "邮递员送信\n斗地主",
+          "rect": [
+            39.75,
+            773.25,
+            75.75,
+            791.25
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day25:综合练习 (搜索)"
+        }
+      ]
+    },
+    {
+      "page": 19,
+      "text": "Day26:综合练习 (DP)​\n中国象棋​\n数字计数​\n关路灯​\n消防局的设立​\n涂色​\nDay27:综合练习 (图论)​\n【模板】缩点​\n受欢迎的牛 G​\n间谍网络​\n割点​\nDay28:复盘​\n查找​\nKMP​\nSPFA​\nMST​\n单调队列 / 滑动窗口​\nDay29:二阶段验收​\n瑞士轮​\n最大食物链计数​\n方格取数​\n独木桥​\n阶段三：​\n目的：针对压轴题（大模拟、复杂DP、思维题），查漏补缺。 强度：每天 3-5 题（绿题/蓝题为主）​\nWeek1:​\nDay1:思维与博弈​\n取火柴​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P2051",
+          "anchor": "中国象棋",
+          "context": "Day26:综合练习 (DP)\n中国象棋\n数字计数",
+          "rect": [
+            39.75,
+            55.5,
+            87.75,
+            73.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day26:综合练习 (DP)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2602",
+          "anchor": "数字计数",
+          "context": "中国象棋\n数字计数\n关路灯",
+          "rect": [
+            39.75,
+            81.0,
+            87.75,
+            99.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day26:综合练习 (DP)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1220",
+          "anchor": "关路灯",
+          "context": "数字计数\n关路灯\n消防局的设立",
+          "rect": [
+            39.75,
+            106.5,
+            75.75,
+            124.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day26:综合练习 (DP)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2279",
+          "anchor": "消防局的设立",
+          "context": "关路灯\n消防局的设立\n涂色",
+          "rect": [
+            39.75,
+            132.0,
+            111.75,
+            150.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day26:综合练习 (DP)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4170",
+          "anchor": "涂色",
+          "context": "消防局的设立\n涂色",
+          "rect": [
+            39.75,
+            157.5,
+            63.75,
+            175.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day26:综合练习 (DP)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3387",
+          "anchor": "【模板】缩点",
+          "context": "Day27:综合练习 (图论)\n【模板】缩点\n受欢迎的牛 G",
+          "rect": [
+            39.75,
+            219.0,
+            111.75,
+            237.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day27:综合练习 (图论)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2341",
+          "anchor": "受欢迎的牛 G",
+          "context": "【模板】缩点\n受欢迎的牛 G\n间谍网络",
+          "rect": [
+            39.75,
+            244.5,
+            110.25,
+            262.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day27:综合练习 (图论)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1262",
+          "anchor": "间谍网络",
+          "context": "受欢迎的牛 G\n间谍网络\n割点",
+          "rect": [
+            39.75,
+            270.0,
+            87.75,
+            288.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day27:综合练习 (图论)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3388",
+          "anchor": "割点",
+          "context": "间谍网络\n割点",
+          "rect": [
+            39.75,
+            295.5,
+            63.75,
+            313.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day27:综合练习 (图论)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2249",
+          "anchor": "查找",
+          "context": "Day28:复盘\n查找\nKMP",
+          "rect": [
+            39.75,
+            357.0,
+            63.75,
+            375.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day28:复盘"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3375",
+          "anchor": "KMP",
+          "context": "查找\nKMP\nSPFA",
+          "rect": [
+            39.75,
+            382.5,
+            64.5,
+            400.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day28:复盘"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4779",
+          "anchor": "SPFA",
+          "context": "KMP\nSPFA\nMST",
+          "rect": [
+            39.75,
+            408.0,
+            67.5,
+            426.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day28:复盘"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3366",
+          "anchor": "MST",
+          "context": "SPFA\nMST\n单调队列 / 滑动窗口",
+          "rect": [
+            39.75,
+            433.5,
+            63.0,
+            451.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day28:复盘"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1886",
+          "anchor": "单调队列 / 滑动窗口",
+          "context": "MST\n单调队列 / 滑动窗口",
+          "rect": [
+            39.75,
+            459.0,
+            145.5,
+            477.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day28:复盘"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1309",
+          "anchor": "瑞士轮",
+          "context": "Day29:二阶段验收\n瑞士轮\n最大食物链计数",
+          "rect": [
+            39.75,
+            520.5,
+            75.75,
+            538.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day29:二阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4017",
+          "anchor": "最大食物链计数",
+          "context": "瑞士轮\n最大食物链计数\n方格取数",
+          "rect": [
+            39.75,
+            546.0,
+            123.75,
+            564.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day29:二阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1004",
+          "anchor": "方格取数",
+          "context": "最大食物链计数\n方格取数\n独木桥",
+          "rect": [
+            39.75,
+            571.5,
+            87.75,
+            589.5
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day29:二阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1007",
+          "anchor": "独木桥",
+          "context": "方格取数\n独木桥",
+          "rect": [
+            39.75,
+            597.0,
+            75.75,
+            615.0
+          ],
+          "pdf_stage": "阶段二：",
+          "section": "Day29:二阶段验收"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1247",
+          "anchor": "取火柴",
+          "context": "Day1:思维与博弈\n取火柴",
+          "rect": [
+            39.75,
+            771.75,
+            75.75,
+            789.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day1:思维与博弈"
+        }
+      ]
+    },
+    {
+      "page": 20,
+      "text": "高手过招​\n取数游戏 II​\n【模板】威佐夫博弈 / [SHOI2002] 取石子游戏​\nDay2:树形 DP 专项/LCA最近公共祖先​\n二叉苹果树​\n选课​\n树上染色​\n时态同步​\n二叉树问题​\nDay3:字符串进阶​\nAC 自动机（简单版）​\n于是他错误的点名开始了(Trie)​\nKMP模板​\n无线传输​\nDay4:综合图论应用​\n最短路计数​\n【模板】负环​\n路径统计​\nElaxia的路线​\n嗅探器​\nDay5:数论​\n模意义下的乘法逆元​\n维护序列 (线段树+乘法)​\n仪仗队​\n小凯的疑惑​\nDay6:模拟​\n计算器的改良​\n时间复杂度​\n螺旋矩阵​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P2575",
+          "anchor": "高手过招",
+          "context": "高手过招\n取数游戏 II",
+          "rect": [
+            39.75,
+            28.5,
+            87.75,
+            46.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day1:思维与博弈"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1288",
+          "anchor": "取数游戏 II",
+          "context": "高手过招\n取数游戏 II\n【模板】威佐夫博弈 / [SHOI2002] 取石子游戏",
+          "rect": [
+            39.75,
+            54.0,
+            96.75,
+            72.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day1:思维与博弈"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2252",
+          "anchor": "【模板】威佐夫博弈 / [SHOI2002] 取石子游戏",
+          "context": "取数游戏 II\n【模板】威佐夫博弈 / [SHOI2002] 取石子游戏",
+          "rect": [
+            39.75,
+            79.5,
+            283.5,
+            97.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day1:思维与博弈"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2015",
+          "anchor": "二叉苹果树",
+          "context": "Day2:树形 DP 专项/LCA最近公共祖先\n二叉苹果树\n选课",
+          "rect": [
+            39.75,
+            141.0,
+            99.75,
+            159.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day2:树形 DP 专项/LCA最近公共祖先"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2014",
+          "anchor": "选课",
+          "context": "二叉苹果树\n选课\n树上染色",
+          "rect": [
+            39.75,
+            166.5,
+            63.75,
+            184.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day2:树形 DP 专项/LCA最近公共祖先"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3177",
+          "anchor": "树上染色",
+          "context": "选课\n树上染色\n时态同步",
+          "rect": [
+            39.75,
+            192.0,
+            87.75,
+            210.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day2:树形 DP 专项/LCA最近公共祖先"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1131",
+          "anchor": "时态同步",
+          "context": "树上染色\n时态同步\n二叉树问题",
+          "rect": [
+            39.75,
+            217.5,
+            87.75,
+            235.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day2:树形 DP 专项/LCA最近公共祖先"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3884",
+          "anchor": "二叉树问题",
+          "context": "时态同步\n二叉树问题",
+          "rect": [
+            39.75,
+            243.0,
+            99.75,
+            261.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day2:树形 DP 专项/LCA最近公共祖先"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3808",
+          "anchor": "AC 自动机（简单版）",
+          "context": "Day3:字符串进阶\nAC 自动机（简单版）\n于是他错误的点名开始了(Trie)",
+          "rect": [
+            39.75,
+            304.5,
+            153.0,
+            322.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day3:字符串进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2580",
+          "anchor": "于是他错误的点名开始了(Trie)",
+          "context": "AC 自动机（简单版）\n于是他错误的点名开始了(Trie)\nKMP模板",
+          "rect": [
+            39.75,
+            330.0,
+            201.0,
+            348.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day3:字符串进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3375",
+          "anchor": "KMP模板",
+          "context": "于是他错误的点名开始了(Trie)\nKMP模板\n无线传输",
+          "rect": [
+            39.75,
+            355.5,
+            88.5,
+            373.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day3:字符串进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4391",
+          "anchor": "无线传输",
+          "context": "KMP模板\n无线传输",
+          "rect": [
+            39.75,
+            381.0,
+            87.75,
+            399.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day3:字符串进阶"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1144",
+          "anchor": "最短路计数",
+          "context": "Day4:综合图论应用\n最短路计数\n【模板】负环",
+          "rect": [
+            39.75,
+            442.5,
+            99.75,
+            460.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day4:综合图论应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3385",
+          "anchor": "【模板】负环",
+          "context": "最短路计数\n【模板】负环\n路径统计",
+          "rect": [
+            39.75,
+            468.0,
+            111.75,
+            486.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day4:综合图论应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1608",
+          "anchor": "路径统计",
+          "context": "【模板】负环\n路径统计\nElaxia的路线",
+          "rect": [
+            39.75,
+            493.5,
+            87.75,
+            511.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day4:综合图论应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2149",
+          "anchor": "Elaxia的路线",
+          "context": "路径统计\nElaxia的路线\n嗅探器",
+          "rect": [
+            39.75,
+            519.0,
+            108.75,
+            537.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day4:综合图论应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5058",
+          "anchor": "嗅探器",
+          "context": "Elaxia的路线\n嗅探器",
+          "rect": [
+            39.75,
+            544.5,
+            75.75,
+            562.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day4:综合图论应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3811",
+          "anchor": "模意义下的乘法逆元",
+          "context": "Day5:数论\n模意义下的乘法逆元\n维护序列 (线段树+乘法)",
+          "rect": [
+            39.75,
+            606.0,
+            147.75,
+            624.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day5:数论"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2023",
+          "anchor": "维护序列 (线段树+乘法)",
+          "context": "模意义下的乘法逆元\n维护序列 (线段树+乘法)\n仪仗队",
+          "rect": [
+            39.75,
+            631.5,
+            165.0,
+            649.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day5:数论"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2158",
+          "anchor": "仪仗队",
+          "context": "维护序列 (线段树+乘法)\n仪仗队\n小凯的疑惑",
+          "rect": [
+            39.75,
+            657.0,
+            75.75,
+            675.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day5:数论"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3951",
+          "anchor": "小凯的疑惑",
+          "context": "仪仗队\n小凯的疑惑",
+          "rect": [
+            39.75,
+            682.5,
+            99.75,
+            700.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day5:数论"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1022",
+          "anchor": "计算器的改良",
+          "context": "Day6:模拟\n计算器的改良\n时间复杂度",
+          "rect": [
+            39.75,
+            744.0,
+            111.75,
+            762.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day6:模拟"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3952",
+          "anchor": "时间复杂度",
+          "context": "计算器的改良\n时间复杂度\n螺旋矩阵",
+          "rect": [
+            39.75,
+            769.5,
+            99.75,
+            787.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day6:模拟"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2239",
+          "anchor": "螺旋矩阵",
+          "context": "时间复杂度\n螺旋矩阵",
+          "rect": [
+            39.75,
+            795.0,
+            87.75,
+            813.0
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day6:模拟"
+        }
+      ]
+    },
+    {
+      "page": 21,
+      "text": "垂直柱状图​\nDay7:复盘​\n整理模板​\nWeek2:​\nday8:动态规划综合​\n涂色​\n合唱队​\n关路灯​\n金明的预算方案​\nDay9:搜索综合​\n靶形数独​\n八数码难题​\n埃及分数​\n骑士精神​\nDay10:STL综合应用​\n中位数 (堆)​\n黑匣子​\n阅读理解 (Map/Trie)​\n序列合并​\nDay11:经典模型 (一)​\n单词接龙​\n字串变换​\n小木棍​\n加分二叉树​\nDay12::经典模型 (二)​\n乌龟棋​\n矩阵取数游戏​\n传纸条​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1598",
+          "anchor": "垂直柱状图",
+          "context": "垂直柱状图",
+          "rect": [
+            39.75,
+            28.5,
+            99.75,
+            46.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day6:模拟"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4170",
+          "anchor": "涂色",
+          "context": "day8:动态规划综合\n涂色\n合唱队",
+          "rect": [
+            39.75,
+            191.25,
+            63.75,
+            209.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "day8:动态规划综合"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3205",
+          "anchor": "合唱队",
+          "context": "涂色\n合唱队\n关路灯",
+          "rect": [
+            39.75,
+            216.75,
+            75.75,
+            234.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "day8:动态规划综合"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1220",
+          "anchor": "关路灯",
+          "context": "合唱队\n关路灯\n金明的预算方案",
+          "rect": [
+            39.75,
+            242.25,
+            75.75,
+            260.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "day8:动态规划综合"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1064",
+          "anchor": "金明的预算方案",
+          "context": "关路灯\n金明的预算方案",
+          "rect": [
+            39.75,
+            267.75,
+            123.75,
+            285.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "day8:动态规划综合"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1074",
+          "anchor": "靶形数独",
+          "context": "Day9:搜索综合\n靶形数独\n八数码难题",
+          "rect": [
+            39.75,
+            329.25,
+            87.75,
+            347.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day9:搜索综合"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1379",
+          "anchor": "八数码难题",
+          "context": "靶形数独\n八数码难题\n埃及分数",
+          "rect": [
+            39.75,
+            354.75,
+            99.75,
+            372.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day9:搜索综合"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1763",
+          "anchor": "埃及分数",
+          "context": "八数码难题\n埃及分数\n骑士精神",
+          "rect": [
+            39.75,
+            380.25,
+            87.75,
+            398.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day9:搜索综合"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2324",
+          "anchor": "骑士精神",
+          "context": "埃及分数\n骑士精神",
+          "rect": [
+            39.75,
+            405.75,
+            87.75,
+            423.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day9:搜索综合"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1168",
+          "anchor": "中位数 (堆)",
+          "context": "Day10:STL综合应用\n中位数 (堆)\n黑匣子",
+          "rect": [
+            39.75,
+            467.25,
+            98.25,
+            485.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day10:STL综合应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1801",
+          "anchor": "黑匣子",
+          "context": "中位数 (堆)\n黑匣子\n阅读理解 (Map/Trie)",
+          "rect": [
+            39.75,
+            492.75,
+            75.75,
+            510.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day10:STL综合应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3879",
+          "anchor": "阅读理解 (Map/Trie)",
+          "context": "黑匣子\n阅读理解 (Map/Trie)\n序列合并",
+          "rect": [
+            39.75,
+            518.25,
+            147.75,
+            536.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day10:STL综合应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1631",
+          "anchor": "序列合并",
+          "context": "阅读理解 (Map/Trie)\n序列合并",
+          "rect": [
+            39.75,
+            543.75,
+            87.75,
+            561.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day10:STL综合应用"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1019",
+          "anchor": "单词接龙",
+          "context": "Day11:经典模型 (一)\n单词接龙\n字串变换",
+          "rect": [
+            39.75,
+            605.25,
+            87.75,
+            623.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day11:经典模型 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1032",
+          "anchor": "字串变换",
+          "context": "单词接龙\n字串变换\n小木棍",
+          "rect": [
+            39.75,
+            630.75,
+            87.75,
+            648.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day11:经典模型 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1120",
+          "anchor": "小木棍",
+          "context": "字串变换\n小木棍\n加分二叉树",
+          "rect": [
+            39.75,
+            656.25,
+            75.75,
+            674.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day11:经典模型 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1040",
+          "anchor": "加分二叉树",
+          "context": "小木棍\n加分二叉树",
+          "rect": [
+            39.75,
+            681.75,
+            99.75,
+            699.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day11:经典模型 (一)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1541",
+          "anchor": "乌龟棋",
+          "context": "Day12::经典模型 (二)\n乌龟棋\n矩阵取数游戏",
+          "rect": [
+            39.75,
+            743.25,
+            75.75,
+            761.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day12::经典模型 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1005",
+          "anchor": "矩阵取数游戏",
+          "context": "乌龟棋\n矩阵取数游戏\n传纸条",
+          "rect": [
+            39.75,
+            768.75,
+            111.75,
+            786.75
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day12::经典模型 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1006",
+          "anchor": "传纸条",
+          "context": "矩阵取数游戏\n传纸条",
+          "rect": [
+            39.75,
+            794.25,
+            75.75,
+            812.25
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day12::经典模型 (二)"
+        }
+      ]
+    },
+    {
+      "page": 22,
+      "text": "小 a 和 uim 之大逃离​\nDay13:复盘​\n模拟题​\n第一轮:​\n题目较为经典，侧重考察代码实现能力和基础算法模板​\nDay1:​\nHanoi 双塔问题​\n合并果子​\n亲戚​\n八数码难题​\nDay2:​\n海港​\n逆序对​\n关押罪犯​\n单词接龙​\nDay3:​\n字符串的展开​\n均分纸牌​\n团伙​\n字串变换​\nDay4:​\n拼数​\n瑞士轮​\n石子合并​\n靶形数独​\nDay5:​\n快排​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1373",
+          "anchor": "小 a 和 uim 之大逃离",
+          "context": "小 a 和 uim 之大逃离",
+          "rect": [
+            39.75,
+            28.5,
+            150.75,
+            46.5
+          ],
+          "pdf_stage": "阶段三：",
+          "section": "Day12::经典模型 (二)"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1096",
+          "anchor": "Hanoi 双塔问题",
+          "context": "Day1:\nHanoi 双塔问题\n合并果子",
+          "rect": [
+            39.75,
+            237.75,
+            123.75,
+            255.75
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day1:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1090",
+          "anchor": "合并果子",
+          "context": "Hanoi 双塔问题\n合并果子\n亲戚",
+          "rect": [
+            39.75,
+            263.25,
+            87.75,
+            281.25
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day1:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1551",
+          "anchor": "亲戚",
+          "context": "合并果子\n亲戚\n八数码难题",
+          "rect": [
+            39.75,
+            288.75,
+            63.75,
+            306.75
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day1:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1379",
+          "anchor": "八数码难题",
+          "context": "亲戚\n八数码难题",
+          "rect": [
+            39.75,
+            314.25,
+            99.75,
+            332.25
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day1:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2058",
+          "anchor": "海港",
+          "context": "Day2:\n海港\n逆序对",
+          "rect": [
+            39.75,
+            375.75,
+            63.75,
+            393.75
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day2:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1908",
+          "anchor": "逆序对",
+          "context": "海港\n逆序对\n关押罪犯",
+          "rect": [
+            39.75,
+            401.25,
+            75.75,
+            419.25
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day2:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1525",
+          "anchor": "关押罪犯",
+          "context": "逆序对\n关押罪犯\n单词接龙",
+          "rect": [
+            39.75,
+            426.75,
+            87.75,
+            444.75
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day2:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1019",
+          "anchor": "单词接龙",
+          "context": "关押罪犯\n单词接龙",
+          "rect": [
+            39.75,
+            452.25,
+            87.75,
+            470.25
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day2:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1200",
+          "anchor": "字符串的展开",
+          "context": "Day3:\n字符串的展开\n均分纸牌",
+          "rect": [
+            39.75,
+            513.75,
+            111.75,
+            531.75
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day3:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1031",
+          "anchor": "均分纸牌",
+          "context": "字符串的展开\n均分纸牌\n团伙",
+          "rect": [
+            39.75,
+            539.25,
+            87.75,
+            557.25
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day3:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1892",
+          "anchor": "团伙",
+          "context": "均分纸牌\n团伙\n字串变换",
+          "rect": [
+            39.75,
+            564.75,
+            63.75,
+            582.75
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day3:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1032",
+          "anchor": "字串变换",
+          "context": "团伙\n字串变换",
+          "rect": [
+            39.75,
+            590.25,
+            87.75,
+            608.25
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day3:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1012",
+          "anchor": "拼数",
+          "context": "Day4:\n拼数\n瑞士轮",
+          "rect": [
+            39.75,
+            651.75,
+            63.75,
+            669.75
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day4:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1309",
+          "anchor": "瑞士轮",
+          "context": "拼数\n瑞士轮\n石子合并",
+          "rect": [
+            39.75,
+            677.25,
+            75.75,
+            695.25
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day4:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1880",
+          "anchor": "石子合并",
+          "context": "瑞士轮\n石子合并\n靶形数独",
+          "rect": [
+            39.75,
+            702.75,
+            87.75,
+            720.75
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day4:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1074",
+          "anchor": "靶形数独",
+          "context": "石子合并\n靶形数独",
+          "rect": [
+            39.75,
+            728.25,
+            87.75,
+            746.25
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day4:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1177",
+          "anchor": "快排",
+          "context": "Day5:\n快排",
+          "rect": [
+            39.75,
+            789.75,
+            63.75,
+            807.75
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day5:"
+        }
+      ]
+    },
+    {
+      "page": 23,
+      "text": "跳石头​\n能量项链​\nIPv6地址压缩​\nDay6：​\n明明的随机数​\n路标设置​\n248 G​\n公交转乘​\nDay7:​\n分数线划定​\n砍树​\n涂色​\n纪念品分组​\n第二轮:​\n引入字符串算法、线性/树形 DP 及图论基础，难度适中​\nDay8：​\n数列分段 Section II​\n生活大爆炸版石头剪刀布​\n滑雪​\n最大食物链计数​\nDay9:​\n玩具谜题​\n借教室​\n合唱队形​\n车站分级​\nDay10:​\n多项式输出​\n金币【循环】​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P2678",
+          "anchor": "跳石头",
+          "context": "跳石头\n能量项链",
+          "rect": [
+            39.75,
+            28.5,
+            75.75,
+            46.5
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day5:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1063",
+          "anchor": "能量项链",
+          "context": "跳石头\n能量项链\nIPv6地址压缩",
+          "rect": [
+            39.75,
+            54.0,
+            87.75,
+            72.0
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day5:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2815",
+          "anchor": "IPv6地址压缩",
+          "context": "能量项链\nIPv6地址压缩",
+          "rect": [
+            39.75,
+            79.5,
+            111.75,
+            97.5
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day5:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1059",
+          "anchor": "明明的随机数",
+          "context": "Day6：\n明明的随机数\n路标设置",
+          "rect": [
+            39.75,
+            141.0,
+            111.75,
+            159.0
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day6："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3853",
+          "anchor": "路标设置",
+          "context": "明明的随机数\n路标设置\n248 G",
+          "rect": [
+            39.75,
+            166.5,
+            87.75,
+            184.5
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day6："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3146",
+          "anchor": "248 G",
+          "context": "路标设置\n248 G\n公交转乘",
+          "rect": [
+            39.75,
+            192.0,
+            70.5,
+            210.0
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day6："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5661",
+          "anchor": "公交转乘",
+          "context": "248 G\n公交转乘",
+          "rect": [
+            39.75,
+            217.5,
+            87.75,
+            235.5
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day6："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1068",
+          "anchor": "分数线划定",
+          "context": "Day7:\n分数线划定\n砍树",
+          "rect": [
+            39.75,
+            279.0,
+            99.75,
+            297.0
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day7:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1873",
+          "anchor": "砍树",
+          "context": "分数线划定\n砍树\n涂色",
+          "rect": [
+            39.75,
+            304.5,
+            63.75,
+            322.5
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day7:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4170",
+          "anchor": "涂色",
+          "context": "砍树\n涂色\n纪念品分组",
+          "rect": [
+            39.75,
+            330.0,
+            63.75,
+            348.0
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day7:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1094",
+          "anchor": "纪念品分组",
+          "context": "涂色\n纪念品分组",
+          "rect": [
+            39.75,
+            355.5,
+            99.75,
+            373.5
+          ],
+          "pdf_stage": "第一轮:",
+          "section": "Day7:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1182",
+          "anchor": "数列分段 Section II",
+          "context": "Day8：\n数列分段 Section II\n生活大爆炸版石头剪刀布",
+          "rect": [
+            39.75,
+            482.25,
+            141.75,
+            500.25
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day8："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1328",
+          "anchor": "生活大爆炸版石头剪刀布",
+          "context": "数列分段 Section II\n生活大爆炸版石头剪刀布\n滑雪",
+          "rect": [
+            39.75,
+            507.75,
+            171.75,
+            525.75
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day8："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1434",
+          "anchor": "滑雪",
+          "context": "生活大爆炸版石头剪刀布\n滑雪\n最大食物链计数",
+          "rect": [
+            39.75,
+            533.25,
+            63.75,
+            551.25
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day8："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4017",
+          "anchor": "最大食物链计数",
+          "context": "滑雪\n最大食物链计数",
+          "rect": [
+            39.75,
+            558.75,
+            123.75,
+            576.75
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day8："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1563",
+          "anchor": "玩具谜题",
+          "context": "Day9:\n玩具谜题\n借教室",
+          "rect": [
+            39.75,
+            620.25,
+            87.75,
+            638.25
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day9:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1083",
+          "anchor": "借教室",
+          "context": "玩具谜题\n借教室\n合唱队形",
+          "rect": [
+            39.75,
+            645.75,
+            75.75,
+            663.75
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day9:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1091",
+          "anchor": "合唱队形",
+          "context": "借教室\n合唱队形\n车站分级",
+          "rect": [
+            39.75,
+            671.25,
+            87.75,
+            689.25
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day9:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1983",
+          "anchor": "车站分级",
+          "context": "合唱队形\n车站分级",
+          "rect": [
+            39.75,
+            696.75,
+            87.75,
+            714.75
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day9:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1067",
+          "anchor": "多项式输出",
+          "context": "Day10:\n多项式输出\n金币【循环】",
+          "rect": [
+            39.75,
+            758.25,
+            99.75,
+            776.25
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day10:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2669",
+          "anchor": "金币【循环】",
+          "context": "多项式输出\n金币【循环】",
+          "rect": [
+            39.75,
+            783.75,
+            111.75,
+            801.75
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day10:"
+        }
+      ]
+    },
+    {
+      "page": 24,
+      "text": "导弹拦截​\n拓扑排序​\nDay11：​\n凯撒密码​\n字符串哈希​\n最长公共子序列​\n选课​\nDay12:​\nISBN 号码​\nKMP模板​\n编辑距离​\n飞行路线​\nDay13:​\n标题统计​\n于是他错误的点名开始了(Trie)​\n战略游戏​\n矩阵取数游戏​\nDay14:​\n神奇的幻方​\n无线传输​\n没有上司的舞会​\n金明的预算方案​\n第三轮:​\n包含复杂 DP、高精度、综合图论及大模拟，对标高难度考题​\nDay15:​\n排座椅​\n采药​\n最短路计数​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1020",
+          "anchor": "导弹拦截",
+          "context": "导弹拦截\n拓扑排序",
+          "rect": [
+            39.75,
+            28.5,
+            87.75,
+            46.5
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day10:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/B3644",
+          "anchor": "拓扑排序",
+          "context": "导弹拦截\n拓扑排序",
+          "rect": [
+            39.75,
+            54.0,
+            87.75,
+            72.0
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day10:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1914",
+          "anchor": "凯撒密码",
+          "context": "Day11：\n凯撒密码\n字符串哈希",
+          "rect": [
+            39.75,
+            115.5,
+            87.75,
+            133.5
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day11："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3370",
+          "anchor": "字符串哈希",
+          "context": "凯撒密码\n字符串哈希\n最长公共子序列",
+          "rect": [
+            39.75,
+            141.0,
+            99.75,
+            159.0
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day11："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1439",
+          "anchor": "最长公共子序列",
+          "context": "字符串哈希\n最长公共子序列\n选课",
+          "rect": [
+            39.75,
+            166.5,
+            123.75,
+            184.5
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day11："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2014",
+          "anchor": "选课",
+          "context": "最长公共子序列\n选课",
+          "rect": [
+            39.75,
+            192.0,
+            63.75,
+            210.0
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day11："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1055",
+          "anchor": "ISBN 号码",
+          "context": "Day12:\nISBN 号码\nKMP模板",
+          "rect": [
+            39.75,
+            253.5,
+            93.0,
+            271.5
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day12:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3375",
+          "anchor": "KMP模板",
+          "context": "ISBN 号码\nKMP模板\n编辑距离",
+          "rect": [
+            39.75,
+            279.0,
+            88.5,
+            297.0
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day12:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2758",
+          "anchor": "编辑距离",
+          "context": "KMP模板\n编辑距离\n飞行路线",
+          "rect": [
+            39.75,
+            304.5,
+            87.75,
+            322.5
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day12:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4568",
+          "anchor": "飞行路线",
+          "context": "编辑距离\n飞行路线",
+          "rect": [
+            39.75,
+            330.0,
+            87.75,
+            348.0
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day12:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P5015",
+          "anchor": "标题统计",
+          "context": "Day13:\n标题统计\n于是他错误的点名开始了(Trie)",
+          "rect": [
+            39.75,
+            391.5,
+            87.75,
+            409.5
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day13:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2580",
+          "anchor": "于是他错误的点名开始了(Trie)",
+          "context": "标题统计\n于是他错误的点名开始了(Trie)\n战略游戏",
+          "rect": [
+            39.75,
+            417.0,
+            201.0,
+            435.0
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day13:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2016",
+          "anchor": "战略游戏",
+          "context": "于是他错误的点名开始了(Trie)\n战略游戏\n矩阵取数游戏",
+          "rect": [
+            39.75,
+            442.5,
+            87.75,
+            460.5
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day13:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1005",
+          "anchor": "矩阵取数游戏",
+          "context": "战略游戏\n矩阵取数游戏",
+          "rect": [
+            39.75,
+            468.0,
+            111.75,
+            486.0
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day13:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2615",
+          "anchor": "神奇的幻方",
+          "context": "Day14:\n神奇的幻方\n无线传输",
+          "rect": [
+            39.75,
+            529.5,
+            99.75,
+            547.5
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day14:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P4391",
+          "anchor": "无线传输",
+          "context": "神奇的幻方\n无线传输\n没有上司的舞会",
+          "rect": [
+            39.75,
+            555.0,
+            87.75,
+            573.0
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day14:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1352",
+          "anchor": "没有上司的舞会",
+          "context": "无线传输\n没有上司的舞会\n金明的预算方案",
+          "rect": [
+            39.75,
+            580.5,
+            123.75,
+            598.5
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day14:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1064",
+          "anchor": "金明的预算方案",
+          "context": "没有上司的舞会\n金明的预算方案",
+          "rect": [
+            39.75,
+            606.0,
+            123.75,
+            624.0
+          ],
+          "pdf_stage": "第二轮:",
+          "section": "Day14:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1098",
+          "anchor": "排座椅",
+          "context": "Day15:\n排座椅\n采药",
+          "rect": [
+            39.75,
+            732.75,
+            75.75,
+            750.75
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day15:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1048",
+          "anchor": "采药",
+          "context": "排座椅\n采药\n最短路计数",
+          "rect": [
+            39.75,
+            758.25,
+            63.75,
+            776.25
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day15:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1144",
+          "anchor": "最短路计数",
+          "context": "采药\n最短路计数",
+          "rect": [
+            39.75,
+            783.75,
+            99.75,
+            801.75
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day15:"
+        }
+      ]
+    },
+    {
+      "page": 25,
+      "text": "传纸条​\nDay16:​\n税收与补贴问题​\n装箱问题​\n词链​\n关路灯​\nDay17：​\n螺旋矩阵​\n小A点菜​\n杂务​\n二叉苹果树​\nDay18:​\n高精度加法​\n最小生成树​\n乌龟棋​\n海战​\nDay19:​\n高精度乘法​\n单源最短路径【弱化版】​\n摆花​\n传球游戏​\nDay20:​\n阶乘之和​\n并查集​\n方格取数​\n数的划分​\nDay21:​\n高精度减法​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P1006",
+          "anchor": "传纸条",
+          "context": "传纸条",
+          "rect": [
+            39.75,
+            28.5,
+            75.75,
+            46.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day15:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1023",
+          "anchor": "税收与补贴问题",
+          "context": "Day16:\n税收与补贴问题\n装箱问题",
+          "rect": [
+            39.75,
+            90.0,
+            123.75,
+            108.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day16:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1049",
+          "anchor": "装箱问题",
+          "context": "税收与补贴问题\n装箱问题\n词链",
+          "rect": [
+            39.75,
+            115.5,
+            87.75,
+            133.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day16:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1127",
+          "anchor": "词链",
+          "context": "装箱问题\n词链\n关路灯",
+          "rect": [
+            39.75,
+            141.0,
+            63.75,
+            159.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day16:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1220",
+          "anchor": "关路灯",
+          "context": "词链\n关路灯",
+          "rect": [
+            39.75,
+            166.5,
+            75.75,
+            184.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day16:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2239",
+          "anchor": "螺旋矩阵",
+          "context": "Day17：\n螺旋矩阵\n小A点菜",
+          "rect": [
+            39.75,
+            228.0,
+            87.75,
+            246.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day17："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1164",
+          "anchor": "小A点菜",
+          "context": "螺旋矩阵\n小A点菜\n杂务",
+          "rect": [
+            39.75,
+            253.5,
+            82.5,
+            271.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day17："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1113",
+          "anchor": "杂务",
+          "context": "小A点菜\n杂务\n二叉苹果树",
+          "rect": [
+            39.75,
+            279.0,
+            63.75,
+            297.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day17："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2015",
+          "anchor": "二叉苹果树",
+          "context": "杂务\n二叉苹果树",
+          "rect": [
+            39.75,
+            304.5,
+            99.75,
+            322.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day17："
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1601",
+          "anchor": "高精度加法",
+          "context": "Day18:\n高精度加法\n最小生成树",
+          "rect": [
+            39.75,
+            366.0,
+            99.75,
+            384.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day18:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3366",
+          "anchor": "最小生成树",
+          "context": "高精度加法\n最小生成树\n乌龟棋",
+          "rect": [
+            39.75,
+            391.5,
+            99.75,
+            409.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day18:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1541",
+          "anchor": "乌龟棋",
+          "context": "最小生成树\n乌龟棋\n海战",
+          "rect": [
+            39.75,
+            417.0,
+            75.75,
+            435.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day18:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1331",
+          "anchor": "海战",
+          "context": "乌龟棋\n海战",
+          "rect": [
+            39.75,
+            442.5,
+            63.75,
+            460.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day18:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1303",
+          "anchor": "高精度乘法",
+          "context": "Day19:\n高精度乘法\n单源最短路径【弱化版】",
+          "rect": [
+            39.75,
+            504.0,
+            99.75,
+            522.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day19:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3371",
+          "anchor": "单源最短路径【弱化版】",
+          "context": "高精度乘法\n单源最短路径【弱化版】\n摆花",
+          "rect": [
+            39.75,
+            529.5,
+            171.75,
+            547.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day19:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1077",
+          "anchor": "摆花",
+          "context": "单源最短路径【弱化版】\n摆花\n传球游戏",
+          "rect": [
+            39.75,
+            555.0,
+            63.75,
+            573.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day19:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1057",
+          "anchor": "传球游戏",
+          "context": "摆花\n传球游戏",
+          "rect": [
+            39.75,
+            580.5,
+            87.75,
+            598.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day19:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1009",
+          "anchor": "阶乘之和",
+          "context": "Day20:\n阶乘之和\n并查集",
+          "rect": [
+            39.75,
+            642.0,
+            87.75,
+            660.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day20:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P3367",
+          "anchor": "并查集",
+          "context": "阶乘之和\n并查集\n方格取数",
+          "rect": [
+            39.75,
+            667.5,
+            75.75,
+            685.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day20:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1004",
+          "anchor": "方格取数",
+          "context": "并查集\n方格取数\n数的划分",
+          "rect": [
+            39.75,
+            693.0,
+            87.75,
+            711.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day20:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1025",
+          "anchor": "数的划分",
+          "context": "方格取数\n数的划分",
+          "rect": [
+            39.75,
+            718.5,
+            87.75,
+            736.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day20:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P2142",
+          "anchor": "高精度减法",
+          "context": "Day21:\n高精度减法",
+          "rect": [
+            39.75,
+            780.0,
+            99.75,
+            798.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day21:"
+        }
+      ]
+    },
+    {
+      "page": 26,
+      "text": "单源最短路径（标准版）​\n开心的金明​\n高精除低精​\n",
+      "links": [
+        {
+          "url": "https://www.luogu.com.cn/problem/P4779",
+          "anchor": "单源最短路径（标准版）",
+          "context": "单源最短路径（标准版）\n开心的金明",
+          "rect": [
+            39.75,
+            28.5,
+            171.75,
+            46.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day21:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1060",
+          "anchor": "开心的金明",
+          "context": "单源最短路径（标准版）\n开心的金明\n高精除低精",
+          "rect": [
+            39.75,
+            54.0,
+            99.75,
+            72.0
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day21:"
+        },
+        {
+          "url": "https://www.luogu.com.cn/problem/P1480",
+          "anchor": "高精除低精",
+          "context": "开心的金明\n高精除低精",
+          "rect": [
+            39.75,
+            79.5,
+            99.75,
+            97.5
+          ],
+          "pdf_stage": "第三轮:",
+          "section": "Day21:"
+        }
+      ]
+    }
+  ]
+}

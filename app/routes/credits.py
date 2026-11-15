@@ -133,10 +133,10 @@ def list_vouchers(package: Package | None = None, status: Status = 'all', q: str
 
 @router.get('/api/admin/vouchers/export')
 def export_vouchers(package: Package, status: Status = 'unused', batch: str = Query('', max_length=24),
-                    user=Depends(administrator)):
+                    q: str = Query('', max_length=100), user=Depends(administrator)):
     """Export one raw code per line for upload to a separate shop, with no shop API."""
-    where, values = voucher_filters(package, status, batch=batch)
+    where, values = voucher_filters(package, status, q.strip(), batch)
     with connect() as db:
-        codes = [row[0] for row in db.execute('SELECT v.code FROM vouchers v' + where + ' ORDER BY v.id', values)]
+        codes = [row[0] for row in db.execute('SELECT v.code FROM vouchers v LEFT JOIN users u ON u.id=v.redeemed_by' + where + ' ORDER BY v.id', values)]
     return Response('\n'.join(codes) + ('\n' if codes else ''), media_type='text/plain; charset=utf-8',
                     headers={'Content-Disposition': f'attachment; filename="vouchers-{package}-{status}.txt"', 'Cache-Control': 'no-store'})

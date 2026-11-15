@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 25
+SCHEMA_VERSION = 27
 
 
 @contextmanager
@@ -160,6 +160,11 @@ def initialize():
         db.execute('''CREATE TABLE IF NOT EXISTS presentations(
             interview_id INTEGER PRIMARY KEY REFERENCES interviews(id),
             directory TEXT NOT NULL, name TEXT NOT NULL, pages INTEGER NOT NULL)''')
+        db.execute('''CREATE TABLE IF NOT EXISTS interview_start_requests(
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            request_key TEXT NOT NULL, digest TEXT NOT NULL,
+            interview_id INTEGER NOT NULL UNIQUE REFERENCES interviews(id) ON DELETE CASCADE,
+            PRIMARY KEY(user_id,request_key))''')
         db.execute("""CREATE TABLE IF NOT EXISTS interview_recordings(
             id TEXT PRIMARY KEY, interview_id INTEGER NOT NULL REFERENCES interviews(id),
             created REAL NOT NULL, audio_path TEXT, mime_type TEXT NOT NULL DEFAULT 'audio/webm',
@@ -228,4 +233,6 @@ def initialize():
         initialize_contribution_rewards(db)
         from .services.announcements import initialize as initialize_announcements
         initialize_announcements(db)
+        from .services.coding_schema import initialize_coding
+        initialize_coding(db)
         db.execute(f'PRAGMA user_version={SCHEMA_VERSION}')

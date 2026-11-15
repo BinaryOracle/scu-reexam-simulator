@@ -8,28 +8,37 @@ import {
   hasUnsavedWork,
   pauseInterviewAudio,
   clearInterviewState,
-} from "./interview.js?v=20261114-ui-v20";
+} from "./interview.js?v=20261115-ui-v24";
 import {
   refreshContests,
   refreshSubmissions,
   createContest,
   clearContestState,
+  suspendContestWorkspace,
   setupContestCreation,
-} from "./contest.js?v=20261115-navigation-v3";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261114-ui-v23";
-import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261114-training-v9";
+  requestLuoguSubmit,
+} from "./contest.js?v=20261115-contest-records-v1";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-post-save-refresh-feedback-v1";
+import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261115-profile-independent-sections-v1";
 import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
 
-import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261114-training-v11";
-import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261114-training-v11";
+import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261115-retry-load-v1";
+import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-dialog-v1";
 
-import { clearTransfers } from "./credit-transfers.js?v=20261114-training-v10";
-import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261114-home-v3";
+import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-announcement-load-error-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
+
+import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261115-coding-integrated-v2";
+import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261115-coding-v1";
+
+configureCodingBridge(requestLuoguSubmit);
 
 const views = {
   home: { label: "备考首页", refresh: refreshHome },
   announcementsAdmin: { label: "公告管理", refresh: refreshAnnouncementsAdmin },
+  coding: { label: "算法带刷", refresh: refreshCoding },
+  codingAdmin: { label: "带刷题库", refresh: refreshCodingAdmin },
   training: { label: "每日训练", refresh: refreshTraining },
   trainingAdmin: { label: "训练题库", refresh: refreshTrainingAdmin },
   users: { label: "用户管理", refresh: refreshUsers },
@@ -42,11 +51,11 @@ const views = {
     refresh: refreshInterviews,
   },
   contest: {
-    label: state.adminMode ? "考务管理" : "上机考试",
+    label: "上机考试",
     refresh: refreshContests,
   },
   submissions: {
-    label: state.adminMode ? "提交总览" : "提交记录",
+    label: "提交记录",
     refresh: refreshSubmissions,
   },
   adminDenied: { label: "后台管理", refresh: async () => {} },
@@ -59,8 +68,13 @@ function configureSidebar() {
   document.body.classList.toggle("sidebar-collapsed", collapsed);
   syncSidebarToggle();
   window.addEventListener("interview-layout-changed", syncSidebarToggle);
+  window.addEventListener("resize", syncSidebarToggle);
   $("sidebarToggle").addEventListener("click", () => {
     if (document.body.classList.contains("interview-immersive")) {
+      if (window.matchMedia("(max-width: 620px)").matches) {
+        document.body.classList.toggle("interview-shell-open");
+        syncSidebarToggle();
+      }
       return;
     }
     const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
@@ -73,14 +87,32 @@ function configureSidebar() {
     item.setAttribute("aria-label", item.title);
   }
 }
+function configureContestNavigation() {
+  const submenu = $("contestSubnav");
+  const toggle = $("contestNavToggle");
+  const admin = state.adminMode && Boolean(state.user?.is_admin);
+  const isExpanded = !admin;
+  submenu.hidden = admin;
+  toggle.hidden = true;
+  toggle.setAttribute("aria-expanded", String(isExpanded));
+  toggle.setAttribute("aria-label", `${isExpanded ? "收起" : "展开"}上机考试菜单`);
+  toggle.title = `${isExpanded ? "收起" : "展开"}上机考试菜单`;
+  toggle.querySelector("span").textContent = isExpanded ? "⌃" : "⌄";
+}
 function syncSidebarToggle() {
-  const collapsed = document.body.classList.contains("interview-immersive")
-    ? !document.body.classList.contains("interview-shell-open")
+  const immersive = document.body.classList.contains("interview-immersive");
+  const menuOpen = document.body.classList.contains("interview-shell-open");
+  const collapsed = immersive
+    ? !menuOpen
     : document.body.classList.contains("sidebar-collapsed");
   const control = $("sidebarToggle");
-  control.hidden = document.body.classList.contains("interview-immersive");
-  control.textContent = collapsed ? "›" : "‹";
-  control.title = collapsed ? "展开侧边栏" : "收起侧边栏";
+  control.hidden = immersive && !window.matchMedia("(max-width: 620px)").matches;
+  control.textContent = immersive
+    ? menuOpen ? "×" : "☰"
+    : collapsed ? "›" : "‹";
+  control.title = immersive
+    ? menuOpen ? "关闭菜单" : "打开菜单"
+    : collapsed ? "展开侧边栏" : "收起侧边栏";
   control.setAttribute("aria-label", control.title);
   control.setAttribute("aria-expanded", String(!collapsed));
 }
@@ -88,9 +120,9 @@ function syncSidebarToggle() {
 function allowedViews() {
   if (state.adminMode)
     return state.user.is_admin
-      ? ["users", "questionBank", "trainingAdmin", "announcementsAdmin", "vouchers", "systemSettings", "interview", "contest", "submissions", "profile"]
+      ? ["users", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "vouchers", "systemSettings", "interview", "contest", "profile"]
       : ["adminDenied"];
-  return ["home", "training", "interview", "contest", "submissions", "profile"];
+  return ["home", "training", "coding", "interview", "contest", "submissions", "profile"];
 }
 function configureAccess() {
   const allowed = allowedViews();
@@ -105,10 +137,13 @@ function configureAccess() {
       ? state.user.is_superadmin ? "超级管理员" : "后台管理员"
       : "普通用户"
     : "用户工作台";
+  configureContestNavigation();
   return allowed;
 }
 async function show(view, force = false, { historyMode = "push" } = {}) {
+  if (state.adminMode && view === "submissions") view = "contest";
   if (!force && !allowNavigation()) return;
+  if (view !== "contest") suspendContestWorkspace();
   clearVisiblePasswords();
   clearProfilePassword();
   clearTransfers();
@@ -119,9 +154,10 @@ async function show(view, force = false, { historyMode = "push" } = {}) {
   if (historyMode !== "none") writeAppViewRoute(selected, Object.keys(views), { replace: historyMode === "replace" });
   document.body.classList.toggle("interview-immersive", selected === "interview" && !$("interviewDetail").hidden && $("interviewDetail").dataset.immersive === "true");
   document.body.classList.toggle("contest-immersive", selected === "contest" && document.body.dataset.contestWorkspace === "true" && !state.adminMode);
+  document.body.classList.toggle("coding-immersive", selected === "coding" && /^#view=coding\/question\/\d+$/.test(location.hash));
   document.body.classList.remove("interview-shell-open");
   syncSidebarToggle();
-  if (selected !== currentView) { pauseInterviewAudio(); clearTraining(); clearTrainingAdmin(); }
+  if (selected !== currentView) { pauseInterviewAudio(); clearTraining(); clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); }
   currentView = selected;
   for (const [key, value] of Object.entries(views)) {
     $(key).hidden = key !== selected;
@@ -142,7 +178,7 @@ async function enterWorkspace() {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin();
   $("login").hidden = true;
   $("app").hidden = false;
   $("today").textContent = new Date().toLocaleDateString("zh-CN", {
@@ -153,7 +189,9 @@ async function enterWorkspace() {
   configureInterviewMode();
   configureAccess();
   const fallback = state.adminMode ? "users" : "home";
-  await show(readAppRoute(location.hash, allowedViews(), fallback), false, { historyMode: "replace" });
+  const route = readAppRoute(location.hash, Object.keys(views), fallback);
+  await show(route, false, { historyMode: "replace" });
+  document.documentElement.classList.remove("session-restoring");
 }
 function configureShell() {
   document.body.classList.toggle("admin-mode", state.adminMode);
@@ -166,7 +204,7 @@ function configureShell() {
   $("workspaceLabel").textContent = "平台管理空间";
   document.querySelector(".login-card h2").textContent = "登录管理后台";
   document.querySelector(".login-description").textContent =
-    "使用管理员账号，管理用户、题库与考务。";
+    "使用管理员账号，管理用户、题库与上机考试。";
   document.querySelector(".login-story .brand-subtitle").textContent =
     "后台管理系统";
   for (const item of document.querySelectorAll("[data-view]")) {
@@ -179,7 +217,7 @@ function configureShell() {
     if (span) span.textContent = views[item.dataset.view].label;
   }
   $("contestTitleHeading").replaceChildren(
-    document.createTextNode("考务管理"),
+    document.createTextNode("上机考试"),
     Object.assign(document.createElement("span"), {
       textContent: ".",
       className: "heading-dot",
@@ -197,7 +235,7 @@ window.addEventListener("popstate", () => {
   if (!state.user) return;
   if (!isAppRouteHash(location.hash)) return;
   const fallback = state.adminMode ? "users" : "home";
-  const route = readAppRoute(location.hash, allowedViews(), fallback);
+  const route = readAppRoute(location.hash, Object.keys(views), fallback);
   if (!allowNavigation()) {
     writeAppRoute(currentView || fallback, { replace: true });
     return;
@@ -317,14 +355,14 @@ $("togglePassword").addEventListener("click", () => {
 });
 async function logout() {
   if (!allowNavigation()) return;
-  if (hasUnsavedWork() && !await confirmAction("有尚未保存的面试文本，退出后将丢失这些修改。", { title: "退出登录？", confirmText: "退出登录" })) return;
+  if (hasUnsavedWork() && !await confirmAction("有尚未保存的面试内容或已选择的 PPT，退出后需要重新准备。", { title: "退出登录？", confirmText: "退出登录" })) return;
   await api("/logout", { method: "POST" });
   clearProfilePassword();
   clearTransfers();
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin();
   sessionStorage.removeItem("token");
   state.token = null;
   location.reload();
@@ -362,6 +400,7 @@ window.addEventListener("account-access-updated", () =>
 );
 let updatingAccess = false;
 window.addEventListener("session-expired", () => {
+  document.documentElement.classList.remove("session-restoring");
   clearProfilePassword();
   clearTransfers();
   state.token = null;
@@ -370,7 +409,7 @@ window.addEventListener("session-expired", () => {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin();
   for (const dialog of document.querySelectorAll("dialog[open]"))
     dialog.close();
   $("app").hidden = true;
@@ -404,7 +443,7 @@ window.addEventListener("account-session-ended", event => {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin();
   for (const dialog of document.querySelectorAll("dialog[open]")) dialog.close();
   currentView = null;
   $("app").hidden = true;
@@ -443,4 +482,5 @@ if (state.token)
     sessionStorage.removeItem("token");
     $("app").hidden = true;
     $("login").hidden = false;
+    document.documentElement.classList.remove("session-restoring");
   });

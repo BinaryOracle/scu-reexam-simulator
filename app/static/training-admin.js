@@ -1,7 +1,7 @@
 /** Training-only administration; submission review never lists private drafts. */
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, notify, badge, requestText } from './ui.js?v=20261114-ui-v17';
-import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261114-ui-v18';
+import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
 let listRequest=0;
 let generation=0, settings=null, tab='pending', page=1, query='', collection='', section='';
 function live(key,token) { return key===generation && token===state.token && !$('trainingAdmin').hidden; }
@@ -15,7 +15,8 @@ function render() {
   listRequest++;
   const root=$('trainingAdminContent');root.replaceChildren();
   const head=el('div','','page-heading');const title=el('div');title.append(el('span','DAILY PRACTICE','eyebrow'),el('h1','训练题库'),el('p','维护参考答案，认真对待每一份分享。','muted'));
-  head.append(title,button('新增公开题',()=>questionEditor(settings.collections,null,async data=>{await api('/admin/training/questions',{method:'POST',body:JSON.stringify(data)});notify('公开训练题已保存');await list();},true,section||'interview',collection),'button primary'));root.append(head);
+  if(tab==='public')head.append(button('新增公开题',()=>questionEditor(settings.collections,null,async data=>{await api('/admin/training/questions',{method:'POST',body:JSON.stringify(data)});await refreshSavedQuestions('公开训练题已保存');},true,section||'interview',collection),'button primary'));
+  root.append(head);
   const tabs=el('div','','learning-tabs');
   for(const [value,label] of [['pending','投稿审核'],['public','公开题库'],['rewards','打卡奖励'],['contribution','投稿奖励'],['settings','训练设置']]) {
     const control=button(label,async()=>{tab=value;page=1;render();await list();},`button ${tab===value?'primary':'quiet'}`);control.setAttribute('aria-pressed',String(tab===value));tabs.append(control);
@@ -34,6 +35,11 @@ function render() {
     root.append(el('p',tab==='pending'?'只有用户主动提交的内容才会出现在这里；通过后才对所有用户可见。':'训练题库独立于模拟面试题库，修改不会影响已有面试记录。','muted'));
   }
   const listNode=el('div','','learning-list');listNode.id='trainingAdminList';root.append(listNode);
+}
+async function refreshSavedQuestions(message) {
+  notify(message);
+  try { await list(); }
+  catch (error) { notify(`题目已保存，但列表刷新失败：${error.message}。请刷新列表查看。`, 'error'); }
 }
 async function list() {
   if(tab==='settings'||tab==='contribution'||$('trainingAdmin').hidden||!state.user?.is_admin)return;
@@ -59,7 +65,7 @@ async function list() {
           await api(`/admin/training/questions/${item.id}/review`,{method:'POST',body:JSON.stringify({version:item.version,approve:false,reason})});notify('已反馈审核意见');await list();
         },'button quiet'));
       }else{
-        if(item.official)actions.append(button(item.category==='translation'?'编辑译文':'编辑答案',()=>questionEditor(settings.collections,item,async data=>{await api(`/admin/training/questions/${item.id}`,{method:'PATCH',body:JSON.stringify({...data,version:item.version,active:item.active})});notify('题目与答案已更新');await list();},true,section||'interview')));
+        if(item.official)actions.append(button(item.category==='translation'?'编辑译文':'编辑答案',()=>questionEditor(settings.collections,item,async data=>{await api(`/admin/training/questions/${item.id}`,{method:'PATCH',body:JSON.stringify({...data,version:item.version,active:item.active})});await refreshSavedQuestions('题目与答案已更新');},true,section||'interview')));
         actions.append(button(item.active?'停用题目':'启用题目',async()=>{await api(`/admin/training/questions/${item.id}/active`,{method:'POST',body:JSON.stringify({version:item.version,active:!item.active})});await list();},'button secondary'));
       }
     }row.append(info,actions);root.append(row);

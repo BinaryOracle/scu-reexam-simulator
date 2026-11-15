@@ -2,7 +2,7 @@
 import sqlite3
 import time
 import re
-from typing import Annotated
+from typing import Annotated, Literal
 from pathlib import Path
 from urllib.parse import urlsplit
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -343,16 +343,62 @@ def problems(cid: int):
             for row in db.execute('SELECT * FROM problems WHERE contest_id=? ORDER BY id', (cid,))]
 
 
+@router.get('/submissions/users')
+def submission_users(page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
+                    actor=Depends(administrator)):
+    with connect() as db:
+        visibility = '' if actor['is_superadmin'] else ' AND users.is_admin=0'
+        total = db.execute(f'''SELECT COUNT(*) FROM (
+            SELECT submissions.user_id FROM submissions JOIN users ON users.id=submissions.user_id
+            WHERE 1=1{visibility} GROUP BY submissions.user_id
+        )''').fetchone()[0]
+        users = [dict(row) for row in db.execute(f'''SELECT users.id AS user_id,users.username,COUNT(submissions.id) AS submission_count
+            FROM users JOIN submissions ON submissions.user_id=users.id
+            WHERE 1=1{visibility} GROUP BY users.id,users.username
+            ORDER BY users.username COLLATE NOCASE LIMIT ? OFFSET ?''', (page_size,(page-1)*page_size))]
+        stats = db.execute(f'''SELECT COUNT(*) AS total,
+            SUM(CASE WHEN status='Accepted' THEN 1 ELSE 0 END) AS accepted,
+            SUM(CASE WHEN status IN ('Waiting for browser extension','Submitted','Judging') THEN 1 ELSE 0 END) AS judging
+            FROM submissions JOIN users ON users.id=submissions.user_id WHERE 1=1{visibility}''').fetchone()
+        return {'items':users,'total':total,'page':page,'page_size':page_size,
+            'pages':(total+page_size-1)//page_size,
+            'stats':{'total':stats['total'] or 0,'accepted':stats['accepted'] or 0,'judging':stats['judging'] or 0}}
+
+
+@router.get('/submissions/users/{user_id}')
+def user_submissions(user_id: int, page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
+                     actor=Depends(administrator)):
+    with connect() as db:
+        user = db.execute('SELECT id,username FROM users WHERE id=? AND (? OR is_admin=0)',
+                          (user_id,actor['is_superadmin'])).fetchone()
+        if not user: raise HTTPException(404, '用户不存在')
+        total = db.execute('SELECT COUNT(*) FROM submissions WHERE user_id=?', (user_id,)).fetchone()[0]
+        rows = [dict(row) for row in db.execute('''SELECT submissions.id,users.username,problem_id,problems.title AS problem_title,
+            language,status,created,remote_submission_id,detail FROM submissions
+            JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
+            WHERE submissions.user_id=? ORDER BY submissions.id DESC LIMIT ? OFFSET ?''',
+            (user_id,page_size,(page-1)*page_size))]
+        return {'items':rows,'total':total,'page':page,'page_size':page_size,
+            'pages':(total+page_size-1)//page_size}
+
+
 @router.get('/submissions')
 def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
-                contest_id: int | None = Query(default=None, ge=1), actor=Depends(administrator)):
+                contest_id: int | None = Query(default=None, ge=1),
+                user_id: int | None = Query(default=None, ge=1),
+                problem_id: int | None = Query(default=None, ge=1),
+                status: Literal['Accepted'] | None = None,
+                participants_only: bool = False, actor=Depends(administrator)):
+    """Filter records within an administrator's visibility, including participant-only contest metrics."""
     with connect() as db:
         clauses = []
         params: list[object] = []
-        if not actor['is_superadmin']: clauses.append('users.is_admin=0')
-        if contest_id is not None:
-            clauses.append('problems.contest_id=?')
-            params.append(contest_id)
+        if not actor['is_superadmin'] or participants_only: clauses.append('users.is_admin=0')
+        for column, value in [('problems.contest_id', contest_id), ('submissions.user_id', user_id),
+                              ('submissions.problem_id', problem_id), ('submissions.status', status)]:
+            if value is not None:
+                clauses.append(f'{column}=?')
+                params.append(value)
         where = 'WHERE ' + ' AND '.join(clauses) if clauses else ''
         total = db.execute(f'''SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
             JOIN problems ON problems.id=submissions.problem_id {where}''', params).fetchone()[0]

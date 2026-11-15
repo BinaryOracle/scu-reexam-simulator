@@ -1,6 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { normalizeSubmissionPage, refreshContestProblemStats } from "../app/static/contest-model.mjs";
+import { canRevealLuoguSource, normalizeSubmissionPage, refreshContestProblemStats, submissionPanelMessage } from "../app/static/contest-model.mjs";
+
+test("gives contest submission panels explicit loading, empty and retry states", () => {
+  assert.deepEqual(submissionPanelMessage("loading"), {
+    title: "正在加载提交记录", description: "提交记录正在同步，请稍候。",
+  });
+  assert.deepEqual(submissionPanelMessage("empty"), {
+    title: "还没有提交记录", description: "完成代码后提交评测，结果将在这里展示。",
+  });
+  assert.deepEqual(submissionPanelMessage("error"), {
+    title: "提交记录暂时无法加载", description: "请检查网络连接后重试。",
+  });
+});
 
 test("refreshes cached contest problem counts after submissions", () => {
   const overview = {
@@ -26,6 +38,14 @@ test("refreshes cached contest problem counts after submissions", () => {
 test("does not refresh a different contest from stale async responses", () => {
   const overview = { id: 8, problems: [{ id: 22, attempt_count: 0 }] };
   assert.equal(refreshContestProblemStats(overview, { id: 7, problems: [] }), overview);
+});
+
+test("reveals Luogu source IDs to participants only after the contest ends", () => {
+  const contest = { starts: 100, ends: 200 };
+  assert.equal(canRevealLuoguSource(contest, 150), false);
+  assert.equal(canRevealLuoguSource(contest, 200), false);
+  assert.equal(canRevealLuoguSource(contest, 201), true);
+  assert.equal(canRevealLuoguSource(contest, 150, true), true);
 });
 
 test("normalizes legacy submission arrays for the current table and pagination controls", () => {

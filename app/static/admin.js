@@ -1,6 +1,6 @@
 /** Account management UI. Backend APIs remain the source of authorization. */
 import { api, state } from "./api.js?v=20261114-ui-v17";
-import { readCreditSettings } from "./credits.js?v=20261114-training-v9";
+import { readCreditSettings } from "./credits.js?v=20261115-dialog-v1";
 import {
   $,
   el,
@@ -20,6 +20,7 @@ let savingPassword = false;
 let bankQuestions = [];
 let bankPage = 1;
 let bankFilterKey = "";
+let questionEditorBaseline = null;
 const visiblePasswords = new Set();
 export function clearVisiblePasswords() {
   for (const hide of visiblePasswords) hide();
@@ -82,9 +83,22 @@ export async function refreshQuestionBank() {
   bankQuestions = await api("/admin/question-bank");
   renderQuestionBank();
 }
+let luoguSettingsRevision = 0;
 export async function refreshLuoguSettings() {
+  const revision = ++luoguSettingsRevision;
   const settings = await api('/admin/luogu-settings');
+  if (revision !== luoguSettingsRevision || $('luoguAppOrigin').readOnly) return;
   $('luoguAppOrigin').value = `${settings.app_origin}/`;
+  $('luoguSettingsStatus').hidden = true;
+}
+function questionEditorState() {
+  return JSON.stringify([$("questionCategory").value, $("questionSubject").value, $("questionContent").value, $("questionActive").checked]);
+}
+function questionEditorDirty() {
+  return questionEditorBaseline !== null && questionEditorState() !== questionEditorBaseline;
+}
+async function discardQuestionChanges() {
+  return !questionEditorDirty() || await confirmAction("未保存的题目修改将丢失。", { title: "放弃未保存的修改？", confirmText: "放弃修改", danger: true });
 }
 function resetQuestionEditor() {
   $("questionBankForm").reset();
@@ -92,6 +106,9 @@ function resetQuestionEditor() {
   $("questionActive").checked = true;
   $("cancelQuestionEdit").hidden = true;
   syncQuestionCategory();
+  $("questionEditorTitle").textContent = "新增题目";
+  $("questionBankForm").querySelector('[type="submit"]').textContent = "添加题目";
+  questionEditorBaseline = questionEditorState();
 }
 function syncQuestionCategory() {
   $("questionSubjectField").hidden = $("questionCategory").value !== "professional";
@@ -119,7 +136,8 @@ function renderQuestionBank() {
     const content = el("p", row.content);
     content.lang = row.category === "professional" ? "zh" : "en";
     const actions = el("div", "", "table-actions");
-    actions.append(button("编辑", () => {
+    actions.append(button("编辑", async () => {
+      if (!await discardQuestionChanges()) return;
       $("questionBankId").value = row.id;
       $("questionCategory").value = row.category;
       $("questionSubject").value = row.subject || "data_structures";
@@ -127,11 +145,15 @@ function renderQuestionBank() {
       $("questionActive").checked = !!row.active;
       $("cancelQuestionEdit").hidden = false;
       syncQuestionCategory();
+      $("questionEditorTitle").textContent = "编辑题目";
+      $("questionBankForm").querySelector('[type="submit"]').textContent = "保存修改";
+      questionEditorBaseline = questionEditorState();
       $("questionBankForm").scrollIntoView({ behavior: "smooth", block: "start" });
       $("questionContent").focus();
     }, "text-button"), button("删除", async () => {
       if (!await confirmAction("已抽取到面试记录中的题目不会受影响。此操作无法撤销。", { title: "删除这道题目？", confirmText: "删除题目", danger: true })) return;
       await api(`/admin/question-bank/${row.id}`, { method: "DELETE" });
+      if ($("questionBankId").value === String(row.id)) resetQuestionEditor();
       await refreshQuestionBank();
       notify("题目已删除。");
     }, "text-button"));
@@ -355,12 +377,14 @@ async function submitUsername(event) {
   const control = $("usernameForm").querySelector('[type="submit"]');
   control.disabled = true;
   $("usernameFormError").hidden = true;
+  let saved = false;
   try {
     const username = $("resetUsername").value;
     const result = await api(`/admin/users/${usernameTarget.id}/username`, {
       method: "POST",
       body: JSON.stringify({ username }),
     });
+    saved = true;
     $("usernameDialog").close();
     if ($("userSearch").value.trim() === usernameTarget.username)
       $("userSearch").value = username;
@@ -371,6 +395,10 @@ async function submitUsername(event) {
     await refreshUsers();
     notify("用户名已更新，后续请使用新用户名登录。密码和历史记录保持不变。");
   } catch (error) {
+    if (saved) {
+      notify("用户名已更新，但用户列表未能刷新。请点击刷新列表；不要重复提交。", "error");
+      return;
+    }
     $("usernameFormError").textContent = error.message;
     $("usernameFormError").hidden = false;
   } finally {
@@ -391,6 +419,7 @@ async function submitAccount(event) {
   savingAccount = true;
   $("saveUser").disabled = true;
   $("userFormError").hidden = true;
+  let saved = false;
   try {
     const payload = {
       username: $("accountUsername").value,
@@ -403,6 +432,7 @@ async function submitAccount(event) {
       method: "POST",
       body: JSON.stringify(payload),
     });
+    saved = true;
     $("userDialog").close();
     $("accountPassword").value = "";
     await refreshUsers();
@@ -410,6 +440,10 @@ async function submitAccount(event) {
       `${payload.is_admin ? "管理员" : "普通用户"}已创建，请将账号信息告知使用者。`,
     );
   } catch (error) {
+    if (saved) {
+      notify("用户已创建，但列表未能刷新。请点击刷新列表；不要重复创建。", "error");
+      return;
+    }
     $("userFormError").textContent = error.message;
     $("userFormError").hidden = false;
   } finally {
@@ -430,11 +464,13 @@ async function submitPassword(event) {
   savingPassword = true;
   const control = $("passwordForm").querySelector('[type="submit"]');
   control.disabled = true;
+  let saved = false;
   try {
     await api(`/admin/users/${passwordTarget.id}/password`, {
       method: "POST",
       body: JSON.stringify({ password }),
     });
+    saved = true;
     $("passwordDialog").close();
     $("passwordForm").reset();
     if (passwordTarget.id === state.user.id) {
@@ -445,6 +481,10 @@ async function submitPassword(event) {
     await refreshUsers();
     notify("密码已重置，该用户需要重新登录。");
   } catch (error) {
+    if (saved) {
+      notify("密码已重置，但用户列表未能刷新。请点击刷新列表；用户需要使用新密码登录。", "error");
+      return;
+    }
     $("passwordFormError").textContent = error.message;
     $("passwordFormError").hidden = false;
   } finally {
@@ -455,12 +495,16 @@ async function submitPassword(event) {
 export function setupAdmin() {
   document.addEventListener("visibilitychange", () => { if (document.hidden) clearVisiblePasswords(); });
   $("newUser").addEventListener("click", () => void openAccount().catch(error => notify(error.message, "error")));
+  $("luoguAppOrigin").addEventListener("input", () => { luoguSettingsRevision++; $("luoguSettingsStatus").hidden = true; });
   $("luoguSettingsForm").addEventListener("submit", (event) => {
     event.preventDefault();
+    luoguSettingsRevision++;
     const form = event.currentTarget;
     const save = form.querySelector('[type="submit"]');
     const status = $("luoguSettingsStatus");
     save.disabled = true;
+    const origin = $("luoguAppOrigin");
+    origin.readOnly = true;
     status.hidden = true;
     void api('/admin/luogu-settings', {
       method: 'PATCH',
@@ -472,17 +516,22 @@ export function setupAdmin() {
       status.classList.remove('form-error');
       notify('洛谷插件网站来源已更新。');
     }).catch(error => {
-      status.textContent = error.message;
+      status.textContent = error.status === 422
+        ? '请输入仅包含协议、域名和端口的地址，不要填写路径或参数。正式网站须使用 HTTPS。'
+        : error.message;
       status.hidden = false;
       status.classList.add('form-error');
-    }).finally(() => { save.disabled = false; });
+    }).finally(() => { save.disabled = false; origin.readOnly = false; });
   });
   $("questionBankForm").addEventListener("submit", (event) => void submitQuestion(event).catch((error) => notify(error.message, "error")));
   $("questionCategory").addEventListener("change", syncQuestionCategory);
   $("questionBankFilter").addEventListener("change", renderQuestionBank);
   $("questionBankSearch").addEventListener("input", renderQuestionBank);
   $("exportQuestionBank").addEventListener("click", () => void exportQuestionBank().catch(error => notify(error.message, "error")));
-  $("cancelQuestionEdit").addEventListener("click", resetQuestionEditor);
+  $("cancelQuestionEdit").addEventListener("click", async () => {
+    if (await discardQuestionChanges()) resetQuestionEditor();
+  });
+  questionEditorBaseline = questionEditorState();
   $("userSearch").addEventListener("input", renderUsers);
   $("userStatus").addEventListener("change", renderUsers);
   $("userForm").addEventListener("submit", submitAccount);

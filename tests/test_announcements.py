@@ -111,6 +111,20 @@ def test_only_administrators_manage_announcements(client):
     assert response.status_code==403
 
 
+def test_admin_announcement_list_is_server_paginated(client):
+    admin=login(client,'manager')
+    for index in range(11):
+        response=client.post('/api/admin/announcements',headers=admin,json={
+            'title':f'分页公告 {index:02d}','summary':'','cover_url':'','body_markdown':'正文'})
+        assert response.status_code==201
+    first=client.get('/api/admin/announcements?page=1&page_size=5',headers=admin).json()
+    third=client.get('/api/admin/announcements?page=3&page_size=5',headers=admin).json()
+    assert first['total']==third['total']==12
+    assert first['page']==1 and third['page']==3
+    assert first['page_size']==third['page_size']==5
+    assert len(first['items'])==5 and len(third['items'])==2
+
+
 def test_announcement_images_are_bounded_and_private_until_published(client):
     admin,alice=login(client,'manager'),login(client,'alice')
     png=b'\x89PNG\r\n\x1a\n' + b'\x00' * 32

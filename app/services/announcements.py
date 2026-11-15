@@ -142,13 +142,20 @@ def serialize(row, *, admin=False):
             'published_at':row['published_at']} | ({'created_by':row['created_by'],'updated_by':row['updated_by']} if admin else {})
 
 
-def list_items(db, *, admin=False, status='', q=''):
+def list_items(db, *, admin=False, status='', q='', page=1, page_size=10):
     clauses, values = [], []
     if not admin: clauses.append("status='published'")
     elif status: clauses.append('status=?'); values.append(status)
     if q: clauses.append('instr(lower(title),lower(?))>0'); values.append(q)
     where = ' WHERE ' + ' AND '.join(clauses) if clauses else ''
-    return [serialize(row,admin=admin) for row in db.execute('SELECT * FROM announcements'+where+' ORDER BY COALESCE(published_at,updated) DESC,id DESC',values)]
+    order = ' ORDER BY COALESCE(published_at,updated) DESC,id DESC'
+    if not admin:
+        return [serialize(row,admin=False) for row in db.execute('SELECT * FROM announcements'+where+order,values)]
+    total = db.execute('SELECT COUNT(*) FROM announcements'+where,values).fetchone()[0]
+    rows = db.execute('SELECT * FROM announcements'+where+order+' LIMIT ? OFFSET ?',
+                      (*values,page_size,(page-1)*page_size))
+    return {'items':[serialize(row,admin=True) for row in rows], 'total':total,
+            'page':page, 'page_size':page_size, 'pages':(total+page_size-1)//page_size}
 
 
 def get_item(db, aid, *, public=False):

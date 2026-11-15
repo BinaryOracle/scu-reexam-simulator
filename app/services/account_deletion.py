@@ -36,6 +36,9 @@ def delete_account(db, account):
         ON CONFLICT(key) DO UPDATE SET value=CAST(MAX(CAST(app_settings.value AS INTEGER),CAST(excluded.value AS INTEGER)) AS TEXT)''', (str(uid),))
     # Public contributions survive without an owner; private drafts are removed from all draws.
     db.execute("UPDATE training_questions SET deleted=1,question='',answer='',images='[]',source_info='{}' WHERE owner_user_id=? AND visibility='private'", (uid,))
+    db.execute("""UPDATE coding_questions SET deleted=1,active=0,title='已删除的私人题目',statement='',
+        samples='[]',reference_code='',source_url='',remote_problem_id='',source_info='{}'
+        WHERE owner_user_id=? AND visibility='private'""", (uid,))
     db.execute('DELETE FROM users WHERE id=?', (uid,))
     return AccountFiles(audio, presentations)
 

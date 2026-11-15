@@ -88,6 +88,9 @@ image = "scu-judge:1"
 timeout_seconds = 5
 cleanup_timeout_seconds = 5 # 超时后强制移除本次评测容器的等待上限
 memory_mb = 256
+compile_timeout_seconds = 30
+output_limit_bytes = 65536 # 每个样例 stdout/stderr 各自的最大字节数
+artifact_limit_bytes = 16777216 # 编译产物及容器文件写入上限
 
 [interview]
 duration_seconds = 600

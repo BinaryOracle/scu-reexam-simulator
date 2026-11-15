@@ -1,11 +1,10 @@
 /** Daily practice cards, sequential review, favorites and private contributions. */
 import { api, state } from './api.js?v=20261114-ui-v17';
-import { $, el, button, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
-import { selectField, pagination, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261114-ui-v18';
+import { $, el, button, emptyState, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
+import { selectField, pagination, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
 let generation = 0, homeData = null, session = null;
 let listRequest = 0;
 let section = 'interview';
-let sectionRequest = 0;
 let collection = '', source = 'all', mode = 'random', tab = 'home', page = 1, search = '';
 let questionCount = null, countMode = 'custom';
 function live(key, token) { return key === generation && token === state.token && !$('training').hidden; }
@@ -13,23 +12,31 @@ export function clearTraining() {
   generation++; session = null; homeData = null; clearLearningMedia();
   $('trainingContent')?.replaceChildren();
 }
-async function loadHome() {
-  const key = generation, token = state.token, selectedSection = section;
+async function loadHome(selectedSection = section) {
+  const key = generation, token = state.token;
   const value = await api(`/training/home?section_id=${selectedSection}`);
-  if (!live(key, token) || selectedSection !== section) return false;
-  homeData = value;
+  if (!live(key, token)) return false;
+  section = selectedSection; homeData = value;
   if (collection && !value.collections.some(c => c.id === collection)) collection='';
   return true;
 }
 export async function refreshTraining() {
   const key = ++generation, token = state.token;
-  $('trainingContent').replaceChildren(el('div', '正在加载今日训练…', 'learning-loading'));
-  const value = await api(`/training/home?section_id=${section}`);
-  if (!live(key, token)) return;
-  homeData = value; session = null;
-  if (collection && !value.collections.some(c => c.id === collection)) collection='';
-  render();
-  if (tab !== 'home') await list();
+  const root = $('trainingContent');
+  root.replaceChildren(el('div', '正在加载今日训练…', 'learning-loading'));
+  try {
+    const value = await api(`/training/home?section_id=${section}`);
+    if (!live(key, token)) return;
+    homeData = value; session = null;
+    if (collection && !value.collections.some(c => c.id === collection)) collection='';
+    render();
+    if (tab !== 'home') await list();
+  } catch {
+    if (!live(key, token)) return;
+    const message = emptyState('训练暂时无法加载', '请检查网络连接后重试。', '◇');
+    message.append(button('重新加载', () => { void refreshTraining(); }, 'button secondary'));
+    root.replaceChildren(message);
+  }
 }
 
 export function selectTrainingSection(value) {
@@ -42,13 +49,15 @@ function render() {
   const head = el('div', '', 'page-heading');
   const title = el('div'); title.append(el('span', 'A LITTLE EVERY DAY', 'eyebrow'), el('h1', '每日训练'), el('p', '把大目标，拆成每天的一小步。', 'muted'));
   head.append(title, button('新增题目', () => editQuestion(), 'button secondary'));
+  head.hidden = Boolean(session);
   root.append(head);
   const chapters = el('div', '', 'learning-chapters'); chapters.setAttribute('aria-label', '训练篇章');
   for (const item of homeData.sections) {
     const control = button('', async () => {
-      const request = ++sectionRequest;
-      section = item.id; collection = ''; page = 1; session = null; search = '';
-      if (await loadHome() && request === sectionRequest) { render(); if (tab !== 'home') await list(); }
+      generation++;
+      if (!await loadHome(item.id)) return;
+      collection = ''; page = 1; session = null; search = '';
+      render(); if (tab !== 'home') await list();
     }, `learning-chapter ${section === item.id ? 'selected' : ''}`);
     control.setAttribute('aria-pressed', String(section === item.id));
     control.append(el('strong', item.name), el('span', item.count ? `${item.count} 道可练题目` : '等待你来补充'));
@@ -56,11 +65,13 @@ function render() {
   }
   if (!session) root.append(chapters);
   const tabs = el('div', '', 'learning-tabs');
+  tabs.hidden = Boolean(session);
   for (const [value, label] of [['home','今日练习'],['favorites','重点回顾'],['mine','我的题目']]) {
     const control = button(label, async () => {
+      generation++;
+      if (value === 'home' && !await loadHome()) return;
       tab = value; page = 1; session = null;
-      if (tab === 'home') { if (await loadHome()) render(); }
-      else { render(); await list(); }
+      render(); if (tab !== 'home') await list();
     }, `button ${tab === value ? 'primary' : 'quiet'}`);
     control.setAttribute('aria-pressed', String(tab === value)); tabs.append(control);
   }
@@ -157,7 +168,7 @@ function renderHome(root) {
   m.input.addEventListener('change', () => { mode = m.input.value; });
   const begin = button('开始训练 →', async () => {
     if (!form.reportValidity()) return;
-    const key = generation, token = state.token;
+    const key = ++generation, token = state.token;
     const value = await api('/training/sessions', { method: 'POST', body: JSON.stringify({ section_id: section, collection_id: collection, source, mode,
       question_count: countMode === 'all' ? 'all' : Number(amount.value) }) });
     if (!live(key, token)) return; session = value; render(); $('trainingContent').scrollIntoView({ behavior: 'smooth' });
@@ -177,19 +188,24 @@ function renderHome(root) {
   }
 }
 async function resume(id) {
-  const key = generation, token = state.token;
+  const key = ++generation, token = state.token;
   const value = await api(`/training/sessions/${id}`);
   if (live(key, token)) { session = value; section = value.section_id; collection = value.collection_id; tab = 'home'; render(); }
+}
+async function returnToTrainingHome() {
+  generation++;
+  if (!await loadHome()) return;
+  session = null; tab = 'home'; render();
 }
 function renderSession(root) {
   const panel = el('section', '', 'learning-study');
   const top = el('div', '', 'learning-study-top');
-  top.append(button('← 返回今日练习', async () => { session = null; if (await loadHome()) render(); }, 'button quiet'), el('span', session.mode === 'sequential' ? '按顺序复习' : '随机训练', 'muted'));
+  top.append(button('← 返回今日练习', returnToTrainingHome, 'button quiet'), el('span', session.mode === 'sequential' ? '按顺序复习' : '随机训练', 'muted'));
   panel.append(top);
   if (session.status !== 'active') {
     panel.classList.add('learning-complete');
     panel.append(el('span', '✓', 'learning-complete-icon'), el('h2', '这一轮，完成了。'), el('p', `已完成 ${session.completed} 道卡片。继续练习，或回到今日目标完成打卡。`, 'muted'));
-    panel.append(button('查看今日进度', async () => { session = null; if (await loadHome()) render(); }, 'button primary'));
+    panel.append(button('查看今日进度', returnToTrainingHome, 'button primary'));
     root.append(panel); return;
   }
   const card = session.cards.find(c => !c.completed);

@@ -1,0 +1,2255 @@
+[
+  {
+    "source_key": "template-2-0",
+    "sections": [
+      2
+    ],
+    "title": "筛出区间内全部质数",
+    "topic": "基础数论",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n筛出区间内全部质数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一个整数 n，0 ≤ n ≤ 100000。\n\n## 输出格式\n按升序输出不大于 n 的全部质数，以空格分隔；没有质数时输出空行。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input()); prime=[True]*(n+1)\nfor x in range(2,int(n**0.5)+1):\n    if prime[x]:\n        for y in range(x*x,n+1,x): prime[y]=False\nprint(*[x for x in range(2,n+1) if prime[x]])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "10\n",
+        "output": "2 3 5 7\n"
+      },
+      {
+        "input": "1\n",
+        "output": "\n"
+      },
+      {
+        "input": "2\n",
+        "output": "2\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-3-1",
+    "sections": [
+      3,
+      104
+    ],
+    "title": "约瑟夫环出圈顺序",
+    "topic": "链表与队列",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n约瑟夫环出圈顺序。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1 ≤ n,m ≤ 1000）。编号 1..n，从 1 开始报数，每报到 m 者出圈。\n\n## 输出格式\n输出所有编号的出圈顺序。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,m=map(int,input().split()); people=list(range(1,n+1)); pos=0; ans=[]\nwhile people:\n    pos=(pos+m-1)%len(people); ans.append(people.pop(pos))\nprint(*ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "7 3\n",
+        "output": "3 6 2 7 5 1 4\n"
+      },
+      {
+        "input": "1 1\n",
+        "output": "1\n"
+      },
+      {
+        "input": "5 2\n",
+        "output": "2 4 1 5 3\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-4-2",
+    "sections": [
+      4
+    ],
+    "title": "汉诺塔移动序列",
+    "topic": "递归与分治",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n汉诺塔移动序列。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n整数 n（1 ≤ n ≤ 12）；将 A 柱上的 n 个盘移到 C 柱，以 B 为辅助。\n\n## 输出格式\n逐行输出 起点 终点，小盘始终在大盘上方。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input())\ndef move(n,a,b,c):\n    if n:\n        move(n-1,a,c,b); print(a,c); move(n-1,b,a,c)\nmove(n,'A','B','C')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1\n",
+        "output": "A C\n"
+      },
+      {
+        "input": "2\n",
+        "output": "A B\nA C\nB C\n"
+      },
+      {
+        "input": "3\n",
+        "output": "A C\nA B\nC B\nA C\nB A\nB C\nA C\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-5-3",
+    "sections": [
+      5
+    ],
+    "title": "斐波那契数列",
+    "topic": "递推",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n斐波那契数列。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一个整数 n，0 ≤ n ≤ 1000；F(0)=0，F(1)=1。\n\n## 输出格式\n输出 F(n)，需处理大整数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input()); a,b=0,1\nfor _ in range(n): a,b=b,a+b\nprint(a)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "0\n",
+        "output": "0\n"
+      },
+      {
+        "input": "1\n",
+        "output": "1\n"
+      },
+      {
+        "input": "10\n",
+        "output": "55\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-6-4",
+    "sections": [
+      6
+    ],
+    "title": "输出杨辉三角",
+    "topic": "递推",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n输出杨辉三角。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一个整数 n，1 ≤ n ≤ 30。\n\n## 输出格式\n输出前 n 行，每行数字用单个空格分隔。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input()); row=[1]\nfor _ in range(n):\n    print(*row); row=[1]+[row[i]+row[i+1] for i in range(len(row)-1)]+[1]\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1\n",
+        "output": "1\n"
+      },
+      {
+        "input": "2\n",
+        "output": "1\n1 1\n"
+      },
+      {
+        "input": "4\n",
+        "output": "1\n1 1\n1 2 1\n1 3 3 1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-7-5",
+    "sections": [
+      7,
+      8
+    ],
+    "title": "组合数 C(n,k)",
+    "topic": "组合数学",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n组合数 C(n,k)。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn k（0 ≤ n,k ≤ 1000）。\n\n## 输出格式\n输出精确组合数；k > n 时输出 0。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,k=map(int,input().split()); ans=1\nif k>n: ans=0\nelse:\n    k=min(k,n-k)\n    for i in range(1,k+1): ans=ans*(n-i+1)//i\nprint(ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5 2\n",
+        "output": "10\n"
+      },
+      {
+        "input": "0 0\n",
+        "output": "1\n"
+      },
+      {
+        "input": "3 4\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-11-6",
+    "sections": [
+      11
+    ],
+    "title": "骑士之旅：最小字典序路径",
+    "topic": "回溯",
+    "difficulty": 4,
+    "stars": 2,
+    "statement": "## 题目描述\n骑士之旅：最小字典序路径。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1 ≤ n,m ≤ 5，n*m ≤ 20），棋盘行列从 1 编号，从 (1,1) 出发。马按日字移动，每格恰好访问一次。\n\n## 输出格式\n按 (行,列) 的字典序选择最小的完整路径，每行输出一对坐标；不存在时输出 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,m=map(int,input().split()); path=[(0,0)]; used={(0,0)}\ndef dfs(x,y):\n    if len(path)==n*m: return True\n    nxt=sorted((x+dx,y+dy) for dx,dy in [(1,2),(1,-2),(-1,2),(-1,-2),(2,1),(2,-1),(-2,1),(-2,-1)])\n    for a,b in nxt:\n        if 0<=a<n and 0<=b<m and (a,b) not in used:\n            used.add((a,b));path.append((a,b))\n            if dfs(a,b):return True\n            path.pop();used.remove((a,b))\n    return False\nif dfs(0,0):\n    for x,y in path:print(x+1,y+1)\nelse:print(-1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1 1\n",
+        "output": "1 1\n"
+      },
+      {
+        "input": "2 2\n",
+        "output": "-1\n"
+      },
+      {
+        "input": "1 3\n",
+        "output": "-1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-12-7",
+    "sections": [
+      12
+    ],
+    "title": "N 皇后方案数",
+    "topic": "回溯",
+    "difficulty": 3,
+    "stars": 5,
+    "statement": "## 题目描述\nN 皇后方案数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n整数 n（1 ≤ n ≤ 12）。每行、每列放一枚皇后，任意两枚不在同一斜线上。\n\n## 输出格式\n输出不同摆放方案数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input()); mask=(1<<n)-1\ndef dfs(cols,left,right):\n    if cols==mask:return 1\n    free=mask&~(cols|left|right); total=0\n    while free:\n        bit=free&-free;free-=bit\n        total+=dfs(cols|bit,((left|bit)<<1)&mask,(right|bit)>>1)\n    return total\nprint(dfs(0,0,0))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1\n",
+        "output": "1\n"
+      },
+      {
+        "input": "4\n",
+        "output": "2\n"
+      },
+      {
+        "input": "8\n",
+        "output": "92\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-15-8",
+    "sections": [
+      15
+    ],
+    "title": "不甘心的皇后：相邻列约束",
+    "topic": "动态规划",
+    "difficulty": 3,
+    "stars": 5,
+    "statement": "## 题目描述\n不甘心的皇后：相邻列约束。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n第一行 n（1 ≤ n ≤ 10）；第二行 n 个整数，0 表示该列位置未定，1..n 表示固定行号。每列恰放一枚，相邻两列行号之差不超过 1；没有普通皇后的行/对角线限制。\n\n## 输出格式\n输出符合固定位置和相邻列约束的方案数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input()); a=list(map(int,input().split())); dp=[1 if a[0] in (0,r+1) else 0 for r in range(n)]\nfor col in range(1,n):\n    dp=[sum(dp[max(0,r-1):min(n,r+2)]) if a[col] in (0,r+1) else 0 for r in range(n)]\nprint(sum(dp))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1\n0\n",
+        "output": "1\n"
+      },
+      {
+        "input": "2\n0 0\n",
+        "output": "4\n"
+      },
+      {
+        "input": "3\n1 3 0\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-19-9",
+    "sections": [
+      19
+    ],
+    "title": "寻找较轻的假银币",
+    "topic": "递归与分治",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n寻找较轻的假银币。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（2 ≤ n ≤ 100000）；接着 n 个正整数重量。恰有一枚比其余等重的真币轻。\n\n## 输出格式\n输出假币的编号（从 1 开始）。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input()); a=list(map(int,input().split()));print(a.index(min(a))+1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "8\n10 10 10 10 10 10 10 6\n",
+        "output": "8\n"
+      },
+      {
+        "input": "3\n2 1 2\n",
+        "output": "2\n"
+      },
+      {
+        "input": "2\n1 2\n",
+        "output": "1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-20-10",
+    "sections": [
+      20
+    ],
+    "title": "循环赛日程表",
+    "topic": "递归与分治",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n循环赛日程表。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nM（1 ≤ M ≤ 7），共有 n=2^M 名选手。\n\n## 输出格式\n输出 n 行 n-1 列，行 i 表示选手 i 各日对手。为固定答案，第 d 天 (1 ≤ d < n) 对手为 ((i-1) XOR d)+1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "m=int(input()); n=1<<m\nfor i in range(n):print(*[(i^d)+1 for d in range(1,n)])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1\n",
+        "output": "2\n1\n"
+      },
+      {
+        "input": "2\n",
+        "output": "2 3 4\n1 4 3\n4 1 2\n3 2 1\n"
+      },
+      {
+        "input": "3\n",
+        "output": "2 3 4 5 6 7 8\n1 4 3 6 5 8 7\n4 1 2 7 8 5 6\n3 2 1 8 7 6 5\n6 7 8 1 2 3 4\n5 8 7 2 1 4 3\n8 5 6 3 4 1 2\n7 6 5 4 3 2 1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-21-11",
+    "sections": [
+      21
+    ],
+    "title": "生命游戏的一轮演化",
+    "topic": "矩阵模拟",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n生命游戏的一轮演化。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1..50），随后 n 行 m 个 0/1。活细胞八邻域活邻居数为 2/3 时存活，死细胞恰有 3 个活邻居时复活，棋盘外均为死。\n\n## 输出格式\n输出同步演化一轮后的矩阵。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,m=map(int,input().split());a=[list(map(int,input().split())) for _ in range(n)]\nfor i in range(n):\n    row=[]\n    for j in range(m):\n        c=sum(a[x][y] for x in range(max(0,i-1),min(n,i+2)) for y in range(max(0,j-1),min(m,j+2)) if (x,y)!=(i,j))\n        row.append(int(c==3 or (a[i][j] and c==2)))\n    print(*row)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1 1\n1\n",
+        "output": "0\n"
+      },
+      {
+        "input": "2 2\n1 1\n1 1\n",
+        "output": "1 1\n1 1\n"
+      },
+      {
+        "input": "3 3\n0 1 0\n0 1 0\n0 1 0\n",
+        "output": "0 0 0\n1 1 1\n0 0 0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-22-12",
+    "sections": [
+      22,
+      23,
+      24
+    ],
+    "title": "不重复的全排列",
+    "topic": "回溯",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n不重复的全排列。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1 ≤ n ≤ 8），下一行 n 个整数，可能重复。\n\n## 输出格式\n按字典序输出不同全排列，每行一种。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "from collections import Counter\nn=int(input()); c=Counter(map(int,input().split())); keys=sorted(c);path=[]\ndef dfs():\n    if len(path)==n:print(*path);return\n    for x in keys:\n        if c[x]:c[x]-=1;path.append(x);dfs();path.pop();c[x]+=1\ndfs()\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1\n9\n",
+        "output": "9\n"
+      },
+      {
+        "input": "3\n1 1 2\n",
+        "output": "1 1 2\n1 2 1\n2 1 1\n"
+      },
+      {
+        "input": "2\n2 1\n",
+        "output": "1 2\n2 1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-25-13",
+    "sections": [
+      25
+    ],
+    "title": "组合总和：允许重复选取",
+    "topic": "回溯",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n组合总和：允许重复选取。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn target（1 ≤ n ≤ 15，1 ≤ target ≤ 50）；下一行 n 个互不相同的正整数。\n\n## 输出格式\n输出能凑成 target 的非降序组合，按字典序，每行一种。无解输出 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,t=map(int,input().split());a=sorted(map(int,input().split()));ans=[]\ndef dfs(start,left,path):\n    if left==0:ans.append(path);return\n    for i in range(start,n):\n        if a[i]>left:break\n        dfs(i,left-a[i],path+[a[i]])\ndfs(0,t,[])\nfor row in ans:print(*row)\nif not ans:print(-1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "4 7\n2 3 6 7\n",
+        "output": "2 2 3\n7\n"
+      },
+      {
+        "input": "1 3\n2\n",
+        "output": "-1\n"
+      },
+      {
+        "input": "2 4\n1 2\n",
+        "output": "1 1 1 1\n1 1 2\n2 2\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-26-14",
+    "sections": [
+      26
+    ],
+    "title": "组合总和：每项只能选一次",
+    "topic": "回溯",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n组合总和：每项只能选一次。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn target（1 ≤ n ≤ 18，1 ≤ target ≤ 50）；下一行 n 个正整数，可重复。每个位置至多选一次。\n\n## 输出格式\n不同的非降序组合按字典序逐行输出；无解输出 -1。注意 PDF 此节链接指向另一道有序计数题，不用于本题评测。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,t=map(int,input().split());a=sorted(map(int,input().split()));ans=[]\ndef dfs(start,left,path):\n    if left==0:ans.append(path);return\n    for i in range(start,n):\n        if a[i]>left:break\n        if i>start and a[i]==a[i-1]:continue\n        dfs(i+1,left-a[i],path+[a[i]])\ndfs(0,t,[])\nfor row in ans:print(*row)\nif not ans:print(-1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "7 8\n10 1 2 7 6 1 5\n",
+        "output": "1 1 6\n1 2 5\n1 7\n2 6\n"
+      },
+      {
+        "input": "1 4\n2\n",
+        "output": "-1\n"
+      },
+      {
+        "input": "3 2\n1 1 2\n",
+        "output": "1 1\n2\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-33-15",
+    "sections": [
+      33
+    ],
+    "title": "A 与 B 的不同排列数",
+    "topic": "组合数学",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\nA 与 B 的不同排列数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n两个整数 n m（0 ≤ n,m ≤ 500），分别代表 A、B 的个数。\n\n## 输出格式\n输出不同字符串的个数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "from math import comb\nn,m=map(int,input().split());print(comb(n+m,n))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "2 1\n",
+        "output": "3\n"
+      },
+      {
+        "input": "0 0\n",
+        "output": "1\n"
+      },
+      {
+        "input": "5 2\n",
+        "output": "21\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-34-16",
+    "sections": [
+      34
+    ],
+    "title": "三个小朋友分糖果",
+    "topic": "枚举",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n三个小朋友分糖果。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn limit（0 ≤ n ≤ 100，0 ≤ limit ≤ 100）。三个小朋友可分到 0 颗，每人不超过 limit。\n\n## 输出格式\n输出分配方案数，小朋友有区别。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,limit=map(int,input().split());print(sum(0<=n-a-b<=limit for a in range(limit+1) for b in range(limit+1)))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5 2\n",
+        "output": "3\n"
+      },
+      {
+        "input": "0 0\n",
+        "output": "1\n"
+      },
+      {
+        "input": "3 3\n",
+        "output": "10\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-39-17",
+    "sections": [
+      39
+    ],
+    "title": "矩阵顺时针旋转 90 度",
+    "topic": "矩阵模拟",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n矩阵顺时针旋转 90 度。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1..100），随后 n 行 n 个整数。\n\n## 输出格式\n输出顺时针旋转 90 度的矩阵。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());a=[list(map(int,input().split())) for _ in range(n)]\nfor j in range(n):print(*[a[i][j] for i in range(n-1,-1,-1)])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1\n7\n",
+        "output": "7\n"
+      },
+      {
+        "input": "2\n1 2\n3 4\n",
+        "output": "3 1\n4 2\n"
+      },
+      {
+        "input": "3\n1 2 3\n4 5 6\n7 8 9\n",
+        "output": "7 4 1\n8 5 2\n9 6 3\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-42-18",
+    "sections": [
+      42
+    ],
+    "title": "无重复字符的最长子串",
+    "topic": "字符串与滑动窗口",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n无重复字符的最长子串。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一行 ASCII 字符串，长度 0..100000，不含换行。空格也是字符。\n\n## 输出格式\n输出最长不含重复字符的连续子串长度。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "s=input();last={};start=ans=0\nfor i,ch in enumerate(s):\n    start=max(start,last.get(ch,-1)+1);last[ch]=i;ans=max(ans,i-start+1)\nprint(ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "abcabcbb\n",
+        "output": "3\n"
+      },
+      {
+        "input": "bbbbb\n",
+        "output": "1\n"
+      },
+      {
+        "input": "\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-43-19",
+    "sections": [
+      43
+    ],
+    "title": "最大连续子数组和",
+    "topic": "线性动态规划",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n最大连续子数组和。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1..100000），随后 n 个整数，绝对值 ≤ 10^9。\n\n## 输出格式\n输出非空连续子数组的最大和。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys\na=list(map(int,sys.stdin.read().split()))[1:];cur=ans=a[0]\nfor x in a[1:]:cur=max(x,cur+x);ans=max(ans,cur)\nprint(ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "9\n-2 1 -3 4 -1 2 1 -5 4\n",
+        "output": "6\n"
+      },
+      {
+        "input": "3\n-5 -2 -8\n",
+        "output": "-2\n"
+      },
+      {
+        "input": "1\n0\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-44-20",
+    "sections": [
+      44
+    ],
+    "title": "最长回文子串",
+    "topic": "字符串",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n最长回文子串。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一行 ASCII 字符串，长度 0..2000。\n\n## 输出格式\n输出最长回文连续子串；有多个时输出起点最靠左的；空串输出空行。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "s=input();best='';start=0\nfor c in range(len(s)):\n    for l,r in [(c,c),(c,c+1)]:\n        while l>=0 and r<len(s) and s[l]==s[r]:\n            if r-l+1>len(best) or (r-l+1==len(best) and l<start):best=s[l:r+1];start=l\n            l-=1;r+=1\nprint(best)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "babad\n",
+        "output": "bab\n"
+      },
+      {
+        "input": "cbbd\n",
+        "output": "bb\n"
+      },
+      {
+        "input": "\n",
+        "output": "\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-45-21",
+    "sections": [
+      45
+    ],
+    "title": "判断回文整数",
+    "topic": "字符串",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n判断回文整数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一个整数 x，-10^18 ≤ x ≤ 10^18。负数不是回文数。\n\n## 输出格式\n回文输出 YES，否则 NO。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "s=input().strip();print('YES' if not s.startswith('-') and s==s[::-1] else 'NO')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "121\n",
+        "output": "YES\n"
+      },
+      {
+        "input": "-121\n",
+        "output": "NO\n"
+      },
+      {
+        "input": "0\n",
+        "output": "YES\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-46-22",
+    "sections": [
+      46
+    ],
+    "title": "字符串编辑距离",
+    "topic": "序列动态规划",
+    "difficulty": 3,
+    "stars": 5,
+    "statement": "## 题目描述\n字符串编辑距离。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n两行字符串，每行长度 0..1000。插入、删除、替换一个字符的代价均为 1。\n\n## 输出格式\n输出将第一串变成第二串的最小代价。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "a=input();b=input();dp=list(range(len(b)+1))\nfor i,x in enumerate(a,1):\n    new=[i]\n    for j,y in enumerate(b,1):new.append(min(dp[j]+1,new[-1]+1,dp[j-1]+(x!=y)))\n    dp=new\nprint(dp[-1])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "horse\nros\n",
+        "output": "3\n"
+      },
+      {
+        "input": "\nabc\n",
+        "output": "3\n"
+      },
+      {
+        "input": "same\nsame\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-48-23",
+    "sections": [
+      48
+    ],
+    "title": "中奖号码的最长公共连续片段",
+    "topic": "字符串",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n中奖号码的最长公共连续片段。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n两行十进制数字串，长度 1..1000；保留前导零。\n\n## 输出格式\n输出两串的最长公共连续子串长度。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "a=input();b=input();dp=[0]*(len(b)+1);ans=0\nfor x in a:\n    new=[0]*(len(b)+1)\n    for j,y in enumerate(b,1):\n        if x==y:new[j]=dp[j-1]+1;ans=max(ans,new[j])\n    dp=new\nprint(ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "12345678\n12436578\n",
+        "output": "2\n"
+      },
+      {
+        "input": "000\n1000\n",
+        "output": "3\n"
+      },
+      {
+        "input": "123\n456\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-49-24",
+    "sections": [
+      49
+    ],
+    "title": "最长公共子序列",
+    "topic": "序列动态规划",
+    "difficulty": 3,
+    "stars": 5,
+    "statement": "## 题目描述\n最长公共子序列。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n两行 ASCII 字符串，每行长度 0..1000。子序列可不连续。\n\n## 输出格式\n输出最长公共子序列长度。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "a=input();b=input();dp=[0]*(len(b)+1)\nfor x in a:\n    new=[0]\n    for j,y in enumerate(b,1):new.append(dp[j-1]+1 if x==y else max(dp[j],new[-1]))\n    dp=new\nprint(dp[-1])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "abcde\nace\n",
+        "output": "3\n"
+      },
+      {
+        "input": "abc\ndef\n",
+        "output": "0\n"
+      },
+      {
+        "input": "\nabc\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-50-25",
+    "sections": [
+      50
+    ],
+    "title": "数组循环右移",
+    "topic": "数组",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n数组循环右移。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn k（1 ≤ n ≤ 100000，0 ≤ k ≤ 10^9），下一行 n 个整数。\n\n## 输出格式\n输出向右循环移动 k 位后的数组。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,k=map(int,input().split());a=list(map(int,input().split()));k%=n\nprint(*(a[-k:]+a[:-k] if k else a))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5 2\n1 2 3 4 5\n",
+        "output": "4 5 1 2 3\n"
+      },
+      {
+        "input": "1 9\n7\n",
+        "output": "7\n"
+      },
+      {
+        "input": "3 0\n1 2 3\n",
+        "output": "1 2 3\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-51-26",
+    "sections": [
+      51
+    ],
+    "title": "从左向右提取奇偶位置数字",
+    "topic": "字符串",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n从左向右提取奇偶位置数字。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一个非负整数的十进制表示（1..100 位，无多余前导零）。从左侧第 1 位开始计数。\n\n## 输出格式\n依次输出奇数位置组成的整数、偶数位置组成的整数；缺少的部分输出 0。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "s=input().strip();print(int(s[::2] or '0'),int(s[1::2] or '0'))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "12345\n",
+        "output": "135 24\n"
+      },
+      {
+        "input": "7\n",
+        "output": "7 0\n"
+      },
+      {
+        "input": "10002\n",
+        "output": "102 0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-52-27",
+    "sections": [
+      52
+    ],
+    "title": "将每个英文单词末尾转为大写",
+    "topic": "字符串",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n将每个英文单词末尾转为大写。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一行 ASCII 文本，长度 0..10000；单词定义为连续英文字母。\n\n## 输出格式\n保留原字符和空格，仅将每个单词最后一个字母转为大写。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import re\ns=input();print(re.sub(r'[A-Za-z]+',lambda m:m[0][:-1]+m[0][-1].upper(),s))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "hello world\n",
+        "output": "hellO worlD\n"
+      },
+      {
+        "input": "a,b!\n",
+        "output": "A,B!\n"
+      },
+      {
+        "input": "\n",
+        "output": "\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-53-28",
+    "sections": [
+      53
+    ],
+    "title": "严格验证 IPv4 地址",
+    "topic": "字符串",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n严格验证 IPv4 地址。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一行地址。由四段十进制数以点分隔，每段 0..255；除单个 0 外不得有前导零。\n\n## 输出格式\n合法输出 YES，否则 NO。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "s=input().strip();p=s.split('.')\nok=len(p)==4 and all(x and x.isascii() and x.isdecimal() and 0<=int(x)<=255 and (x=='0' or x[0]!='0') for x in p)\nprint('YES' if ok else 'NO')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "192.168.1.1\n",
+        "output": "YES\n"
+      },
+      {
+        "input": "01.2.3.4\n",
+        "output": "NO\n"
+      },
+      {
+        "input": "256.0.0.1\n",
+        "output": "NO\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-54-29",
+    "sections": [
+      54
+    ],
+    "title": "字符串循环左移",
+    "topic": "字符串",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n字符串循环左移。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n第一行非空 ASCII 字符串，长度 ≤ 10000；第二行非负整数 k ≤ 10^9。\n\n## 输出格式\n输出左循环移动 k 位后的字符串。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "s=input();k=int(input())%len(s);print(s[k:]+s[:k])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "abcdef\n4\n",
+        "output": "efabcd\n"
+      },
+      {
+        "input": "a\n10\n",
+        "output": "a\n"
+      },
+      {
+        "input": "abc\n0\n",
+        "output": "abc\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-56-30",
+    "sections": [
+      56
+    ],
+    "title": "合并两个有序字符串",
+    "topic": "双指针",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n合并两个有序字符串。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n两行各自按 ASCII 升序排列的字符串，每行长度 0..10000。\n\n## 输出格式\n输出保留所有重复字符的升序合并结果。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "a=input();b=input();i=j=0;ans=[]\nwhile i<len(a) and j<len(b):\n    if a[i]<=b[j]:ans.append(a[i]);i+=1\n    else:ans.append(b[j]);j+=1\nprint(''.join(ans)+a[i:]+b[j:])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "ace\nbdf\n",
+        "output": "abcdef\n"
+      },
+      {
+        "input": "aa\na\n",
+        "output": "aaa\n"
+      },
+      {
+        "input": "\nxyz\n",
+        "output": "xyz\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-57-31",
+    "sections": [
+      57
+    ],
+    "title": "递归逆序输出字符串",
+    "topic": "递归",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n递归逆序输出字符串。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一行 ASCII 字符串，长度 0..500。\n\n## 输出格式\n逆序输出全部字符，保留空格。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "s=input()\ndef rev(i):\n    if i==len(s):return ''\n    return rev(i+1)+s[i]\nprint(rev(0))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "ABC\n",
+        "output": "CBA\n"
+      },
+      {
+        "input": "a b\n",
+        "output": "b a\n"
+      },
+      {
+        "input": "\n",
+        "output": "\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-62-32",
+    "sections": [
+      62
+    ],
+    "title": "大整数取余",
+    "topic": "高精度",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n大整数取余。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n两行非负整数 a 和正整数 b；a 最多 1000 位，1 ≤ b ≤ 10^9。\n\n## 输出格式\n输出 a 对 b 的余数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "a=input().strip();b=int(input());r=0\nfor c in a:r=(r*10+int(c))%b\nprint(r)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "123456789123456789\n10\n",
+        "output": "9\n"
+      },
+      {
+        "input": "0\n7\n",
+        "output": "0\n"
+      },
+      {
+        "input": "100\n25\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-64-33",
+    "sections": [
+      64
+    ],
+    "title": "Decimal：精确除法并截断",
+    "topic": "高精度",
+    "difficulty": 2,
+    "stars": 5,
+    "statement": "## 题目描述\nDecimal：精确除法并截断。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\na b c（0 ≤ a ≤ 10^18，1 ≤ b ≤ 10^18，0 ≤ c ≤ 1000）。\n\n## 输出格式\n输出 a/b，恰保留 c 位小数，直接截断；c=0 时只输出整数部分。PDF 文字允许不四舍五入，本练习明确采用截断。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "a,b,c=map(int,input().split());whole,r=divmod(a,b);digits=[]\nfor _ in range(c):q,r=divmod(r*10,b);digits.append(str(q))\nprint(str(whole)+('.'+''.join(digits) if c else ''))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1 8 2\n",
+        "output": "0.12\n"
+      },
+      {
+        "input": "10 4 0\n",
+        "output": "2\n"
+      },
+      {
+        "input": "1 3 5\n",
+        "output": "0.33333\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-65-34",
+    "sections": [
+      65
+    ],
+    "title": "十进制除法：四舍五入",
+    "topic": "数学",
+    "difficulty": 2,
+    "stars": 5,
+    "statement": "## 题目描述\n十进制除法：四舍五入。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\na b c；a、b 为非负十进制数，最多 20 位数字，b > 0，0 ≤ c ≤ 20。\n\n## 输出格式\n输出 a/b，恰保留 c 位小数，采用十进制四舍五入（5 向上）。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "from decimal import Decimal,localcontext,ROUND_HALF_UP\na,b,c=input().split();c=int(c)\nwith localcontext() as ctx:\n    ctx.prec=100\n    x=(Decimal(a)/Decimal(b)).quantize(Decimal(1).scaleb(-c),rounding=ROUND_HALF_UP)\n    print(f'{x:.{c}f}')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1 8 2\n",
+        "output": "0.13\n"
+      },
+      {
+        "input": "199 200 2\n",
+        "output": "1.00\n"
+      },
+      {
+        "input": "10.5 2 1\n",
+        "output": "5.3\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-70-35",
+    "sections": [
+      70
+    ],
+    "title": "第 n 个幸运数",
+    "topic": "数论",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n第 n 个幸运数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1 ≤ n ≤ 10^18）；幸运数的十进制数位只含 4 和 7，按从小到大排列。\n\n## 输出格式\n输出第 n 个幸运数，从 1 编号。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());print(''.join('4' if x=='0' else '7' for x in bin(n+1)[3:]))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1\n",
+        "output": "4\n"
+      },
+      {
+        "input": "6\n",
+        "output": "77\n"
+      },
+      {
+        "input": "7\n",
+        "output": "444\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-71-36",
+    "sections": [
+      71
+    ],
+    "title": "找出偏离其余均值最远的评分",
+    "topic": "数学",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n找出偏离其余均值最远的评分。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（2..100000），下一行 n 个整数评分，绝对值 ≤ 10^9。\n\n## 输出格式\n输出与其余 n-1 项均值的绝对差最大的评分的编号（从 1 开始）；并列取最早者。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());a=list(map(int,input().split()));s=sum(a);print(max(range(n),key=lambda i:abs(n*a[i]-s))+1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "4\n10 10 10 100\n",
+        "output": "4\n"
+      },
+      {
+        "input": "2\n1 9\n",
+        "output": "1\n"
+      },
+      {
+        "input": "3\n7 7 7\n",
+        "output": "1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-72-37",
+    "sections": [
+      72
+    ],
+    "title": "向量的一范数和二范数",
+    "topic": "数学",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n向量的一范数和二范数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1..1000），下一行 n 个整数，绝对值 ≤ 1000。\n\n## 输出格式\n分别输出 L1、L2 范数，均保留 6 位小数，以空格分隔。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import math\nn=int(input());a=list(map(int,input().split()));print(f'{sum(map(abs,a)):.6f} {math.sqrt(sum(x*x for x in a)):.6f}')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "2\n3 4\n",
+        "output": "7.000000 5.000000\n"
+      },
+      {
+        "input": "1\n-2\n",
+        "output": "2.000000 2.000000\n"
+      },
+      {
+        "input": "3\n0 0 0\n",
+        "output": "0.000000 0.000000\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-73-38",
+    "sections": [
+      73
+    ],
+    "title": "两个矩阵的行向量距离矩阵",
+    "topic": "矩阵模拟",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n两个矩阵的行向量距离矩阵。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nr s c（1..100），随后 r 行矩阵 A、s 行矩阵 B，各行 c 个整数，绝对值 ≤ 1000。\n\n## 输出格式\n输出 r 行 s 列，元素为 A 第 i 行和 B 第 j 行的欧氏距离，保留 6 位小数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import math\nr,s,c=map(int,input().split());a=[list(map(int,input().split())) for _ in range(r)];b=[list(map(int,input().split())) for _ in range(s)]\nfor row in a:print(*[f'{math.sqrt(sum((x-y)**2 for x,y in zip(row,col))):.6f}' for col in b])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1 1 2\n0 0\n3 4\n",
+        "output": "5.000000\n"
+      },
+      {
+        "input": "1 2 1\n2\n2\n5\n",
+        "output": "0.000000 3.000000\n"
+      },
+      {
+        "input": "2 1 1\n1\n4\n2\n",
+        "output": "1.000000\n2.000000\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-74-39",
+    "sections": [
+      74
+    ],
+    "title": "打靶计数",
+    "topic": "计数动态规划",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n打靶计数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn target（1 ≤ n ≤ 20，0 ≤ target ≤ 10n），每次得分为 0..10，不同先后顺序视为不同方案。\n\n## 输出格式\n输出 n 次得分和为 target 的方案数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,t=map(int,input().split());dp=[0]*(t+1);dp[0]=1\nfor _ in range(n):dp=[sum(dp[s-x] for x in range(11) if s>=x) for s in range(t+1)]\nprint(dp[t])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "10 90\n",
+        "output": "92378\n"
+      },
+      {
+        "input": "1 0\n",
+        "output": "1\n"
+      },
+      {
+        "input": "2 2\n",
+        "output": "3\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-75-40",
+    "sections": [
+      75
+    ],
+    "title": "定期提款需要的本金",
+    "topic": "逆向递推",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n定期提款需要的本金。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn amount rate：1 ≤ n ≤ 100，0 ≤ amount ≤ 100000，0 ≤ rate ≤ 1。每年先获得利息，再提取 amount，n 年后恰为零。\n\n## 输出格式\n输出最初本金，四舍五入保留 2 位小数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "from decimal import Decimal,localcontext,ROUND_HALF_UP\nn,a,r=input().split();n=int(n)\nwith localcontext() as c:\n    c.prec=80;y=Decimal(0);a=Decimal(a);r=Decimal(r)\n    for _ in range(n):y=(y+a)/(1+r)\n    print(y.quantize(Decimal('0.01'),rounding=ROUND_HALF_UP))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5 1000 0\n",
+        "output": "5000.00\n"
+      },
+      {
+        "input": "1 1000 0.25\n",
+        "output": "800.00\n"
+      },
+      {
+        "input": "2 100 1\n",
+        "output": "75.00\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-77-41",
+    "sections": [
+      77
+    ],
+    "title": "学生年龄递推",
+    "topic": "递推",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n学生年龄递推。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn first step（1 ≤ n ≤ 100000，0 ≤ first,step ≤ 1000）；第一人的年龄为 first，此后每人比前一人大 step 岁。\n\n## 输出格式\n输出第 n 人的年龄。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,a,d=map(int,input().split());print(a+(n-1)*d)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5 10 2\n",
+        "output": "18\n"
+      },
+      {
+        "input": "1 10 2\n",
+        "output": "10\n"
+      },
+      {
+        "input": "3 0 0\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-78-42",
+    "sections": [
+      78
+    ],
+    "title": "立方与四次方的数字年龄谜题",
+    "topic": "枚举",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n立方与四次方的数字年龄谜题。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nL R（1 ≤ L ≤ R ≤ 100），搜索闭区间的整数年龄。\n\n## 输出格式\n输出满足立方为四位数、四次方为六位数，且两者合起来恰含 0..9 各一次的所有年龄，升序；无解输出 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "l,r=map(int,input().split());ans=[]\nfor x in range(l,r+1):\n    a,b=str(x**3),str(x**4)\n    if len(a)==4 and len(b)==6 and sorted(a+b)==list('0123456789'):ans.append(x)\nprint(*ans) if ans else print(-1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "1 100\n",
+        "output": "18\n"
+      },
+      {
+        "input": "18 18\n",
+        "output": "18\n"
+      },
+      {
+        "input": "1 17\n",
+        "output": "-1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-79-43",
+    "sections": [
+      79
+    ],
+    "title": "十六进制转十进制",
+    "topic": "进制转换",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n十六进制转十进制。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n一行合法十六进制整数，无 0x 前缀，长度 1..100，大小写均可。\n\n## 输出格式\n输出非负十进制数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "s=input().strip();ans=0\nfor ch in s.upper():ans=ans*16+'0123456789ABCDEF'.index(ch)\nprint(ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "FF\n",
+        "output": "255\n"
+      },
+      {
+        "input": "0\n",
+        "output": "0\n"
+      },
+      {
+        "input": "aB\n",
+        "output": "171\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-80-44",
+    "sections": [
+      80
+    ],
+    "title": "找出学习时长恰为 13 的连续区间",
+    "topic": "双指针",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n找出学习时长恰为 13 的连续区间。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1..100000），下一行 n 个正整数时长。\n\n## 输出格式\n存在连续区间总和为 13 时输出 YES，否则 NO。本题是原鸽巢原理结论的查询练习，不限制 37 天/总和 60。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());a=list(map(int,input().split()));left=total=0;ok=False\nfor right,x in enumerate(a):\n    total+=x\n    while total>13 and left<=right:total-=a[left];left+=1\n    if total==13:ok=True\nprint('YES' if ok else 'NO')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3\n5 8 2\n",
+        "output": "YES\n"
+      },
+      {
+        "input": "2\n14 14\n",
+        "output": "NO\n"
+      },
+      {
+        "input": "1\n13\n",
+        "output": "YES\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-81-45",
+    "sections": [
+      81
+    ],
+    "title": "蜗牛爬井",
+    "topic": "数学",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n蜗牛爬井。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nh up down（1 ≤ h ≤ 10^9，1 ≤ up ≤ 10^9，0 ≤ down < up），白天爬 up，未出井时夜间下滑 down。\n\n## 输出格式\n输出第一次达到井口的天数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "h,u,d=map(int,input().split());print(1 if h<=u else 1+(h-u+u-d-1)//(u-d))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "10 3 1\n",
+        "output": "5\n"
+      },
+      {
+        "input": "2 3 1\n",
+        "output": "1\n"
+      },
+      {
+        "input": "6 3 0\n",
+        "output": "2\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-82-46",
+    "sections": [
+      82
+    ],
+    "title": "矩阵鞍点",
+    "topic": "矩阵模拟",
+    "difficulty": 2,
+    "stars": 5,
+    "statement": "## 题目描述\n矩阵鞍点。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1..100），随后 n 行 m 个整数。鞍点是所在行的最大值且是所在列的最小值，允许并列。\n\n## 输出格式\n按行号、列号升序逐行输出 行 列 值，行列从 1 开始；不存在输出 NONE。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,m=map(int,input().split());a=[list(map(int,input().split())) for _ in range(n)];rows=[max(r) for r in a];cols=[min(a[i][j] for i in range(n)) for j in range(m)];ans=[]\nfor i in range(n):\n    for j in range(m):\n        if a[i][j]==rows[i]==cols[j]:ans.append((i+1,j+1,a[i][j]))\nfor row in ans:print(*row)\nif not ans:print('NONE')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "2 2\n1 2\n3 4\n",
+        "output": "1 2 2\n"
+      },
+      {
+        "input": "2 2\n1 2\n2 1\n",
+        "output": "NONE\n"
+      },
+      {
+        "input": "1 1\n7\n",
+        "output": "1 1 7\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-84-47",
+    "sections": [
+      84
+    ],
+    "title": "八连通水域个数",
+    "topic": "图搜索",
+    "difficulty": 2,
+    "stars": 5,
+    "statement": "## 题目描述\n八连通水域个数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1..200），随后 n 行字符串，w 为水域、. 为陆地。水平、竖直或斜向相邻的水域连通。\n\n## 输出格式\n输出水域连通块数量。与四连通岛屿题规则不同。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,m=map(int,input().split());a=[list(input().strip()) for _ in range(n)];ans=0\nfor i in range(n):\n    for j in range(m):\n        if a[i][j]!='w':continue\n        ans+=1;stack=[(i,j)];a[i][j]='.'\n        while stack:\n            x,y=stack.pop()\n            for dx in [-1,0,1]:\n                for dy in [-1,0,1]:\n                    u,v=x+dx,y+dy\n                    if 0<=u<n and 0<=v<m and a[u][v]=='w':a[u][v]='.';stack.append((u,v))\nprint(ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "2 2\nw.\n.w\n",
+        "output": "1\n"
+      },
+      {
+        "input": "1 3\nw.w\n",
+        "output": "2\n"
+      },
+      {
+        "input": "1 1\n.\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-85-48",
+    "sections": [
+      85
+    ],
+    "title": "无向图单源最短路",
+    "topic": "最短路",
+    "difficulty": 3,
+    "stars": 5,
+    "statement": "## 题目描述\n无向图单源最短路。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m s（1 ≤ n ≤ 2000，0 ≤ m ≤ 10000，1 ≤ s ≤ n），随后 m 行 u v w，w 为 0..10^9 的非负整数，允许重边。\n\n## 输出格式\n输出从 s 到 1..n 的最短距离，不可达为 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys,heapq\nt=iter(map(int,sys.stdin.read().split()));n,m,s=next(t),next(t),next(t);g=[[] for _ in range(n)]\nfor _ in range(m):u,v,w=next(t)-1,next(t)-1,next(t);g[u].append((v,w));g[v].append((u,w))\nd=[float('inf')]*n;d[s-1]=0;q=[(0,s-1)]\nwhile q:\n    du,u=heapq.heappop(q)\n    if du!=d[u]:continue\n    for v,w in g[u]:\n        if du+w<d[v]:d[v]=du+w;heapq.heappush(q,(d[v],v))\nprint(*[-1 if x==float('inf') else x for x in d])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 3 1\n1 2 5\n1 3 2\n3 2 1\n",
+        "output": "0 3 2\n"
+      },
+      {
+        "input": "2 0 1\n",
+        "output": "0 -1\n"
+      },
+      {
+        "input": "1 0 1\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-86-49",
+    "sections": [
+      86
+    ],
+    "title": "Floyd：无向图所有点对最短路",
+    "topic": "最短路",
+    "difficulty": 3,
+    "stars": 5,
+    "statement": "## 题目描述\nFloyd：无向图所有点对最短路。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1 ≤ n ≤ 100，0 ≤ m ≤ 10000），随后 m 行 u v w，端点 1..n，权重非负整数 ≤ 10^6，允许重边。\n\n## 输出格式\n输出 n×n 距离矩阵，不可达为 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys\nt=iter(map(int,sys.stdin.read().split()));n,m=next(t),next(t);inf=float('inf');d=[[inf]*n for _ in range(n)]\nfor i in range(n):d[i][i]=0\nfor _ in range(m):u,v,w=next(t)-1,next(t)-1,next(t);d[u][v]=d[v][u]=min(d[u][v],w)\nfor k in range(n):\n    for i in range(n):\n        for j in range(n):d[i][j]=min(d[i][j],d[i][k]+d[k][j])\nfor row in d:print(*[-1 if x==inf else x for x in row])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 2\n1 2 2\n2 3 3\n",
+        "output": "0 2 5\n2 0 3\n5 3 0\n"
+      },
+      {
+        "input": "2 0\n",
+        "output": "0 -1\n-1 0\n"
+      },
+      {
+        "input": "1 0\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-87-50",
+    "sections": [
+      87,
+      88,
+      89
+    ],
+    "title": "最小生成树：Prim 与 Kruskal",
+    "topic": "最小生成树",
+    "difficulty": 3,
+    "stars": 5,
+    "statement": "## 题目描述\n最小生成树：Prim 与 Kruskal。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1 ≤ n ≤ 2000，0 ≤ m ≤ 10000），随后 m 行 u v w，为无向边，端点 1..n，权重整数 0..10^9。\n\n## 输出格式\n连通时输出最小生成树权值和，否则输出 -1。可用 Prim 或 Kruskal/并查集。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys\nt=iter(map(int,sys.stdin.read().split()));n,m=next(t),next(t);edges=[(next(t),next(t),next(t)) for _ in range(m)];p=list(range(n+1));size=[1]*(n+1)\ndef find(x):\n    while p[x]!=x:p[x]=p[p[x]];x=p[x]\n    return x\nans=count=0\nfor u,v,w in sorted(edges,key=lambda e:e[2]):\n    u,v=find(u),find(v)\n    if u==v:continue\n    if size[u]<size[v]:u,v=v,u\n    p[v]=u;size[u]+=size[v];ans+=w;count+=1\nprint(ans if count==n-1 else -1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 3\n1 2 1\n2 3 2\n1 3 9\n",
+        "output": "3\n"
+      },
+      {
+        "input": "3 1\n1 2 1\n",
+        "output": "-1\n"
+      },
+      {
+        "input": "1 0\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-90-51",
+    "sections": [
+      90
+    ],
+    "title": "拓扑排序：最小字典序",
+    "topic": "拓扑排序",
+    "difficulty": 3,
+    "stars": 5,
+    "statement": "## 题目描述\n拓扑排序：最小字典序。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1 ≤ n ≤ 10000，0 ≤ m ≤ 100000），随后 m 行 u v，表示 u 必须先于 v。\n\n## 输出格式\n输出字典序最小的拓扑顺序，有环时输出 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys,heapq\nt=iter(map(int,sys.stdin.read().split()));n,m=next(t),next(t);g=[[] for _ in range(n+1)];deg=[0]*(n+1)\nfor _ in range(m):u,v=next(t),next(t);g[u].append(v);deg[v]+=1\nq=[i for i in range(1,n+1) if deg[i]==0];heapq.heapify(q);ans=[]\nwhile q:\n    u=heapq.heappop(q);ans.append(u)\n    for v in g[u]:\n        deg[v]-=1\n        if deg[v]==0:heapq.heappush(q,v)\nprint(*ans) if len(ans)==n else print(-1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 2\n1 3\n2 3\n",
+        "output": "1 2 3\n"
+      },
+      {
+        "input": "2 2\n1 2\n2 1\n",
+        "output": "-1\n"
+      },
+      {
+        "input": "1 0\n",
+        "output": "1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-93-52",
+    "sections": [
+      93
+    ],
+    "title": "按高度输出垂直柱状图",
+    "topic": "输出模拟",
+    "difficulty": 2,
+    "stars": 5,
+    "statement": "## 题目描述\n按高度输出垂直柱状图。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1..100），下一行 n 个高度（0..100）。\n\n## 输出格式\n从最高层向下逐行输出，每列有柱体时为 *，否则空格，列间一个空格；删除各行末尾空格。全部高度为 0 时输出空行。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());h=list(map(int,input().split()));top=max(h)\nfor level in range(top,0,-1):print(' '.join('*' if x>=level else ' ' for x in h).rstrip())\nif top==0:print()\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3\n1 3 2\n",
+        "output": "  *\n  * *\n* * *\n"
+      },
+      {
+        "input": "1\n2\n",
+        "output": "*\n*\n"
+      },
+      {
+        "input": "2\n0 0\n",
+        "output": "\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-95-53",
+    "sections": [
+      95
+    ],
+    "title": "交叉合并两个字符串",
+    "topic": "字符串",
+    "difficulty": 1,
+    "stars": 4,
+    "statement": "## 题目描述\n交叉合并两个字符串。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n两行 ASCII 字符串，长度 0..10000。\n\n## 输出格式\n从第一串开始交替取字符，短串结束后追加长串的剩余部分。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "a=input();b=input();ans=[]\nfor i in range(max(len(a),len(b))):\n    if i<len(a):ans.append(a[i])\n    if i<len(b):ans.append(b[i])\nprint(''.join(ans))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "abc\nXY\n",
+        "output": "aXbYc\n"
+      },
+      {
+        "input": "\n123\n",
+        "output": "123\n"
+      },
+      {
+        "input": "a\nbcd\n",
+        "output": "abcd\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-96-54",
+    "sections": [
+      96,
+      106,
+      107,
+      108,
+      109,
+      110,
+      112
+    ],
+    "title": "整数升序排序：数组与链表模板",
+    "topic": "排序",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n整数升序排序：数组与链表模板。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（0..100000），下一行 n 个整数，绝对值 ≤ 10^9。\n\n## 输出格式\n按升序输出所有整数，重复元素保留。可练习冒泡、选择、插入、堆、快排与链表插入；大输入应选 O(n log n) 算法。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys\na=list(map(int,sys.stdin.read().split()));print(*sorted(a[1:]))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5\n3 -1 3 0 2\n",
+        "output": "-1 0 2 3 3\n"
+      },
+      {
+        "input": "0\n\n",
+        "output": "\n"
+      },
+      {
+        "input": "1\n7\n",
+        "output": "7\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-97-55",
+    "sections": [
+      97
+    ],
+    "title": "按车次查询记录",
+    "topic": "结构体与文件",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n按车次查询记录。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（0..1000）；随后 n 行，字段 车次 出发站 终点站 时间，以空格分隔且各字段不含空格；最后一行为查询车次。车次不重复，区分大小写。\n\n## 输出格式\n找到时输出该行四个字段，以单个空格分隔；找不到输出 NOT FOUND。用标准输入代替原稿文件/argv。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());rows=[input().split() for _ in range(n)];q=input().strip();ans=next((r for r in rows if r[0]==q),None)\nprint(' '.join(ans) if ans else 'NOT FOUND')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "2\nT8 Chengdu Beijing 09:30\nK1 X Y 12:00\nT8\n",
+        "output": "T8 Chengdu Beijing 09:30\n"
+      },
+      {
+        "input": "0\nT8\n",
+        "output": "NOT FOUND\n"
+      },
+      {
+        "input": "1\nT8 A B 09:30\nt8\n",
+        "output": "NOT FOUND\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-98-56",
+    "sections": [
+      98
+    ],
+    "title": "简化 HTML 文本提取",
+    "topic": "字符串状态机",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n简化 HTML 文本提取。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n标准输入至 EOF 为简化 HTML，长度 ≤ 10000。标签不嵌套尖括号，不含属性值里的 >，无需实体解码。\n\n## 输出格式\n去除所有标签和输入换行；遇到不区分大小写的 </title>、<br>、<br/>、</br> 换行；输出末尾补一个换行（已有则不重复）。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys,re\ns=sys.stdin.read().replace('\\n','').replace('\\r','')\ns=re.sub(r'<[^>]*>',lambda m:'\\n' if m[0].lower() in ('</title>','<br>','<br/>','</br>') else '',s)\nprint(s,end='' if s.endswith('\\n') else '\\n')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "<title>Hi</title><p>Body</p>\n",
+        "output": "Hi\nBody\n"
+      },
+      {
+        "input": "a<br>b\n",
+        "output": "a\nb\n"
+      },
+      {
+        "input": "<b>x</b>\n",
+        "output": "x\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-99-57",
+    "sections": [
+      99
+    ],
+    "title": "删除 C 源码注释",
+    "topic": "字符串状态机",
+    "difficulty": 4,
+    "stars": 4,
+    "statement": "## 题目描述\n删除 C 源码注释。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n输入至 EOF 为合法简化 C 源码，不含预处理续行、原始字符串或三字符组。支持双引号字符串、单引号字符、反斜线转义、// 与 /* */ 注释。\n\n## 输出格式\n将每个注释替换为空格，保留注释内换行及其他字符。末尾不额外增加换行。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys\ns=sys.stdin.read();i=0;out=[]\nwhile i<len(s):\n    if s.startswith('//',i):\n        out.append(' ');i+=2\n        while i<len(s) and s[i]!='\\n':i+=1\n    elif s.startswith('/*',i):\n        out.append(' ');i+=2\n        while not s.startswith('*/',i):\n            if s[i]=='\\n':out.append('\\n')\n            i+=1\n        i+=2\n    elif s[i] in ('\"',\"'\"):\n        quote=s[i];out.append(s[i]);i+=1\n        while i<len(s):\n            ch=s[i];out.append(ch);i+=1\n            if ch=='\\\\' and i<len(s):out.append(s[i]);i+=1\n            elif ch==quote:break\n    else:out.append(s[i]);i+=1\nsys.stdout.write(''.join(out))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "int a; // note\n",
+        "output": "int a;  \n"
+      },
+      {
+        "input": "a/*x*/b\n",
+        "output": "a b\n"
+      },
+      {
+        "input": "char *s=\"// ok\";\n",
+        "output": "char *s=\"// ok\";\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-100-58",
+    "sections": [
+      100
+    ],
+    "title": "统计 C 标识符与关键字",
+    "topic": "字符串与映射",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n统计 C 标识符与关键字。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n输入至 EOF 为 C 片段，本练习保证不含注释、字符串、字符字面量、预处理行或浮点常量。标识符由英文字母/下划线开头，后接字母、数字、下划线。\n\n## 输出格式\n按字典序逐行输出 每个标识符 次数；关键字也统计。没有标识符输出 NONE。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys,re\nfrom collections import Counter\nc=Counter(re.findall(r'\\b[A-Za-z_][A-Za-z_0-9]*\\b',sys.stdin.read()))\nfor x in sorted(c):print(x,c[x])\nif not c:print('NONE')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "int a; int b=a;\n",
+        "output": "a 2\nb 1\nint 2\n"
+      },
+      {
+        "input": "123 + 45;\n",
+        "output": "NONE\n"
+      },
+      {
+        "input": "_x=_x+1;\n",
+        "output": "_x 2\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-102-59",
+    "sections": [
+      102
+    ],
+    "title": "交换链表第 k 个与倒数第 k 个节点的值",
+    "topic": "链表",
+    "difficulty": 2,
+    "stars": 5,
+    "statement": "## 题目描述\n交换链表第 k 个与倒数第 k 个节点的值。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn k（1 ≤ k ≤ n ≤ 100000），下一行按链表顺序给出 n 个整数。\n\n## 输出格式\n交换两个节点的值后按链表顺序输出。输入输出用整数序列表示链表。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,k=map(int,input().split());a=list(map(int,input().split()));a[k-1],a[n-k]=a[n-k],a[k-1];print(*a)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5 2\n1 2 3 4 5\n",
+        "output": "1 4 3 2 5\n"
+      },
+      {
+        "input": "1 1\n7\n",
+        "output": "7\n"
+      },
+      {
+        "input": "3 2\n1 2 3\n",
+        "output": "1 2 3\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-103-60",
+    "sections": [
+      103
+    ],
+    "title": "两两交换链表节点",
+    "topic": "链表",
+    "difficulty": 2,
+    "stars": 5,
+    "statement": "## 题目描述\n两两交换链表节点。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（0..100000），下一行按链表顺序给出 n 个整数。\n\n## 输出格式\n每对相邻节点交换顺序，末尾落单节点保留；输出结果序列。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys\na=list(map(int,sys.stdin.read().split()))[1:]\nfor i in range(0,len(a)-1,2):a[i],a[i+1]=a[i+1],a[i]\nprint(*a)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "4\n1 2 3 4\n",
+        "output": "2 1 4 3\n"
+      },
+      {
+        "input": "3\n1 2 3\n",
+        "output": "2 1 3\n"
+      },
+      {
+        "input": "0\n\n",
+        "output": "\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-111-61",
+    "sections": [
+      111
+    ],
+    "title": "寻找第 k 大元素",
+    "topic": "堆与选择",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n寻找第 k 大元素。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn k（1 ≤ k ≤ n ≤ 100000），下一行 n 个整数。\n\n## 输出格式\n输出降序排序后的第 k 个元素，重复值分别计数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,k=map(int,input().split());a=list(map(int,input().split()));print(sorted(a,reverse=True)[k-1])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "6 2\n3 2 1 5 6 4\n",
+        "output": "5\n"
+      },
+      {
+        "input": "3 2\n2 2 1\n",
+        "output": "2\n"
+      },
+      {
+        "input": "1 1\n-8\n",
+        "output": "-8\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-113-62",
+    "sections": [
+      113
+    ],
+    "title": "奇数降序、偶数升序",
+    "topic": "排序",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n奇数降序、偶数升序。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（0..100000），随后 n 个整数，绝对值 ≤ 10^9。\n\n## 输出格式\n先输出奇数（降序），后输出偶数（升序），重复值保留。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys\na=list(map(int,sys.stdin.read().split()))[1:];print(*(sorted((x for x in a if x%2),reverse=True)+sorted(x for x in a if not x%2)))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "6\n1 2 3 4 5 6\n",
+        "output": "5 3 1 2 4 6\n"
+      },
+      {
+        "input": "3\n-3 -2 -1\n",
+        "output": "-1 -3 -2\n"
+      },
+      {
+        "input": "0\n\n",
+        "output": "\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-117-63",
+    "sections": [
+      117
+    ],
+    "title": "目标和：添加正负号",
+    "topic": "背包动态规划",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n目标和：添加正负号。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn target（0 ≤ n ≤ 20，|target| ≤ 1000），下一行 n 个非负整数，每项 ≤ 100。\n\n## 输出格式\n每项恰好加一个 + 或 -，输出表达式值为 target 的方案数；不同位置上的选择分别计数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "from collections import Counter\nn,t=map(int,input().split());a=list(map(int,input().split()));dp=Counter({0:1})\nfor x in a:\n    nxt=Counter()\n    for s,c in dp.items():nxt[s+x]+=c;nxt[s-x]+=c\n    dp=nxt\nprint(dp[t])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5 3\n1 1 1 1 1\n",
+        "output": "5\n"
+      },
+      {
+        "input": "2 0\n0 0\n",
+        "output": "4\n"
+      },
+      {
+        "input": "1 2\n1\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-120-64",
+    "sections": [
+      120
+    ],
+    "title": "零钱兑换：最少硬币",
+    "topic": "背包动态规划",
+    "difficulty": 3,
+    "stars": 5,
+    "statement": "## 题目描述\n零钱兑换：最少硬币。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn amount（1 ≤ n ≤ 100，0 ≤ amount ≤ 10000），下一行 n 个不同正整数面额，每种硬币无限枚。\n\n## 输出格式\n输出凑出 amount 的最少硬币数；无法凑出为 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,t=map(int,input().split());a=list(map(int,input().split()));dp=[t+1]*(t+1);dp[0]=0\nfor s in range(1,t+1):\n    for x in a:\n        if x<=s:dp[s]=min(dp[s],dp[s-x]+1)\nprint(dp[t] if dp[t]<=t else -1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 11\n1 2 5\n",
+        "output": "3\n"
+      },
+      {
+        "input": "1 3\n2\n",
+        "output": "-1\n"
+      },
+      {
+        "input": "1 0\n1\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-122-65",
+    "sections": [
+      122
+    ],
+    "title": "可分割背包",
+    "topic": "贪心",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n可分割背包。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn capacity（1 ≤ n ≤ 1000，0 ≤ capacity ≤ 100000），随后 n 行 weight value（1 ≤ weight ≤ 100000，0 ≤ value ≤ 100000）。允许拿取物品的一部分。\n\n## 输出格式\n输出最大总价值，保留 2 位小数，十进制四舍五入。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "from fractions import Fraction\nfrom decimal import Decimal,localcontext,ROUND_HALF_UP\nn,c=map(int,input().split());items=[tuple(map(int,input().split())) for _ in range(n)];ans=Fraction(0)\nfor w,v in sorted(items,key=lambda x:Fraction(x[1],x[0]),reverse=True):\n    take=min(c,w);ans+=Fraction(v*take,w);c-=take\nwith localcontext() as ctx:\n    ctx.prec=60\n    print((Decimal(ans.numerator)/Decimal(ans.denominator)).quantize(Decimal('0.01'),rounding=ROUND_HALF_UP))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 50\n10 60\n20 100\n30 120\n",
+        "output": "240.00\n"
+      },
+      {
+        "input": "1 0\n10 5\n",
+        "output": "0.00\n"
+      },
+      {
+        "input": "1 1\n3 1\n",
+        "output": "0.33\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-123-66",
+    "sections": [
+      123
+    ],
+    "title": "整数拆分的最大乘积",
+    "topic": "动态规划",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n整数拆分的最大乘积。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n整数 n（2..58），拆成至少两个正整数之和。\n\n## 输出格式\n输出拆分后可得到的最大乘积。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());dp=[0]*(n+1)\nfor s in range(2,n+1):dp[s]=max(i*max(s-i,dp[s-i]) for i in range(1,s))\nprint(dp[n])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "2\n",
+        "output": "1\n"
+      },
+      {
+        "input": "10\n",
+        "output": "36\n"
+      },
+      {
+        "input": "3\n",
+        "output": "2\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-125-67",
+    "sections": [
+      125
+    ],
+    "title": "每次增加当前数的一个约数",
+    "topic": "动态规划",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n每次增加当前数的一个约数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n正整数 a b（1 ≤ a,b ≤ 2000）。一次操作将当前 x 变为 x+d，d 为当前 x 的任意正约数（允许 1 和 x）。\n\n## 输出格式\n输出从 a 到 b 的最少操作数；不能到达为 -1。约数随当前数变化，不是固定的完全背包物品。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "a,b=map(int,input().split())\nif a>b:print(-1)\nelse:\n    dp=[10**9]*(b+1);dp[a]=0\n    for x in range(a,b+1):\n        for d in range(1,int(x**0.5)+1):\n            if x%d:continue\n            for step in {d,x//d}:\n                if x+step<=b:dp[x+step]=min(dp[x+step],dp[x]+1)\n    print(dp[b] if dp[b]<10**9 else -1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 6\n",
+        "output": "1\n"
+      },
+      {
+        "input": "3 5\n",
+        "output": "2\n"
+      },
+      {
+        "input": "5 3\n",
+        "output": "-1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-126-68",
+    "sections": [
+      126
+    ],
+    "title": "抛硬币：不出现连续正面",
+    "topic": "线性动态规划",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n抛硬币：不出现连续正面。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n整数 n（0..1000）。每次正面/反面构成不同序列。\n\n## 输出格式\n输出长度 n 且没有连续两个正面的序列数，空序列算一种。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());a,b=1,2\nfor _ in range(n):a,b=b,a+b\nprint(a)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "0\n",
+        "output": "1\n"
+      },
+      {
+        "input": "2\n",
+        "output": "3\n"
+      },
+      {
+        "input": "5\n",
+        "output": "13\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-129-69",
+    "sections": [
+      129
+    ],
+    "title": "跳跃游戏：是否可达",
+    "topic": "贪心",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n跳跃游戏：是否可达。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1..100000），下一行 n 个非负整数 a[i]，每次可从 i 向右跳 1..a[i] 步。\n\n## 输出格式\n是否能从第一个位置到达最后一个位置，输出 YES 或 NO。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());a=list(map(int,input().split()));reach=0\nfor i,x in enumerate(a):\n    if i>reach:break\n    reach=max(reach,i+x)\nprint('YES' if reach>=n-1 else 'NO')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5\n2 3 1 1 4\n",
+        "output": "YES\n"
+      },
+      {
+        "input": "5\n3 2 1 0 4\n",
+        "output": "NO\n"
+      },
+      {
+        "input": "1\n0\n",
+        "output": "YES\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-130-70",
+    "sections": [
+      130
+    ],
+    "title": "跳跃游戏：最少次数",
+    "topic": "贪心",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n跳跃游戏：最少次数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1..100000），下一行 n 个非负整数 a[i]，可向右跳 1..a[i] 步。\n\n## 输出格式\n输出到达最后一个位置的最少次数，不可达输出 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());a=list(map(int,input().split()));end=reach=steps=0;ok=True\nfor i in range(n-1):\n    if i>reach:ok=False;break\n    reach=max(reach,i+a[i])\n    if i==end:\n        if reach==end:ok=False;break\n        steps+=1;end=reach\nprint(steps if ok and (n==1 or reach>=n-1) else -1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5\n2 3 1 1 4\n",
+        "output": "2\n"
+      },
+      {
+        "input": "2\n0 1\n",
+        "output": "-1\n"
+      },
+      {
+        "input": "1\n0\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-131-71",
+    "sections": [
+      131
+    ],
+    "title": "环形加油站",
+    "topic": "贪心",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n环形加油站。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（1..100000），接着一行 n 个 gas 和一行 n 个 cost，均为 0..10000。到站先加油，再消耗 cost[i] 前往下一站。\n\n## 输出格式\n输出能空油箱起步并绕行一周的最小站点下标（0 开始）；无解为 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());g=list(map(int,input().split()));c=list(map(int,input().split()));total=tank=start=0\nfor i in range(n):\n    diff=g[i]-c[i];total+=diff;tank+=diff\n    if tank<0:start=i+1;tank=0\nprint(start if total>=0 else -1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5\n1 2 3 4 5\n3 4 5 1 2\n",
+        "output": "3\n"
+      },
+      {
+        "input": "1\n0\n1\n",
+        "output": "-1\n"
+      },
+      {
+        "input": "2\n1 1\n1 1\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-133-72",
+    "sections": [
+      133
+    ],
+    "title": "有序数组去重：至多保留 k 次",
+    "topic": "双指针",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n有序数组去重：至多保留 k 次。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn k（0 ≤ n ≤ 100000，1 ≤ k ≤ 100），下一行 n 个非降序整数。\n\n## 输出格式\n输出每个数最多保留 k 次的结果序列。k=1 和 k=2 分别覆盖 PDF 两个版本。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,k=map(int,input().split());a=list(map(int,input().split()));ans=[]\nfor x in a:\n    if len(ans)<k or ans[-k]!=x:ans.append(x)\nprint(*ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "6 1\n1 1 2 2 3 3\n",
+        "output": "1 2 3\n"
+      },
+      {
+        "input": "6 2\n1 1 1 2 2 3\n",
+        "output": "1 1 2 2 3\n"
+      },
+      {
+        "input": "0 2\n\n",
+        "output": "\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-134-73",
+    "sections": [
+      134
+    ],
+    "title": "颜色分类：荷兰国旗",
+    "topic": "双指针",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n颜色分类：荷兰国旗。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn（0..100000），下一行 n 个 0、1、2。\n\n## 输出格式\n将 0 放前、1 居中、2 放后，输出序列。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n=int(input());a=list(map(int,input().split()));lo=i=0;hi=n-1\nwhile i<=hi:\n    if a[i]==0:a[lo],a[i]=a[i],a[lo];lo+=1;i+=1\n    elif a[i]==2:a[i],a[hi]=a[hi],a[i];hi-=1\n    else:i+=1\nprint(*a)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "6\n2 0 2 1 1 0\n",
+        "output": "0 0 1 1 2 2\n"
+      },
+      {
+        "input": "1\n2\n",
+        "output": "2\n"
+      },
+      {
+        "input": "0\n\n",
+        "output": "\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-135-74",
+    "sections": [
+      135
+    ],
+    "title": "二分查找第一个匹配位置",
+    "topic": "二分查找",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n二分查找第一个匹配位置。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn target（0 ≤ n ≤ 100000），下一行 n 个非降序整数。\n\n## 输出格式\n输出 target 首次出现的下标（0 开始），不存在为 -1。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,t=map(int,input().split());a=list(map(int,input().split()));l,r=0,n\nwhile l<r:\n    m=(l+r)//2\n    if a[m]<t:l=m+1\n    else:r=m\nprint(l if l<n and a[l]==t else -1)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "5 2\n1 2 2 3 5\n",
+        "output": "1\n"
+      },
+      {
+        "input": "3 4\n1 2 3\n",
+        "output": "-1\n"
+      },
+      {
+        "input": "0 1\n\n",
+        "output": "-1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-16-75",
+    "sections": [
+      16
+    ],
+    "title": "解唯一解数独",
+    "topic": "回溯",
+    "difficulty": 4,
+    "stars": 4,
+    "statement": "## 题目描述\n解唯一解数独。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\n9 行，每行 9 个数字字符，0 表示空位，1..9 为已知数。保证有且只有一个合法解。\n\n## 输出格式\n输出 9 行解，每行 9 个数字字符。每行、每列、每个 3×3 宫均含 1..9。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "a=[list(map(int,input().strip())) for _ in range(9)]\ndef solve():\n    best=None;choices=None\n    for i in range(9):\n        for j in range(9):\n            if a[i][j]:continue\n            used=set(a[i])|{a[r][j] for r in range(9)}|{a[r][c] for r in range(i//3*3,i//3*3+3) for c in range(j//3*3,j//3*3+3)}\n            opts=set(range(1,10))-used\n            if not opts:return False\n            if choices is None or len(opts)<len(choices):best=(i,j);choices=opts\n    if best is None:return True\n    i,j=best\n    for x in sorted(choices):\n        a[i][j]=x\n        if solve():return True\n    a[i][j]=0;return False\nsolve()\nfor row in a:print(''.join(map(str,row)))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "530070000\n600195000\n098000060\n800060003\n400803001\n700020006\n060000280\n000419005\n000080079\n",
+        "output": "534678912\n672195348\n198342567\n859761423\n426853791\n713924856\n961537284\n287419635\n345286179\n"
+      },
+      {
+        "input": "534678912\n672195348\n198342567\n859761423\n426853791\n713924856\n961537284\n287419635\n345286179\n",
+        "output": "534678912\n672195348\n198342567\n859761423\n426853791\n713924856\n961537284\n287419635\n345286179\n"
+      },
+      {
+        "input": "034678912\n672195348\n198342567\n859761423\n426853791\n713924856\n961537284\n287419635\n345286179\n",
+        "output": "534678912\n672195348\n198342567\n859761423\n426853791\n713924856\n961537284\n287419635\n345286179\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-32-76",
+    "sections": [
+      32
+    ],
+    "title": "球盒模型：有区别的球放入有区别的盒",
+    "topic": "组合数学",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n球盒模型：有区别的球放入有区别的盒。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m mode（0 ≤ n ≤ 15，1 ≤ m ≤ 15，mode=0 或 1）。mode=0 允许空盒，mode=1 要求所有盒非空。\n\n## 输出格式\n输出将 n 个有区别的球放入 m 个有区别的盒的方案数。与相同球/相同盒模型分别练习。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "from math import comb\nn,m,mode=map(int,input().split())\nprint(m**n if mode==0 else sum((-1)**k*comb(m,k)*(m-k)**n for k in range(m+1)))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 2 0\n",
+        "output": "8\n"
+      },
+      {
+        "input": "3 2 1\n",
+        "output": "6\n"
+      },
+      {
+        "input": "1 2 1\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-38-77",
+    "sections": [
+      38
+    ],
+    "title": "螺旋顺序遍历矩阵",
+    "topic": "矩阵模拟",
+    "difficulty": 2,
+    "stars": 4,
+    "statement": "## 题目描述\n螺旋顺序遍历矩阵。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1..100），随后 n 行 m 个整数。\n\n## 输出格式\n从左上角开始，向右、下、左、上依次顺时针向内遍历，输出所有元素。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,m=map(int,input().split());a=[list(map(int,input().split())) for _ in range(n)];ans=[];top,left,bottom,right=0,0,n-1,m-1\nwhile top<=bottom and left<=right:\n    for j in range(left,right+1):ans.append(a[top][j])\n    top+=1\n    for i in range(top,bottom+1):ans.append(a[i][right])\n    right-=1\n    if top<=bottom:\n        for j in range(right,left-1,-1):ans.append(a[bottom][j])\n        bottom-=1\n    if left<=right:\n        for i in range(bottom,top-1,-1):ans.append(a[i][left])\n        left+=1\nprint(*ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 3\n1 2 3\n4 5 6\n7 8 9\n",
+        "output": "1 2 3 6 9 8 7 4 5\n"
+      },
+      {
+        "input": "1 3\n1 2 3\n",
+        "output": "1 2 3\n"
+      },
+      {
+        "input": "3 1\n1\n2\n3\n",
+        "output": "1 2 3\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-84-78",
+    "sections": [
+      84
+    ],
+    "title": "四连通岛屿数量",
+    "topic": "图搜索",
+    "difficulty": 2,
+    "stars": 5,
+    "statement": "## 题目描述\n四连通岛屿数量。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1..200），随后 n 行仅含 0/1 的字符串。1 为陆地，只有上下左右相邻视为连通。\n\n## 输出格式\n输出岛屿数量。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,m=map(int,input().split());a=[list(input()) for _ in range(n)];ans=0\nfor i in range(n):\n    for j in range(m):\n        if a[i][j]!='1':continue\n        ans+=1;stack=[(i,j)];a[i][j]='0'\n        while stack:\n            x,y=stack.pop()\n            for dx,dy in [(1,0),(-1,0),(0,1),(0,-1)]:\n                u,v=x+dx,y+dy\n                if 0<=u<n and 0<=v<m and a[u][v]=='1':a[u][v]='0';stack.append((u,v))\nprint(ans)\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "2 2\n10\n01\n",
+        "output": "2\n"
+      },
+      {
+        "input": "2 2\n11\n11\n",
+        "output": "1\n"
+      },
+      {
+        "input": "1 1\n0\n",
+        "output": "0\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-84-79",
+    "sections": [
+      84
+    ],
+    "title": "被包围的区域",
+    "topic": "图搜索",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n被包围的区域。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1..200），随后 n 行仅含 X/O 的字符串。与边界 O 通过上下左右连通的 O 保留，其余 O 变成 X。\n\n## 输出格式\n输出修改后的字符矩阵。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,m=map(int,input().split());a=[list(input()) for _ in range(n)];stack=[]\nfor i in range(n):\n    for j in range(m):\n        if (i in (0,n-1) or j in (0,m-1)) and a[i][j]=='O':a[i][j]='#';stack.append((i,j))\nwhile stack:\n    x,y=stack.pop()\n    for dx,dy in [(1,0),(-1,0),(0,1),(0,-1)]:\n        u,v=x+dx,y+dy\n        if 0<=u<n and 0<=v<m and a[u][v]=='O':a[u][v]='#';stack.append((u,v))\nfor row in a:print(''.join('O' if c=='#' else 'X' for c in row))\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 3\nXXX\nXOX\nXXX\n",
+        "output": "XXX\nXXX\nXXX\n"
+      },
+      {
+        "input": "1 1\nO\n",
+        "output": "O\n"
+      },
+      {
+        "input": "3 3\nXOX\nXOX\nXXX\n",
+        "output": "XOX\nXOX\nXXX\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-26-80",
+    "sections": [
+      26
+    ],
+    "title": "组合总和 IV：考虑顺序的方案数",
+    "topic": "计数动态规划",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n组合总和 IV：考虑顺序的方案数。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn target（1 ≤ n ≤ 20，0 ≤ target ≤ 100），下一行 n 个不同正整数，每个整数可重复使用。\n\n## 输出格式\n输出相加为 target 的有序序列个数，空序列和为 0。本题对应 PDF 错链实际指向的问题，和无序组合分开计数。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "n,t=map(int,input().split());a=list(map(int,input().split()));dp=[0]*(t+1);dp[0]=1\nfor s in range(1,t+1):dp[s]=sum(dp[s-x] for x in a if x<=s)\nprint(dp[t])\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 4\n1 2 3\n",
+        "output": "7\n"
+      },
+      {
+        "input": "1 3\n2\n",
+        "output": "0\n"
+      },
+      {
+        "input": "1 0\n1\n",
+        "output": "1\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-90-81",
+    "sections": [
+      90
+    ],
+    "title": "判定一个序列是否为拓扑序",
+    "topic": "拓扑排序",
+    "difficulty": 3,
+    "stars": 4,
+    "statement": "## 题目描述\n判定一个序列是否为拓扑序。本题将 PDF 模板整理为统一的标准输入输出练习，输入范围及输出约定以本页为准；不冒充来源平台的原题。\n\n## 输入格式\nn m（1..1000，0 ≤ m ≤ 10000），接着 m 行有向边 u v（1..n），最后一行 n 个整数为待判断序列。\n\n## 输出格式\n若序列恰为 1..n 的排列且所有边起点先于终点，输出 YES，否则 NO。\n\n## 评测范围\n仅使用下方公开样例，覆盖基本情况和部分边界，不代表完整隐藏测试。",
+    "reference_code": "import sys\nt=iter(map(int,sys.stdin.read().split()));n,m=next(t),next(t);edges=[(next(t),next(t)) for _ in range(m)];a=list(t);pos={x:i for i,x in enumerate(a)}\nok=len(a)==n and set(a)==set(range(1,n+1)) and all(pos[u]<pos[v] for u,v in edges)\nprint('YES' if ok else 'NO')\n",
+    "reference_language": "python3",
+    "samples": [
+      {
+        "input": "3 2\n1 3\n2 3\n2 1 3\n",
+        "output": "YES\n"
+      },
+      {
+        "input": "2 1\n1 2\n2 1\n",
+        "output": "NO\n"
+      },
+      {
+        "input": "2 0\n1 1\n",
+        "output": "NO\n"
+      }
+    ]
+  },
+  {
+    "source_key": "template-powx-n",
+    "sections": [
+      76
+    ],
+    "title": "实数的整数次幂（含负指数）",
+    "topic": "快速幂",
+    "difficulty": 2,
+    "stars": 4,
+    "reference_language": "python3",
+    "statement": "## 题目描述\n计算实数 x 的整数次幂 x^n。要求使用快速幂，不能直接调用语言的幂运算。该练习改编自所附 LeetCode Pow(x, n) 链接，与洛谷模幂题 P1226 不同：本题不取模，且允许负指数。\n\n## 输入格式\n一行包含实数 x 和整数 n，以空格分隔。保证 -100 <= x <= 100，-10000 <= n <= 10000，x 为 0 时 n > 0；结果可用双精度浮点数表示且绝对值不超过 10^9。\n\n## 输出格式\n输出 x^n，保留 6 位小数。若结果按六位小数舍入为 0，输出 0.000000。\n",
+    "samples": [
+      {
+        "input": "2 10\n",
+        "output": "1024.000000\n"
+      },
+      {
+        "input": "0.5 -2\n",
+        "output": "4.000000\n"
+      },
+      {
+        "input": "2 -2\n",
+        "output": "0.250000\n"
+      }
+    ],
+    "reference_code": "import sys\nx, n = sys.stdin.read().split()\nx, n = float(x), int(n)\nif n < 0:\n    x, n = 1 / x, -n\nresult = 1.0\nwhile n:\n    if n & 1:\n        result *= x\n    n >>= 1\n    if n:\n        x *= x\nif abs(result) < 0.0000005:\n    result = 0.0\nprint(f\"{result:.6f}\")\n"
+  }
+]

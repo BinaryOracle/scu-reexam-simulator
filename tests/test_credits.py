@@ -129,6 +129,12 @@ def test_export_is_separated_by_package_status_and_batch(client):
     assert exported.status_code == 200
     assert exported.text.splitlines() == [first[1]['code']]
     assert exported.headers['cache-control'] == 'no-store'
+    search_code = client.get('/api/admin/vouchers/export', headers=manager, params={'package': 'three', 'status': 'all', 'q': first[1]['code'][-8:]})
+    assert search_code.text.splitlines() == [first[1]['code']]
+    search_user = client.get('/api/admin/vouchers/export', headers=manager, params={'package': 'three', 'status': 'all', 'q': 'alice'})
+    assert search_user.text.splitlines() == [first[0]['code']]
+    no_match = client.get('/api/admin/vouchers/export', headers=manager, params={'package': 'three', 'q': 'no-such-code'})
+    assert no_match.text == ''
     assert client.get('/api/admin/vouchers/export?package=ten', headers=manager).text.splitlines() == [ten[0]['code']]
     assert client.get('/api/admin/vouchers/export?package=three', headers=alice).status_code == 403
 

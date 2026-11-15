@@ -3,11 +3,12 @@ import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, el, button, emptyState, notify, run, dateTime, badge } from "./ui.js?v=20261114-ui-v17";
 import { refreshAccountSettings, setupAccountSettings } from "./profile-account.js?v=20261114-ui-v17";
 
-import { refreshTransfers } from "./credit-transfers.js?v=20261114-training-v10";
+import { refreshTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
 
 let voucherPackage = "";
 let voucherPage = 1;
 let voucherRequest = 0;
+let voucherSearchTimer;
 let defaultCreditsDirty = false;
 const money = value => `¥${(value / 100).toFixed(2)}`;
 const download = (text, name) => {
@@ -20,8 +21,18 @@ export async function readCreditSettings() {
   return api("/admin/credit-settings");
 }
 
+function voucherLoading() {
+  for (const id of ["voucherTotal", "voucherUnused", "voucherRedeemed", "voucherPageLabel"]) $(id).textContent = "—";
+  $("voucherPrevious").disabled = true; $("voucherNext").disabled = true;
+  $("voucherList").setAttribute("aria-busy", "true");
+  $("voucherList").replaceChildren(el("p", "正在加载卡密…", "muted"));
+}
+
 export async function refreshVouchers() {
+  clearTimeout(voucherSearchTimer);
   const request = ++voucherRequest;
+  voucherLoading();
+  try {
   const settings = await readCreditSettings();
   if (request !== voucherRequest) return;
   if (!settings.packages.some(item => item.id === voucherPackage)) voucherPackage = settings.packages[0]?.id || "";
@@ -44,6 +55,7 @@ export async function refreshVouchers() {
     q: $("voucherSearch").value.trim(), batch: $("voucherBatch").value.trim(), page: voucherPage });
   const data = await api(`/admin/vouchers?${query}`);
   if (request !== voucherRequest) return;
+  $("voucherList").removeAttribute("aria-busy");
   if (!defaultCreditsDirty) $("defaultCredits").value = settings.default_credits;
   $("voucherCount").max = settings.max_voucher_batch;
   $("voucherMaxHint").textContent = `每批最多 ${settings.max_voucher_batch} 张；每张卡密只能兑换一次。`;
@@ -85,11 +97,18 @@ export async function refreshVouchers() {
     body.append(row);
   }
   table.append(head, body); wrap.append(table); $("voucherList").replaceChildren(wrap);
+  } catch (error) {
+    if (request !== voucherRequest) return;
+    $("voucherList").removeAttribute("aria-busy");
+    const message = emptyState("卡密加载失败", "请检查网络连接后重试。", "◇");
+    message.append(button("重新加载", refreshVouchers));
+    $("voucherList").replaceChildren(message);
+    throw error;
+  }
 }
 
 export async function refreshProfile() {
   const data = await api("/profile");
-  const contribution = await api("/training/contribution-rewards");
   state.user.interview_credits = data.remaining;
   $("profileUsername").textContent = data.username;
   refreshAccountSettings();
@@ -102,40 +121,52 @@ export async function refreshProfile() {
   $("profileRedeemCount").textContent = `${data.redemptions.length} 张`;
   const shop = $("voucherShopLink");
   const contributionRoot = $("profileContribution");
-  contributionRoot.replaceChildren();
-  const contributionHeading = el("div", "", "contribution-heading");
-  contributionHeading.append(el("div", "题库贡献奖励", "eyebrow"),
-    el("h2", contribution.exempt ? "管理员账号不参与奖励" : "分享题目，获得面试次数"));
-  const contributionProgress = el("p", contribution.exempt
-    ? "普通用户投稿审核通过并公开后计入奖励。"
-    : "当前规则：每 " + contribution.policy.questions_per_reward + " 道公开题奖励 " +
-      contribution.policy.credits_per_reward + " 次；本规则下已通过 " + contribution.approved_count +
-      " 道，再通过 " + contribution.remaining_questions + " 道可达下一奖励。", "muted");
-  contributionRoot.append(contributionHeading, contributionProgress);
-  if (!contribution.exempt) {
-    const history = el("div", "", "contribution-history");
-    for (const grant of contribution.grants.slice(0, 5))
-      history.append(el("span", "+" + grant.credits + " 次 · " + new Date(grant.created * 1000).toLocaleDateString("zh-CN")));
-    if (!contribution.grants.length) history.append(el("span", "审核通过的投稿达到规则数量后，会在这里显示奖励记录。"));
-    contributionRoot.append(history);
-  }
   shop.hidden = !data.shop_url;
   if (data.shop_url) shop.href = data.shop_url;
   else shop.removeAttribute("href");
-  await refreshTransfers(data, refreshProfile);
   if (!data.redemptions.length) {
     $("redemptionHistory").replaceChildren(emptyState("暂无兑换记录", "兑换成功后，次数和对应套餐金额会显示在这里。", "◇"));
-    return;
+  } else {
+    const list = el("div", "", "redemption-list");
+    for (const record of data.redemptions) {
+      const row = el("article", "", "redemption-record");
+      const copy = el("div");
+      copy.append(el("strong", `新增 ${record.credits} 次面试`), el("p", `卡密尾号 ${record.code_suffix} · ${dateTime(record.redeemed_at)}`));
+      row.append(copy, el("span", money(record.amount_fen), "redemption-price"));
+      list.append(row);
+    }
+    $("redemptionHistory").replaceChildren(list);
   }
-  const list = el("div", "", "redemption-list");
-  for (const record of data.redemptions) {
-    const row = el("article", "", "redemption-record");
-    const copy = el("div");
-    copy.append(el("strong", `新增 ${record.credits} 次面试`), el("p", `卡密尾号 ${record.code_suffix} · ${dateTime(record.redeemed_at)}`));
-    row.append(copy, el("span", money(record.amount_fen), "redemption-price"));
-    list.append(row);
+  try { await refreshTransfers(data, refreshProfile); }
+  catch {
+    const message = emptyState("转赠记录暂时无法加载", "余额和兑换信息已更新；请稍后重试查看转赠记录。", "◇");
+    message.append(button("重新加载", () => { void refreshProfile(); }, "button secondary"));
+    $("profileTransfers").replaceChildren(message);
   }
-  $("redemptionHistory").replaceChildren(list);
+  try {
+    const contribution = await api("/training/contribution-rewards");
+    contributionRoot.replaceChildren();
+    const contributionHeading = el("div", "", "contribution-heading");
+    contributionHeading.append(el("div", "题库贡献奖励", "eyebrow"),
+      el("h2", contribution.exempt ? "管理员账号不参与奖励" : "分享题目，获得面试次数"));
+    const contributionProgress = el("p", contribution.exempt
+      ? "普通用户投稿审核通过并公开后计入奖励。"
+      : "当前规则：每 " + contribution.policy.questions_per_reward + " 道公开题奖励 " +
+        contribution.policy.credits_per_reward + " 次；本规则下已通过 " + contribution.approved_count +
+        " 道，再通过 " + contribution.remaining_questions + " 道可达下一奖励。", "muted");
+    contributionRoot.append(contributionHeading, contributionProgress);
+    if (!contribution.exempt) {
+      const history = el("div", "", "contribution-history");
+      for (const grant of contribution.grants.slice(0, 5))
+        history.append(el("span", "+" + grant.credits + " 次 · " + new Date(grant.created * 1000).toLocaleDateString("zh-CN")));
+      if (!contribution.grants.length) history.append(el("span", "审核通过的投稿达到规则数量后，会在这里显示奖励记录。"));
+      contributionRoot.append(history);
+    }
+  } catch {
+    const message = emptyState("贡献奖励信息暂时无法加载", "账户余额与兑换记录仍可正常查看。", "◇");
+    message.append(button("重新加载", () => { void refreshProfile(); }, "button secondary"));
+    contributionRoot.replaceChildren(message);
+  }
 }
 
 export function setupCredits() {
@@ -176,14 +207,21 @@ export function setupCredits() {
       notify(`已生成 ${cards.length} 张新卡密，当前仅展示本批次，可直接导出。`);
     }, event.submitter);
   });
-  for (const id of ["voucherStatus", "voucherSearch", "voucherBatch"]) $(id).addEventListener("change", () => { voucherPage = 1; run(refreshVouchers); });
+  for (const id of ["voucherSearch", "voucherBatch"]) $(id).addEventListener("input", () => {
+    voucherPage = 1;
+    voucherRequest++;
+    clearTimeout(voucherSearchTimer);
+    voucherLoading();
+    voucherSearchTimer = setTimeout(() => run(refreshVouchers), 250);
+  });
+  $("voucherStatus").addEventListener("change", () => { voucherPage = 1; run(refreshVouchers); });
   $("clearVoucherFilters").addEventListener("click", () => {
     $("voucherSearch").value = ""; $("voucherBatch").value = ""; $("voucherStatus").value = "all"; voucherPage = 1; run(refreshVouchers);
   });
   $("voucherPrevious").addEventListener("click", () => { voucherPage--; run(refreshVouchers); });
   $("voucherNext").addEventListener("click", () => { voucherPage++; run(refreshVouchers); });
   $("exportVouchers").addEventListener("click", event => run(async () => {
-    const query = new URLSearchParams({ package: voucherPackage, status: $("voucherStatus").value, batch: $("voucherBatch").value.trim() });
+    const query = new URLSearchParams({ package: voucherPackage, status: $("voucherStatus").value, q: $("voucherSearch").value.trim(), batch: $("voucherBatch").value.trim() });
     const response = await fetch(`/api/admin/vouchers/export?${query}`, { headers: { Authorization: `Bearer ${state.token}` } });
     if (!response.ok) throw new Error("卡密导出失败，请重新登录后重试");
     const value = await response.text();

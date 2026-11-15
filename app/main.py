@@ -19,6 +19,7 @@ from app.services.security import verify_password
 from app.services.password_vault import PasswordVaultError, encrypt_password
 from app.services.auth import current_user, administrator, interview_user, exam_user, public_user
 from app.services.interviews import details, interview, active_interview, require_stage, summary, seed_answers
+from app.services.contest_scoring import submission_score
 from app.services.interview_clock import require_running, timing, timestamp
 from app.services import question_bank
 from app.services import luogu_catalog
@@ -32,6 +33,7 @@ from app.routes.profile_account import router as profile_account_router
 from app.routes.training import router as training_router
 from app.routes.credit_transfers import router as credit_transfers_router
 from app.routes.announcements import router as announcements_router
+from app.routes.coding import router as coding_router
 
 initialize()
 app = FastAPI(title='复试模拟系统')
@@ -51,6 +53,7 @@ app.include_router(profile_account_router)
 app.include_router(training_router)
 app.include_router(credit_transfers_router)
 app.include_router(announcements_router)
+app.include_router(coding_router)
 app.mount('/static', StaticFiles(directory=ROOT / 'app/static'), name='static')
 
 @app.get('/api/home/resources')
@@ -485,18 +488,24 @@ def contest_ranking(cid: int, user=Depends(exam_user)):
             score = accepted = attempts = 0
             first_accept = None
             for problem in problems:
-                submissions = list(db.execute('''SELECT status,created FROM submissions
+                submissions = list(db.execute('''SELECT status,created,detail FROM submissions
                     WHERE user_id=? AND problem_id=? ORDER BY id''', (candidate['id'], problem['id'])))
                 accepted_rows = [row for row in submissions if row['status'] == 'Accepted']
                 solved = bool(accepted_rows)
+                scored_submissions = [(submission_score(problem['points'], row['status'], row['detail']), row)
+                                      for row in submissions]
+                problem_score, best_submission = max(scored_submissions, key=lambda item: item[0], default=(0, None))
+                testcase_match = re.search(r'通过测试(?:用例|点)数\s*[:：]\s*(\d+)\s*/\s*(\d+)', best_submission['detail']) if best_submission else None
                 attempts += len(submissions)
                 accepted += int(solved)
+                score += problem_score
                 if solved:
-                    score += problem['points']
                     solved_at = accepted_rows[0]['created']
                     first_accept = solved_at if first_accept is None else min(first_accept, solved_at)
                 per_problem.append({'problem_id': problem['id'], 'attempts': len(submissions),
-                    'accepted': len(accepted_rows), 'solved': solved})
+                    'accepted': len(accepted_rows), 'solved': solved, 'score': problem_score,
+                    'passed_cases': int(testcase_match.group(1)) if testcase_match else 0,
+                    'total_cases': int(testcase_match.group(2)) if testcase_match else 0})
             rows.append({'user_id': candidate['id'], 'username': candidate['username'], 'score': score,
                 'accepted_count': accepted, 'attempt_count': attempts, 'first_accepted_at': first_accept,
                 'problems': per_problem})
@@ -707,7 +716,7 @@ def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(defau
         joins = 'JOIN problems ON problems.id=submissions.problem_id'
         total = db.execute(f'SELECT COUNT(*) FROM submissions {joins} WHERE {where}', params).fetchone()[0]
         rows = [dict(row) for row in db.execute(f'''SELECT submissions.id,username,problem_id,problems.title AS problem_title,
-            language,status,created,remote_submission_id,detail FROM submissions JOIN users ON users.id=submissions.user_id
+            language,status,created,detail FROM submissions JOIN users ON users.id=submissions.user_id
             {joins} WHERE {where} ORDER BY submissions.id DESC LIMIT ? OFFSET ?''', (*params,page_size,(page-1)*page_size))]
         pages = (total + page_size - 1) // page_size
         stats = db.execute(f'''SELECT SUM(CASE WHEN status='Accepted' THEN 1 ELSE 0 END) AS accepted,
@@ -723,7 +732,7 @@ def submission_detail(sid: int, user=Depends(exam_user)):
     with connect() as db:
         row = db.execute('''SELECT submissions.id,submissions.user_id,submissions.problem_id,problems.title AS problem_title,
             contests.title AS contest_title,submissions.language,submissions.source,submissions.status,submissions.created,
-            submissions.remote_submission_id,submissions.detail FROM submissions
+            submissions.detail FROM submissions
             JOIN problems ON problems.id=submissions.problem_id JOIN contests ON contests.id=problems.contest_id
             WHERE submissions.id=? AND submissions.user_id=?''', (sid,user['id'])).fetchone()
         if not row: raise HTTPException(404, '提交记录不存在')

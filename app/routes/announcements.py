@@ -36,8 +36,9 @@ def image(asset_id:str,user=Depends(current_user)):
 
 
 @router.get('/api/admin/announcements')
-def admin_list(status:Literal['','draft','published','withdrawn']='',q:str=Query('',max_length=120),actor=Depends(administrator)):
-    with connect() as db: return {'items':announcements.list_items(db,admin=True,status=status,q=q)}
+def admin_list(status:Literal['','draft','published','withdrawn']='',q:str=Query('',max_length=120),
+               page:int=Query(1,ge=1),page_size:int=Query(10,ge=1,le=100),actor=Depends(administrator)):
+    with connect() as db: return announcements.list_items(db,admin=True,status=status,q=q,page=page,page_size=page_size)
 
 
 @router.post('/api/admin/announcements',status_code=201)

@@ -138,10 +138,12 @@ def test_submissions_are_paginated_have_private_details_and_feed_contest_ranking
     page = client.get('/api/submissions?page=1&page_size=1', headers=alice)
     assert page.status_code == 200
     assert page.json()['total'] == 2 and page.json()['pages'] == 2
+    assert 'remote_submission_id' not in page.json()['items'][0]
     detail = client.get(f'/api/submissions/{first}', headers=alice)
     assert detail.status_code == 200
     assert detail.json()['source'] == 'int main(){}'
     assert detail.json()['detail'] == '测试点 2 答案错误'
+    assert 'remote_submission_id' not in detail.json()
     assert client.get(f'/api/submissions/{first}', headers=bob).status_code == 404
 
     overview = client.get(f'/api/contests/{contest["id"]}', headers=alice).json()
@@ -152,6 +154,69 @@ def test_submissions_are_paginated_have_private_details_and_feed_contest_ranking
     assert ranking.json()['rows'][0]['username'] == 'alice'
     assert ranking.json()['rows'][0]['score'] == 250
     assert ranking.json()['rows'][0]['problems'][0]['attempts'] == 2
+
+    client.post(f'/api/problems/{pid}/submissions', headers=bob, json={'source':'print(1)','language':'python3'})
+    client.post(f'/api/problems/{pid}/submissions', headers=bob, json={'source':'print(2)','language':'python3'})
+    admin_first = client.get('/api/admin/submissions?page=1&page_size=2', headers=manager).json()
+    admin_second = client.get('/api/admin/submissions?page=2&page_size=2', headers=manager).json()
+    assert admin_first['total']==admin_second['total']==4
+    assert [row['username'] for row in admin_first['items']]==['alice','alice']
+    assert [row['username'] for row in admin_second['items']]==['bob','bob']
+
+def test_contest_ranking_awards_ceiling_proportional_score_for_partial_luogu_results(client):
+    manager, alice = login(client, 'manager'), login(client, 'alice')
+    now = time.time()
+    contest = client.post('/api/admin/contests', headers=manager, json={
+        'title':'部分分赛','starts':now-10,'ends':now+100,'show_ranking':True,
+        'ranking_rule':'score','problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000','points':100}]
+    }).json()
+    pid = contest['problem_ids'][0]
+    first = client.post(f'/api/problems/{pid}/submissions', headers=alice, json={
+        'source':'int main(){}','language':'cpp11'
+    }).json()['id']
+    assert client.post(f'/api/submissions/{first}/remote-result', headers=alice, json={
+        'remote_submission_id':'8123456','status':'Wrong Answer',
+        'detail':'通过测试用例数：7 / 12\n测试点 #1：AC\n测试点 #2：WA'
+    }).status_code == 200
+    ranking = client.get(f'/api/contests/{contest["id"]}/ranking', headers=alice).json()
+    assert ranking['rows'][0]['score'] == 59
+    assert ranking['rows'][0]['problems'][0]['score'] == 59
+    assert ranking['rows'][0]['problems'][0]['solved'] is False
+    assert ranking['rows'][0]['problems'][0]['passed_cases'] == 7
+    assert ranking['rows'][0]['problems'][0]['total_cases'] == 12
+
+def test_admin_submission_directory_and_each_users_submissions_are_paginated_separately(client):
+    manager, alice, bob = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
+    now = time.time()
+    contest = client.post('/api/admin/contests', headers=manager, json={
+        'title':'分层分页赛','starts':now-10,'ends':now+100,
+        'problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000'}]
+    }).json()
+    pid = contest['problem_ids'][0]
+    for source in ('print(1)', 'print(2)', 'print(3)'):
+        assert client.post(f'/api/problems/{pid}/submissions', headers=alice,
+                           json={'source':source,'language':'python3'}).status_code == 200
+    assert client.post(f'/api/problems/{pid}/submissions', headers=bob,
+                       json={'source':'print(4)','language':'python3'}).status_code == 200
+    assert client.post(f'/api/problems/{pid}/submissions', headers=manager,
+                       json={'source':'print(5)','language':'python3'}).status_code == 200
+
+    first_users = client.get('/api/admin/submissions/users?page=1&page_size=1', headers=manager)
+    second_users = client.get('/api/admin/submissions/users?page=2&page_size=1', headers=manager)
+    assert first_users.status_code == second_users.status_code == 200
+    assert (first_users.json()['total'], first_users.json()['pages']) == (2, 2)
+    assert first_users.json()['items'][0]['username'] == 'alice'
+    assert first_users.json()['items'][0]['submission_count'] == 3
+    assert second_users.json()['items'][0]['username'] == 'bob'
+
+    alice_id = first_users.json()['items'][0]['user_id']
+    first_submissions = client.get(f'/api/admin/submissions/users/{alice_id}?page=1&page_size=2', headers=manager)
+    second_submissions = client.get(f'/api/admin/submissions/users/{alice_id}?page=2&page_size=2', headers=manager)
+    assert first_submissions.status_code == second_submissions.status_code == 200
+    assert (first_submissions.json()['total'], first_submissions.json()['pages']) == (3, 2)
+    assert len(first_submissions.json()['items']) == 2
+    assert len(second_submissions.json()['items']) == 1
+    assert all(row['username'] == 'alice' for row in first_submissions.json()['items'] + second_submissions.json()['items'])
 
 def test_contest_ranking_can_be_hidden_and_invalid_language_is_rejected(client):
     manager, alice = login(client, 'manager'), login(client, 'alice')

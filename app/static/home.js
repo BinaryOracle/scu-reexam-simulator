@@ -1,30 +1,102 @@
 /** Renders the authenticated preparation home and published announcement reader. */
 import { api, state } from "./api.js?v=20261114-ui-v17";
-import { $, el, button, notify } from "./ui.js?v=20261114-ui-v17";
+import { $, el, button, notify, confirmAction } from "./ui.js?v=20261114-ui-v17";
 
-let timer = null;
 let notices = [];
-let activeNotice = 0;
+let announcementsUnavailable = false;
+let releaseAnnouncementImages = null;
 
-function openAnnouncement(item) {
+/** Load private images with the current session; closing the reader cancels and releases them. */
+function prepareAnnouncementImage(image, source, session) {
+  image.classList.add("announcement-content-image");
+  image.removeAttribute("src");
+  const match = /^\/api\/(?:admin\/)?announcements\/assets\/([a-f0-9]{32})$/.exec(source);
+  if (!match) { image.src = source; return; }
+  const status = el("span", "图片加载中…", "announcement-image-status");
+  image.hidden = true;
+  const load = async () => {
+    status.textContent = "图片加载中…";
+    try {
+      const response = await fetch(announcementAssetUrl(match[1]), {
+        headers: { Authorization: `Bearer ${session.token}` }, signal: session.controller.signal,
+      });
+      if (!response.ok) throw new Error(response.status === 401 ? "登录已过期，请重新登录后查看图片" : "图片加载失败");
+      const blob = await response.blob();
+      if (session.controller.signal.aborted || state.token !== session.token || !image.isConnected) return;
+      const url = URL.createObjectURL(blob); session.urls.add(url);
+      image.src = url;
+      try { await image.decode(); }
+      catch (error) { URL.revokeObjectURL(url); session.urls.delete(url); throw new Error("图片无法显示，请重新上传"); }
+      if (session.controller.signal.aborted) return;
+      image.hidden = false; status.remove();
+    } catch (error) {
+      if (session.controller.signal.aborted || !image.isConnected) return;
+      status.replaceChildren(el("span", error.message), button("重试", load, "button quiet"));
+    }
+  };
+  return { status, load };
+}
+
+function openAnnouncement(item, { returnToList = false } = {}) {
+  releaseAnnouncementImages?.();
+  const session = { controller: new AbortController(), urls: new Set(), token: state.token };
+  releaseAnnouncementImages = () => {
+    session.controller.abort();
+    session.urls.forEach(url => URL.revokeObjectURL(url));
+    session.urls.clear();
+  };
   $("announcementDialogTitle").textContent = item.title;
   const body = $("announcementDialogContent");
   body.replaceChildren();
+  if (returnToList) body.append(button("← 返回公告列表", openAnnouncementList, "button quiet announcement-list-back"));
+  const content = document.createElement("template");
   if (item.cover_url) {
     const image = el("img", "", "announcement-detail-cover");
-    image.src = state.adminMode
-      ? item.cover_url.replace("/api/announcements/assets/", "/api/admin/announcements/assets/")
-      : item.cover_url;
+    image.dataset.assetSource = item.cover_url;
     image.alt = "";
-    body.append(image);
+    content.content.append(image);
   }
-  if (item.summary) body.append(el("p", item.summary, "announcement-summary"));
-  body.insertAdjacentHTML("beforeend", item.body_html || "");
-  for (const image of body.querySelectorAll("img")) {
-    image.classList.add("announcement-content-image");
-    if (state.adminMode) image.src = image.src.replace("/api/announcements/assets/", "/api/admin/announcements/assets/");
+  if (item.summary) content.content.append(el("p", item.summary, "announcement-summary"));
+  const markdown = document.createElement("template");
+  markdown.innerHTML = item.body_html || "";
+  content.content.append(markdown.content);
+  const loads = [];
+  for (const image of content.content.querySelectorAll("img")) {
+    const task = prepareAnnouncementImage(image, image.dataset.assetSource || image.getAttribute("src") || "", session);
+    if (task) { image.before(task.status); loads.push(task.load); }
   }
-  $("announcementDialog").showModal();
+  body.append(content.content);
+  if (!$("announcementDialog").open) $("announcementDialog").showModal();
+  body.scrollTop = 0;
+  body.querySelector(".announcement-list-back")?.focus({ preventScroll: true });
+  loads.forEach(load => { void load(); });
+}
+
+function openAnnouncementList() {
+  releaseAnnouncementImages?.(); releaseAnnouncementImages = null;
+  $("announcementDialogTitle").textContent = "全部公告";
+  const body = $("announcementDialogContent");
+  body.replaceChildren(el("p", `共 ${notices.length} 条公告`, "announcement-list-count"));
+  const list = el("ul", "", "announcement-public-list");
+  for (const item of notices) {
+    const row = el("li");
+    const control = button("", () => openAnnouncement(item, { returnToList: true }), "announcement-public-item");
+    const copy = el("span", "", "announcement-public-copy");
+    copy.append(el("strong", item.title));
+    if (item.summary) copy.append(el("span", item.summary, "announcement-public-summary"));
+    if (item.published_at) {
+      const date = el("time", new Date(item.published_at * 1000).toLocaleDateString("zh-CN"));
+      date.dateTime = new Date(item.published_at * 1000).toISOString();
+      copy.append(date);
+    }
+    const arrow = el("span", "→", "announcement-public-arrow"); arrow.setAttribute("aria-hidden", "true");
+    control.append(copy, arrow); row.append(control); list.append(row);
+  }
+  if (notices.length) body.append(list);
+  else body.append(el("p", "暂无已发布的公告。", "empty-state"));
+  if (!$("announcementDialog").open) $("announcementDialog").showModal();
+  body.scrollTop = 0;
+  $("closeAnnouncementDialog").focus({ preventScroll: true });
 }
 
 function announcementAssetUrl(assetId) {
@@ -34,16 +106,30 @@ function announcementAssetUrl(assetId) {
 function renderNotices(root) {
   const band = el("section", "", "home-announcement-band");
   band.setAttribute("aria-label", "平台公告");
-  const current = notices[activeNotice];
-  const open = button(current ? current.title : "暂无公告", () => current && openAnnouncement(current), "home-announcement-title");
-  open.disabled = !current;
-  band.append(el("span", "公告", "home-announcement-label"), open);
-  if (notices.length > 1) {
-    const controls = el("div", "", "home-announcement-controls");
-    controls.append(button("‹", () => { activeNotice = (activeNotice + notices.length - 1) % notices.length; renderHome(); }, "icon-button"));
-    controls.append(button("›", () => { activeNotice = (activeNotice + 1) % notices.length; renderHome(); }, "icon-button"));
-    band.append(controls);
+  const viewport = el("div", "", "home-announcement-viewport");
+  const track = el("div", "", "home-announcement-track");
+  if (announcementsUnavailable) {
+    viewport.append(el("span", "公告暂时无法加载", "home-announcement-error"),
+      button("重试", () => { void refreshHome(); }, "text-button home-announcement-retry"));
+  } else if (!notices.length) viewport.append(el("span", "暂无公告"));
+  else {
+    for (let copy = 0; copy < 2; copy++) {
+      const group = el("div", "", "home-announcement-group");
+      if (copy) group.setAttribute("aria-hidden", "true");
+      for (const item of notices) {
+        const link = button(item.title, () => openAnnouncement(item), "home-announcement-title");
+        if (copy) link.tabIndex = -1;
+        group.append(link);
+      }
+      track.append(group);
+    }
+    track.classList.add("is-rotating");
+    track.style.setProperty("--announcement-duration", `${24 * notices.length}s`);
+    viewport.append(track);
   }
+  const label = button("公告", openAnnouncementList, "home-announcement-label");
+  label.title = "查看全部公告";
+  band.append(label, viewport);
   root.append(band);
 }
 
@@ -64,6 +150,7 @@ function renderHome() {
     ["training", "每日训练", "题库练习 · 连续签到", "◈"],
     ["interview", "模拟面试", "PPT、语音回答与点评", "◉"],
     ["contest", "上机考试", "限时编程与在线评测", "</>"],
+    ["coding", "算法带刷", "分阶段题单 · 每日一题", "⌘"],
   ]) {
     const control = button("", () => navigate(item[0]), "home-action");
     control.append(el("span", item[3], "home-action-icon"), el("span", item[1], "home-action-title"),
@@ -113,19 +200,17 @@ function renderHome() {
 }
 
 export async function refreshHome() {
-  clearInterval(timer); timer = null;
-  try { notices = await api("/announcements"); }
-  catch (error) { notices = []; notify(error.message, "error"); }
-  activeNotice = Math.min(activeNotice, Math.max(0, notices.length - 1));
+  try { notices = await api("/announcements"); announcementsUnavailable = false; }
+  catch { notices = []; announcementsUnavailable = true; }
   renderHome();
-  if (notices.length > 1) timer = setInterval(() => {
-    activeNotice = (activeNotice + 1) % notices.length;
-    const root=$("home");root.querySelector(".home-announcement-band")?.remove();renderNotices(root);
-  }, 8000);
 }
 
 export function setupHome() {
   $("closeAnnouncementDialog").addEventListener("click", () => $("announcementDialog").close());
+  $("announcementDialog").addEventListener("close", () => {
+    releaseAnnouncementImages?.(); releaseAnnouncementImages = null;
+    $("announcementDialogContent").replaceChildren();
+  });
 }
 
 export async function refreshAnnouncementsAdmin() {
@@ -140,14 +225,22 @@ export async function refreshAnnouncementsAdmin() {
   root.append(heading);
   const toolbar = el("div", "", "announcement-admin-toolbar");
   const search = el("input"); search.type = "search"; search.placeholder = "搜索公告标题";
+  search.setAttribute("aria-label", "搜索公告标题");
   const status = el("select");
+  status.setAttribute("aria-label", "按公告状态筛选");
   for (const [value,label] of [["","全部状态"],["draft","草稿"],["published","已上架"],["withdrawn","已下架"]]) {
     const option = el("option",label); option.value=value; status.append(option);
   }
   const list = el("div", "", "announcement-admin-list"); list.id="announcementAdminList";
+  let request = 0;
+  let page = 1;
+  let searchTimer = null;
   const load = async () => {
-    const query = new URLSearchParams({status:status.value,q:search.value.trim()});
+    const currentRequest = ++request;
+    const query = new URLSearchParams({status:status.value,q:search.value.trim(),page:String(page),page_size:"10"});
     const data = await api("/admin/announcements?" + query);
+    if (currentRequest !== request || root.hidden) return;
+    if (page > Math.max(1, data.pages)) { page = Math.max(1, data.pages); return load(); }
     list.replaceChildren();
     for (const item of data.items) {
       const row=el("article","","announcement-admin-row");
@@ -163,10 +256,20 @@ export async function refreshAnnouncementsAdmin() {
       row.append(copy,controls);list.append(row);
     }
     if(!data.items.length)list.append(el("p","当前没有匹配的公告。","empty-state"));
+    toolbar.querySelector(".announcement-admin-pagination")?.remove();
+    if(data.pages>1){
+      const pagination=el("nav","","announcement-admin-pagination");pagination.setAttribute("aria-label","公告列表分页");
+      const previous=button("上一页",()=>{page--;void load().catch(error=>notify(error.message,"error"));},"button secondary");previous.disabled=page<=1;
+      const next=button("下一页",()=>{page++;void load().catch(error=>notify(error.message,"error"));},"button secondary");next.disabled=page>=data.pages;
+      pagination.append(previous,el("span",`第 ${page} / ${data.pages} 页 · 共 ${data.total} 条`),next);toolbar.append(pagination);
+    }
   };
   toolbar.append(search,status);
-  search.addEventListener("input",()=>void load().catch(error=>notify(error.message,"error")));
-  status.addEventListener("change",()=>void load().catch(error=>notify(error.message,"error")));
+  search.addEventListener("input",()=>{
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(()=>{page=1;void load().catch(error=>notify(error.message,"error"));},180);
+  });
+  status.addEventListener("change",()=>{page=1;void load().catch(error=>notify(error.message,"error"));});
   root.append(toolbar,list);
   await load();
 }
@@ -177,6 +280,12 @@ function statusLabel(status) {
 
 function editNotice(item) {
   const root=$("announcementsAdmin");
+  const heading=root.querySelector(":scope > .page-heading");
+  const toolbar=root.querySelector(":scope > .announcement-admin-toolbar");
+  const list=root.querySelector(":scope > .announcement-admin-list");
+  if(heading)heading.hidden=true;
+  if(toolbar)toolbar.hidden=true;
+  if(list)list.hidden=true;
   root.querySelector(".announcement-editor")?.remove();
   const form=el("form","","panel announcement-editor");
   const title=el("input");title.required=true;title.maxLength=120;title.value=item?.title||"";
@@ -235,7 +344,13 @@ function editNotice(item) {
     finally{imageInput.value="";}
   });
   const actions=el("div","","action-group");
-  actions.append(button("取消",()=>form.remove(),"button quiet"));
+  const values=()=>({title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value});
+  let original=JSON.stringify(values());
+  actions.append(button("取消",async()=>{
+    if(JSON.stringify(values())!==original&&!await confirmAction("公告有尚未保存的修改，确定放弃吗？"))return;
+    form.remove();
+    for(const node of [heading,toolbar,list])if(node)node.hidden=false;
+  },"button quiet"));
   actions.append(button("预览",async()=>{
     try{
       const preview=await api("/admin/announcements/preview",{method:"POST",body:JSON.stringify({
@@ -247,6 +362,7 @@ function editNotice(item) {
     const payload={title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value};
     const saved=await api(item?"/admin/announcements/"+item.id:"/admin/announcements",{
       method:item?"PUT":"POST",body:JSON.stringify(payload)});
+    original=JSON.stringify(payload);
     notify("公告草稿已保存");
     if(!item)editNotice(saved);else await refreshAnnouncementsAdmin();
   },"button primary"));
