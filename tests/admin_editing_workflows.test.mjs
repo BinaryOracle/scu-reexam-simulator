@@ -124,6 +124,25 @@ test('announcement cancel preserves edited content until discard is confirmed', 
   assert.equal(form.isConnected, false); assert.equal(root.querySelector('.page-heading').hidden, false);
 });
 
+test('saving a new announcement draft once returns to the list with the saved item', async () => {
+  let creates = 0;
+  const saved = { id: 9, title: '一次保存成功', summary: '草稿摘要', status: 'draft' };
+  const env = environment(async (path, options) => {
+    if (options?.method === 'POST') { creates++; return saved; }
+    if (path.startsWith('/admin/announcements')) return { items: [saved], pages: 1, total: 1 };
+    return {};
+  });
+  env.load('home'); const root = env.el('section'); root.id = 'announcementsAdmin'; env.body.append(root);
+  for (const name of ['page-heading', 'announcement-admin-toolbar', 'announcement-admin-list']) root.append(env.el('div', '', name));
+  env.context.editNotice(null);
+  const form = root.querySelector('.announcement-editor');
+  form.querySelector('input').value = saved.title;
+  await env.find(form, '保存草稿').click();
+  assert.equal(creates, 1);
+  assert.equal(root.querySelector('.announcement-editor'), null);
+  assert.equal(root.querySelector('.announcement-admin-row').querySelector('strong').textContent, saved.title);
+});
+
 test('announcement status change returns an invalid filtered last page to the preceding page', async () => {
   let changed = false; const requests = [];
   const item = { id: 1, title: '公告', summary: '', status: 'published' };

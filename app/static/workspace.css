@@ -120,6 +120,7 @@
 .candidate-workspace[data-editor-hidden="true"] > .editor-stack { grid-template-rows: minmax(0, 1fr); }
 .candidate-workspace[data-editor-hidden="true"]:not([data-panels-hidden="true"]) > .problem-splitter { display: none; }
 .candidate-workspace[data-editor-hidden="true"]:not([data-panels-hidden="true"]) > .editor-stack { grid-column: 2 / -1; }
+.candidate-workspace[data-statement-hidden="true"][data-editor-hidden="true"]:not([data-panels-hidden="true"]) > .editor-stack { grid-column: 1 / -1; }
 .candidate-workspace[data-panels-hidden="true"] > .editor-stack { grid-template-rows: minmax(0, 1fr); }
 .candidate-workspace[data-editor-hidden="true"][data-panels-hidden="true"] > .problem-splitter,
 .candidate-workspace[data-editor-hidden="true"][data-panels-hidden="true"] > .editor-stack { display: none; }

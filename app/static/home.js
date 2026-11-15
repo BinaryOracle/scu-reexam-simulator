@@ -6,6 +6,7 @@ import { homeLayoutErrorMessage } from "./home-feedback.mjs?v=20261115-home-feed
 
 let notices = [];
 let announcementIndex = 0;
+let announcementTimer = null;
 let announcementsUnavailable = false;
 let releaseAnnouncementImages = null;
 let homeRevision = 0;
@@ -108,6 +109,8 @@ function announcementAssetUrl(assetId) {
 }
 
 function renderNotices(root) {
+  clearInterval(announcementTimer);
+  announcementTimer = null;
   const band = el("section", "", "home-announcement-band");
   band.setAttribute("aria-label", "平台公告");
   const viewport = el("div", "", "home-announcement-viewport");
@@ -121,25 +124,34 @@ function renderNotices(root) {
     announcementIndex %= notices.length;
     const title = button("", () => openAnnouncement(notices[announcementIndex]), "home-announcement-title");
     const position = el("span", "", "home-announcement-position");
-    const showNotice = () => {
+    const showNotice = (animate = false) => {
       title.textContent = notices[announcementIndex].title;
       position.textContent = notices.length > 1 ? `${announcementIndex + 1} / ${notices.length}` : "";
+      if (animate) {
+        title.classList.remove("is-rolling");
+        void title.offsetWidth;
+        title.classList.add("is-rolling");
+      }
     };
     showNotice();
     viewport.append(title);
     if (notices.length > 1) {
       const previous = button("‹", () => {
         announcementIndex = (announcementIndex - 1 + notices.length) % notices.length;
-        showNotice();
+        showNotice(true);
       }, "icon-button");
       previous.setAttribute("aria-label", "上一条公告");
       const next = button("›", () => {
         announcementIndex = (announcementIndex + 1) % notices.length;
-        showNotice();
+        showNotice(true);
       }, "icon-button");
       next.setAttribute("aria-label", "下一条公告");
       controls.append(position, previous, next);
     }
+    announcementTimer = setInterval(() => {
+      announcementIndex = (announcementIndex + 1) % notices.length;
+      showNotice(true);
+    }, 5000);
   }
   const label = button("公告", openAnnouncementList, "home-announcement-label");
   label.title = "查看全部公告";
@@ -346,11 +358,13 @@ function editNotice(item) {
   },"button secondary"));
   actions.append(button("保存草稿",async()=>{
     const payload={title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value};
-    const saved=await api(item?"/admin/announcements/"+item.id:"/admin/announcements",{
+    await api(item?"/admin/announcements/"+item.id:"/admin/announcements",{
       method:item?"PUT":"POST",body:JSON.stringify(payload)});
-    original=JSON.stringify(payload);
     notify("公告草稿已保存");
-    if(!item)editNotice(saved);else await refreshAnnouncementsAdmin();
+    form.remove();
+    for(const node of [heading,toolbar,list])if(node)node.hidden=false;
+    try { await refreshAnnouncementsAdmin(); }
+    catch(error) { notify(`草稿已保存，但列表刷新失败：${error.message}`,"error"); }
   },"button primary"));
   form.append(titleLabel,summaryLabel,coverLabel,coverUpload,coverFile,blockHeading,markdown,addImage,imageInput,actions);
   root.append(form);form.scrollIntoView({behavior:"smooth",block:"start"});

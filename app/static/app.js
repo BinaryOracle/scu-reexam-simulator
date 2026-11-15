@@ -26,7 +26,7 @@ import { refreshTraining, clearTraining, selectTrainingSection } from "./trainin
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-empty-state-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
-import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-access-layout-v2";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261115-announcement-roll-v1";
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
@@ -167,6 +167,8 @@ async function show(view, force = false, { historyMode = "push" } = {}) {
     item?.classList.toggle("active", key === selected);
     if (key === selected) item?.setAttribute("aria-current", "page");
     else item?.removeAttribute("aria-current");
+    if (key === selected && window.matchMedia("(max-width: 620px)").matches)
+      item?.scrollIntoView({ behavior: "instant", block: "nearest", inline: "nearest" });
     if (key === selected) {
       $("pageLabel").textContent = value.label;
       document.title = `${value.label} · 知序${state.adminMode ? "后台" : ""}`;

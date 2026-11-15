@@ -72,6 +72,10 @@ test('keeps the submission panel in the remaining outer grid columns when the co
   assert.match(layoutStyles, /\.candidate-workspace\[data-editor-hidden="true"\]:not\(\[data-panels-hidden="true"\]\)\s*>\s*\.editor-stack\s*\{\s*grid-column:\s*2\s*\/\s*-1/);
 });
 
+test('lets the submission panel fill the workspace when it is the only visible pane', () => {
+  assert.match(layoutStyles, /\.candidate-workspace\[data-statement-hidden="true"\]\[data-editor-hidden="true"\]:not\(\[data-panels-hidden="true"\]\)\s*>\s*\.editor-stack\s*\{\s*grid-column:\s*1\s*\/\s*-1/);
+});
+
 test('does not expose the local database id as a user-facing problem number', () => {
   const f = fixture();
   f.context.renderWorkspace();
@@ -105,6 +109,6 @@ test('groups Luogu source and refresh actions with clear spacing when they wrap'
     '在洛谷打开题目 ↗',
     '从洛谷更新题面与样例',
   ]);
-  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-actions\s*\{\s*display:\s*flex;\s*flex-direction:\s*column;\s*align-items:\s*flex-start;\s*gap:\s*14px;/);
-  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-action-row\s*\{\s*display:\s*flex;\s*align-items:\s*center;\s*width:\s*100%;\s*min-width:\s*0;\s*min-height:\s*36px;/);
+  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-actions\s*\{\s*display:\s*grid;\s*grid-template-columns:\s*minmax\(0,\s*1fr\);\s*align-items:\s*start;\s*gap:\s*16px;/);
+  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-action-row\s*\{\s*display:\s*flex;\s*align-items:\s*center;\s*width:\s*100%;\s*min-width:\s*0;\s*min-height:\s*40px;/);
 });
