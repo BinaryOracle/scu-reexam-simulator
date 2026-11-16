@@ -246,7 +246,8 @@ def _create_user(db, email):
     password = secrets.token_urlsafe(48)
     uid = allocate_user_id(db)
     db.execute("""INSERT INTO users(id,username,password,password_ciphertext,email,interview_credits,
-        is_admin,is_superadmin,is_active) VALUES (?,?,?,?,?,0,0,0,1)""",
+        is_admin,is_superadmin,is_active,can_interview,can_exam,can_practice,can_training,can_coding)
+        VALUES (?,?,?,?,?,0,0,0,1,1,1,0,0,0)""",
         (uid, email, hash_password(password), encrypt_password(password), email))
     adjust(db, uid, default_credits(db), kind='initial')
     return db.execute('SELECT * FROM users WHERE id=?', (uid,)).fetchone()

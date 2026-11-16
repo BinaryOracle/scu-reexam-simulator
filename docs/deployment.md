@@ -85,7 +85,99 @@ sh scripts/prepare_judge.sh
 
 ### 规划主机与域名
 
-建议使用提供 Python 3.12 的受支持 Linux x86-64 主机，配置固定公网 IPv4、SSD 持久盘、Docker Engine/Compose、Nginx、FFmpeg、LibreOffice 和中文字体。至少准备两个 DNS 名称：`app.example.org` 指向应用反向代理，`media.example.org` 指向 LiveKit 信令入口。正式使用前安装受信任的 TLS 证书。
+以下命令以 Ubuntu 24.04 LTS、单台 Linux x86-64 主机和公网 IPv4 为例；其他发行版请将包名和服务管理命令换成对应版本。准备至少两个 DNS 名称：`app.example.org` 指向应用反向代理，`media.example.org` 指向 LiveKit 信令入口。部署前将文中的示例域名替换成自己的域名，并确认两条 DNS 记录均已生效。
+
+先安装应用、媒体服务和证书所需的系统包：
+
+```sh
+sudo apt update
+sudo apt install -y ca-certificates curl git python3.12 python3.12-venv \
+  python3-pip docker.io docker-compose-v2 nginx certbot python3-certbot-nginx acl ufw \
+  ffmpeg libreoffice fonts-noto-cjk fontconfig
+sudo systemctl enable --now docker nginx
+```
+
+应用以无登录权限的 `scu` 账号运行。历史 Docker 评测需要应用访问 Docker socket；将该账号加入 `docker` 组等同授予宿主机近似 root 权限。仅对可信单机试点开放此权限；运行公网不可信代码时，必须将评测器隔离到独立主机或受限判题服务。
+
+```sh
+sudo useradd --system --create-home --home-dir /srv/scu --shell /usr/sbin/nologin scu
+sudo usermod -aG docker scu
+sudo install -d -o root -g scu -m 0750 /srv/scu/current
+sudo install -d -o scu -g scu -m 0750 /srv/scu/data \
+  /srv/scu/data/audio /srv/scu/data/presentations /srv/scu/data/live
+sudo install -d -o root -g scu -m 0750 /etc/scu
+sudo git clone https://github.com/BinaryOracle/scu-reexam-simulator.git /srv/scu/current
+sudo chown -R root:scu /srv/scu/current
+sudo chmod -R g+rX /srv/scu/current
+```
+
+创建 Python 环境、配置文件和隔离评测镜像：
+
+```sh
+sudo python3.12 -m venv /srv/scu/current/.venv
+sudo /srv/scu/current/.venv/bin/pip install -r /srv/scu/current/requirements.txt
+sudo install -o root -g scu -m 0640 /srv/scu/current/config.example.toml /etc/scu/config.toml
+sudo -u scu sh -c 'cd /srv/scu/current && SCU_CONFIG=/etc/scu/config.toml sh scripts/prepare_judge.sh'
+```
+
+用 `sudoedit /etc/scu/config.toml` 更新已有配置节中的私有数据路径，设为 `/srv/scu/data` 下的目录。不要把下列内容重复追加到文件末尾，否则重复的 TOML 配置节会导致应用无法启动：
+
+```toml
+[app]
+database = "/srv/scu/data/app.db"
+upload_dir = "/srv/scu/data/audio"
+
+[security]
+password_key_file = "/srv/scu/data/password-view.key"
+
+[presentation]
+directory = "/srv/scu/data/presentations"
+
+[live]
+directory = "/srv/scu/data/live"
+```
+
+保存后确认配置只允许 root 修改、服务组读取：
+
+```sh
+sudo chown root:scu /etc/scu/config.toml
+sudo chmod 0640 /etc/scu/config.toml
+```
+
+启用 HTTPS 前，先让域名解析到本机并确保外部 TCP 80/443 可达。首次签发使用 standalone 模式，临时停 Nginx 释放 80 端口：
+
+```sh
+sudo systemctl stop nginx
+sudo certbot certonly --standalone -d app.example.org -d media.example.org
+sudo systemctl start nginx
+```
+
+随后将下面的 HTTPS 虚拟主机分别保存为 `/etc/nginx/sites-available/scu-app` 和 `/etc/nginx/sites-available/scu-media`，替换证书域名后启用；首次启用前先运行 `sudo nginx -t`。可按需启用自动续期定时器：
+
+```sh
+sudo ln -s /etc/nginx/sites-available/scu-app /etc/nginx/sites-enabled/scu-app
+sudo ln -s /etc/nginx/sites-available/scu-media /etc/nginx/sites-enabled/scu-media
+sudo systemctl enable --now certbot.timer
+```
+
+证书签发后验证续期流程：
+
+```sh
+sudo certbot renew --dry-run
+```
+
+在启用防火墙前先允许管理员来源访问 SSH；以下示例中的 `203.0.113.10/32` 是文档保留地址，必须替换为实际管理 IP/CIDR。云安全组也须设置同样的 TCP/UDP 规则：
+
+```sh
+sudo ufw allow from 203.0.113.10/32 to any port 22 proto tcp
+sudo ufw allow 80,443/tcp
+sudo ufw allow 7881/tcp
+sudo ufw allow 50000:60000/udp
+sudo ufw enable
+sudo ufw status verbose
+```
+
+如需 TURN/TLS，应另行规划其公网域名、证书、监听端口和 LiveKit 配置，再将对应端口加入主机防火墙与云安全组；不要把未配置的 TURN 端口直接开放。
 
 防火墙仅允许 SSH 管理地址、TCP 80/443、LiveKit TCP 7881、LiveKit UDP 媒体端口范围和所需 TURN/TLS 端口。Redis、应用端口 8000、LiveKit API 端口 7880、Egress health 端口不得直接开放公网。具体 UDP 范围必须同时写入 LiveKit 配置、Docker 端口映射和云安全组；范围不一致会表现为信令已连接但没有音视频。
 
@@ -136,7 +228,14 @@ logging:
   level: info
 ```
 
-同一个 API Key/Secret 也放入仅供 Compose 读取的 `/etc/scu/live.env`：
+同一个 API Key/Secret 也放入仅供 Compose 读取的 `/etc/scu/live.env`。先创建权限受限的文件，再填入密钥：
+
+```sh
+sudo install -o root -g root -m 0600 /dev/null /etc/scu/live.env
+sudoedit /etc/scu/live.env
+```
+
+文件内容：
 
 ```sh
 LIVEKIT_API_KEY=scu-prod
@@ -208,45 +307,38 @@ services:
       start_period: 10s
 ```
 
-Redis 不发布宿主机端口。Egress 与 LiveKit 共用网络命名空间以便连接回环 WSS，录播目录映射到同一宿主持久卷。按 Egress 官方建议，为 `/srv/scu/data/live/recordings` 配置与 Egress 容器运行 UID/GID 对应的 ACL 或属组写权限，不要开放整个 `/srv/scu/data`。启动后检查该目录可由 Egress 新建文件，再由应用账号读取。保存后执行 `docker compose -f /etc/scu/compose.yaml config` 检查，再用 `docker compose -f /etc/scu/compose.yaml up -d` 启动服务。确认 Redis、LiveKit 和 Egress 健康后，再继续应用 webhook 和录制验收。
+Redis 不发布宿主机端口。Egress 与 LiveKit 共用网络命名空间以便连接回环 WSS，录播目录映射到同一宿主持久卷。创建目录并按容器实际 UID 授权 Egress 写入、应用读取；不要开放整个 `/srv/scu/data`：
+
+```sh
+sudo install -d -o scu -g scu -m 0750 /srv/scu/data/live/recordings
+EGRESS_UID=$(sudo docker run --rm --entrypoint id livekit/egress:v1.15.0 -u)
+sudo setfacl -m "u:${EGRESS_UID}:rwX,u:scu:rwX" /srv/scu/data/live/recordings
+sudo setfacl -d -m "u:${EGRESS_UID}:rwX,u:scu:rwX" /srv/scu/data/live/recordings
+```
+
+保存 Compose 文件后执行 `docker compose -f /etc/scu/compose.yaml config` 检查，再用 `docker compose -f /etc/scu/compose.yaml up -d` 启动服务。确认 Redis、LiveKit 和 Egress 健康后，再继续应用 webhook 和录制验收。
 
 ### 部署应用与评测器
 
-创建独立服务账号及项目目录，将代码部署到固定版本目录。为上传目录、数据库、私钥和日志创建应用账号可读写的持久目录，并限制权限。不要将配置文件、数据库、录音或日志放入公开静态目录。
-
-系统依赖可由发行版包管理器安装，Debian/Ubuntu 主机至少需要 Python 3.12、venv、Docker Engine/Compose、Nginx、FFmpeg、LibreOffice 和中文字体。Python 3.12 的获取方式及 Docker Engine 安装命令按主机发行版官方文档执行；生产主机不要安装 Docker Desktop。
+前一节已经安装系统依赖、检出代码、创建 Python 环境并设置了持久目录。更新依赖或判题镜像时，在代码目录执行：
 
 ```sh
-python3.12 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-cp config.example.toml config.toml
-chmod 600 config.toml
-sh scripts/prepare_judge.sh
+cd /srv/scu/current
+sudo /srv/scu/current/.venv/bin/pip install -r requirements.txt
+sudo -u scu sh scripts/prepare_judge.sh
 ```
 
-在 `config.toml` 中将数据库和私有文件放到代码目录以外的持久卷。示例：
-
-```toml
-[app]
-database = "/srv/scu/data/app.db"
-upload_dir = "/srv/scu/data/audio"
-
-[security]
-password_key_file = "/srv/scu/data/password-view.key"
-
-[presentation]
-directory = "/srv/scu/data/presentations"
-```
+应用配置位于 `/etc/scu/config.toml`，由 systemd 通过 `SCU_CONFIG` 指定；数据库和私有文件放在代码目录以外的持久卷。前一节给出了所需路径配置。
 
 公告图片保存在 `upload_dir/announcements`；面试录音等保存在 `upload_dir` 下的业务子目录。`[live].directory` 另设为 `/srv/scu/data/live`。确保应用账号可以读写这些目录，并让 Egress 的 `/out` 映射到 `/srv/scu/data/live/recordings`。第一次启动会自动执行 SQLite schema 迁移并初始化默认管理员 `root / root`；之后立即重置默认密码。以后版本升级前必须备份数据库及其密码查看密钥、所有私有数据目录，不能用新版本覆盖或丢弃旧数据库。
 
-Docker 评测会从应用进程调用 Docker CLI。若在单机试点启用，应用服务账号必须访问 Docker socket（常见做法是加入 `docker` 组），这等同于授予近似 root 的宿主机权限；仅在可信单机试点使用。对公网运行不可信用户代码时，应把评测器迁到隔离的独立主机或受限判题服务，并限制网络、镜像来源、资源、并发和宿主目录挂载。
+Docker 评测会从应用进程调用 Docker CLI。上面的 `scu` 服务账号已加入 `docker` 组；这等同于授予近似 root 的宿主机权限，仅适合可信单机试点。对公网运行不可信用户代码时，应把评测器迁到隔离的独立主机或受限判题服务，并限制网络、镜像来源、资源、并发和宿主目录挂载。
 
 ### 配置公网 LiveKit 与 Egress
 
 为 LiveKit、Egress 和应用使用同一组专用 API Key/Secret。将密钥分别注入 LiveKit 服务配置、Egress 容器环境，以及应用服务环境变量，或为应用设置私有 JSON `credentials_file`。配置文件只能由对应服务账号读取，权限不宽于 `0600`；不得把真实密钥提交进仓库或复制到浏览器。
 
-应用 `[live]` 至少填写以下值，其他参数按[直播课堂配置](live-classroom.md#应用配置)设置：
+在 `/etc/scu/config.toml` 的已有 `[live]` 配置节中更新以下值，不要重复创建同名配置节；其他参数按[直播课堂配置](live-classroom.md#应用配置)设置：
 
 ```toml
 [live]
@@ -278,6 +370,7 @@ Wants=network-online.target
 Type=simple
 User=scu
 Group=scu
+SupplementaryGroups=docker
 WorkingDirectory=/srv/scu/current
 Environment=SCU_CONFIG=/etc/scu/config.toml
 EnvironmentFile=-/etc/scu/app.env
@@ -292,7 +385,7 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-`/etc/scu/app.env` 只放应用需要的密钥环境变量，例如 `LIVEKIT_API_KEY`、`LIVEKIT_API_SECRET`、`DASHSCOPE_API_KEY`、`ASR_API_KEY` 和 `SCU_SMTP_PASSWORD`。按使用功能添加，不需要的变量可省略；该文件不存在时 systemd 会忽略它。若使用该文件，设置为 `root:root` 所有且权限 `0600`；systemd 管理进程读取后再启动应用，禁止把环境变量打印到部署日志。`/etc/scu/config.toml` 需要可由应用服务账号读取，但只允许管理用户修改。systemd 启用服务后检查 `systemctl status` 和 `journalctl -u`，确认只运行一个 Uvicorn worker。
+`/etc/scu/app.env` 只放应用需要的密钥环境变量，例如 `LIVEKIT_API_KEY`、`LIVEKIT_API_SECRET`、`DASHSCOPE_API_KEY`、`ASR_API_KEY` 和 `SCU_SMTP_PASSWORD`。按使用功能添加，不需要的变量可省略；该文件不存在时 systemd 会忽略它。需要该文件时先用 `sudo install -o root -g root -m 0600 /dev/null /etc/scu/app.env` 创建，再通过 `sudoedit` 填写；systemd 管理进程读取后再启动应用，禁止把环境变量打印到部署日志。`/etc/scu/config.toml` 需要可由应用服务账号读取，但只允许管理用户修改。systemd 启用服务后检查 `systemctl status` 和 `journalctl -u`，确认只运行一个 Uvicorn worker。
 
 保存 unit 为 `/etc/systemd/system/scu-simulator.service` 后运行：
 

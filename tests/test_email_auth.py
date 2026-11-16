@@ -111,6 +111,8 @@ def test_email_creates_normal_account_with_current_default_and_single_use(email_
     assert result.status_code == 200, result.text
     body = result.json()
     assert body['is_admin'] is False and body['is_superadmin'] is False
+    assert body['can_interview'] is True and body['can_exam'] is True
+    assert body['can_training'] is False and body['can_coding'] is False
     assert body['interview_credits'] == 4
     assert body['email'] == email
     assert body['username'] == email
@@ -126,10 +128,15 @@ def test_email_creates_normal_account_with_current_default_and_single_use(email_
         assert len(ledger) == 1 and ledger[0]['kind'] == 'initial'
         assert ledger[0]['delta'] == 4 and ledger[0]['balance_after'] == 4
     assert login(client, value, email).status_code == 401
+    with connect() as db:
+        db.execute('UPDATE users SET can_interview=0,can_exam=0,can_training=1,can_coding=1,can_practice=1 WHERE id=?',
+                   (body['id'],))
     clock[0] += settings['resend_seconds']
     assert send(client, email).status_code == 200
     again = login(client, code(messages[-1]), email)
     assert again.status_code == 200 and again.json()['id'] == body['id']
+    assert again.json()['can_interview'] is False and again.json()['can_exam'] is False
+    assert again.json()['can_training'] is True and again.json()['can_coding'] is True
     with connect() as db:
         assert db.execute('SELECT COUNT(*) FROM credit_ledger WHERE user_id=?', (body['id'],)).fetchone()[0] == 1
 
