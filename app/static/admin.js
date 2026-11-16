@@ -265,6 +265,8 @@ function renderUsers() {
     "面试次数",
     "每日训练权限",
     "算法题带刷权限",
+    "模拟面试权限",
+    "上机考试权限",
     "管理权限",
     "账号状态",
     "操作",
@@ -380,7 +382,9 @@ function renderUsers() {
     };
     const trainingPermission = permissionCell("can_training", "每日训练权限");
     const codingPermission = permissionCell("can_coding", "算法题带刷权限");
-    row.append(name, password, email, credits, trainingPermission, codingPermission, admin, active, actions);
+    const interviewPermission = permissionCell("can_interview", "模拟面试权限");
+    const examPermission = permissionCell("can_exam", "上机考试权限");
+    row.append(name, password, email, credits, trainingPermission, codingPermission, interviewPermission, examPermission, admin, active, actions);
     body.append(row);
   }
   table.append(head, body);
@@ -394,6 +398,8 @@ function syncAccountType() {
   $("accountCredits").disabled = admin;
   $("trainingPermissionField").hidden = admin;
   $("codingPermissionField").hidden = admin;
+  $("interviewPermissionField").hidden = admin;
+  $("examPermissionField").hidden = admin;
 }
 async function openAccount() {
   const settings = await readCreditSettings();
@@ -472,6 +478,8 @@ async function submitAccount(event) {
       interview_credits: Number($("accountCredits").value),
       can_training: $("accountTraining").checked,
       can_coding: $("accountCoding").checked,
+      can_interview: $("accountInterview").checked,
+      can_exam: $("accountExam").checked,
     };
     await api("/admin/users", {
       method: "POST",

@@ -5,7 +5,7 @@ from fastapi import Depends, Header, HTTPException
 from app.db import connect
 from app.services.credits import ADMIN_CREDITS
 
-PUBLIC_USER_FIELDS = 'id,username,email,is_admin,is_superadmin,is_active,interview_credits,can_practice,can_training,can_coding'
+PUBLIC_USER_FIELDS = 'id,username,email,is_admin,is_superadmin,is_active,interview_credits,can_interview,can_exam,can_practice,can_training,can_coding'
 FLAGS = ('is_admin', 'is_superadmin', 'is_active')
 
 
@@ -19,6 +19,8 @@ def public_user(row, *, admin_view=False):
             'can_training': training,
             'can_coding': coding,
             'can_practice': bool(training and coding),
+            'can_interview': bool(row['is_admin'] or row['can_interview']),
+            'can_exam': bool(row['is_admin'] or row['can_exam']),
             'interview_credits': (ADMIN_CREDITS if admin_view else None) if row['is_admin'] else row['interview_credits'],
             **{key: bool(row[key]) for key in FLAGS}}
 
@@ -56,12 +58,16 @@ def reviewable_interview(db, iid, actor):
 
 
 def interview_user(user=Depends(current_user)):
-    """Allow every authenticated active account to use the interview module."""
+    """Require an account grant before accessing interview records or endpoints."""
+    if not user['can_interview']:
+        raise HTTPException(403, '尚未开通模拟面试权限，请联系管理员开通')
     return user
 
 
 def exam_user(user=Depends(current_user)):
-    """Allow every authenticated active account to use the programming module."""
+    """Require an account grant before accessing contests or submissions."""
+    if not user['can_exam']:
+        raise HTTPException(403, '尚未开通上机考试权限，请联系管理员开通')
     return user
 
 

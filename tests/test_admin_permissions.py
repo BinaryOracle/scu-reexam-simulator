@@ -36,15 +36,15 @@ def test_legacy_accounts_migrate_once_without_teacher_role(legacy_client):
     admin = legacy_client.get('/api/me', headers=manager).json()
     user = legacy_client.get('/api/me', headers=alice).json()
     assert admin['is_admin'] is True
-    assert 'can_interview' not in admin and 'can_exam' not in admin
-    assert 'can_interview' not in user and 'can_exam' not in user
+    assert admin['can_interview'] and admin['can_exam']
+    assert user['can_interview'] and user['can_exam']
     assert 'role' not in admin
     with connect() as db:
         assert 'role' not in {r['name'] for r in db.execute('PRAGMA table_info(users)')}
         db.execute('UPDATE users SET can_exam=0 WHERE username=?', ('alice',))
     initialize()
-    assert 'can_exam' not in legacy_client.get('/api/me', headers=alice).json()
-    assert legacy_client.get('/api/contests', headers=alice).status_code == 200
+    assert legacy_client.get('/api/me', headers=alice).json()['can_exam'] is False
+    assert legacy_client.get('/api/contests', headers=alice).status_code == 403
 
 
 def test_only_admin_can_manage_users(legacy_client):
@@ -65,7 +65,7 @@ def test_account_creation_defaults_and_duplicate_validation(legacy_client):
     assert response.status_code == 201
     row = response.json()
     assert not row['is_admin'] and row['is_active']
-    assert 'can_interview' not in row and 'can_exam' not in row
+    assert row['can_interview'] and row['can_exam']
     assert legacy_client.post('/api/admin/users', headers=manager, json=payload).status_code == 409
     assert legacy_client.post('/api/admin/users', headers=manager, json={'username':'short', 'password':'123'}).status_code == 201
     user = login(legacy_client, 'new-user')
@@ -73,23 +73,21 @@ def test_account_creation_defaults_and_duplicate_validation(legacy_client):
     assert legacy_client.get('/api/contests', headers=user).status_code == 200
 
 
-def test_legacy_disabled_module_flags_do_not_restrict_active_sessions(legacy_client):
+def test_module_flags_restrict_active_sessions(legacy_client):
     from app.db import connect
     manager, alice = login(legacy_client, 'manager'), login(legacy_client, 'alice')
     uid = legacy_client.get('/api/me', headers=alice).json()['id']
     iid = legacy_client.post('/api/interviews', headers=alice).json()['id']
     with connect() as db:
         db.execute('UPDATE users SET can_interview=0,can_exam=0 WHERE id=?', (uid,))
-    assert legacy_client.get('/api/interviews', headers=alice).status_code == 200
-    assert legacy_client.get(f'/api/interviews/{iid}', headers=alice).status_code == 200
-    assert legacy_client.get('/api/contests', headers=alice).status_code == 200
-    assert legacy_client.get('/api/submissions', headers=alice).status_code == 200
+    assert legacy_client.get('/api/interviews', headers=alice).status_code == 403
+    assert legacy_client.get(f'/api/interviews/{iid}', headers=alice).status_code == 403
+    assert legacy_client.get('/api/contests', headers=alice).status_code == 403
+    assert legacy_client.get('/api/submissions', headers=alice).status_code == 403
     assert legacy_client.get('/api/admin/users', headers=alice).status_code == 403
     for flag in ('can_interview', 'can_exam'):
         assert legacy_client.patch(f'/api/admin/users/{uid}', headers=manager,
-            json={flag: True}).status_code == 422
-        assert legacy_client.post('/api/admin/users', headers=manager,
-            json={'username': 'obsolete', 'password': '1', flag: True}).status_code == 422
+            json={flag: True}).status_code == 200
 
 
 def test_disabling_account_and_password_reset_invalidate_sessions(legacy_client):
@@ -177,7 +175,7 @@ def test_account_updates_reject_invalid_fields_without_changing_account_state(le
     user = login(legacy_client, 'alice')
     before = legacy_client.get('/api/me', headers=user).json()
     for payload in [
-        {'can_exam': 'false'}, {'can_interview': 0}, {'is_active': None},
+        {'can_exam': 'false'}, {'can_interview': '0'}, {'is_active': None},
         {'role': 'teacher'}, {'username': 'changed'}, {},
     ]:
         response = legacy_client.patch(f"/api/admin/users/{before['id']}", headers=manager, json=payload)
@@ -206,8 +204,7 @@ def test_new_admin_receives_both_modules_without_feature_flags(legacy_client):
     response = legacy_client.post('/api/admin/users', headers=manager,
         json={'username': 'new-admin', 'password': 'password123', 'is_admin': True})
     assert response.status_code == 201
-    assert 'can_interview' not in response.json()
-    assert 'can_exam' not in response.json()
+    assert response.json()['can_interview'] and response.json()['can_exam']
     admin = login(legacy_client, 'new-admin')
     assert legacy_client.get('/api/contests', headers=admin).status_code == 200
     assert legacy_client.post('/api/interviews', headers=admin).status_code == 200
@@ -223,7 +220,7 @@ def test_v1_admins_gain_module_access_without_changing_ordinary_users(legacy_cli
         admin = db.execute("SELECT can_interview,can_exam FROM users WHERE username='manager'").fetchone()
         ordinary = db.execute("SELECT can_interview,can_exam FROM users WHERE username='alice'").fetchone()
         assert tuple(admin) == (1, 1)
-        assert tuple(ordinary) == (0, 0)
+        assert tuple(ordinary) == (1, 1)
         assert db.execute('PRAGMA user_version').fetchone()[0] == SCHEMA_VERSION
 
 
@@ -302,7 +299,7 @@ def test_empty_database_bootstraps_root_once(tmp_path, monkeypatch):
         headers = login(client, 'root', 'root')
         user = client.get('/api/me', headers=headers).json()
         assert user['is_admin'] and user['is_active']
-        assert 'can_interview' not in user and 'can_exam' not in user
+        assert user['can_interview'] and user['can_exam']
         with connect() as db:
             db.execute('UPDATE users SET username=?,password=? WHERE id=?',
                 ('renamed-root',hash_password('1'),user['id']))

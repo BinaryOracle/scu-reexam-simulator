@@ -124,7 +124,10 @@ function allowedViews() {
     return state.user.is_admin
       ? ["users", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "homeLayoutAdmin", "vouchers", "systemSettings", "interview", "contest", "profile"]
       : ["adminDenied"];
-  return ["home", "training", "coding", "interview", "contest", "submissions", "profile"];
+  const views = ["home", "training", "coding", "profile"];
+  if (state.user.can_interview) views.push("interview");
+  if (state.user.can_exam) views.push("contest", "submissions");
+  return views;
 }
 function configureAccess() {
   const allowed = allowedViews();

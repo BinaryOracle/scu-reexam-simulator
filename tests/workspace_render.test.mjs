@@ -109,6 +109,11 @@ test('groups Luogu source and refresh actions with clear spacing when they wrap'
     '在洛谷打开题目 ↗',
     '从洛谷更新题面与样例',
   ]);
-  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-actions\s*\{\s*display:\s*flex;\s*flex-direction:\s*column;\s*align-items:\s*flex-start;\s*gap:\s*10px;/);
+  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-actions\s*\{\s*display:\s*flex;\s*flex-direction:\s*column;\s*align-items:\s*flex-start;\s*row-gap:\s*14px;/);
   assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-action-row\s*\{\s*display:\s*flex;\s*align-items:\s*center;\s*width:\s*100%;\s*min-width:\s*0;/);
+  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-actions\s*\{[^}]*row-gap:\s*14px/);
+});
+
+test('removes the empty restore bar so narrow workspaces do not reserve blank space', () => {
+  assert.match(layoutStyles, /\.workspace-pane-restores:not\(:has\(> button:not\(\[hidden\]\)\)\)\s*\{\s*display:\s*none;\s*\}/);
 });

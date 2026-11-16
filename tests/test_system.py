@@ -14,7 +14,8 @@ def client(tmp_path, monkeypatch):
     initialize()
     with connect() as db:
         for name in ['manager', 'alice', 'bob']:
-            db.execute('INSERT INTO users(username,password,is_admin,can_practice) VALUES (?,?,?,1)', (name,hash_password('password123'),name=='manager'))
+            db.execute('INSERT INTO users(username,password,is_admin,can_interview,can_exam,can_practice) VALUES (?,?,?,?,?,1)',
+                       (name, hash_password('password123'), name == 'manager', 1, 1))
     # Route fixtures use placeholder audio bytes; conversion is covered by provider tests.
     from app.services import ai
     monkeypatch.setattr(ai, 'media_audio', lambda paths: [{'type': 'input_audio', 'input_audio': {'data': 'route-test-audio'}}])

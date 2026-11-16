@@ -30,6 +30,8 @@ class AccountCreate(BaseModel):
     is_active: StrictBool = True
     can_training: StrictBool = False
     can_coding: StrictBool = False
+    can_interview: StrictBool = True
+    can_exam: StrictBool = True
     can_practice: StrictBool | None = None
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
 
@@ -49,6 +51,8 @@ class AccountUpdate(BaseModel):
     is_active: StrictBool | None = None
     can_training: StrictBool | None = None
     can_coding: StrictBool | None = None
+    can_interview: StrictBool | None = None
+    can_exam: StrictBool | None = None
     # Kept for one release so older clients can update the former combined grant.
     can_practice: StrictBool | None = None
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
@@ -236,9 +240,9 @@ def create_user(payload: AccountCreate, actor=Depends(administrator)):
             legacy_grant = payload.can_practice
             training = payload.can_training if legacy_grant is None else legacy_grant
             coding = payload.can_coding if legacy_grant is None else legacy_grant
-            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits,can_practice,can_training,can_coding)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
-                payload.email, payload.is_active, 0, int(training and coding), training, coding)).lastrowid
+            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits,can_interview,can_exam,can_practice,can_training,can_coding)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
+                payload.email, payload.is_active, 0, payload.can_interview, payload.can_exam, int(training and coding), training, coding)).lastrowid
         except sqlite3.IntegrityError as error:
             raise HTTPException(409, '用户名或邮箱已存在，请使用其他用户名或邮箱') from error
         credits.adjust(db, uid, initial, kind='initial')
@@ -272,6 +276,7 @@ def update_user(uid: int, payload: AccountUpdate, actor=Depends(administrator)):
             changes['can_practice'] = int(current_training and current_coding)
         if changes.get('is_admin', old['is_admin']):
             changes['interview_credits'] = credits.ADMIN_CREDITS
+            changes['can_interview'] = changes['can_exam'] = 1
         if 'interview_credits' in changes:
             credits.adjust(db, uid, changes.pop('interview_credits'))
         # Field names are drawn only from the closed AccountUpdate model.

@@ -74,6 +74,7 @@
 .workspace-pane-actions { display: flex; flex: none; align-items: center; gap: 2px; margin-left: auto; }
 .workspace-panel-label { color: #706053; font-size: 12px; font-weight: 650; }
 .workspace-pane-restores { display: flex; flex: none; align-items: center; gap: 6px; min-height: 34px; }
+.workspace-pane-restores:not(:has(> button:not([hidden]))) { display: none; }
 .workspace-pane-restore,
 .workspace-expand-all { min-height: 28px; padding: 4px 9px; border: 1px solid var(--line); border-radius: 5px; background: #fffdfa; color: #706053; font: inherit; font-size: 11px; cursor: pointer; }
 .workspace-pane-restore:hover,

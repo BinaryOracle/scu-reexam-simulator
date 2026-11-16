@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 30
+SCHEMA_VERSION = 31
 
 
 @contextmanager
@@ -92,6 +92,16 @@ def initialize():
                 db.execute(f'ALTER TABLE users ADD COLUMN {field} INTEGER NOT NULL DEFAULT 0 CHECK({field} IN (0,1))')
                 db.execute(f'UPDATE users SET {field}=can_practice')
         columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
+        if 'is_active' not in columns:
+            db.execute('ALTER TABLE users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1 CHECK(is_active IN (0,1))')
+        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
+        for field in ('can_interview', 'can_exam'):
+            if field not in columns:
+                db.execute(f'ALTER TABLE users ADD COLUMN {field} INTEGER NOT NULL DEFAULT 0 CHECK({field} IN (0,1))')
+        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
+        if version < 31:
+            # Prior releases allowed every active account into both main modules.
+            db.execute('UPDATE users SET can_interview=1,can_exam=1 WHERE is_active=1')
         contest_columns = {row['name'] for row in db.execute('PRAGMA table_info(contests)')}
         if 'access_mode' not in contest_columns:
             db.execute("ALTER TABLE contests ADD COLUMN access_mode TEXT NOT NULL DEFAULT 'selected' CHECK(access_mode IN ('all','selected'))")
@@ -147,7 +157,9 @@ def initialize():
         db.execute('CREATE INDEX IF NOT EXISTS ledger_by_user ON credit_ledger(user_id,created)')
         if 'role' in columns:
             # The old teacher account managed exams; it becomes the administrator.
-            for field, default in [('is_admin', 0), ('can_interview', 0), ('can_exam', 0), ('is_active', 1)]:
+            for field, default in [('is_admin', 0), ('is_active', 1)]:
+                if field in columns:
+                    continue
                 db.execute(f'ALTER TABLE users ADD COLUMN {field} INTEGER NOT NULL DEFAULT {default} CHECK({field} IN (0,1))')
             db.execute("UPDATE users SET is_admin=(role='teacher'),can_interview=(role='student'),can_exam=(role='student')")
             db.execute('ALTER TABLE users DROP COLUMN role')
