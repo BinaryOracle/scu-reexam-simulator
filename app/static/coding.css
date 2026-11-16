@@ -207,8 +207,10 @@
 .submission-pass-summary { display: flex; align-items: baseline; gap: 8px; }
 .submission-pass-count { font-size: 19px; font-variant-numeric: tabular-nums; color: var(--ink); }
 .submission-case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; max-height: 230px; overflow: auto; }
-.submission-case { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 12px 10px; border: 1px solid #e8e0d5; border-radius: 7px; font-size: 12px; }
+.submission-case { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 4px; padding: 12px 10px; border: 1px solid #e8e0d5; border-radius: 7px; font-size: 12px; }
 .submission-case span { opacity: .7; font-variant-numeric: tabular-nums; }
+.submission-case > span { grid-column: 1; justify-self: start; }
+.submission-case > strong { grid-column: 2; justify-self: center; }
 .submission-case.accepted { background: #eef4eb; border-color: #dce7d6; color: #527246; }
 .submission-case.failed { background: #fbede7; border-color: #f1dad0; color: #ab543a; }
 .submission-case.pending { background: #edf2f6; color: #536d86; }
