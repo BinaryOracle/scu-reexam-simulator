@@ -12,6 +12,14 @@ test('history keeps timed-out interviews available for review without listing ac
   assert.match(source, /closed \? "查看回顾 →" : reviewMode\(\) \? "查看回答 →" : "继续面试 →"/);
 });
 
+test('keeps the preparation return action visible while scrolling the setup form', async () => {
+  const styles = await readFile(new URL('../app/static/style.css', import.meta.url), 'utf8');
+  assert.match(source, /preparationToolbar\.append\(el\("span", "INTERVIEW SETUP", "eyebrow"\), back\)/);
+  assert.match(source, /准备好 PPT 后，可先检测麦克风并试听/);
+  assert.match(styles, /\.interview-preparation-toolbar\s*\{[^}]*position:\s*sticky/);
+  assert.match(styles, /\.interview-preparation-toolbar \.return-interviews-button\s*\{[^}]*width:\s*auto/);
+});
+
 test('starting again after a lost response keeps the original request key', async () => {
   const headers = [];
   const item = { id: null, workflow_version: 5 };

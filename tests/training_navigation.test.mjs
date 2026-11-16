@@ -74,6 +74,12 @@ test('failed return leaves the current card available for rating', async () => {
   assert.equal(f.has('查看今日进度'), true);
 });
 
+test('describes an active training round as current progress', () => {
+  const f = fixture(async () => home());
+  f.show(null, home({ section_id: 'interview', completed: 0, total: 1 }));
+  assert.equal(f.has('面试篇 · 本轮进度 0/1 题'), true);
+});
+
 test('a rating response cannot reopen a round after returning to today', async () => {
   const response = deferred();
   const f = fixture(path => path.includes('/complete') ? response.promise : Promise.resolve(home()));

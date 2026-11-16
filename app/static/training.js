@@ -118,7 +118,7 @@ function renderHome(root) {
   if (homeData.active_session) {
     const active = homeData.active_session;
     const banner = el('div', '', 'learning-resume');
-    banner.append(el('div', `${homeData.sections.find(s => s.id === active.section_id)?.name || '面试篇'} · 上次练习已完成 ${active.completed}/${active.total} 题`));
+    banner.append(el('div', `${homeData.sections.find(s => s.id === active.section_id)?.name || '面试篇'} · 本轮进度 ${active.completed}/${active.total} 题`));
     banner.append(button('继续练习', () => resume(active.id), 'button primary'), button('结束这一轮', async () => {
       if (!await confirmAction('已完成题目会保留，尚未完成的题目不会计入今日目标。', { title: '结束本轮训练', confirmText: '结束本轮' })) return;
       await api(`/training/sessions/${active.id}/end`, { method: 'POST', body: '{}' });

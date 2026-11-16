@@ -679,13 +679,12 @@ function renderInterview() {
   if (preparing) {
     stopInterviewTimer();
     const preparation = el("section", "", "panel interview-preparation");
+    const preparationToolbar = el("div", "", "interview-preparation-toolbar");
+    preparationToolbar.append(el("span", "INTERVIEW SETUP", "eyebrow"), back);
     preparation.append(
-      el("span", "INTERVIEW SETUP", "eyebrow"),
+      preparationToolbar,
       el("h2", "正式开始前，请先上传你的复试 PPT"),
-      el(
-        "p",
-        "选好文件并检查麦克风后，点击页面底部的「开始模拟面试」。正式开始前不会创建面试记录。",
-      ),
+      el("p", "准备好 PPT 后，可先检测麦克风并试听。点击页面底部的「开始模拟面试」后，才会正式请求麦克风权限、创建面试记录并开始计时。"),
     );
     const session = el("div", "", "presentation-session");
     session.append(

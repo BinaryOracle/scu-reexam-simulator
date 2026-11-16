@@ -109,6 +109,6 @@ test('groups Luogu source and refresh actions with clear spacing when they wrap'
     '在洛谷打开题目 ↗',
     '从洛谷更新题面与样例',
   ]);
-  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-actions\s*\{\s*display:\s*grid;\s*grid-template-columns:\s*minmax\(0,\s*1fr\);\s*align-items:\s*start;\s*gap:\s*28px;/);
-  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-action-row\s*\{\s*display:\s*flex;\s*align-items:\s*center;\s*width:\s*100%;\s*min-width:\s*0;\s*min-height:\s*46px;/);
+  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-actions\s*\{\s*display:\s*flex;\s*flex-direction:\s*column;\s*align-items:\s*flex-start;\s*gap:\s*10px;/);
+  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-action-row\s*\{\s*display:\s*flex;\s*align-items:\s*center;\s*width:\s*100%;\s*min-width:\s*0;/);
 });

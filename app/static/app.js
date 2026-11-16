@@ -8,7 +8,7 @@ import {
   hasUnsavedWork,
   pauseInterviewAudio,
   clearInterviewState,
-} from "./interview.js?v=20261115-history-expired-v1";
+} from "./interview.js?v=20261115-interview-prep-nav-v1";
 import {
   refreshContests,
   refreshSubmissions,
@@ -17,12 +17,12 @@ import {
   suspendContestWorkspace,
   setupContestCreation,
   requestLuoguSubmit,
-} from "./contest.js?v=20261115-submit-guidance-v1";
+} from "./contest.js?v=20261116-contest-state-copy-v1";
 import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-access-layout-v5";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261115-voucher-export-v2";
 import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
 
-import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261115-access-layout-v2";
+import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261116-active-round-copy-v1";
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-empty-state-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";

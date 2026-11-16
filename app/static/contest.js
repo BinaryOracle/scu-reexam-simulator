@@ -592,7 +592,8 @@ async function loadContestRanking(panel, contestId, existingSection = null) {
     summary.append(el("strong", `${result.rows.length} 人上榜`));
     content.append(summary);
     if (!result.rows.length) {
-      content.append(el("p", "暂无成绩。完成首次提交，争取榜上领先。", "contest-ranking-message"));
+      const ended = Date.now() / 1000 > contestOverview.ends;
+      content.append(el("p", ended ? "本场比赛尚无成绩记录。" : "暂无成绩。完成首次提交，争取榜上领先。", "contest-ranking-message"));
       return;
     }
     const wrap = el("div", "", "table-scroll contest-ranking-table");
@@ -723,7 +724,7 @@ function renderWorkspace() {
       ),
     );
     container.replaceChildren(workspace);
-    if (!managementMode() && selectedContest.judge_mode === "luogu" && !luoguStatusChecked)
+    if (!managementMode() && selectedContest.judge_mode === "luogu" && Date.now() / 1000 <= selectedContest.ends && !luoguStatusChecked)
       void refreshLuoguBridgeConnection();
     return;
   }
@@ -899,7 +900,7 @@ function renderWorkspace() {
     else if (tabBounds.left < railBounds.left) tabs.scrollLeft -= railBounds.left - tabBounds.left;
   }
   if (layoutNodes) disposeWorkspaceLayout = mountWorkspaceLayout(layoutNodes);
-  if (!managementMode() && selectedContest.judge_mode === "luogu" && !luoguStatusChecked)
+  if (!managementMode() && selectedContest.judge_mode === "luogu" && Date.now() / 1000 <= selectedContest.ends && !luoguStatusChecked)
     void refreshLuoguBridgeConnection();
   loadContestSubmissions();
   tick();
