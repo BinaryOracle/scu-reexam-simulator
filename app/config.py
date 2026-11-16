@@ -243,12 +243,18 @@ def _live_config(config):
                 'presence_seconds': 60, 'token_seconds': 120, 'material_max_mb': 25,
                 'directory': 'data/live', 'egress_directory': '/out',
                 'recording_enabled': False, 'playback_seconds': 14400, 'like_interval_seconds': 1}
-    defaults.update(screen_share_width=1280, screen_share_height=720,
-                    screen_share_frame_rate=15, screen_share_max_bitrate=1500000)
+    defaults.update(screen_share_width=1920, screen_share_height=1080,
+                    screen_share_frame_rate=15, screen_share_max_bitrate=3000000,
+                    recording_width=1920, recording_height=1080,
+                    recording_frame_rate=30, recording_video_bitrate=4500,
+                    recording_audio_bitrate=128)
     for key, value in defaults.items():
         live.setdefault(key, value)
     for key, minimum, maximum in [('screen_share_width', 640, 1920), ('screen_share_height', 360, 1080),
-                                  ('screen_share_frame_rate', 5, 30), ('screen_share_max_bitrate', 300000, 5000000)]:
+                                  ('screen_share_frame_rate', 5, 30), ('screen_share_max_bitrate', 300000, 5000000),
+                                  ('recording_width', 640, 1920), ('recording_height', 360, 1080),
+                                  ('recording_frame_rate', 5, 30), ('recording_video_bitrate', 500, 12000),
+                                  ('recording_audio_bitrate', 32, 320)]:
         if type(live[key]) is not int or not minimum <= live[key] <= maximum:
             raise ValueError(f'live.{key} 必须在 {minimum} 到 {maximum} 之间')
     for key in ('max_participants', 'presence_seconds', 'token_seconds', 'material_max_mb', 'playback_seconds', 'like_interval_seconds'):

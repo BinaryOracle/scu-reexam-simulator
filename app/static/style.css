@@ -3122,23 +3122,30 @@ td .badge {
 .luogu-tutorial code {
   overflow-wrap: anywhere;
 }
-.model-settings-form { margin-top: 30px; }
-.model-settings-form > .section-heading { margin-bottom: 14px; }
-.model-settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.model-setting-card { display: grid; align-content: start; gap: 12px; min-width: 0; margin: 0; padding: 18px; }
+.model-settings-form { margin-top: 26px; }
+.model-settings-form > .section-heading { margin-bottom: 12px; }
+.model-compat-note { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: 8px 14px; margin: 0 0 14px; padding: 11px 14px; border: 1px solid #dce8e4; border-left: 3px solid #438b78; border-radius: 6px; background: #f5f9f7; color: #536b64; font-size: 12px; line-height: 1.6; }
+.model-compat-note strong { color: #315f53; font-size: 12px; white-space: nowrap; }
+.model-settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.model-setting-card { display: grid; align-content: start; gap: 10px; min-width: 0; margin: 0; padding: 14px 16px 15px; border-radius: 8px; }
 .model-setting-card legend { padding: 0 5px; color: var(--ink); font-size: 14px; font-weight: 700; }
-.model-setting-card > .muted { min-height: 36px; margin: -5px 0 0; font-size: 12px; line-height: 1.6; }
-.model-setting-card > label, .model-setting-pair > label { display: grid; gap: 6px; min-width: 0; color: #756050; font-size: 12px; }
+.model-setting-card > .muted { margin: -4px 0 0; font-size: 12px; line-height: 1.5; }
+.model-setting-fields, .model-setting-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.model-setting-card > label, .model-setting-fields > label, .model-setting-pair > label { display: grid; gap: 5px; min-width: 0; color: #756050; font-size: 12px; }
 .model-setting-card input:not([type="checkbox"]), .model-setting-card select { width: 100%; min-width: 0; }
-.model-setting-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.model-key-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px; color: var(--muted); font-size: 11px; }
-.model-key-row label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.model-key-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; color: var(--muted); font-size: 11px; }
+.model-key-row > span { min-width: 0; overflow-wrap: anywhere; }
+.model-key-row label { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; cursor: pointer; white-space: nowrap; }
 .model-key-row input { margin: 0; }
 .model-settings-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
 .model-settings-actions p { margin: 0; }
 @media (max-width: 760px) {
   .model-settings-grid { grid-template-columns: 1fr; }
-  .model-setting-card > .muted { min-height: 0; }
+}
+@media (max-width: 520px) {
+  .model-compat-note { grid-template-columns: 1fr; gap: 2px; }
+  .model-setting-fields, .model-setting-pair { grid-template-columns: 1fr; }
+  .model-key-row { align-items: flex-start; flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) {
   *,

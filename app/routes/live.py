@@ -505,7 +505,14 @@ async def recording(lid: int, payload: RecordingInput, user=Depends(current_user
         db.commit()
         try:
             result = await media.call('egress', 'start_room_composite_egress', api.RoomCompositeEgressRequest(
-                room_name=media.room(lid), layout='grid', file_outputs=[api.EncodedFileOutput(
+                room_name=media.room(lid), layout='grid',
+                advanced=api.EncodingOptions(
+                    width=media.settings()['recording_width'],
+                    height=media.settings()['recording_height'],
+                    framerate=media.settings()['recording_frame_rate'],
+                    video_bitrate=media.settings()['recording_video_bitrate'],
+                    audio_bitrate=media.settings()['recording_audio_bitrate']),
+                file_outputs=[api.EncodedFileOutput(
                     file_type=api.EncodedFileType.MP4, filepath=str(Path(media.settings()['egress_directory']) / filename))]))
         except HTTPException as error:
             status = 'failed' if isinstance(error.__cause__, api.TwirpError) else 'unknown'

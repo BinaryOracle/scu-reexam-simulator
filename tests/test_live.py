@@ -140,7 +140,14 @@ def test_recording_signed_webhook_ticket_and_membership_recheck(client, monkeypa
     base = f'/api/live/lessons/{lid}'
     assert client.post(base + '/recording', headers=alice, json={'action': 'start'}).json()['status'] == 'starting'
     assert client.post(base + '/recording', headers=alice, json={'action': 'start'}).json()['status'] == 'starting'
-    assert len([call for call in calls if call[1] == 'start_room_composite_egress']) == 1
+    starts = [call for call in calls if call[1] == 'start_room_composite_egress']
+    assert len(starts) == 1
+    request = starts[0][2]
+    assert request.advanced.width == 1920
+    assert request.advanced.height == 1080
+    assert request.advanced.framerate == 30
+    assert request.advanced.video_bitrate == 4500
+    assert request.advanced.audio_bitrate == 128
     with connect() as db:
         row = dict(db.execute('SELECT * FROM live_recordings').fetchone())
     path = private_path('recordings', row['path'])
@@ -205,9 +212,19 @@ def test_screen_sharing_defaults_are_bounded_and_overridable():
     config = {'live': {}}
     _live_config(config)
     assert config['live']['screen_share_frame_rate'] == 15
-    assert config['live']['screen_share_width'] == 1280
+    assert config['live']['screen_share_width'] == 1920
+    assert config['live']['screen_share_height'] == 1080
+    assert config['live']['screen_share_max_bitrate'] == 3000000
+    assert config['live']['recording_width'] == 1920
+    assert config['live']['recording_height'] == 1080
+    assert config['live']['recording_frame_rate'] == 30
+    assert config['live']['recording_video_bitrate'] == 4500
+    assert config['live']['recording_audio_bitrate'] == 128
     for value in ({'screen_share_width': 4000}, {'screen_share_height': 2160},
-                  {'screen_share_frame_rate': 60}, {'screen_share_max_bitrate': 0}):
+                  {'screen_share_frame_rate': 60}, {'screen_share_max_bitrate': 0},
+                  {'recording_width': 4000}, {'recording_height': 2160},
+                  {'recording_frame_rate': 60}, {'recording_video_bitrate': 20000},
+                  {'recording_audio_bitrate': 1000}):
         with pytest.raises(ValueError):
             _live_config({'live': value})
 

@@ -58,13 +58,18 @@ recording_enabled = false
 egress_directory = "/out"
 playback_seconds = 14400
 like_interval_seconds = 1
-screen_share_width = 1280
-screen_share_height = 720
+screen_share_width = 1920
+screen_share_height = 1080
 screen_share_frame_rate = 15
-screen_share_max_bitrate = 1500000
+screen_share_max_bitrate = 3000000
+recording_width = 1920
+recording_height = 1080
+recording_frame_rate = 30
+recording_video_bitrate = 4500
+recording_audio_bitrate = 128
 ```
 
-`url` 是浏览器可以访问的 WSS 地址，`api_url` 是应用服务器可以访问的 HTTP/HTTPS API 地址。正式部署使用 HTTPS/WSS；HTTP/WS 只适合受控本机调试。`directory` 相对项目根目录解析。共享参数 `screen_share_width` 范围 640–1920、`screen_share_height` 范围 360–1080、`screen_share_frame_rate` 范围 5–30、`screen_share_max_bitrate` 范围 300000–5000000 bps；修改后新入会生效。`max_participants` 必须在 1–50，入会令牌有效期 `token_seconds` 在 1–300 秒，资料上限在 1–100 MB。`playback_seconds` 默认四小时，可设为 1–86400 秒。心跳有效期 `presence_seconds` 最短 15 秒，须大于前端心跳间隔；网络代理需允许轮询持续正常请求。
+`url` 是浏览器可以访问的 WSS 地址，`api_url` 是应用服务器可以访问的 HTTP/HTTPS API 地址。正式部署使用 HTTPS/WSS；HTTP/WS 只适合受控本机调试。`directory` 相对项目根目录解析。屏幕共享默认采集到 1920×1080、15 fps，并限制为 3 Mbps；范围分别为宽 640–1920、高 360–1080、帧率 5–30、码率 300000–5000000 bps，修改后新入会生效。录播默认输出 1920×1080、30 fps、视频 4500 kbps、音频 128 kbps；宽高范围分别为 640–1920 和 360–1080，帧率范围为 5–30，视频码率范围为 500–12000 kbps、音频码率范围为 32–320 kbps，修改后新开始的录制生效。1080p 录制会增加文件体积和 Egress 编码负载；本机部署仅保证单个课堂录制。`max_participants` 必须在 1–50，入会令牌有效期 `token_seconds` 在 1–300 秒，资料上限在 1–100 MB。`playback_seconds` 默认四小时，可设为 1–86400 秒。心跳有效期 `presence_seconds` 最短 15 秒，须大于前端心跳间隔；网络代理需允许轮询持续正常请求。
 
 LiveKit 的 API Key 和 Secret 可通过完整的一对进程环境变量，或显式设置的 `credentials_file` 私有 JSON 文件提供，TOML 中不允许内联 `api_key` 或 `api_secret`。环境变量优先；只配置一个环境变量时不会与文件中的另一项混用。JSON 的两个字段名与 `api_key_env` / `api_secret_env` 一致，文件路径相对项目根目录解析；Mac/Linux 须设置为 `chmod 600`。指定文件不可读、格式错误、缺少密钥或权限过宽时返回明确的配置错误，不静默忽略。可使用部署平台的密钥管理注入 `LIVEKIT_API_KEY` 和 `LIVEKIT_API_SECRET`，并与媒体服务的服务端密钥保持一致。不要写入仓库、前端 JavaScript 或示例配置。浏览器只接收短期入会令牌，不接收服务端密钥。
 
