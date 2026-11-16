@@ -96,17 +96,23 @@ def initialize(db):
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         announcement_id INTEGER NOT NULL REFERENCES announcements(id) ON DELETE CASCADE,
         dismissed_at REAL NOT NULL,PRIMARY KEY(user_id,announcement_id))''')
+    db.execute('''CREATE TABLE IF NOT EXISTS announcement_seed_state(
+        name TEXT PRIMARY KEY,initialized REAL NOT NULL)''')
     for row in db.execute("SELECT id,blocks FROM announcements WHERE body_markdown='' AND blocks!='[]'").fetchall():
         db.execute('UPDATE announcements SET body_markdown=? WHERE id=?',
                    (blocks_to_markdown(json.loads(row['blocks'])), row['id']))
+    seed = db.execute("SELECT 1 FROM announcement_seed_state WHERE name='default_guidance'").fetchone()
     existing = db.execute('SELECT * FROM announcements WHERE title=? LIMIT 1', (DEFAULT_TITLE,)).fetchone()
-    if not existing:
+    if not seed and not existing:
         now = time.time()
         blocks = default_blocks()
         db.execute('''INSERT INTO announcements(title,summary,cover_url,blocks,body_markdown,status,created,updated,published_at)
             VALUES (?,?,?,?,?, 'published',?,?,?)''', (DEFAULT_TITLE, '题目投稿、每日签到、次数购买兑换与转赠说明', DEFAULT_COVER,
             json.dumps(blocks, ensure_ascii=False), blocks_to_markdown(blocks), now, now, now))
-    elif existing['created_by'] is None and existing['updated_by'] is None:
+    if not seed:
+        db.execute("INSERT INTO announcement_seed_state(name,initialized) VALUES ('default_guidance',?)", (time.time(),))
+    existing = db.execute('SELECT * FROM announcements WHERE title=? LIMIT 1', (DEFAULT_TITLE,)).fetchone()
+    if existing and existing['created_by'] is None and existing['updated_by'] is None:
         # Refresh only the untouched system seed; preserve administrator edits and publication state.
         blocks = default_blocks()
         db.execute('UPDATE announcements SET summary=?,cover_url=?,blocks=?,body_markdown=?,updated=? WHERE id=?',
@@ -233,6 +239,34 @@ def set_status(db, aid, actor_id, status):
     db.execute('UPDATE announcements SET status=?,updated_by=?,updated=?,published_at=COALESCE(?,published_at) WHERE id=?',
                (status,actor_id,time.time(),published,aid))
     return get_item(db,aid)
+
+
+def delete_item(db, aid):
+    row = db.execute('SELECT * FROM announcements WHERE id=?', (aid,)).fetchone()
+    if row is None:
+        raise HTTPException(404, '公告不存在')
+    asset_ids = set(re.findall(r'/api/announcements/assets/([a-f0-9]{32})', row['body_markdown'] or ''))
+    match = ASSET_PATH.fullmatch(row['cover_url'] or '')
+    if match:
+        asset_ids.add(match[1])
+    try:
+        asset_ids.update(block['asset_id'] for block in json.loads(row['blocks'])
+                         if block.get('type') == 'image' and re.fullmatch(r'[a-f0-9]{32}', block.get('asset_id', '')))
+    except (TypeError, ValueError):
+        pass
+    db.execute('DELETE FROM announcements WHERE id=?', (aid,))
+    for asset_id in asset_ids:
+        cover = f'/api/announcements/assets/{asset_id}'
+        needle = f'"asset_id": "{asset_id}"'
+        referenced = db.execute('''SELECT 1 FROM announcements
+            WHERE blocks LIKE ? OR body_markdown LIKE ? OR cover_url=? LIMIT 1''',
+            ('%' + needle + '%', '%' + cover + '%', cover)).fetchone()
+        if referenced:
+            continue
+        asset = db.execute('SELECT path FROM announcement_assets WHERE id=?', (asset_id,)).fetchone()
+        if asset:
+            Path(asset['path']).unlink(missing_ok=True)
+            db.execute('DELETE FROM announcement_assets WHERE id=?', (asset_id,))
 
 
 def upload_image(db, actor_id, data, content_type):

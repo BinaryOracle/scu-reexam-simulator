@@ -50,6 +50,29 @@ def test_announcement_drafts_are_hidden_until_published_and_links_are_validated(
     assert client.get(f"/api/announcements/{item['id']}",headers=alice).status_code==404
 
 
+def test_admin_can_delete_announcement_and_deleted_default_is_not_reseeded(client):
+    admin,alice=login(client,'manager'),login(client,'alice')
+    default=next(item for item in client.get('/api/announcements',headers=alice).json()
+                 if item['title']=='平台功能与奖励规则说明')
+    deleted=client.delete(f"/api/admin/announcements/{default['id']}",headers=admin)
+    assert deleted.status_code==204
+    assert client.get(f"/api/announcements/{default['id']}",headers=alice).status_code==404
+    from app.db import connect
+    from app.services.announcements import initialize
+    with connect() as db:
+        initialize(db)
+        assert db.execute("SELECT 1 FROM announcements WHERE title='平台功能与奖励规则说明'").fetchone() is None
+
+
+def test_only_administrators_can_delete_announcements(client):
+    admin,alice=login(client,'manager'),login(client,'alice')
+    created=client.post('/api/admin/announcements',headers=admin,json={
+        'title':'待删除公告','summary':'','cover_url':'','body_markdown':'正文'})
+    aid=created.json()['id']
+    assert client.delete(f'/api/admin/announcements/{aid}',headers=alice).status_code==403
+    assert client.delete('/api/admin/announcements/99999',headers=admin).status_code==404
+
+
 def test_first_visit_announcement_reminder_is_per_user_and_dismissible(client):
     admin,alice,bob=login(client,'manager'),login(client,'alice'),login(client,'bob')
     response=client.post('/api/admin/announcements',headers=admin,json={

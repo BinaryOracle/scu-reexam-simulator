@@ -14,6 +14,8 @@
 
 ## 快速启动
 
+从环境准备到应用、Docker 评测和直播课堂的完整部署流程见[系统部署手册](docs/deployment.md)。
+
 ```sh
 python3.12 -m venv .venv
 .venv/bin/pip install -r requirements.txt

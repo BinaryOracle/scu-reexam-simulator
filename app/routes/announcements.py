@@ -1,7 +1,7 @@
 """Authenticated announcement reads and administrator content management."""
 from typing import Literal
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
 from app.db import connect
 from app.services.auth import current_user, administrator
@@ -60,6 +60,12 @@ def preview(payload:Announcement,actor=Depends(administrator)):
 @router.put('/api/admin/announcements/{aid}')
 def update(aid:int,payload:Announcement,actor=Depends(administrator)):
     with connect() as db: return announcements.save(db,actor['id'],aid=aid,**payload.model_dump())
+
+
+@router.delete('/api/admin/announcements/{aid}',status_code=204)
+def delete(aid:int,actor=Depends(administrator)):
+    with connect() as db: announcements.delete_item(db,aid)
+    return Response(status_code=204)
 
 
 @router.post('/api/admin/announcements/{aid}/status')

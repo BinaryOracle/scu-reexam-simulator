@@ -27,7 +27,7 @@ import { refreshTraining, clearTraining, selectTrainingSection } from "./trainin
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-empty-state-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
-import { refreshHome, refreshAnnouncementsAdmin, setupHome, showPendingAnnouncementReminder } from "./home.js?v=20261116-announcement-reminders-v1";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome, showPendingAnnouncementReminder } from "./home.js?v=20261116-announcement-delete-v1";
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 

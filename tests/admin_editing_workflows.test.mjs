@@ -181,3 +181,21 @@ test('announcement status change returns an invalid filtered last page to the pr
   assert.equal(requests.at(-1).get('page'), '1'); assert.equal(requests.at(-1).get('status'), 'published');
   assert.ok(root.querySelector('strong')); assert.equal(root.querySelector('.empty-state'), null);
 });
+
+test('announcement deletion requires confirmation and refreshes the current list', async () => {
+  const requests = []; let deleted = false;
+  const item = { id: 7, title: '待删除公告', summary: '', status: 'draft' };
+  const env = environment(async (path, options) => {
+    requests.push([path, options?.method || 'GET']);
+    if (options?.method === 'DELETE') { deleted = true; return {}; }
+    if (path.startsWith('/admin/announcements?')) return { items: deleted ? [] : [item], pages: 1, total: deleted ? 0 : 1 };
+    return { items: [item], pages: 1, total: 1 };
+  });
+  env.load('home'); const root = env.el('section'); root.id = 'announcementsAdmin'; env.body.append(root);
+  await env.context.refreshAnnouncementsAdmin();
+  env.choose(true); await env.find(root, '删除').click();
+  assert.equal(requests.filter(([, method]) => method === 'DELETE').length, 1);
+  assert.ok(requests.some(([path, method]) => path.startsWith('/admin/announcements?') && method === 'GET'));
+  assert.equal(root.querySelector('.empty-state').textContent, '当前没有匹配的公告。');
+  assert.equal(env.confirmations.length, 1);
+});

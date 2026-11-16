@@ -282,6 +282,13 @@ export async function refreshAnnouncementsAdmin() {
         await api("/admin/announcements/"+item.id+"/status",{method:"POST",body:JSON.stringify({status:item.status==="published"?"withdrawn":"published"})});
         await load();
       },item.status==="published"?"button quiet":"button secondary"));
+      controls.append(button("删除",async()=>{
+        if(!await confirmAction(`删除公告“${item.title}”后，用户将无法再查看，且这项操作不能撤销。`,
+          {title:"删除公告",confirmText:"删除",danger:true}))return;
+        await api("/admin/announcements/"+item.id,{method:"DELETE"});
+        notify("公告已删除");
+        await load();
+      },"button danger-button"));
       row.append(copy,controls);list.append(row);
     }
     if(!data.items.length)list.append(el("p","当前没有匹配的公告。","empty-state"));
