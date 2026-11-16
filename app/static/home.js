@@ -10,6 +10,7 @@ let announcementTimer = null;
 let announcementsUnavailable = false;
 let releaseAnnouncementImages = null;
 let homeRevision = 0;
+let announcementRequestRevision = 0;
 
 /** Load private images with the current session; closing the reader cancels and releases them. */
 function prepareAnnouncementImage(image, source, session) {
@@ -188,8 +189,23 @@ function renderHome() {
 }
 
 export async function refreshHome() {
-  try { notices = await api("/announcements"); announcementIndex = 0; announcementsUnavailable = false; }
-  catch { notices = []; announcementsUnavailable = true; }
+  const requestRevision = ++announcementRequestRevision;
+  const token = state.token;
+  // Paint the workspace before waiting on optional announcement content. This keeps
+  // the primary practice actions usable when the announcement service is slow.
+  notices = [];
+  announcementIndex = 0;
+  announcementsUnavailable = false;
+  renderHome();
+  try {
+    notices = await api("/announcements");
+    announcementIndex = 0;
+    announcementsUnavailable = false;
+  } catch {
+    notices = [];
+    announcementsUnavailable = true;
+  }
+  if (requestRevision !== announcementRequestRevision || token !== state.token) return;
   renderHome();
 }
 
