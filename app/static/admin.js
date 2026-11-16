@@ -109,6 +109,14 @@ export async function refreshQuestionBank() {
   renderQuestionBank();
 }
 let luoguSettingsRevision = 0;
+const modelServiceMeta = {
+  interview: { title: '面试多模态模型', description: '用于专家提问与整场面试点评，可结合 PPT、回答文本和录音。', tag: '面试' },
+  asr: { title: '语音识别（ASR）', description: '将面试录音转写为文字，供面试记录与点评使用。', tag: '语音输入' },
+  tts: { title: '语音合成（TTS）', description: '播报专家问答环节生成的问题。', tag: '语音输出' },
+  trends: { title: '热点趋势分析', description: '根据公开来源生成 AI 技术趋势内容，可单独配置模型。', tag: '内容生成' },
+};
+let modelSettingsSnapshot = null;
+let activeModelService = null;
 export async function refreshLuoguSettings() {
   const revision = ++luoguSettingsRevision;
   const settings = await api('/admin/luogu-settings');
@@ -118,26 +126,59 @@ export async function refreshLuoguSettings() {
 }
 let modelSettingsRevision = 0;
 function renderModelSettings(settings) {
-  for (const fieldset of $('modelSettingsForm').querySelectorAll('[data-model-service]')) {
-    const service = settings.services[fieldset.dataset.modelService];
-    for (const field of ['base_url', 'model', 'provider', 'protocol', 'voice']) {
-      const input = fieldset.querySelector(`[name="${field}"]`);
-      if (input && service[field] !== undefined) input.value = service[field];
-    }
-    fieldset.querySelector('[name="api_key"]').value = '';
-    fieldset.querySelector('[name="clear_api_key"]').checked = false;
-    const status = fieldset.querySelector('[data-key-status]');
-    status.textContent = service.api_key_configured
-      ? `已配置 · ${service.api_key_source}`
-      : '尚未配置 API Key';
+  modelSettingsSnapshot = settings;
+  const list = $('modelServiceList');
+  const rows = Object.entries(modelServiceMeta).map(([id, meta]) => {
+    const service = settings.services[id];
+    const row = el('button', '', 'model-service-row');
+    row.type = 'button';
+    row.setAttribute('aria-haspopup', 'dialog');
+    row.setAttribute('aria-label', '编辑' + meta.title);
+    const main = el('span', '', 'model-service-main');
+    const heading = el('span', '', 'model-service-heading');
+    heading.append(el('strong', meta.title), el('span', meta.tag, 'model-service-tag'));
+    main.append(heading, el('span', meta.description, 'model-service-description'));
+    const details = el('span', '', 'model-service-details');
+    details.append(el('strong', service.model || '未设置模型'), el('span', service.base_url || '未设置接口地址'));
+    const aside = el('span', '', 'model-service-aside');
+    aside.append(el('span', service.api_key_configured ? '密钥已配置 · ' + service.api_key_source : '尚未配置密钥', service.api_key_configured ? 'model-service-status configured' : 'model-service-status missing'), el('span', '›', 'model-service-arrow'));
+    row.append(main, details, aside);
+    row.addEventListener('click', () => openModelService(id));
+    return row;
+  });
+  list.replaceChildren(...rows);
+}
+function openModelService(serviceName) {
+  const service = modelSettingsSnapshot?.services[serviceName];
+  if (!service) return;
+  activeModelService = serviceName;
+  const meta = modelServiceMeta[serviceName];
+  const form = $('modelSettingsForm');
+  form.reset();
+  $('modelServiceDialogTitle').textContent = meta.title;
+  $('modelServiceDialogDescription').textContent = meta.description;
+  for (const field of ['base_url', 'model', 'provider', 'protocol', 'voice']) {
+    const input = form.querySelector('[name="' + field + '"]');
+    if (input) input.value = service[field] || '';
   }
+  $('modelTtsFields').hidden = serviceName !== 'tts';
+  form.querySelector('[name="voice"]').required = serviceName === 'tts';
+  const keyInput = form.querySelector('[name="api_key"]');
+  keyInput.value = '';
+  keyInput.placeholder = service.api_key_configured ? '••••••••••••••••' : '请输入 API Key';
+  $('modelServiceKeyStatus').textContent = service.api_key_configured
+    ? '当前使用：' + service.api_key_source + ' · 输入新密钥可替换'
+    : '尚未配置 API Key';
+  const status = $('modelSettingsStatus');
+  status.hidden = true;
+  status.classList.remove('form-error');
+  $('modelServiceDialog').showModal();
 }
 export async function refreshModelSettings() {
   const revision = ++modelSettingsRevision;
   const settings = await api('/admin/model-settings');
   if (revision !== modelSettingsRevision || $('modelSettingsForm').dataset.saving === 'true') return;
   renderModelSettings(settings);
-  $('modelSettingsStatus').hidden = true;
 }
 function questionEditorState() {
   return JSON.stringify([$("questionCategory").value, $("questionSubject").value, $("questionContent").value, $("questionActive").checked]);
@@ -600,34 +641,52 @@ export function setupAdmin() {
       status.classList.add('form-error');
     }).finally(() => { save.disabled = false; origin.readOnly = false; });
   });
+  $('closeModelServiceDialog').addEventListener('click', () => {
+    if ($('modelSettingsForm').dataset.saving !== 'true') $('modelServiceDialog').close();
+  });
+  $('cancelModelServiceEdit').addEventListener('click', () => {
+    if ($('modelSettingsForm').dataset.saving !== 'true') $('modelServiceDialog').close();
+  });
+  $('modelServiceDialog').addEventListener('cancel', event => {
+    if ($('modelSettingsForm').dataset.saving === 'true') event.preventDefault();
+  });
   $("modelSettingsForm").addEventListener("submit", event => {
     event.preventDefault();
     const form = event.currentTarget;
     const save = form.querySelector('[type="submit"]');
     const status = $("modelSettingsStatus");
-    const changes = {};
-    for (const fieldset of form.querySelectorAll('[data-model-service]')) {
-      const service = {};
-      for (const field of ['base_url', 'model', 'provider', 'protocol', 'voice']) {
-        const input = fieldset.querySelector('[name="' + field + '"]');
-        if (input) service[field] = input.value;
-      }
-      const key = fieldset.querySelector('[name="api_key"]').value;
-      if (key) service.api_key = key;
-      service.clear_api_key = fieldset.querySelector('[name="clear_api_key"]').checked;
-      changes[fieldset.dataset.modelService] = service;
+    if (!activeModelService) return;
+    const service = {};
+    const fields = ['base_url', 'model'];
+    if (activeModelService === 'tts') fields.push('provider', 'protocol', 'voice');
+    for (const field of fields) {
+      service[field] = form.querySelector('[name="' + field + '"]').value;
     }
-    form.dataset.saving = 'true'; save.disabled = true; status.hidden = true;
+    const key = form.querySelector('[name="api_key"]').value;
+    if (key) service.api_key = key;
+    const changes = { [activeModelService]: service };
+    form.dataset.saving = 'true'; save.disabled = true; $('cancelModelServiceEdit').disabled = true;
+    $('closeModelServiceDialog').disabled = true; status.hidden = true;
     void api('/admin/model-settings', { method: 'PATCH', body: JSON.stringify(changes) })
       .then(settings => {
         renderModelSettings(settings);
-        status.textContent = '模型、接口和密钥状态已更新，后续请求将使用新设置。';
+        const updated = settings.services[activeModelService];
+        const keyInput = form.querySelector('[name="api_key"]');
+        keyInput.value = '';
+        keyInput.placeholder = updated.api_key_configured ? '••••••••••••••••' : '请输入 API Key';
+        $('modelServiceKeyStatus').textContent = updated.api_key_configured
+          ? '当前使用：' + updated.api_key_source + ' · 输入新密钥可替换'
+          : '尚未配置 API Key';
+        status.textContent = '设置已保存，后续请求将使用新配置。';
         status.hidden = false; status.classList.remove('form-error');
         notify('AI 服务设置已保存。');
       }).catch(error => {
         status.textContent = error.message;
         status.hidden = false; status.classList.add('form-error');
-      }).finally(() => { form.dataset.saving = 'false'; save.disabled = false; });
+      }).finally(() => {
+        form.dataset.saving = 'false'; save.disabled = false;
+        $('cancelModelServiceEdit').disabled = false; $('closeModelServiceDialog').disabled = false;
+      });
   });
   $("questionBankForm").addEventListener("submit", (event) => void submitQuestion(event).catch((error) => notify(error.message, "error")));
   $("questionCategory").addEventListener("change", syncQuestionCategory);

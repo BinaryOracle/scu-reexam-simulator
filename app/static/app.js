@@ -19,7 +19,7 @@ import {
   setupContestCreation,
   requestLuoguSubmit,
 } from "./contest.js?v=20261116-ui-audit-v2";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261116-model-settings-v1";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261116-model-settings-v3";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261116-ui-audit-v2";
 import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
 
@@ -31,7 +31,7 @@ import { refreshHome, refreshAnnouncementsAdmin, setupHome, showPendingAnnouncem
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
-import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261116-discussion-tabs-v1";
+import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261116-submission-ui-v2";
 import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261115-coding-v1";
 import { refreshTrends } from "./trends.js?v=20261116-trends-admin-v1";
 

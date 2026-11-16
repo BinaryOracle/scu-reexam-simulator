@@ -6,6 +6,7 @@ import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261
 import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261115-workspace-v5";
 import { editCodingQuestion, codingDialog } from "./coding-form.mjs?v=20261115-coding-v1";
 import { codingQuestionId, filterCodingQuestions, codingDraftKey, acceptsCodingStatus } from "./coding-model.mjs?v=20261115-coding-v1";
+import { renderSubmissionDetails } from "./submission-details.mjs?v=20261116-submissions-v1";
 
 let revision = 0;
 let requestLuoguSubmit;
@@ -30,7 +31,6 @@ let searchTimer;
 let recordTarget;
 const drafts = createCodeDrafts(() => window.localStorage);
 const pending = new Map();
-const resultTargets = new Map();
 const terminal = new Set(["Accepted", "Wrong Answer", "Runtime Error", "Compile Error", "Time Limit Exceeded", "Memory Limit Exceeded", "Output Limit Exceeded", "Judge Error", "System Error", "Submission Failed"]);
 const languages = [["cpp11", "C++11"], ["c", "C"], ["python3", "Python 3"]];
 const reviewLabels = { draft: "私人草稿", pending: "审核中", approved: "已公开", rejected: "需修改" };
@@ -41,7 +41,7 @@ export function clearCoding() {
   document.body.classList.remove("coding-immersive");
   revision++; listRevision++; recordsRevision++;
   clearTimeout(searchTimer); disposeLayout?.(); disposeLayout = null;
-  selectedQuestion = null; recordTarget = null; resultTargets.clear();
+  selectedQuestion = null; recordTarget = null;
   document.querySelectorAll('[data-coding-owner="coding"]').forEach(dialog => dialog.close());
   if (!state.user) { home = null; pending.clear(); stageId = ""; query = ""; topic = ""; mode = "roadmap"; }
 }
@@ -260,24 +260,33 @@ function renderWorkspace(question, request, userId) {
   const statementTabs = el("div", "", "coding-statement-tabs"); statementTabs.setAttribute("role", "tablist"); statementTabs.setAttribute("aria-label", "题目内容");
   const statementTab = button("题目描述", () => selectStatementView("statement"), "coding-statement-tab selected");
   const discussionTab = button("讨论", () => selectStatementView("discussion"), "coding-statement-tab");
+  const submissionTab = button("提交记录", () => selectStatementView("submissions"), "coding-statement-tab");
   statementTab.id = `statement-tab-${question.id}`; discussionTab.id = `discussion-tab-${question.id}`;
-  statementTab.setAttribute("role", "tab"); discussionTab.setAttribute("role", "tab");
-  statementTab.setAttribute("aria-selected", "true"); discussionTab.setAttribute("aria-selected", "false"); discussionTab.tabIndex = -1;
+  submissionTab.id = `submission-tab-${question.id}`;
+  for (const tab of [statementTab, discussionTab, submissionTab]) tab.setAttribute("role", "tab");
+  statementTab.setAttribute("aria-selected", "true"); discussionTab.setAttribute("aria-selected", "false");
+  submissionTab.setAttribute("aria-selected", "false"); discussionTab.tabIndex = -1; submissionTab.tabIndex = -1;
   const selectStatementView = view => {
-    const showingDiscussion = view === "discussion";
-    content.hidden = showingDiscussion; discussion.hidden = !showingDiscussion;
-    statementTab.classList.toggle("selected", !showingDiscussion); discussionTab.classList.toggle("selected", showingDiscussion);
-    statementTab.setAttribute("aria-selected", String(!showingDiscussion)); discussionTab.setAttribute("aria-selected", String(showingDiscussion));
-    statementTab.tabIndex = showingDiscussion ? -1 : 0; discussionTab.tabIndex = showingDiscussion ? 0 : -1;
+    const views = [["statement", statementTab], ["discussion", discussionTab], ["submissions", submissionTab]];
+    content.hidden = view !== "statement"; discussion.hidden = view !== "discussion"; records.hidden = view !== "submissions";
+    for (const [name, tab] of views) {
+      const selected = view === name;
+      tab.classList.toggle("selected", selected); tab.setAttribute("aria-selected", String(selected)); tab.tabIndex = selected ? 0 : -1;
+    }
   };
-  for (const tab of [statementTab, discussionTab]) tab.addEventListener("keydown", event => {
+  for (const tab of [statementTab, discussionTab, submissionTab]) tab.addEventListener("keydown", event => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const target = event.key === "Home" || event.key === "ArrowLeft" ? statementTab : discussionTab;
-    selectStatementView(target === statementTab ? "statement" : "discussion"); target.focus();
+    const current = [statementTab, discussionTab, submissionTab].indexOf(tab);
+    const next = event.key === "Home" ? 0 : event.key === "End" ? 2
+      : (current + (event.key === "ArrowRight" ? 1 : 2)) % 3;
+    const target = [statementTab, discussionTab, submissionTab][next];
+    selectStatementView(["statement", "discussion", "submissions"][next]); target.focus();
   });
-  statementTab.setAttribute("aria-controls", `statement-content-${question.id}`); discussionTab.setAttribute("aria-controls", `discussion-content-${question.id}`);
-  statementTabs.append(statementTab, discussionTab);
+  statementTab.setAttribute("aria-controls", `statement-content-${question.id}`);
+  discussionTab.setAttribute("aria-controls", `discussion-content-${question.id}`);
+  submissionTab.setAttribute("aria-controls", `submission-content-${question.id}`);
+  statementTabs.append(statementTab, discussionTab, submissionTab);
   const content = el("div", "", "workspace-statement-content");
   content.id = `statement-content-${question.id}`; content.setAttribute("role", "tabpanel"); content.setAttribute("aria-labelledby", statementTab.id);
   content.append(el("p", [question.topic, `难度 ${question.difficulty}/5`, "★".repeat(question.stars)].filter(Boolean).join(" · "), "coding-statement-meta"));
@@ -305,7 +314,10 @@ function renderWorkspace(question, request, userId) {
   }
   const discussion = renderDiscussion(question, request, userId);
   discussion.id = `discussion-content-${question.id}`; discussion.hidden = true; discussion.setAttribute("role", "tabpanel"); discussion.setAttribute("aria-labelledby", discussionTab.id);
-  statement.append(statementHead, statementTabs, content, discussion);
+  const records = el("div", "", "coding-submission-panel coding-record-list");
+  records.id = `submission-content-${question.id}`; records.hidden = true; records.setAttribute("role", "tabpanel"); records.setAttribute("aria-labelledby", submissionTab.id);
+  recordTarget = records;
+  statement.append(statementHead, statementTabs, content, discussion, records);
   const stack = el("div", "", "editor-stack");
   const editor = el("section", "", "panel editor-panel"); const editorHead = el("div", "", "editor-heading");
   const language = select("编程语言", languages, "cpp11", () => {}); language.className = "language-select"; const editorControl = paneControl();
@@ -338,7 +350,6 @@ function renderWorkspace(question, request, userId) {
   });
   language.addEventListener("change", () => { save(previous); previous = language.value; input.value = drafts.read(codingDraftKey(userId, question.id, previous)); update(); }); update(); area.append(numbers, input);
   const footer = el("div", "", "editor-footer");
-  const result = el("div", "", "submission-result"); result.setAttribute("role", "status"); result.setAttribute("aria-live", "polite");
   const run = button("运行测试用例", async () => {
     if (!input.value.trim()) { runResult.replaceChildren(el("span", "请先输入代码，再运行。", "coding-form-error")); activateResults(); return; }
     if (!testCases.length) testCases.push({ input: "", output: "" });
@@ -355,11 +366,9 @@ function renderWorkspace(question, request, userId) {
   }, "button secondary coding-run-button");
   const runResult = el("div", "", "submission-result coding-run-result"); runResult.setAttribute("role", "status"); runResult.setAttribute("aria-live", "polite");
   let activateResults = () => {};
-  let activateRecords = () => {};
   const submit = button("提交洛谷评测 →", async () => {
-    activateRecords();
-    if (!input.value.trim()) { result.replaceChildren(el("span", "请先输入代码，再提交评测。", "coding-form-error")); return; }
-    const source = input.value; const lang = language.value; result.replaceChildren(el("span", "正在评测…", "muted"));
+    if (!input.value.trim()) { notify("请先输入代码，再提交评测。", "error"); return; }
+    const source = input.value; const lang = language.value;
     let remotePayload = null; let submissionId = null;
     try {
       let response = await api(`/coding/questions/${question.id}/submissions`, { method: "POST", body: JSON.stringify({ language: lang, source }) });
@@ -367,7 +376,6 @@ function renderWorkspace(question, request, userId) {
       submissionId = response.id;
       if (response.judge_mode === "luogu") {
         pending.set(response.id, { userId, questionId: question.id, remoteProblemId: response.remote_problem_id });
-        resultTargets.set(response.id, { userId, result });
         try {
           remotePayload = await requestLuoguSubmit({ context: "coding", submission_id: response.id, problem_id: response.remote_problem_id, source, language: lang });
         } catch (error) {
@@ -385,17 +393,17 @@ function renderWorkspace(question, request, userId) {
         response = await saveRemote(response.id, remotePayload);
       }
       if (!active(request, userId)) return;
-      renderResult(result, response); await loadRecords(question.id, request, userId);
+      await loadRecords(question.id, request, userId);
     } catch (error) {
       if (active(request, userId)) {
-        result.replaceChildren(el("span", error.message, "coding-form-error"));
-        if (remotePayload?.remote_submission_id && submissionId) result.append(button("重新同步评测结果", async () => {
+        notify(error.message, "error");
+        if (remotePayload?.remote_submission_id && submissionId) {
           try {
-            const synced = await saveRemote(submissionId, remotePayload);
+            await saveRemote(submissionId, remotePayload);
             if (!active(request, userId)) return;
-            renderResult(result, synced); await loadRecords(question.id, request, userId);
-          } catch (syncError) { result.replaceChildren(el("span", syncError.message, "coding-form-error")); }
-        }, "text-button"));
+            await loadRecords(question.id, request, userId);
+          } catch (syncError) { notify(syncError.message, "error"); }
+        }
         await loadRecords(question.id, request, userId);
       }
     }
@@ -454,26 +462,20 @@ function renderWorkspace(question, request, userId) {
   };
   renderCaseEditor(); casePanel.append(caseTabs, caseFields);
   const results = el("div", "", "editor-bottom-content coding-test-results"); results.hidden = true; results.append(runResult);
-  const records = el("div", "", "editor-bottom-content coding-submission-panel"); records.hidden = true; records.append(result);
-  const recordList = el("div", "", "coding-record-list"); records.append(recordList); recordTarget = recordList;
   const tabButtons = [];
   const selectBottomPanel = pane => {
-    casePanel.hidden = pane !== casePanel; results.hidden = pane !== results; records.hidden = pane !== records;
+    casePanel.hidden = pane !== casePanel; results.hidden = pane !== results;
     tabButtons.forEach(([control, target]) => { control.classList.toggle("selected", pane === target); control.setAttribute("aria-pressed", String(pane === target)); });
   };
-  for (const [label, pane] of [["测试用例", casePanel], ["运行结果", results], ["提交记录", records]]) {
+  for (const [label, pane] of [["测试用例", casePanel], ["运行结果", results]]) {
     const control = button(label, () => selectBottomPanel(pane), `editor-bottom-tab${pane === casePanel ? " selected" : ""}`);
     control.setAttribute("aria-pressed", String(pane === casePanel)); tabButtons.push([control,pane]); tabsInner.append(control);
   }
   activateResults = () => { selectBottomPanel(results); if (layoutStore.read().collapsed.panels) restoreControls.panels.click(); };
   const layoutStore = createLayoutStore((() => { try { return window.localStorage; } catch { return undefined; } })(), `scu:${userId}:coding-layout:v1`);
-  activateRecords = () => {
-    selectBottomPanel(records);
-    if (layoutStore.read().collapsed.panels) restoreControls.panels.click();
-  };
   const closePanels = closePaneControl("样例与提交记录"); closeControls.panels = closePanels;
   const panelActions = el("div", "", "workspace-pane-actions"); panelActions.append(panelControl, closePanels);
-  tabs.append(tabsInner, panelActions); panels.append(tabs, casePanel, results, records);
+  tabs.append(tabsInner, panelActions); panels.append(tabs, casePanel, results);
   const horizontal = splitter("problem-splitter", "调整题面和代码区宽度", "vertical"); const vertical = splitter("editor-splitter", "调整代码与样例区高度", "horizontal");
   stack.append(editor, vertical, panels); columns.append(statement, horizontal, stack);
   const mobile = el("div", "", "workspace-pane-switcher");
@@ -575,9 +577,7 @@ function renderDiscussion(question, request, userId) {
   return section;
 }
 function renderResult(target, result) {
-  target.replaceChildren(el("span", `提交 #${result.id}`), statusBadge(result.status));
-  if (result.judge_mode === "samples") target.append(el("span", `公开样例 ${result.passed_cases ?? 0}/${result.total_cases ?? 0}，未验证隐藏测试`));
-  if (result.detail) target.append(el("pre", result.detail, "submission-result-detail"));
+  renderSubmissionDetails(target, result);
 }
 function renderRunResult(target, result) {
   const passed = result.passed_cases ?? 0; const total = result.total_cases ?? 0;
@@ -602,10 +602,30 @@ async function loadRecords(id, request, userId) {
     if (!result.items.length) target.append(el("p", "完成代码后提交，评测记录会出现在这里。", "muted"));
     for (const record of result.items) {
       if (record.judge_mode === "luogu" && !terminal.has(record.status)) pending.set(record.id, { userId, questionId: id, remoteProblemId: record.remote_problem_id });
-      const row = el("div", "", "coding-record"); row.append(el("span", `#${record.id} · ${record.language}`), statusBadge(record.status), button("详情", async () => {
-        const data = await api(`/coding/submissions/${record.id}`); if (!active(request, userId)) return;
-        const { body } = codingDialog(`提交 #${record.id}`); renderResult(body, data); body.append(el("pre", data.source || "", "coding-source-code"));
-      }, "text-button")); target.append(row);
+      const row = button("", async () => {
+        const { dialog, body } = codingDialog(`提交 #${record.id}`);
+        dialog.classList.add("coding-submission-dialog"); body.replaceChildren(el("p", "正在加载提交详情…", "muted"));
+        try {
+          const data = await api(`/coding/submissions/${record.id}`);
+          if (!active(request, userId) || !dialog.isConnected) return;
+          renderResult(body, data);
+        } catch (error) {
+          if (!dialog.isConnected) return;
+          body.replaceChildren(el("p", error.message, "coding-form-error"), button("重试", async () => {
+            body.replaceChildren(el("p", "正在加载提交详情…", "muted"));
+            try {
+              const data = await api(`/coding/submissions/${record.id}`);
+              if (active(request, userId) && dialog.isConnected) renderResult(body, data);
+            } catch (retryError) {
+              if (dialog.isConnected) body.replaceChildren(el("p", retryError.message, "coding-form-error"));
+            }
+          }, "button secondary"));
+        }
+      }, "coding-record");
+      row.setAttribute("aria-label", `查看提交 #${record.id} 的评测详情`);
+      row.setAttribute("aria-haspopup", "dialog");
+      row.append(el("span", `#${record.id}`, "coding-record-id"), el("span", languages.find(([id]) => id === record.language)?.[1] || record.language, "coding-record-language"), statusBadge(record.status), el("span", "查看详情 ›", "coding-record-more"));
+      target.append(row);
     }
   } catch (error) { if (active(request, userId) && turn === recordsRevision && target.isConnected) target.replaceChildren(el("p", error.message, "coding-form-error"), button("重试", () => loadRecords(id, request, userId))); }
 }
@@ -636,8 +656,6 @@ window.addEventListener("scu-luogu-status", event => {
     const saved = await saveRemote(data.submission_id, data);
     if (!sameSession()) return;
     if (terminal.has(saved.status)) pending.delete(data.submission_id);
-    const visible = resultTargets.get(data.submission_id);
-    if (visible?.userId === userId && visible.result.isConnected) renderResult(visible.result, saved);
     if (selectedQuestion?.id === owned.question_id) await loadRecords(owned.question_id, revision, userId);
     else if (!$("coding")?.hidden && !selectedQuestion) await refreshCoding();
   })().catch(error => { if (sameSession() && error.status !== 404) notify(`带刷评测状态同步失败：${error.message}`, "error"); });

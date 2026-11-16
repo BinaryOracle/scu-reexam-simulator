@@ -80,10 +80,9 @@
 .coding-submit-tools { display: flex; align-items: center; gap: 10px; margin-right: auto; }
 .coding-workspace .editor-footer > .button { flex: none; }
 .coding-workspace .editor-footer > .muted { font-size: 10px; }
-.coding-workspace .coding-submission-panel { min-height: 100%; overflow: auto; }
-.coding-workspace .submission-result { justify-content: flex-start; max-height: 140px; overflow: auto; border-top: 0; padding: 4px 0 10px; margin: 0 0 8px; color: var(--ink); font-size: 12px; }
-.coding-workspace .submission-result:empty { display: none; }
-.coding-workspace .coding-record-list { min-height: 40px; }
+.coding-workspace .coding-submission-panel { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.coding-workspace .coding-record-list { min-height: 40px; padding: 4px 12px 12px; }
+.coding-workspace .coding-record-list > p { margin: 18px 4px; color: var(--muted); font-size: 13px; }
 .coding-workspace .coding-run-button { color: #fff; background: #32865d; border-color: #32865d; }
 .coding-workspace .coding-run-button:hover:not(:disabled) { background: #276d4b; }
 .coding-workspace .editor-footer > .button:disabled { cursor: not-allowed; opacity: .48; }
@@ -170,8 +169,13 @@
 .coding-reference { margin-top: 24px; padding: 13px 0; border-top: 1px solid var(--line); }
 .coding-reference summary { cursor: pointer; color: #935237; font-size: 12px; }
 .coding-reference pre, .coding-source-code { max-height: 500px; overflow: auto; padding: 15px; background: #f6f0e7; border-radius: 7px; font-size: 12px; }
-.coding-record { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 12px; }
-.coding-record > .text-button { margin-left: auto; }
+.coding-record { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 56px; padding: 12px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--ink); text-align: left; font: inherit; font-size: 13px; cursor: pointer; transition: background .15s; }
+.coding-record:hover { background: #f6f0e7; }
+.coding-record:focus-visible { outline: 2px solid var(--accent, #a34334); outline-offset: -2px; border-radius: 6px; }
+.coding-record .badge { flex: none; }
+.coding-record-id { min-width: 42px; font-weight: 650; }
+.coding-record-language { min-width: 52px; color: var(--muted); }
+.coding-record-more { margin-left: auto; color: #8e7869; white-space: nowrap; font-size: 12px; }
 .coding-admin-heading { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin: 20px 0; }
 .coding-admin-heading .section-title { font-size: 25px; font-weight: 650; }
 .coding-admin-list { display: grid; gap: 12px; margin-top: 18px; }
@@ -185,6 +189,39 @@
 .coding-dialog .dialog-header, .coding-dialog .dialog-footer { flex: none; }
 .coding-dialog .dialog-body { flex: 1; overflow: auto; }
 .coding-dialog .dialog-footer { flex-wrap: wrap; }
+.coding-submission-dialog { width: min(960px, calc(100vw - 32px)); max-width: 960px; border: 1px solid #e6dcd1; border-radius: 16px; background: #fffdfa; box-shadow: 0 24px 90px #30221933; }
+.coding-submission-dialog::backdrop { background: #241b1559; backdrop-filter: blur(3px); }
+.coding-submission-dialog .dialog-header { padding: 18px 24px; background: #f8f4ee; border-bottom: 1px solid var(--line); }
+.coding-submission-dialog .dialog-header h2 { margin: 0; font-size: 20px; }
+.coding-submission-dialog .dialog-header button { min-height: 36px; padding: 7px 14px; font-size: 13px; }
+.coding-submission-dialog .dialog-body { display: flex; flex-direction: column; gap: 24px; min-height: 0; padding: 24px; }
+.coding-submission-dialog .dialog-footer:empty { display: none; }
+.submission-overview { padding: 18px 20px; border: 1px solid var(--line); border-radius: 10px; background: #faf7f2; }
+.submission-verdict { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.submission-label { color: #8b7969; font-size: 12px; font-weight: 400; }
+.submission-metadata { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--line); }
+.submission-metadata dt { color: #8b7969; font-size: 11px; margin-bottom: 5px; }
+.submission-metadata dd { margin: 0; color: var(--ink); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.submission-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.coding-submission-dialog h3 { margin: 0; color: var(--ink); font-size: 14px; font-weight: 650; }
+.submission-pass-summary { display: flex; align-items: baseline; gap: 8px; }
+.submission-pass-count { font-size: 19px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.submission-case-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; max-height: 230px; overflow: auto; }
+.submission-case { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 12px 10px; border: 1px solid #e8e0d5; border-radius: 7px; font-size: 12px; }
+.submission-case span { opacity: .7; font-variant-numeric: tabular-nums; }
+.submission-case.accepted { background: #eef4eb; border-color: #dce7d6; color: #527246; }
+.submission-case.failed { background: #fbede7; border-color: #f1dad0; color: #ab543a; }
+.submission-case.pending { background: #edf2f6; color: #536d86; }
+.submission-diagnostics pre { max-height: 220px; overflow: auto; margin: 12px 0 0; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: #faf7f2; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; font: 12px/1.7 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.coding-submission-dialog .submission-code { max-height: min(42dvh, 420px); overflow: auto; margin: 0; padding: 18px 20px; border: 1px solid #3e3934; border-radius: 10px; background: #2e2a26; color: #eee5d9; tab-size: 4; white-space: pre; font: 13px/1.75 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.submission-code code { padding: 0; background: transparent; color: inherit; font: inherit; }
+@media (max-width: 540px) {
+  .coding-submission-dialog .dialog-body { padding: 16px; gap: 20px; }
+  .submission-overview { padding: 14px; }
+  .submission-metadata { grid-template-columns: 1fr; gap: 12px; }
+  .coding-record { gap: 8px; padding-inline: 6px; }
+  .coding-record-more { font-size: 11px; }
+}
 .coding-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 18px 0; }
 .coding-field { display: grid; align-content: start; gap: 7px; min-width: 0; font-size: 13px; color: #756050; }
 .coding-field input, .coding-field textarea, .coding-field select { width: 100%; min-width: 0; }

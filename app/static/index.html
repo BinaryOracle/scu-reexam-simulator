@@ -7,11 +7,11 @@
     <title>知序 · 复试模拟系统</title>
     <link rel="icon" href="/static/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=0.19.1" />
-    <link rel="stylesheet" href="/static/style.css?v=20261116-ai-settings-v2" />
+    <link rel="stylesheet" href="/static/style.css?v=20261116-ai-settings-v4" />
     <link rel="stylesheet" href="/static/workspace.css?v=20261115-workspace-v8" />
     <link rel="stylesheet" href="/static/contest-focus.css?v=20261115-contest-records-v2" />
     <link rel="stylesheet" href="/static/live.css?v=20261116-frames-v1" />
-    <link rel="stylesheet" href="/static/coding.css?v=20261116-discussion-tabs-v1" />
+    <link rel="stylesheet" href="/static/coding.css?v=20261116-submission-ui-v2" />
     <link rel="stylesheet" href="/static/home-layout.css?v=20261115-layout-v1" />
     <link rel="stylesheet" href="/static/training.css?v=20261115-empty-state-v1" />
     <link rel="stylesheet" href="/static/credits.css?v=20261116-ui-audit-v2" />
@@ -384,43 +384,11 @@
               <p class="field-hint">默认地址为 http://127.0.0.1:8000/。正式部署请填写 HTTPS 网站的来源地址，不包含路径。修改后需要重新下载并加载插件。</p>
               <div class="luogu-origin-actions"><p id="luoguSettingsStatus" role="status" aria-live="polite" hidden></p><button type="submit" class="button primary">保存设置</button></div>
             </form>
-            <form id="modelSettingsForm" class="model-settings-form">
-              <div class="section-heading"><div><h2>大模型与语音服务</h2><p class="muted">修改后对后续请求立即生效。API Key 留空表示保持不变，勾选清除后会回退到配置文件或环境变量。</p></div></div>
+            <div class="model-settings-form">
+              <div class="section-heading"><div><h2>大模型与语音服务</h2><p class="muted">修改后对后续请求立即生效。已配置的密钥以掩码显示；留空保持不变，输入新密钥即可替换。</p></div></div>
               <div class="model-compat-note"><strong>接口兼容说明</strong><span>面试与趋势分析使用 OpenAI 风格 Chat Completions；语音识别依赖音频输入及服务商参数，语音合成按所选协议调用。切换服务商时请同时确认模型名称和所需能力均受支持。</span></div>
-              <div class="model-settings-grid">
-                <fieldset class="panel model-setting-card" data-model-service="interview">
-                  <legend>面试多模态模型</legend><p class="muted">专家提问与整场面试点评，会结合 PPT、回答文本和录音。</p>
-                  <div class="model-setting-fields"><label>接口地址<input name="base_url" type="url" maxlength="500" required /></label>
-                  <label>模型名称<input name="model" maxlength="200" required /></label></div>
-                  <label>API Key<input name="api_key" type="password" maxlength="4096" autocomplete="new-password" placeholder="留空保持当前密钥" /></label>
-                  <div class="model-key-row"><span data-key-status></span><label><input name="clear_api_key" type="checkbox" /> 清除此自定义 Key</label></div>
-                </fieldset>
-                <fieldset class="panel model-setting-card" data-model-service="asr">
-                  <legend>语音识别（ASR）</legend><p class="muted">面试录音转写使用的模型与服务凭证。</p>
-                  <div class="model-setting-fields"><label>接口地址<input name="base_url" type="url" maxlength="500" required /></label>
-                  <label>模型名称<input name="model" maxlength="200" required /></label></div>
-                  <label>API Key<input name="api_key" type="password" maxlength="4096" autocomplete="new-password" placeholder="留空保持当前密钥" /></label>
-                  <div class="model-key-row"><span data-key-status></span><label><input name="clear_api_key" type="checkbox" /> 清除此自定义 Key</label></div>
-                </fieldset>
-                <fieldset class="panel model-setting-card" data-model-service="tts">
-                  <legend>语音合成（TTS）</legend><p class="muted">专家问题语音播报使用的模型与服务凭证。</p>
-                  <div class="model-setting-fields"><label>接口地址<input name="base_url" type="url" maxlength="500" required /></label>
-                  <label>模型名称<input name="model" maxlength="200" required /></label></div>
-                  <div class="model-setting-pair"><label>服务商<select name="provider"><option value="dashscope">阿里云百炼</option><option value="openai">OpenAI 兼容</option></select></label><label>协议<select name="protocol"><option value="dashscope_audio">DashScope Audio</option><option value="dashscope_native">DashScope 原生</option></select></label></div>
-                  <label>音色<input name="voice" maxlength="120" required /></label>
-                  <label>API Key<input name="api_key" type="password" maxlength="4096" autocomplete="new-password" placeholder="留空保持当前密钥" /></label>
-                  <div class="model-key-row"><span data-key-status></span><label><input name="clear_api_key" type="checkbox" /> 清除此自定义 Key</label></div>
-                </fieldset>
-                <fieldset class="panel model-setting-card" data-model-service="trends">
-                  <legend>热点趋势分析模型</legend><p class="muted">趋势分析可单独指定模型、服务地址与密钥；密钥留空时继承面试多模态模型配置。</p>
-                  <div class="model-setting-fields"><label>接口地址<input name="base_url" type="url" maxlength="500" required /></label>
-                  <label>模型名称<input name="model" maxlength="200" required /></label></div>
-                  <label>独立 API Key<input name="api_key" type="password" maxlength="4096" autocomplete="new-password" placeholder="留空继承通用模型密钥" /></label>
-                  <div class="model-key-row"><span data-key-status></span><label><input name="clear_api_key" type="checkbox" /> 清除此独立 Key</label></div>
-                </fieldset>
-              </div>
-              <div class="model-settings-actions"><p id="modelSettingsStatus" role="status" aria-live="polite" hidden></p><button type="submit" class="button primary">保存 AI 服务设置</button></div>
-            </form>
+              <div id="modelServiceList" class="model-service-list" aria-label="已配置的大模型服务"></div>
+            </div>
           </section>
           <section id="coding" aria-label="算法带刷" hidden><div id="codingContent"></div></section>
           <section id="codingAdmin" aria-label="带刷题库管理" hidden><div id="codingAdminContent"></div></section>
@@ -895,7 +863,23 @@
       <div id="submissionDetailBody" class="dialog-body"></div>
       <div class="dialog-footer"><button id="closeSubmissionDetailFooter" type="button" class="button secondary">关闭</button></div>
     </dialog>
+    <dialog id="modelServiceDialog" class="account-dialog model-service-dialog" aria-labelledby="modelServiceDialogTitle">
+      <div class="dialog-header"><div><span class="eyebrow">AI SERVICE</span><h2 id="modelServiceDialogTitle">编辑模型服务</h2></div><button id="closeModelServiceDialog" type="button" class="icon-button" aria-label="关闭模型服务设置">×</button></div>
+      <form id="modelSettingsForm" class="model-service-edit-form">
+        <div class="dialog-body model-service-edit-body">
+          <p id="modelServiceDialogDescription" class="muted"></p>
+          <div class="model-setting-fields"><label>接口地址<input name="base_url" type="url" maxlength="500" required /></label><label>模型名称<input name="model" maxlength="200" required /></label></div>
+          <div id="modelTtsFields" class="model-tts-fields" hidden>
+            <div class="model-setting-pair"><label>服务商<select name="provider"><option value="dashscope">阿里云百炼</option><option value="openai">OpenAI 兼容</option></select></label><label>协议<select name="protocol"><option value="dashscope_audio">DashScope Audio</option><option value="dashscope_native">DashScope 原生</option></select></label></div>
+            <label>音色<input name="voice" maxlength="120" required /></label>
+          </div>
+          <label>API Key<input name="api_key" type="password" maxlength="4096" autocomplete="new-password" placeholder="请输入 API Key" /></label>
+          <p id="modelServiceKeyStatus" class="model-service-key-status" role="status"></p>
+        </div>
+        <div class="dialog-footer model-settings-actions"><p id="modelSettingsStatus" class="model-settings-status" role="status" aria-live="polite" hidden></p><button id="cancelModelServiceEdit" type="button" class="button secondary">取消</button><button type="submit" class="button primary">保存设置</button></div>
+      </form>
+    </dialog>
     <dialog id="announcementDialog" class="account-dialog announcement-dialog" aria-labelledby="announcementDialogTitle"><div class="dialog-header"><div><span class="eyebrow">公告</span><h2 id="announcementDialogTitle">公告详情</h2></div><button id="closeAnnouncementDialog" type="button" class="icon-button" aria-label="关闭公告">×</button></div><div id="announcementDialogContent" class="dialog-body announcement-dialog-content"></div></dialog>
-    <script type="module" src="/static/app.js?v=20261116-ai-settings-v2"></script>
+    <script type="module" src="/static/app.js?v=20261116-ai-settings-v4"></script>
   </body>
 </html>

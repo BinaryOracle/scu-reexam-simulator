@@ -12,12 +12,15 @@ test('keeps the return-to-list action outside the collapsible statement pane', (
   assert.doesNotMatch(render, /statementHead\.append\(button\("← 返回题单"/);
 });
 
-test('places submit feedback in the submission tab and consumes errors inline', () => {
+test('shows submission details only from the submission-record dialog', () => {
   const render = source.slice(source.indexOf('function renderWorkspace('), source.indexOf('function renderResult('));
-  assert.match(render, /const records = el\("div", "", "editor-bottom-content coding-submission-panel"\); records\.hidden = true; records\.append\(result\)/);
-  assert.match(render, /activateRecords\(\);/);
+  assert.match(render, /const records = el\("div", "", "coding-submission-panel coding-record-list"\)/);
+  assert.match(render, /const submissionTab = button\("提交记录", \(\) => selectStatementView\("submissions"\)/);
   assert.doesNotMatch(render, /footer\.append\([^;]*result/);
-  assert.doesNotMatch(render, /await loadRecords\(question\.id, request, userId\);\s*throw error;/);
+  assert.doesNotMatch(render, /renderResult\(result,/);
+  assert.doesNotMatch(source, /resultTargets/);
+  assert.match(source, /row\.setAttribute\("aria-label", `查看提交 #\$\{record\.id\} 的评测详情`\)/);
+  assert.match(source, /coding-submission-dialog/);
 });
 
 test('keeps the coding workspace focused on the problem and editor within the viewport', () => {
@@ -95,12 +98,15 @@ test('presents comments as a LeetCode-style discussion stream with compact sorti
 
 test('keeps question discussion beside the statement in the left workspace pane', () => {
   const render = source.slice(source.indexOf('function renderWorkspace('), source.indexOf('function renderDiscussion('));
-  assert.match(render, /statementTabs\.append\(statementTab, discussionTab\)/);
-  assert.match(render, /statement\.append\(statementHead, statementTabs, content, discussion\)/);
+  assert.match(render, /statementTabs\.append\(statementTab, discussionTab, submissionTab\)/);
+  assert.match(render, /statement\.append\(statementHead, statementTabs, content, discussion, records\)/);
+  assert.match(render, /for \(const \[label, pane\] of \[\["测试用例", casePanel\], \["运行结果", results\]\]\)/);
+  assert.doesNotMatch(render, /\["提交记录", records\]/);
   assert.match(render, /root\.replaceChildren\(workspace\)/);
   assert.doesNotMatch(render, /root\.replaceChildren\(workspace, discussion\)/);
   assert.match(styles, /\.coding-statement-tabs/);
   assert.match(styles, /\.coding-statement-discussion\s*\{[^}]*flex:\s*1/s);
+  assert.match(styles, /\.coding-submission-panel\s*\{[^}]*flex:\s*1 1 0;[^}]*overflow-y:\s*auto/s);
 });
 
 test('defaults voucher export to unredeemed codes and resets to that safe filter', () => {
