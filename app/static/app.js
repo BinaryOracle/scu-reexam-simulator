@@ -8,7 +8,7 @@ import {
   hasUnsavedWork,
   pauseInterviewAudio,
   clearInterviewState,
-} from "./interview.js?v=20261115-interview-prep-nav-v1";
+} from "./interview.js?v=20261116-ui-audit-v2";
 import {
   refreshContests,
   refreshSubmissions,
@@ -17,10 +17,10 @@ import {
   suspendContestWorkspace,
   setupContestCreation,
   requestLuoguSubmit,
-} from "./contest.js?v=20261116-contest-state-copy-v1";
+} from "./contest.js?v=20261116-ui-audit-v2";
 import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-access-layout-v5";
-import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261115-voucher-export-v2";
-import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
+import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261116-ui-audit-v2";
+import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
 
 import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261116-active-round-copy-v1";
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-empty-state-v1";
@@ -71,6 +71,7 @@ function configureSidebar() {
   syncSidebarToggle();
   window.addEventListener("interview-layout-changed", syncSidebarToggle);
   window.addEventListener("resize", syncSidebarToggle);
+  window.addEventListener("resize", revealActiveNavigation);
   $("sidebarToggle").addEventListener("click", () => {
     if (document.body.classList.contains("interview-immersive")) {
       if (window.matchMedia("(max-width: 620px)").matches) {
@@ -88,6 +89,20 @@ function configureSidebar() {
     item.title = item.querySelector(".nav-label")?.textContent || "";
     item.setAttribute("aria-label", item.title);
   }
+}
+function revealActiveNavigation() {
+  if (!window.matchMedia("(max-width: 620px)").matches) return;
+  const item = document.querySelector(".sidebar .nav-item.active");
+  const navigation = item?.closest("nav");
+  if (!item || !navigation) return;
+  const itemBounds = item.getBoundingClientRect();
+  const navigationBounds = navigation.getBoundingClientRect();
+  const delta = itemBounds.left < navigationBounds.left
+    ? itemBounds.left - navigationBounds.left
+    : itemBounds.right > navigationBounds.right
+      ? itemBounds.right - navigationBounds.right
+      : 0;
+  if (delta) navigation.scrollBy({ left: delta, behavior: "instant" });
 }
 function configureContestNavigation() {
   const submenu = $("contestSubnav");
@@ -170,13 +185,12 @@ async function show(view, force = false, { historyMode = "push" } = {}) {
     item?.classList.toggle("active", key === selected);
     if (key === selected) item?.setAttribute("aria-current", "page");
     else item?.removeAttribute("aria-current");
-    if (key === selected && window.matchMedia("(max-width: 620px)").matches)
-      item?.scrollIntoView({ behavior: "instant", block: "nearest", inline: "nearest" });
     if (key === selected) {
       $("pageLabel").textContent = value.label;
       document.title = `${value.label} · 知序${state.adminMode ? "后台" : ""}`;
     }
   }
+  revealActiveNavigation();
   window.scrollTo({ top: 0, behavior: "instant" });
   await views[selected].refresh();
 }

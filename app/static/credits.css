@@ -33,6 +33,7 @@
 .voucher-pagination { display: flex; justify-content: center; align-items: center; gap: 20px; border-top: 1px solid var(--line); padding: 18px; font-size: 12px; }
 .voucher-pagination .button { font-size: 11px; min-height: 34px; padding: 6px 12px; }
 .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 24px 0; }
+.profile-stats:has(#profileRedemptionStats[hidden]) { grid-template-columns: minmax(0, 420px); }
 .profile-stat { padding: 22px 24px; display: grid; gap: 8px; }
 .profile-stat > span { font-size: 12px; color: var(--muted); }
 .profile-stat > strong { font-size: 28px; color: #946344; font-weight: 550; }
@@ -122,6 +123,29 @@
   .redeem-form { flex-direction: column; }
   .redeem-form input { font-size: 11px; }
   .interview-quota { align-items: flex-start; flex-direction: column; gap: 4px; }
+}
+
+@media (min-width: 621px) {
+  .account-table th:first-child,
+  .account-table td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #fffdfa;
+    box-shadow: 8px 0 12px -12px #51372b80;
+  }
+  .account-table thead th:first-child { z-index: 4; background: #f8f3eb; }
+  .account-table th:last-child,
+  .account-table td:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    background: #fffdfa;
+    box-shadow: -8px 0 12px -12px #51372b80;
+  }
+  .account-table thead th:last-child { z-index: 4; background: #f8f3eb; }
+  .account-table tr.account-disabled td:first-child,
+  .account-table tr.account-disabled td:last-child { background: #fdfbf8; }
 }
 .profile-account-settings { padding: 0 26px; margin-bottom: 24px; }
 .profile-settings-heading { display: flex; justify-content: space-between; align-items: center; padding: 24px 0 18px; }

@@ -6,6 +6,20 @@ import vm from 'node:vm';
 
 const source = await readFile(new URL('../app/static/interview.js', import.meta.url), 'utf8');
 
+test('saved audio counts as an answer even when transcription is unavailable', () => {
+  const start = source.indexOf('function answerIsComplete(');
+  const end = source.indexOf('const reviewMode =', start);
+  const context = vm.createContext({});
+  vm.runInContext(source.slice(start, end), context);
+  const item = { workflow_version: 5, intro_completed: false };
+  assert.equal(context.answerIsComplete(item, { stage: 1, has_audio: true }), false);
+  item.intro_completed = true;
+  assert.equal(context.answerIsComplete(item, { stage: 1 }), true);
+  assert.equal(context.answerIsComplete(item, { stage: 2, transcript: '', has_audio: true }), true);
+  assert.equal(context.answerIsComplete(item, { stage: 3, transcript: 'answer' }), true);
+  assert.equal(context.answerIsComplete(item, { stage: 4, transcript: '  ' }), false);
+});
+
 test('history keeps timed-out interviews available for review without listing active sessions', () => {
   assert.match(source, /interviewItems = allItems\.filter\(item => item\.status === "finished" \|\| item\.status === "expired"\)/);
   assert.match(source, /const closed = item\.status === "finished" \|\| item\.status === "expired"/);

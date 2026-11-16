@@ -470,6 +470,10 @@ def contest_overview(cid: int, user=Depends(exam_user)):
             (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
                 WHERE problem_id=problems.id AND status='Accepted' AND users.is_admin=0) AS accepted_count
             FROM problems WHERE contest_id=? ORDER BY id''', (cid,))]
+        if not user['is_admin'] and not contest['show_ranking']:
+            for problem in problems:
+                problem['attempt_count'] = None
+                problem['accepted_count'] = None
         return {**dict(contest), 'problem_count': len(problems), 'problems': problems}
 
 
@@ -485,6 +489,10 @@ def contest_ranking(cid: int, user=Depends(exam_user)):
                 WHERE problem_id=problems.id AND status='Accepted' AND users.is_admin=0) AS accepted_count
             FROM problems WHERE contest_id=? ORDER BY id''', (cid,))]
         if not contest['show_ranking']:
+            if not user['is_admin']:
+                for problem in problems:
+                    problem['attempt_count'] = None
+                    problem['accepted_count'] = None
             return {'visible': False, 'ranking_rule': contest['ranking_rule'], 'problems': problems, 'rows': []}
         users = list(db.execute('''SELECT DISTINCT users.id,users.username FROM submissions
             JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
@@ -674,9 +682,9 @@ def problems(cid: int, user=Depends(exam_user)):
         return [{**public_problem(row), 'judge_mode': contest['judge_mode'],
             'points': row['points'],
             'attempt_count': db.execute('''SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
-                WHERE problem_id=? AND users.is_admin=0''', (row['id'],)).fetchone()[0],
+                WHERE problem_id=? AND users.is_admin=0''', (row['id'],)).fetchone()[0] if user['is_admin'] or contest['show_ranking'] else None,
             'accepted_count': db.execute("""SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
-                WHERE problem_id=? AND status='Accepted' AND users.is_admin=0""", (row['id'],)).fetchone()[0]}
+                WHERE problem_id=? AND status='Accepted' AND users.is_admin=0""", (row['id'],)).fetchone()[0] if user['is_admin'] or contest['show_ranking'] else None}
             for row in db.execute('SELECT * FROM problems WHERE contest_id=? ORDER BY id', (cid,))]
 
 @app.post('/api/problems/{pid}/submissions')

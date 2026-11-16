@@ -230,6 +230,20 @@ def test_contest_ranking_can_be_hidden_and_invalid_language_is_rejected(client):
     }).json()
     response = client.get(f'/api/contests/{contest["id"]}/ranking', headers=alice)
     assert response.status_code == 200 and response.json()['visible'] is False
+    from app.db import connect
+    with connect() as db:
+        db.execute("INSERT INTO submissions(user_id,problem_id,language,source,status,created) VALUES (?,?,?,?,?,?)",
+                   (3, contest['problem_ids'][0], 'cpp11', 'int main(){}', 'Accepted', now))
+    for suffix in ('', '/problems', '/ranking'):
+        path = f'/api/contests/{contest["id"]}{suffix}'
+        candidate_response = client.get(path, headers=alice)
+        admin_response = client.get(path, headers=manager)
+        assert candidate_response.status_code == admin_response.status_code == 200
+        hidden = candidate_response.json() if suffix == '/problems' else candidate_response.json()['problems']
+        visible = admin_response.json() if suffix == '/problems' else admin_response.json()['problems']
+        assert hidden[0]['attempt_count'] is None and hidden[0]['accepted_count'] is None
+        assert visible[0]['attempt_count'] == visible[0]['accepted_count'] == 1
+        assert hidden[0]['points'] == 100
     invalid = client.post(f'/api/problems/{contest["problem_ids"][0]}/submissions', headers=alice,
                           json={'source':'x','language':'brainfuck'})
     assert invalid.status_code == 422

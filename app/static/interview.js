@@ -144,6 +144,10 @@ const answerKey = (id, stage) => `${id}:${stage}`;
 const stageName = (answer, item) => answer.stage === item.expert_stage ? "专家问答"
   : answer.stage === 1 && item.workflow_version >= 2 ? "PPT 自我介绍"
   : (item.workflow_version >= 5 ? { 2: "专业课问答", 3: "英文翻译", 4: "英文问答" }[answer.stage] : null) || `第 ${answer.stage} 个环节`;
+function answerIsComplete(item, answer) {
+  if (answer.stage === 1 && item.workflow_version >= 2) return Boolean(item.intro_completed);
+  return Boolean(answer.transcript?.trim() || answer.has_audio);
+}
 const reviewMode = () => state.adminMode;
 const interviewPath = (path) => `${reviewMode() ? "/admin" : ""}${path}`;
 const resumeKey = () => `scu:${state.user.id}:interview-in-session`;
@@ -706,11 +710,7 @@ function renderInterview() {
   }
   const workspace = el("div", "", "interview-workspace");
   const stages = el("aside", "", "panel stage-panel");
-  const complete = item.answers.filter((a) =>
-    a.stage === 1 && item.workflow_version >= 2
-      ? item.intro_completed
-      : a.transcript.trim(),
-  ).length;
+  const complete = item.answers.filter((answer) => answerIsComplete(item, answer)).length;
   const progress = el("div", "", "stage-progress");
   const fill = el("span");
   fill.style.width = `${(100 * complete) / Math.max(item.answers.length, 1)}%`;
@@ -727,10 +727,7 @@ function renderInterview() {
   const stageList = el("nav", "", "stage-list");
   stageList.setAttribute("aria-label", "面试环节");
   item.answers.forEach((answer) => {
-    const saved =
-      answer.stage === 1 && item.workflow_version >= 2
-        ? item.intro_completed
-        : !!answer.transcript.trim();
+    const saved = answerIsComplete(item, answer);
     const stageButton = button(
       "",
       async () => {

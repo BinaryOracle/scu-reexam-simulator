@@ -1,7 +1,7 @@
 /** Interview balances and voucher administration have no external shop API. */
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, el, button, emptyState, notify, run, dateTime, badge, confirmAction } from "./ui.js?v=20261114-ui-v17";
-import { refreshAccountSettings, setupAccountSettings } from "./profile-account.js?v=20261114-ui-v17";
+import { refreshAccountSettings, setupAccountSettings } from "./profile-account.js?v=20261116-ui-audit-v2";
 
 import { refreshTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
 

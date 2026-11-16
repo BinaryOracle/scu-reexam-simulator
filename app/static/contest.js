@@ -485,26 +485,30 @@ function renderContestOverview() {
       title.append(el("span", problem.remote_problem_id, "muted"));
     open.append(title);
     const stats = el("span", "", "contest-problem-stats");
-    const attempts = problem.attempt_count ?? 0;
-    const accepted = problem.accepted_count ?? 0;
-    const progress = el("span", "", "contest-problem-submission-count");
-    progress.setAttribute("aria-label", `尝试 ${attempts} 次，通过 ${accepted} 次`);
-    for (const [label, value, activeClass] of [
-      ["尝试", attempts, "has-attempts"],
-      ["通过", accepted, "has-accepted"],
-    ]) {
-      const metricClass = `contest-problem-stat${value > 0 ? ` ${activeClass}` : ""}`;
-      const metric = managementMode()
-        ? button("", () => showContestRecords({ problemId: problem.id, problemTitle, acceptedOnly: label === "通过", participantsOnly: true }), metricClass)
-        : el("span", "", metricClass);
-      if (managementMode()) {
-        metric.setAttribute("aria-label", `查看${problemTitle}的${label}记录，${value} 条`);
-        metric.title = `查看${label}记录`;
+    stats.append(el("strong", `${problem.points ?? 100} 分`));
+    const showProblemStats = managementMode() || Boolean(contestOverview.show_ranking);
+    if (showProblemStats) {
+      const attempts = problem.attempt_count ?? 0;
+      const accepted = problem.accepted_count ?? 0;
+      const progress = el("span", "", "contest-problem-submission-count");
+      progress.setAttribute("aria-label", `尝试 ${attempts} 次，通过 ${accepted} 次`);
+      for (const [label, value, activeClass] of [
+        ["尝试", attempts, "has-attempts"],
+        ["通过", accepted, "has-accepted"],
+      ]) {
+        const metricClass = `contest-problem-stat${value > 0 ? ` ${activeClass}` : ""}`;
+        const metric = managementMode()
+          ? button("", () => showContestRecords({ problemId: problem.id, problemTitle, acceptedOnly: label === "通过", participantsOnly: true }), metricClass)
+          : el("span", "", metricClass);
+        if (managementMode()) {
+          metric.setAttribute("aria-label", `查看${problemTitle}的${label}记录，${value} 条`);
+          metric.title = `查看${label}记录`;
+        }
+        metric.append(el("span", label, "contest-problem-stat-label"), el("strong", String(value)));
+        progress.append(metric);
       }
-      metric.append(el("span", label, "contest-problem-stat-label"), el("strong", String(value)));
-      progress.append(metric);
+      stats.append(progress);
     }
-    stats.append(el("strong", `${problem.points ?? 100} 分`), progress);
     const arrow = button("→", () => enterContest({ problemId: problem.id }), "contest-problem-arrow");
     arrow.setAttribute("aria-label", `${problemTitle}，打开题目工作区`);
     arrow.disabled = open.disabled;
@@ -776,9 +780,11 @@ function renderWorkspace() {
   const statement = el("article", "", "panel problem-statement");
   if (showSource) statement.append(el("span", `洛谷题号 · ${problem.remote_problem_id}`, "eyebrow"));
   statement.append(el("h3", problem.title));
-  const problemStats = el("p", `尝试 ${problem.attempt_count || 0} 次 · 通过 ${problem.accepted_count || 0} 次`, "problem-attempt-stats");
-  problemStats.id = `problemStats-${problem.id}`;
-  statement.append(problemStats);
+  if (managementMode() || selectedContest.show_ranking) {
+    const problemStats = el("p", `尝试 ${problem.attempt_count || 0} 次 · 通过 ${problem.accepted_count || 0} 次`, "problem-attempt-stats");
+    problemStats.id = `problemStats-${problem.id}`;
+    statement.append(problemStats);
+  }
   const sourceActions = el("div", "", "problem-source-actions");
   if (showSource) {
     const sourceLinkRow = el("div", "", "problem-source-action-row");

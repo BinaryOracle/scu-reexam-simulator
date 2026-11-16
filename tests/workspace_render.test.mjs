@@ -109,9 +109,9 @@ test('groups Luogu source and refresh actions with clear spacing when they wrap'
     '在洛谷打开题目 ↗',
     '从洛谷更新题面与样例',
   ]);
-  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-actions\s*\{\s*display:\s*grid;\s*grid-template-columns:\s*minmax\(0, max-content\);\s*justify-content:\s*start;\s*row-gap:\s*18px;/);
+  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-actions\s*\{\s*display:\s*grid;\s*grid-template-columns:\s*minmax\(0, max-content\);\s*justify-content:\s*start;\s*row-gap:\s*24px;/);
   assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.problem-source-action-row\s*\{\s*display:\s*flex;\s*align-items:\s*center;\s*width:\s*100%;\s*min-width:\s*0;\s*min-height:\s*40px;/);
-  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.contest-immersive \.problem-source-actions\s*\{[^}]*row-gap:\s*16px/);
+  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /\.contest-immersive \.problem-source-actions\s*\{[^}]*row-gap:\s*20px/);
 });
 
 test('removes the empty restore bar so narrow workspaces do not reserve blank space', () => {
