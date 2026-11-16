@@ -5,7 +5,7 @@ import vm from "node:vm";
 
 const source = readFileSync(new URL("../app/static/home.js", import.meta.url), "utf8");
 const refreshSource = source
-  .slice(source.indexOf("export async function refreshHome()"), source.indexOf("export function setupHome()"))
+  .slice(source.indexOf("export async function refreshHome()"), source.indexOf("export async function showPendingAnnouncementReminder()"))
   .replace("export async function refreshHome()", "async function refreshHome()");
 
 test("home paints its primary actions before the optional announcement request resolves", async () => {
@@ -16,6 +16,8 @@ test("home paints its primary actions before the optional announcement request r
     announcementIndex: 0,
     announcementsUnavailable: false,
     announcementRequestRevision: 0,
+    showPendingAnnouncementReminder: () => { context.reminderCalls += 1; },
+    reminderCalls: 0,
     state: { token: "session-1" },
     api: () => announcements,
     renderHome: () => { context.renderCount += 1; },
@@ -27,4 +29,5 @@ test("home paints its primary actions before the optional announcement request r
   await context.refreshHomePromise;
   assert.equal(context.renderCount, 2);
   assert.deepEqual(context.notices, [{ title: "公告" }]);
+  assert.equal(context.reminderCalls, 1);
 });

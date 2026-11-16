@@ -52,6 +52,55 @@ def _solve(client, actor, qid):
     return result.json()
 
 
+def test_custom_test_cases_run_locally_without_creating_submission(client, monkeypatch):
+    from app.services import coding_judge
+    alice, admin = login(client, 'alice'), login(client, 'manager')
+    stage = _stage(client, admin)
+    item = _question(client, admin, stage, official=True)
+    _judge(monkeypatch)
+    observed = []
+    monkeypatch.setattr(coding_judge, 'evaluate', lambda language, source, samples: (
+        observed.extend(samples) or {'status': 'Accepted', 'detail': '通过 2 / 2', 'passed_cases': 2, 'total_cases': 2}))
+    response = client.post(f"/api/coding/questions/{item['id']}/run", headers=alice, json={
+        'language': 'cpp11', 'source': 'int main() {}', 'cases': [
+            {'input': '2 3', 'output': '5'}, {'input': '10 20', 'output': '30'}]})
+    assert response.status_code == 200, response.text
+    assert response.json()['total_cases'] == 2
+    assert observed == [{'input': '2 3', 'output': '5'}, {'input': '10 20', 'output': '30'}]
+    assert client.get(f"/api/coding/questions/{item['id']}/submissions", headers=alice).json()['items'] == []
+
+
+def test_local_run_requires_at_least_one_test_case(client):
+    alice, admin = login(client, 'alice'), login(client, 'manager')
+    stage = _stage(client, admin)
+    item = _question(client, admin, stage, official=True)
+    response = client.post(f"/api/coding/questions/{item['id']}/run", headers=alice, json={
+        'language': 'python3', 'source': 'print(1)', 'cases': []})
+    assert response.status_code == 422
+
+
+def test_question_comments_support_nested_replies_likes_sorting_and_admin_pin(client):
+    alice, bob, admin = login(client, 'alice'), login(client, 'bob'), login(client, 'manager')
+    stage = _stage(client, admin)
+    item = _question(client, admin, stage, official=True)
+    root = client.post(f"/api/coding/questions/{item['id']}/comments", headers=alice,
+                       json={'body': '根评论内容'})
+    assert root.status_code == 201, root.text
+    reply = client.post(f"/api/coding/questions/{item['id']}/comments", headers=bob,
+                        json={'body': '回复内容', 'parent_id': root.json()['id']})
+    assert reply.status_code == 201, reply.text
+    assert client.put(f"/api/coding/comments/{root.json()['id']}/like", headers=bob).json()['liked'] is True
+    listing = client.get(f"/api/coding/questions/{item['id']}/comments?sort=hot", headers=alice).json()
+    assert listing['items'][0]['id'] == root.json()['id']
+    assert listing['items'][0]['like_count'] == 1
+    assert listing['items'][1]['parent_id'] == root.json()['id']
+    assert client.post(f"/api/coding/comments/{reply.json()['id']}/pin", headers=alice).status_code == 403
+    assert client.post(f"/api/coding/comments/{reply.json()['id']}/pin", headers=admin).json()['pinned'] is True
+    newest = client.get(f"/api/coding/questions/{item['id']}/comments?sort=new", headers=alice).json()
+    assert newest['items'][0]['id'] == reply.json()['id']
+    assert client.delete(f"/api/coding/comments/{root.json()['id']}/like", headers=bob).json()['liked'] is False
+
+
 def test_private_visibility_admin_hierarchy_and_versioned_review(client):
     from test_admin_permissions import login as root_login
     alice, bob, admin = (login(client, name) for name in ('alice', 'bob', 'manager'))

@@ -81,7 +81,8 @@ def initialize(db):
         cover_url TEXT NOT NULL DEFAULT '',blocks TEXT NOT NULL DEFAULT '[]',body_markdown TEXT NOT NULL DEFAULT '',
         status TEXT NOT NULL CHECK(status IN ('draft','published','withdrawn')),
         created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,updated_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
-        created REAL NOT NULL,updated REAL NOT NULL,published_at REAL)''')
+        created REAL NOT NULL,updated REAL NOT NULL,published_at REAL,
+        remind_on_first_visit INTEGER NOT NULL DEFAULT 0 CHECK(remind_on_first_visit IN (0,1)))''')
     db.execute('CREATE INDEX IF NOT EXISTS announcements_by_status ON announcements(status,published_at)')
     db.execute('''CREATE TABLE IF NOT EXISTS announcement_assets(
         id TEXT PRIMARY KEY,path TEXT NOT NULL,mime_type TEXT NOT NULL,created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -89,6 +90,12 @@ def initialize(db):
     columns = {row['name'] for row in db.execute('PRAGMA table_info(announcements)')}
     if 'body_markdown' not in columns:
         db.execute("ALTER TABLE announcements ADD COLUMN body_markdown TEXT NOT NULL DEFAULT ''")
+    if 'remind_on_first_visit' not in columns:
+        db.execute('ALTER TABLE announcements ADD COLUMN remind_on_first_visit INTEGER NOT NULL DEFAULT 0')
+    db.execute('''CREATE TABLE IF NOT EXISTS announcement_dismissals(
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        announcement_id INTEGER NOT NULL REFERENCES announcements(id) ON DELETE CASCADE,
+        dismissed_at REAL NOT NULL,PRIMARY KEY(user_id,announcement_id))''')
     for row in db.execute("SELECT id,blocks FROM announcements WHERE body_markdown='' AND blocks!='[]'").fetchall():
         db.execute('UPDATE announcements SET body_markdown=? WHERE id=?',
                    (blocks_to_markdown(json.loads(row['blocks'])), row['id']))
@@ -139,10 +146,10 @@ def serialize(row, *, admin=False):
     return {'id':row['id'],'title':row['title'],'summary':row['summary'],'cover_url':row['cover_url'],
             'blocks':json.loads(row['blocks']),'body_markdown':row['body_markdown'],
             'body_html':render_markdown(row['body_markdown']),'status':row['status'],'created':row['created'],'updated':row['updated'],
-            'published_at':row['published_at']} | ({'created_by':row['created_by'],'updated_by':row['updated_by']} if admin else {})
+            'published_at':row['published_at'],'remind_on_first_visit':bool(row['remind_on_first_visit'])} | ({'created_by':row['created_by'],'updated_by':row['updated_by']} if admin else {})
 
 
-def list_items(db, *, admin=False, status='', q='', page=1, page_size=10):
+def list_items(db, *, admin=False, user_id=None, status='', q='', page=1, page_size=10):
     clauses, values = [], []
     if not admin: clauses.append("status='published'")
     elif status: clauses.append('status=?'); values.append(status)
@@ -150,7 +157,12 @@ def list_items(db, *, admin=False, status='', q='', page=1, page_size=10):
     where = ' WHERE ' + ' AND '.join(clauses) if clauses else ''
     order = ' ORDER BY COALESCE(published_at,updated) DESC,id DESC'
     if not admin:
-        return [serialize(row,admin=False) for row in db.execute('SELECT * FROM announcements'+where+order,values)]
+        items = [serialize(row,admin=False) for row in db.execute('SELECT * FROM announcements'+where+order,values)]
+        dismissed = {row['announcement_id'] for row in db.execute(
+            'SELECT announcement_id FROM announcement_dismissals WHERE user_id=?', (user_id,))} if user_id is not None else set()
+        for item in items:
+            item['reminder_pending'] = item['remind_on_first_visit'] and item['id'] not in dismissed
+        return items
     total = db.execute('SELECT COUNT(*) FROM announcements'+where,values).fetchone()[0]
     rows = db.execute('SELECT * FROM announcements'+where+order+' LIMIT ? OFFSET ?',
                       (*values,page_size,(page-1)*page_size))
@@ -158,11 +170,16 @@ def list_items(db, *, admin=False, status='', q='', page=1, page_size=10):
             'page':page, 'page_size':page_size, 'pages':(total+page_size-1)//page_size}
 
 
-def get_item(db, aid, *, public=False):
+def get_item(db, aid, *, public=False, user_id=None):
     clauses = 'id=? AND status=\'published\'' if public else 'id=?'
     row = db.execute('SELECT * FROM announcements WHERE '+clauses,(aid,)).fetchone()
     if row is None: raise HTTPException(404,'公告不存在或当前不可查看')
-    return serialize(row,admin=not public)
+    item = serialize(row,admin=not public)
+    if public:
+        dismissed = db.execute('SELECT 1 FROM announcement_dismissals WHERE user_id=? AND announcement_id=?',
+                               (user_id, aid)).fetchone() if user_id is not None else None
+        item['reminder_pending'] = item['remind_on_first_visit'] and dismissed is None
+    return item
 
 
 def validate_cover(cover_url):
@@ -172,31 +189,41 @@ def validate_cover(cover_url):
         raise HTTPException(422,'公告封面地址无效')
 
 
-def preview(db, *, title, summary, cover_url, body_markdown, blocks=None):
+def preview(db, *, title, summary, cover_url, body_markdown, blocks=None, remind_on_first_visit=False):
     title, summary = title.strip(), summary.strip()
     if not title or len(title)>120 or len(summary)>500: raise HTTPException(422,'请填写有效的公告标题和摘要')
     validate_cover(cover_url)
     markdown = body_markdown if body_markdown else blocks_to_markdown(validate_blocks(blocks or []))
     markdown = validate_markdown(db, markdown)
     return {'title':title,'summary':summary,'cover_url':cover_url,'body_markdown':markdown,
-            'body_html':render_markdown(markdown),'blocks':[],'status':'draft'}
+            'body_html':render_markdown(markdown),'blocks':[],'status':'draft',
+            'remind_on_first_visit':remind_on_first_visit}
 
 
-def save(db, actor_id, *, aid, title, summary, cover_url, body_markdown='', blocks=None):
+def save(db, actor_id, *, aid, title, summary, cover_url, body_markdown='', blocks=None, remind_on_first_visit=False):
     title, summary = title.strip(), summary.strip()
     if not title or len(title)>120 or len(summary)>500: raise HTTPException(422,'请填写有效的公告标题和摘要')
     validate_cover(cover_url)
     markdown = body_markdown if body_markdown else blocks_to_markdown(validate_blocks(blocks or []))
     markdown = validate_markdown(db, markdown)
     now = time.time()
-    data = (title,summary,cover_url,json.dumps([],ensure_ascii=False),markdown,actor_id,now)
+    data = (title,summary,cover_url,json.dumps([],ensure_ascii=False),markdown,actor_id,now,int(remind_on_first_visit))
     if aid is None:
-        aid=db.execute('''INSERT INTO announcements(title,summary,cover_url,blocks,body_markdown,status,created_by,updated_by,created,updated)
-            VALUES (?,?,?,?,?,\'draft\',?,?,?,?)''',(title,summary,cover_url,json.dumps([],ensure_ascii=False),markdown,actor_id,actor_id,now,now)).lastrowid
+        aid=db.execute('''INSERT INTO announcements(title,summary,cover_url,blocks,body_markdown,status,created_by,updated_by,created,updated,remind_on_first_visit)
+            VALUES (?,?,?,?,?,\'draft\',?,?,?,?,?)''',(title,summary,cover_url,json.dumps([],ensure_ascii=False),markdown,actor_id,actor_id,now,now,int(remind_on_first_visit))).lastrowid
     else:
         if not db.execute('SELECT 1 FROM announcements WHERE id=?',(aid,)).fetchone(): raise HTTPException(404,'公告不存在')
-        db.execute('UPDATE announcements SET title=?,summary=?,cover_url=?,blocks=?,body_markdown=?,updated_by=?,updated=? WHERE id=?',(*data,aid))
+        db.execute('UPDATE announcements SET title=?,summary=?,cover_url=?,blocks=?,body_markdown=?,updated_by=?,updated=?,remind_on_first_visit=? WHERE id=?',(*data,aid))
     return get_item(db,aid)
+
+
+def dismiss_reminder(db, user_id, aid):
+    row = db.execute("SELECT remind_on_first_visit FROM announcements WHERE id=? AND status='published'", (aid,)).fetchone()
+    if row is None or not row['remind_on_first_visit']:
+        raise HTTPException(404, '公告提醒不存在或已关闭')
+    db.execute('INSERT OR IGNORE INTO announcement_dismissals(user_id,announcement_id,dismissed_at) VALUES (?,?,?)',
+               (user_id, aid, time.time()))
+    return {'ok': True}
 
 
 def set_status(db, aid, actor_id, status):

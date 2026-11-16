@@ -51,7 +51,18 @@ def load_config():
         path = ROOT / 'config.example.toml'
     with path.open('rb') as f:
         config = tomllib.load(f)
+    trends = config.setdefault('trends', {})
+    trends.setdefault('auto_refresh', True)
+    trends.setdefault('refresh_time', '06:00')
+    trends.setdefault('retry_interval_minutes', 15)
+    if type(trends['auto_refresh']) is not bool:
+        raise ValueError('trends.auto_refresh 必须是布尔值')
+    if not isinstance(trends['refresh_time'], str) or not re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d', trends['refresh_time']):
+        raise ValueError('trends.refresh_time 必须使用 HH:MM 格式')
+    if type(trends['retry_interval_minutes']) is not int or not 1 <= trends['retry_interval_minutes'] <= 1440:
+        raise ValueError('trends.retry_interval_minutes 必须在 1 到 1440 之间')
     _email_auth_config(config)
+    _live_config(config)
     judge = config['judge']
     judge.setdefault('cleanup_timeout_seconds', 5)
     for key, default, maximum in [('compile_timeout_seconds', 30, 120),
@@ -144,6 +155,17 @@ def load_config():
         parsed = urlsplit(url) if isinstance(url, str) else None
         if not parsed or parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password:
             raise ValueError(f'{section}.base_url 必须是 HTTP/HTTPS 接口地址')
+    trends = config.setdefault('trends', {})
+    for key, default in {
+        'model': 'qwen3.7-plus', 'request_timeout_seconds': 300,
+        'max_sources': 36, 'source_timeout_seconds': 15,
+    }.items():
+        trends.setdefault(key, default)
+    if not isinstance(trends['model'], str) or not trends['model'].strip():
+        raise ValueError('trends.model 必须是非空字符串')
+    for key, maximum in [('request_timeout_seconds', 300), ('max_sources', 100), ('source_timeout_seconds', 60)]:
+        if type(trends[key]) is not int or not 1 <= trends[key] <= maximum:
+            raise ValueError(f'trends.{key} 必须在 1 到 {maximum} 之间')
     recording = config.setdefault('recording', {})
     for key, default in [('bitrate', 64000), ('checkpoint_seconds', 15),
                          ('finalize_grace_seconds', 120), ('live_chunk_seconds', 5)]:
@@ -211,3 +233,48 @@ def load_config():
     except (ZoneInfoNotFoundError, TypeError, ValueError) as error:
         raise ValueError('training.timezone 必须是有效的 IANA 时区') from error
     return config
+
+
+def _live_config(config):
+    """Validate media deployment settings without reading or exposing credentials."""
+    live = config.setdefault('live', {})
+    defaults = {'url': '', 'api_url': '', 'api_key_env': 'LIVEKIT_API_KEY',
+                'api_secret_env': 'LIVEKIT_API_SECRET', 'credentials_file': '', 'max_participants': 50,
+                'presence_seconds': 60, 'token_seconds': 120, 'material_max_mb': 25,
+                'directory': 'data/live', 'egress_directory': '/out',
+                'recording_enabled': False, 'playback_seconds': 14400, 'like_interval_seconds': 1}
+    defaults.update(screen_share_width=1280, screen_share_height=720,
+                    screen_share_frame_rate=15, screen_share_max_bitrate=1500000)
+    for key, value in defaults.items():
+        live.setdefault(key, value)
+    for key, minimum, maximum in [('screen_share_width', 640, 1920), ('screen_share_height', 360, 1080),
+                                  ('screen_share_frame_rate', 5, 30), ('screen_share_max_bitrate', 300000, 5000000)]:
+        if type(live[key]) is not int or not minimum <= live[key] <= maximum:
+            raise ValueError(f'live.{key} 必须在 {minimum} 到 {maximum} 之间')
+    for key in ('max_participants', 'presence_seconds', 'token_seconds', 'material_max_mb', 'playback_seconds', 'like_interval_seconds'):
+        maximum = {'max_participants': 50, 'material_max_mb': 100, 'token_seconds': 300, 'playback_seconds': 86400}.get(key, 3600)
+        minimum = 15 if key == 'presence_seconds' else 1
+        if type(live[key]) is not int or not minimum <= live[key] <= maximum:
+            raise ValueError(f'live.{key} 必须在 {minimum} 到 {maximum} 之间')
+    for key in ('api_key_env', 'api_secret_env'):
+        if not isinstance(live[key], str) or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', live[key]):
+            raise ValueError(f'live.{key} 必须是环境变量名称')
+    if 'api_key' in live or 'api_secret' in live:
+        raise ValueError('LiveKit 凭据须使用环境变量或受保护的 credentials_file，不允许内联密钥')
+    if not isinstance(live['credentials_file'], str) or '\x00' in live['credentials_file']:
+        raise ValueError('live.credentials_file 必须是文件路径或空字符串')
+    if live['credentials_file']:
+        credentials_path = Path(live['credentials_file'])
+        live['credentials_file'] = str(credentials_path if credentials_path.is_absolute() else ROOT / credentials_path)
+    for key, schemes in [('url', ('ws', 'wss')), ('api_url', ('http', 'https'))]:
+        value = live[key]
+        parsed = urlsplit(value) if isinstance(value, str) else None
+        if not parsed or (value and (parsed.scheme not in schemes or not parsed.hostname or parsed.username or parsed.password)):
+            raise ValueError(f'live.{key} 地址无效')
+    if type(live['recording_enabled']) is not bool:
+        raise ValueError('live.recording_enabled 必须是布尔值')
+    for key in ('directory', 'egress_directory'):
+        if not isinstance(live[key], str) or not live[key]:
+            raise ValueError(f'live.{key} 必须是目录')
+    directory = Path(live['directory'])
+    live['directory'] = str(directory if directory.is_absolute() else ROOT / directory)

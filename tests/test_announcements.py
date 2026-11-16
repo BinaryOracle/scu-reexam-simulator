@@ -7,6 +7,8 @@ def test_default_guidance_announcement_is_seeded_and_visible(client):
     assert response.status_code==200
     notice=next(item for item in response.json() if item['title']=='平台功能与奖励规则说明')
     assert notice['status']=='published'
+    assert notice['remind_on_first_visit'] is False
+    assert notice['reminder_pending'] is False
     assert notice['cover_url']=='/static/assets/announcement-cover.png'
     assert any(block['type']=='link' and 'wzyp.cn/shop/E1GQFV0P' in block['url'] for block in notice['blocks'])
     content=' '.join(block.get('text','') for block in notice['blocks'])
@@ -46,6 +48,28 @@ def test_announcement_drafts_are_hidden_until_published_and_links_are_validated(
     withdrawn=client.post(f"/api/admin/announcements/{item['id']}/status",headers=admin,json={'status':'withdrawn'})
     assert withdrawn.status_code==200
     assert client.get(f"/api/announcements/{item['id']}",headers=alice).status_code==404
+
+
+def test_first_visit_announcement_reminder_is_per_user_and_dismissible(client):
+    admin,alice,bob=login(client,'manager'),login(client,'alice'),login(client,'bob')
+    response=client.post('/api/admin/announcements',headers=admin,json={
+        'title':'首次访问提示','summary':'请阅读','cover_url':'','body_markdown':'提醒内容',
+        'remind_on_first_visit':True})
+    assert response.status_code==201,response.text
+    item=response.json()
+    assert item['remind_on_first_visit'] is True
+    assert client.post(f"/api/admin/announcements/{item['id']}/status",headers=admin,
+                       json={'status':'published'}).status_code==200
+    alice_items=client.get('/api/announcements',headers=alice).json()
+    bob_items=client.get('/api/announcements',headers=bob).json()
+    assert next(row for row in alice_items if row['id']==item['id'])['reminder_pending'] is True
+    assert next(row for row in bob_items if row['id']==item['id'])['reminder_pending'] is True
+    assert client.post(f"/api/announcements/{item['id']}/dismiss-reminder",headers=alice).json()=={'ok':True}
+    assert next(row for row in client.get('/api/announcements',headers=alice).json()
+                if row['id']==item['id'])['reminder_pending'] is False
+    assert next(row for row in client.get('/api/announcements',headers=bob).json()
+                if row['id']==item['id'])['reminder_pending'] is True
+    assert client.post(f"/api/announcements/{item['id']}/dismiss-reminder",headers=alice).json()=={'ok':True}
 
 
 def test_announcement_markdown_renders_format_and_keeps_raw_html_inert(client):

@@ -8,3 +8,4 @@ cryptography>=46,<47
 filelock>=3.16,<4
 markdown-it-py>=4,<5
 mdit-py-plugins>=0.5,<0.6
+livekit-api==1.2.3

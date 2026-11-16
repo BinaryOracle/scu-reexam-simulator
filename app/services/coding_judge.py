@@ -116,6 +116,7 @@ def evaluate(language, source, samples):
     total, passed = len(samples), 0
     filename, compiler, standard = LANGUAGES[language]
     verdicts = []
+    test_results = []
     with tempfile.TemporaryDirectory(prefix='scu-coding-') as tmp:
         root = Path(tmp)
         root.chmod(0o755)
@@ -132,7 +133,7 @@ def evaluate(language, source, samples):
             if reason or code:
                 status = 'System Error' if reason == 'System Error' or code == 125 else 'Compile Error'
                 return {'status': status, 'detail': f'编译未完成，未运行测试用例（共 {total} 个）。\n{reason or stderr or stdout}',
-                        'passed_cases': 0, 'total_cases': total}
+                        'passed_cases': 0, 'total_cases': total, 'cases': []}
         overall = 'Accepted'
         for index, sample in enumerate(samples):
             command = ['/work/main'] if compiler else ['python3', '-I', '-B', '/app/main.py']
@@ -146,7 +147,9 @@ def evaluate(language, source, samples):
             elif overall == 'Accepted':
                 overall = status
             verdicts.append(f'样例 #{index+1}：{status}' + (f'\n{stderr[:2000]}' if stderr else ''))
+            test_results.append({'input': sample['input'], 'expected_output': sample['output'],
+                                 'actual_output': stdout[:cfg['output_limit_bytes']], 'status': status})
             if status == 'System Error':
                 break
         return {'status': overall, 'detail': f'通过公开样例数：{passed} / {total}\n' + '\n'.join(verdicts),
-                'passed_cases': passed, 'total_cases': total}
+                'passed_cases': passed, 'total_cases': total, 'cases': test_results}

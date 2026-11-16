@@ -1,3 +1,4 @@
+import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261116-frames-v1";
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import {
@@ -8,7 +9,7 @@ import {
   hasUnsavedWork,
   pauseInterviewAudio,
   clearInterviewState,
-} from "./interview.js?v=20261116-ui-audit-v2";
+} from "./interview.js?v=20261116-interview-search-v1";
 import {
   refreshContests,
   refreshSubmissions,
@@ -18,7 +19,7 @@ import {
   setupContestCreation,
   requestLuoguSubmit,
 } from "./contest.js?v=20261116-ui-audit-v2";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261115-access-layout-v5";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261116-model-settings-v1";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261116-ui-audit-v2";
 import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
 
@@ -26,17 +27,20 @@ import { refreshTraining, clearTraining, selectTrainingSection } from "./trainin
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-empty-state-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
-import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261116-home-loading-v1";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome, showPendingAnnouncementReminder } from "./home.js?v=20261116-announcement-reminders-v1";
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
-import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261115-coding-judge-status-v4";
+import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261116-discussion-tabs-v1";
 import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261115-coding-v1";
+import { refreshTrends } from "./trends.js?v=20261116-trends-admin-v1";
 
 configureCodingBridge(requestLuoguSubmit);
 
 const views = {
+  live: { label: "直播课堂", refresh: refreshLive },
   home: { label: "备考首页", refresh: refreshHome },
+  trends: { label: "热点趋势", refresh: refreshTrends },
   announcementsAdmin: { label: "公告管理", refresh: refreshAnnouncementsAdmin },
   homeLayoutAdmin: { label: "首页编排", refresh: refreshHomeLayoutAdmin },
   coding: { label: "算法带刷", refresh: refreshCoding },
@@ -46,7 +50,7 @@ const views = {
   users: { label: "用户管理", refresh: refreshUsers },
   questionBank: { label: "面试题库", refresh: refreshQuestionBank },
   vouchers: { label: "卡密与次数", refresh: refreshVouchers },
-  systemSettings: { label: "系统设置", refresh: refreshLuoguSettings },
+  systemSettings: { label: "系统设置", refresh: async () => { await Promise.all([refreshLuoguSettings(), refreshModelSettings()]); } },
   profile: { label: "个人主页", refresh: refreshProfile },
   interview: {
     label: state.adminMode ? "面试记录" : "模拟面试",
@@ -137,9 +141,9 @@ function syncSidebarToggle() {
 function allowedViews() {
   if (state.adminMode)
     return state.user.is_admin
-      ? ["users", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "homeLayoutAdmin", "vouchers", "systemSettings", "interview", "contest", "profile"]
+      ? ["live", "users", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "homeLayoutAdmin", "vouchers", "systemSettings", "trends", "interview", "contest", "profile"]
       : ["adminDenied"];
-  const views = ["home", "training", "coding", "profile"];
+  const views = ["home", "training", "trends", "coding", "live", "profile"];
   if (state.user.can_interview) views.push("interview");
   if (state.user.can_exam) views.push("contest", "submissions");
   return views;
@@ -163,6 +167,7 @@ function configureAccess() {
 async function show(view, force = false, { historyMode = "push" } = {}) {
   if (state.adminMode && view === "submissions") view = "contest";
   if (!force && !allowNavigation()) return;
+  if (view !== "live" && liveActive() && !await allowLiveNavigation()) return;
   if (view !== "contest") suspendContestWorkspace();
   clearVisiblePasswords();
   clearProfilePassword();
@@ -178,6 +183,7 @@ async function show(view, force = false, { historyMode = "push" } = {}) {
   document.body.classList.remove("interview-shell-open");
   syncSidebarToggle();
   if (selected !== currentView) { pauseInterviewAudio(); clearTraining(); clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); }
+  if (selected !== "live") clearLive();
   currentView = selected;
   for (const [key, value] of Object.entries(views)) {
     $(key).hidden = key !== selected;
@@ -199,7 +205,7 @@ async function enterWorkspace() {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin(); clearCoding(); clearCodingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); clearLive();
   $("login").hidden = true;
   $("app").hidden = false;
   $("today").textContent = new Date().toLocaleDateString("zh-CN", {
@@ -212,6 +218,7 @@ async function enterWorkspace() {
   const fallback = state.adminMode ? "users" : "home";
   const route = readAppRoute(location.hash, Object.keys(views), fallback);
   await show(route, false, { historyMode: "replace" });
+  if (!state.adminMode) void showPendingAnnouncementReminder();
   document.documentElement.classList.remove("session-restoring");
 }
 function configureShell() {
@@ -376,6 +383,7 @@ $("togglePassword").addEventListener("click", () => {
 });
 async function logout() {
   if (!allowNavigation()) return;
+  if (!await allowLiveNavigation()) return;
   if (hasUnsavedWork() && !await confirmAction("有尚未保存的面试内容或已选择的 PPT，退出后需要重新准备。", { title: "退出登录？", confirmText: "退出登录" })) return;
   await api("/logout", { method: "POST" });
   clearProfilePassword();
@@ -383,7 +391,7 @@ async function logout() {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin(); clearCoding(); clearCodingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); clearLive();
   sessionStorage.removeItem("token");
   state.token = null;
   location.reload();
@@ -430,14 +438,14 @@ window.addEventListener("session-expired", () => {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin(); clearCoding(); clearCodingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); clearLive();
   for (const dialog of document.querySelectorAll("dialog[open]"))
     dialog.close();
   $("app").hidden = true;
   $("login").hidden = false;
   document.title = "登录 · 知序";
   $("emailCodeStatus").hidden = true;
-  $("loginError").textContent = "登录已过期或账号已停用，请重新登录。";
+  $("loginError").textContent = "登录状态已失效；同一账号仅允许一处登录，请重新登录。";
   $("loginError").hidden = false;
 });
 window.addEventListener("account-session-ended", event => {
@@ -464,7 +472,7 @@ window.addEventListener("account-session-ended", event => {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin(); clearCoding(); clearCodingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); clearLive();
   for (const dialog of document.querySelectorAll("dialog[open]")) dialog.close();
   currentView = null;
   $("app").hidden = true;

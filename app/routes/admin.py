@@ -8,11 +8,14 @@ from urllib.parse import urlsplit
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
+from app.config import load_config
 from app.db import allocate_user_id, connect
 from app.services.auth import PUBLIC_USER_FIELDS, administrator, public_user, managed_user, reviewable_interview
 from app.services.interviews import details, summary
 from app.services.security import hash_password
 from app.services.password_vault import decrypt_password, encrypt_password
+from app.services.password_vault import PasswordVaultError
+from app.services import model_settings
 from app.services import credits
 from app.services.account_deletion import delete_account, remove_account_files
 from app.services.problem_content import public_problem
@@ -127,6 +130,49 @@ class LuoguSettings(BaseModel):
         return f'{parsed.scheme}://{netloc}'
 
 
+class ModelServiceUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    base_url: str | None = Field(default=None, max_length=500)
+    model: str | None = Field(default=None, max_length=200)
+    api_key: str | None = None
+    clear_api_key: StrictBool = False
+    provider: Literal['dashscope', 'openai'] | None = None
+    protocol: Literal['dashscope_audio', 'dashscope_native'] | None = None
+    voice: str | None = Field(default=None, max_length=120)
+
+    @field_validator('base_url')
+    @classmethod
+    def validate_base_url(cls, value):
+        if value is None:
+            return value
+        parsed = urlsplit(value.strip())
+        try:
+            parsed.port
+        except ValueError as error:
+            raise ValueError('请输入有效的模型服务地址') from error
+        if (parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password
+                or parsed.query or parsed.fragment or any(ord(char) < 32 for char in value)):
+            raise ValueError('模型服务地址必须是有效的 HTTP/HTTPS 地址，不含账号、参数或片段')
+        return value.strip().rstrip('/')
+
+    @field_validator('model', 'voice')
+    @classmethod
+    def validate_name(cls, value):
+        if value is None:
+            return value
+        value = value.strip()
+        if not value or any(ord(char) < 32 for char in value):
+            raise ValueError('模型名称和音色不能为空，且不能包含控制字符')
+        return value
+
+class ModelSettingsUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    interview: ModelServiceUpdate | None = None
+    asr: ModelServiceUpdate | None = None
+    tts: ModelServiceUpdate | None = None
+    trends: ModelServiceUpdate | None = None
+
+
 def find_user(db, uid):
     row = db.execute(f'SELECT {PUBLIC_USER_FIELDS} FROM users WHERE id=?', (uid,)).fetchone()
     if row is None:
@@ -146,6 +192,44 @@ def update_luogu_settings(payload: LuoguSettings):
     with connect() as db:
         db.execute("UPDATE app_settings SET value=? WHERE key='luogu_app_origin'", (payload.app_origin,))
     return {'app_origin': payload.app_origin}
+
+
+@router.get('/model-settings')
+def get_model_settings():
+    config = load_config()
+    with connect() as db:
+        overrides = model_settings.read(db)
+    try:
+        return model_settings.public_settings(config, overrides)
+    except PasswordVaultError as error:
+        raise HTTPException(503, '密钥加密服务不可用，请管理员检查密钥文件') from error
+
+
+@router.patch('/model-settings')
+def update_model_settings(payload: ModelSettingsUpdate):
+    changes = payload.model_dump(exclude_unset=True)
+    allowed = {
+        'interview': {'base_url', 'model', 'api_key', 'clear_api_key'},
+        'asr': {'base_url', 'model', 'api_key', 'clear_api_key'},
+        'tts': {'base_url', 'model', 'api_key', 'clear_api_key', 'provider', 'protocol', 'voice'},
+        'trends': {'base_url', 'model', 'api_key', 'clear_api_key'},
+    }
+    for service, fields in changes.items():
+        unsupported = set(fields) - allowed[service]
+        if unsupported:
+            raise HTTPException(422, f'{service} 不支持配置字段：{", ".join(sorted(unsupported))}')
+        api_key = fields.get('api_key')
+        if api_key is not None and (len(api_key) > 4096 or any(char in api_key for char in ('\r', '\n', '\x00'))):
+            raise HTTPException(422, f'{service} API Key 格式无效')
+        if fields.get('clear_api_key') and api_key:
+            raise HTTPException(422, f'{service} 不能同时设置和清除 API Key')
+    config = load_config()
+    try:
+        with connect() as db:
+            overrides = model_settings.apply_update(db, model_settings.read(db), changes)
+    except PasswordVaultError as error:
+        raise HTTPException(503, '密钥加密服务不可用，请管理员检查密钥文件') from error
+    return model_settings.public_settings(config, overrides)
 
 
 @router.get('/users')

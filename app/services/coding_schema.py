@@ -41,6 +41,19 @@ def initialize_coding(db):
             question_id INTEGER NOT NULL REFERENCES coding_questions(id) ON DELETE CASCADE,
             created REAL NOT NULL,PRIMARY KEY(user_id,question_id))''',
         'CREATE INDEX IF NOT EXISTS coding_favorites_by_question ON coding_favorites(question_id,user_id)',
+        '''CREATE TABLE IF NOT EXISTS coding_comments(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            question_id INTEGER NOT NULL REFERENCES coding_questions(id) ON DELETE CASCADE,
+            parent_id INTEGER REFERENCES coding_comments(id) ON DELETE CASCADE,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            body TEXT NOT NULL,pinned INTEGER NOT NULL DEFAULT 0 CHECK(pinned IN (0,1)),
+            created REAL NOT NULL,updated REAL NOT NULL)''',
+        'CREATE INDEX IF NOT EXISTS coding_comments_question ON coding_comments(question_id,pinned,created)',
+        '''CREATE TABLE IF NOT EXISTS coding_comment_likes(
+            comment_id INTEGER NOT NULL REFERENCES coding_comments(id) ON DELETE CASCADE,
+            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            created REAL NOT NULL,PRIMARY KEY(comment_id,user_id))''',
+        'CREATE INDEX IF NOT EXISTS coding_comment_likes_by_user ON coding_comment_likes(user_id,comment_id)',
         "CREATE UNIQUE INDEX IF NOT EXISTS coding_remote_submission ON coding_submissions(remote_submission_id) WHERE remote_submission_id<>''",
         'CREATE INDEX IF NOT EXISTS coding_submissions_progress ON coding_submissions(user_id,question_id,status,completed_date)',
         '''CREATE TABLE IF NOT EXISTS coding_daily(

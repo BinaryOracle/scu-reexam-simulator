@@ -1,12 +1,23 @@
 """Authentication always re-reads account status and administrator roles from storage."""
+import secrets
 import time
 from typing import Annotated
 from fastapi import Depends, Header, HTTPException
+from app.config import load_config
 from app.db import connect
 from app.services.credits import ADMIN_CREDITS
 
 PUBLIC_USER_FIELDS = 'id,username,email,is_admin,is_superadmin,is_active,interview_credits,can_interview,can_exam,can_practice,can_training,can_coding'
 FLAGS = ('is_admin', 'is_superadmin', 'is_active')
+
+
+def issue_session(db, user_id):
+    """Replace an account's active bearer token and return the new token."""
+    token = secrets.token_urlsafe(32)
+    expires = time.time() + load_config()['app']['session_hours'] * 3600
+    db.execute('DELETE FROM sessions WHERE user_id=?', (user_id,))
+    db.execute('INSERT INTO sessions VALUES (?,?,?)', (token, user_id, expires))
+    return token
 
 
 def public_user(row, *, admin_view=False):
@@ -32,7 +43,7 @@ def current_user(authorization: Annotated[str | None, Header()] = None):
         row = db.execute('''SELECT users.* FROM sessions JOIN users ON users.id=sessions.user_id
             WHERE token=? AND expires>? AND users.is_active=1''', (authorization[7:], time.time())).fetchone()
     if row is None:
-        raise HTTPException(401, '登录已过期或账号已停用，请重新登录')
+        raise HTTPException(401, '登录状态已失效；同一账号仅允许一处登录，请重新登录')
     return public_user(row)
 
 

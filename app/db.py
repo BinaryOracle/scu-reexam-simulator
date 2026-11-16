@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 31
+SCHEMA_VERSION = 34
 
 
 @contextmanager
@@ -267,4 +267,8 @@ def initialize():
         initialize_coding(db)
         from .services.home_layout import initialize as initialize_home_layout
         initialize_home_layout(db)
+        from .services.live_schema import initialize_live
+        initialize_live(db)
+        from .services.trends import initialize as initialize_trends
+        initialize_trends(db)
         db.execute(f'PRAGMA user_version={SCHEMA_VERSION}')

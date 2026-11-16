@@ -6,7 +6,7 @@ import pytest
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    config = Path('config.example.toml').read_text().replace('data/app.db', str(tmp_path / 'test.db')).replace('data/audio', str(tmp_path / 'audio')).replace('data/presentations', str(tmp_path / 'presentations'))
+    config = Path('config.example.toml').read_text().replace('data/app.db', str(tmp_path / 'test.db')).replace('data/audio', str(tmp_path / 'audio')).replace('data/presentations', str(tmp_path / 'presentations')).replace('data/live', str(tmp_path / 'live')).replace('auto_refresh = true', 'auto_refresh = false')
     (tmp_path / 'config.toml').write_text(config)
     monkeypatch.setenv('SCU_CONFIG', str(tmp_path / 'config.toml'))
     from app.db import initialize, connect
@@ -27,6 +27,14 @@ def login(c, name):
     r=c.post('/api/login', json={'username':name,'password':'password123'})
     assert r.status_code == 200
     return {'Authorization':'Bearer '+r.json()['token']}
+
+def test_new_login_replaces_the_previous_account_session(client):
+    first = login(client, 'alice')
+    second = login(client, 'alice')
+
+    assert client.get('/api/me', headers=first).status_code == 401
+    assert client.get('/api/me', headers=second).status_code == 200
+    assert client.get('/api/me', headers=login(client, 'bob')).status_code == 200
 
 def test_interview_permissions_and_ai(client, monkeypatch):
     from app.services import ai

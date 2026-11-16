@@ -143,7 +143,7 @@ function renderHome() {
   const topicSelect = select("知识点筛选", [["", "全部知识点"]], topic, value => { topic = value; void refreshList(); }); topicSelect.id = "codingTopic";
   toolbar.append(topicSelect, select("重要性筛选", [[0,"全部星级"],[3,"三星及以上"],[4,"四星及以上"],[5,"五星重点"]], stars, value => { stars = value; void refreshList(); }), select("题目排序", [["stage","阶段顺序"],["difficulty","由易到难"],["stars","重要性优先"]], order, value => { order = value; void refreshList(); }));
   const list = el("div", "", "coding-question-list panel"); list.id = "codingQuestions";
-  const pagination = el("div", "", "pagination"); pagination.id = "codingPagination";
+  const pagination = el("div", "", "list-pagination coding-pagination"); pagination.id = "codingPagination";
   root.append(toolbar, list, pagination);
 }
 async function loadQuestions(request, userId) {
@@ -256,8 +256,30 @@ function renderWorkspace(question, request, userId) {
   const statement = el("article", "", "panel problem-statement"); const statementHead = el("div", "", "workspace-panel-heading statement-panel-heading"); const statementControl = paneControl();
   const closeStatement = closePaneControl("题面"); closeControls.statement = closeStatement;
   const statementActions = el("div", "", "workspace-pane-actions"); statementActions.append(statementControl, closeStatement);
-  statementHead.append(el("span", "题目描述", "workspace-panel-label"), statementActions);
+  statementHead.append(el("span", "题目", "workspace-panel-label"), statementActions);
+  const statementTabs = el("div", "", "coding-statement-tabs"); statementTabs.setAttribute("role", "tablist"); statementTabs.setAttribute("aria-label", "题目内容");
+  const statementTab = button("题目描述", () => selectStatementView("statement"), "coding-statement-tab selected");
+  const discussionTab = button("讨论", () => selectStatementView("discussion"), "coding-statement-tab");
+  statementTab.id = `statement-tab-${question.id}`; discussionTab.id = `discussion-tab-${question.id}`;
+  statementTab.setAttribute("role", "tab"); discussionTab.setAttribute("role", "tab");
+  statementTab.setAttribute("aria-selected", "true"); discussionTab.setAttribute("aria-selected", "false"); discussionTab.tabIndex = -1;
+  const selectStatementView = view => {
+    const showingDiscussion = view === "discussion";
+    content.hidden = showingDiscussion; discussion.hidden = !showingDiscussion;
+    statementTab.classList.toggle("selected", !showingDiscussion); discussionTab.classList.toggle("selected", showingDiscussion);
+    statementTab.setAttribute("aria-selected", String(!showingDiscussion)); discussionTab.setAttribute("aria-selected", String(showingDiscussion));
+    statementTab.tabIndex = showingDiscussion ? -1 : 0; discussionTab.tabIndex = showingDiscussion ? 0 : -1;
+  };
+  for (const tab of [statementTab, discussionTab]) tab.addEventListener("keydown", event => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const target = event.key === "Home" || event.key === "ArrowLeft" ? statementTab : discussionTab;
+    selectStatementView(target === statementTab ? "statement" : "discussion"); target.focus();
+  });
+  statementTab.setAttribute("aria-controls", `statement-content-${question.id}`); discussionTab.setAttribute("aria-controls", `discussion-content-${question.id}`);
+  statementTabs.append(statementTab, discussionTab);
   const content = el("div", "", "workspace-statement-content");
+  content.id = `statement-content-${question.id}`; content.setAttribute("role", "tabpanel"); content.setAttribute("aria-labelledby", statementTab.id);
   content.append(el("p", [question.topic, `难度 ${question.difficulty}/5`, "★".repeat(question.stars)].filter(Boolean).join(" · "), "coding-statement-meta"));
   if (question.statement_html) appendProblemStatement(content, question.statement_html); else content.append(el("pre", question.statement, "coding-statement-text"));
   if (/^https?:\/\//i.test(question.source_url || "")) { const link = el("a", "查看原题与来源 ↗", "text-button"); link.href = question.source_url; link.target = "_blank"; link.rel = "noopener noreferrer"; content.append(link); }
@@ -281,17 +303,21 @@ function renderWorkspace(question, request, userId) {
       reference.append(el("p", sourceInfo?.reference_note || "来源参考代码可能是算法片段；提交评测前请补齐输入输出和完整程序。", "muted"), el("pre", question.reference_code));
     }); content.append(reference);
   }
-  statement.append(statementHead, content);
+  const discussion = renderDiscussion(question, request, userId);
+  discussion.id = `discussion-content-${question.id}`; discussion.hidden = true; discussion.setAttribute("role", "tabpanel"); discussion.setAttribute("aria-labelledby", discussionTab.id);
+  statement.append(statementHead, statementTabs, content, discussion);
   const stack = el("div", "", "editor-stack");
   const editor = el("section", "", "panel editor-panel"); const editorHead = el("div", "", "editor-heading");
   const language = select("编程语言", languages, "cpp11", () => {}); language.className = "language-select"; const editorControl = paneControl();
   const closeEditor = closePaneControl("代码区"); closeControls.editor = closeEditor;
   const reset = button("恢复布局", () => {}, "workspace-layout-reset"); reset.title = "恢复默认分栏比例";
-  const judgeBadge = badge(question.judge_mode === "luogu" ? "洛谷评测" : "公开样例", "blue");
-  judgeBadge.title = question.judge_mode === "luogu" ? "不限时练习 · 通过浏览器插件提交至洛谷" : "不限时练习 · 只校验公开样例，通过不代表通过完整隐藏测试";
+  const judgeBadge = badge(question.judge_mode === "luogu" ? "洛谷评测" : "本地运行", "blue");
+  judgeBadge.title = question.judge_mode === "luogu" ? "不限时练习 · 运行使用自定义用例，提交通过浏览器插件发送至洛谷" : "不限时练习 · 使用本地测试用例运行，不提供远程提交";
   editorHead.append(el("h4", "代码工作区"));
-  if (question.judge_mode === "samples" && !home.judge.available) {
-    const judgeWarning = el("span", "本站公开样例评测暂不可用，请稍后再试或联系管理员。", "coding-form-error");
+  if (!home.judge.available) {
+    const judgeWarning = el("span", question.judge_mode === "luogu"
+      ? "本地运行暂不可用，仍可通过插件提交至洛谷。"
+      : "本地运行暂不可用，请稍后再试或联系管理员。", "coding-form-error");
     judgeWarning.title = judgeWarning.textContent;
     editorHead.append(judgeWarning);
   }
@@ -311,9 +337,26 @@ function renderWorkspace(question, request, userId) {
     if (event.key === "Tab" && !event.shiftKey) { event.preventDefault(); input.setRangeText("    ", input.selectionStart, input.selectionEnd, "end"); input.dispatchEvent(new Event("input")); }
   });
   language.addEventListener("change", () => { save(previous); previous = language.value; input.value = drafts.read(codingDraftKey(userId, question.id, previous)); update(); }); update(); area.append(numbers, input);
-  const footer = el("div", "", "editor-footer"); const result = el("div", "", "submission-result"); result.setAttribute("role", "status"); result.setAttribute("aria-live", "polite");
+  const footer = el("div", "", "editor-footer");
+  const result = el("div", "", "submission-result"); result.setAttribute("role", "status"); result.setAttribute("aria-live", "polite");
+  const run = button("运行测试用例", async () => {
+    if (!input.value.trim()) { runResult.replaceChildren(el("span", "请先输入代码，再运行。", "coding-form-error")); activateResults(); return; }
+    if (!testCases.length) testCases.push({ input: "", output: "" });
+    runResult.replaceChildren(el("span", `正在运行 ${testCases.length} 个测试用例…`, "muted")); activateResults();
+    try {
+      const evaluated = await api(`/coding/questions/${question.id}/run`, { method: "POST", body: JSON.stringify({
+        language: language.value, source: input.value, cases: testCases.map(({ input: testInput, output }) => ({ input: testInput, output }))
+      }) });
+      if (!active(request, userId)) return;
+      renderRunResult(runResult, evaluated);
+    } catch (error) {
+      if (active(request, userId)) runResult.replaceChildren(el("span", error.message, "coding-form-error"));
+    }
+  }, "button secondary coding-run-button");
+  const runResult = el("div", "", "submission-result coding-run-result"); runResult.setAttribute("role", "status"); runResult.setAttribute("aria-live", "polite");
+  let activateResults = () => {};
   let activateRecords = () => {};
-  const submit = button(question.judge_mode === "luogu" ? "提交洛谷评测 →" : "运行公开样例 →", async () => {
+  const submit = button("提交洛谷评测 →", async () => {
     activateRecords();
     if (!input.value.trim()) { result.replaceChildren(el("span", "请先输入代码，再提交评测。", "coding-form-error")); return; }
     const source = input.value; const lang = language.value; result.replaceChildren(el("span", "正在评测…", "muted"));
@@ -357,33 +400,80 @@ function renderWorkspace(question, request, userId) {
       }
     }
   }, "button primary");
-  if (question.judge_mode === "samples" && !home.judge.available) submit.disabled = true;
+  submit.disabled = question.judge_mode !== "luogu";
+  if (submit.disabled) { submit.title = "该题未关联支持的远程评测平台，暂不能提交"; submit.setAttribute("aria-label", "提交不可用：该题没有外部评测来源"); }
+  if (!home.judge.available) run.disabled = true;
   const submitTools = el("div", "", "coding-submit-tools"); submitTools.append(judgeBadge);
   if (question.judge_mode === "luogu") submitTools.append(button("插件教程", () => $("luoguTutorial")?.showModal(), "text-button coding-tutorial-button"));
-  footer.append(submitTools, saved, submit); editor.append(editorHead, area, footer);
+  footer.append(submitTools, saved, run, submit); editor.append(editorHead, area, footer);
   const panels = el("section", "", "editor-bottom-panel"); const tabs = el("div", "", "workspace-panel-heading auxiliary-panel-heading"); const tabsInner = el("div", "", "editor-bottom-tabs"); const panelControl = paneControl();
-  const samples = el("div", "", "editor-bottom-content");
-  for (const [index, sample] of (question.samples || []).entries()) {
-    const block = el("div", "", "sample-block"); block.append(el("h4", `公开样例 ${index + 1}`, "sample-heading")); const pair = el("div", "", "sample-pair");
-    for (const [name, value] of [["输入", sample.input], ["期望输出", sample.output]]) { const part = el("div", "", "sample-value"); part.append(el("div", name, "sample-value-heading"), el("pre", value)); pair.append(part); } block.append(pair); samples.append(block);
-  }
-  if (!question.samples?.length) samples.append(el("p", "此题未提供公开样例。", "muted"));
+  const casePanel = el("div", "", "editor-bottom-content coding-test-case-panel");
+  const caseKey = `scu:${userId}:coding-cases:${question.id}`;
+  let testCases;
+  const defaultCases = (question.samples || []).map(sample => ({ input: sample.input || "", output: sample.output || "" }));
+  try {
+    const storedCases = JSON.parse(window.localStorage.getItem(caseKey) || "null");
+    testCases = Array.isArray(storedCases)
+      ? storedCases.slice(0, 50).map(item => ({ input: typeof item?.input === "string" ? item.input.slice(0, 100000) : "", output: typeof item?.output === "string" ? item.output.slice(0, 100000) : "" }))
+      : defaultCases;
+  } catch { testCases = defaultCases; }
+  if (!testCases.length) testCases = [{ input: "", output: "" }];
+  let selectedCase = 0;
+  const caseTabs = el("div", "", "coding-test-case-tabs");
+  const caseFields = el("div", "", "coding-test-case-fields");
+  const saveCases = () => { try { window.localStorage.setItem(caseKey, JSON.stringify(testCases)); } catch { /* Keep edits in the current page if browser storage is unavailable. */ } };
+  const renderCaseEditor = () => {
+    selectedCase = Math.min(selectedCase, testCases.length - 1);
+    caseTabs.replaceChildren();
+    testCases.forEach((_, index) => {
+      const tabItem = el("div", "", `coding-test-case-item${index === selectedCase ? " selected" : ""}`);
+      const tab = button(`Case ${index + 1}`, () => { selectedCase = index; renderCaseEditor(); }, `coding-test-case-tab${index === selectedCase ? " selected" : ""}`);
+      tab.setAttribute("aria-pressed", String(index === selectedCase)); tabItem.append(tab);
+      if (testCases.length > 1) {
+        const remove = button("×", () => {
+          testCases.splice(index, 1);
+          if (index < selectedCase) selectedCase--;
+          else if (index === selectedCase) selectedCase = Math.max(0, index - 1);
+          saveCases(); renderCaseEditor();
+        }, "coding-test-case-remove");
+        remove.title = `删除测试用例 ${index + 1}`; remove.setAttribute("aria-label", `删除测试用例 ${index + 1}`); tabItem.append(remove);
+      }
+      caseTabs.append(tabItem);
+    });
+    const addCase = button("+", () => { testCases.push({ input: "", output: "" }); selectedCase = testCases.length - 1; saveCases(); renderCaseEditor(); }, "coding-test-case-add");
+    addCase.disabled = testCases.length >= 50;
+    addCase.title = "添加测试用例"; addCase.setAttribute("aria-label", "添加测试用例"); caseTabs.append(addCase);
+    const current = testCases[selectedCase];
+    const inputField = el("textarea", current.input, "coding-test-case-value mono"); inputField.maxLength = 100000; inputField.setAttribute("aria-label", `测试用例 ${selectedCase + 1} 输入`); inputField.placeholder = "输入测试数据";
+    const outputField = el("textarea", current.output, "coding-test-case-value mono"); outputField.maxLength = 100000; outputField.setAttribute("aria-label", `测试用例 ${selectedCase + 1} 期望输出`); outputField.placeholder = "输入期望输出";
+    inputField.addEventListener("input", () => { current.input = inputField.value; saveCases(); });
+    outputField.addEventListener("input", () => { current.output = outputField.value; saveCases(); });
+    const inputGroup = el("label", "", "coding-test-case-group"); inputGroup.append(el("span", "输入", "coding-test-case-label"), inputField);
+    const outputGroup = el("label", "", "coding-test-case-group"); outputGroup.append(el("span", "期望输出", "coding-test-case-label"), outputField);
+    caseFields.replaceChildren(inputGroup, outputGroup);
+  };
+  renderCaseEditor(); casePanel.append(caseTabs, caseFields);
+  const results = el("div", "", "editor-bottom-content coding-test-results"); results.hidden = true; results.append(runResult);
   const records = el("div", "", "editor-bottom-content coding-submission-panel"); records.hidden = true; records.append(result);
   const recordList = el("div", "", "coding-record-list"); records.append(recordList); recordTarget = recordList;
   const tabButtons = [];
-  for (const [label, pane] of [["公开样例", samples], ["提交记录", records]]) {
-    const control = button(label, () => { samples.hidden = pane !== samples; records.hidden = pane !== records; tabButtons.forEach(([button, target]) => { button.classList.toggle("selected", pane === target); button.setAttribute("aria-pressed", String(pane === target)); }); }, `editor-bottom-tab${pane === samples ? " selected" : ""}`);
-    control.setAttribute("aria-pressed", String(pane === samples)); tabButtons.push([control,pane]); tabsInner.append(control);
+  const selectBottomPanel = pane => {
+    casePanel.hidden = pane !== casePanel; results.hidden = pane !== results; records.hidden = pane !== records;
+    tabButtons.forEach(([control, target]) => { control.classList.toggle("selected", pane === target); control.setAttribute("aria-pressed", String(pane === target)); });
+  };
+  for (const [label, pane] of [["测试用例", casePanel], ["运行结果", results], ["提交记录", records]]) {
+    const control = button(label, () => selectBottomPanel(pane), `editor-bottom-tab${pane === casePanel ? " selected" : ""}`);
+    control.setAttribute("aria-pressed", String(pane === casePanel)); tabButtons.push([control,pane]); tabsInner.append(control);
   }
+  activateResults = () => { selectBottomPanel(results); if (layoutStore.read().collapsed.panels) restoreControls.panels.click(); };
   const layoutStore = createLayoutStore((() => { try { return window.localStorage; } catch { return undefined; } })(), `scu:${userId}:coding-layout:v1`);
   activateRecords = () => {
-    samples.hidden = true; records.hidden = false;
-    tabButtons.forEach(([tab, target]) => { tab.classList.toggle("selected", target === records); tab.setAttribute("aria-pressed", String(target === records)); });
+    selectBottomPanel(records);
     if (layoutStore.read().collapsed.panels) restoreControls.panels.click();
   };
   const closePanels = closePaneControl("样例与提交记录"); closeControls.panels = closePanels;
   const panelActions = el("div", "", "workspace-pane-actions"); panelActions.append(panelControl, closePanels);
-  tabs.append(tabsInner, panelActions); panels.append(tabs, samples, records);
+  tabs.append(tabsInner, panelActions); panels.append(tabs, casePanel, results, records);
   const horizontal = splitter("problem-splitter", "调整题面和代码区宽度", "vertical"); const vertical = splitter("editor-splitter", "调整代码与样例区高度", "horizontal");
   stack.append(editor, vertical, panels); columns.append(statement, horizontal, stack);
   const mobile = el("div", "", "workspace-pane-switcher");
@@ -392,14 +482,115 @@ function renderWorkspace(question, request, userId) {
     tab.dataset.pane = name; mobile.append(tab);
   }
   mobile.children[0].setAttribute("aria-pressed", "true"); mobile.children[0].classList.add("selected"); mobile.children[1].setAttribute("aria-pressed", "false");
-  workspace.append(navigation, mobile, restoreBar, columns); root.replaceChildren(workspace);
+  workspace.append(navigation, mobile, restoreBar, columns);
+  root.replaceChildren(workspace);
   disposeLayout = mountWorkspaceLayout({ columns, stack, horizontal, vertical, controls: { statement: statementControl, editor: editorControl, panels: panelControl }, closeControls, regions: { statement, editor, panels }, restoreControls, expandAll, reset, paneSwitcher: mobile, store: layoutStore });
   void loadRecords(question.id, request, userId);
+}
+function renderDiscussion(question, request, userId) {
+  const section = el("section", "", "coding-discussion coding-statement-discussion");
+  const heading = el("div", "", "coding-discussion-heading");
+  const title = el("div", "", "coding-discussion-title"); title.append(el("h2", "讨论区"), el("span", "", "coding-discussion-count"));
+  let sortMode = "hot";
+  const sort = el("div", "", "coding-comment-sort"); sort.setAttribute("role", "group"); sort.setAttribute("aria-label", "评论排序");
+  for (const [value, label] of [["hot", "最热"], ["new", "最新发布"]]) {
+    const control = button(label, () => { sortMode = value; for (const item of sort.children) { const selected = item === control; item.classList.toggle("selected", selected); item.setAttribute("aria-pressed", String(selected)); } void load(); }, `coding-comment-sort-option${value === sortMode ? " selected" : ""}`);
+    control.setAttribute("aria-pressed", String(value === sortMode)); sort.append(control);
+  }
+  heading.append(title, sort);
+  const composer = el("div", "", "coding-comment-composer");
+  const form = el("form", "", "coding-comment-form");
+  const input = el("textarea", "", "coding-comment-input"); input.maxLength = 10000; input.placeholder = "分享解题思路、补充说明或提出疑问…"; input.setAttribute("aria-label", "写评论");
+  const post = button("发布评论", () => {}, "button primary"); post.type = "submit";
+  const composerFooter = el("div", "", "coding-comment-composer-footer"); composerFooter.append(el("span", "文明讨论，共同进步", "muted"), post);
+  form.append(input, composerFooter); composer.append(form);
+  const list = el("div", "", "coding-comment-list");
+  section.append(heading, composer, list);
+
+  async function load() {
+    try {
+      const result = await api(`/coding/questions/${question.id}/comments?sort=${sortMode}`);
+      if (!active(request, userId)) return;
+      const items = result.items || []; title.querySelector(".coding-discussion-count").textContent = `${items.length} 条评论`;
+      const children = new Map();
+      for (const item of items) {
+        const key = item.parent_id || 0; if (!children.has(key)) children.set(key, []); children.get(key).push(item);
+      }
+      const renderItems = (parentId, depth = 0) => {
+        const fragment = document.createDocumentFragment();
+        for (const comment of children.get(parentId) || []) {
+          const card = el("article", "", `coding-comment${depth ? " coding-comment-reply" : ""}${comment.pinned ? " is-pinned" : ""}`);
+          const meta = el("div", "", "coding-comment-meta");
+          const avatar = el("span", comment.username.slice(0, 1).toUpperCase(), "coding-comment-avatar"); avatar.setAttribute("aria-hidden", "true");
+          meta.append(avatar, el("strong", comment.username), el("time", new Date(comment.created * 1000).toLocaleString("zh-CN", { dateStyle: "medium", timeStyle: "short" })));
+          if (comment.pinned) meta.append(badge("置顶", "gold"));
+          const body = el("p", comment.body, "coding-comment-body");
+          const actions = el("div", "", "coding-comment-actions");
+          const like = button(`${comment.liked ? "♥" : "♡"} ${comment.like_count}`, async () => {
+            await api(`/coding/comments/${comment.id}/like`, { method: comment.liked ? "DELETE" : "PUT" }); await load();
+          }, `coding-comment-like${comment.liked ? " liked" : ""}`);
+          const reply = button("回复", () => {
+            if (card.querySelector(".coding-comment-reply-form")) return;
+            const replyForm = el("form", "", "coding-comment-reply-form");
+            const replyInput = el("textarea", "", "coding-comment-input"); replyInput.maxLength = 10000; replyInput.placeholder = `回复 ${comment.username}`;
+            const send = button("发送回复", () => {}, "button primary"); send.type = "submit";
+            replyForm.append(replyInput, send);
+            replyForm.addEventListener("submit", async event => {
+              event.preventDefault(); if (!replyInput.value.trim()) return;
+              send.disabled = true;
+              try { await api(`/coding/questions/${question.id}/comments`, { method: "POST", body: JSON.stringify({ body: replyInput.value, parent_id: comment.id }) }); await load(); }
+              catch (error) { notify(error.message, "error"); send.disabled = false; }
+            });
+            card.append(replyForm); replyInput.focus();
+          }, "coding-comment-action");
+          actions.append(like, reply);
+          if (state.user?.is_admin) actions.append(button(comment.pinned ? "取消置顶" : "置顶", async () => {
+            try { await api(`/coding/comments/${comment.id}/pin`, { method: comment.pinned ? "DELETE" : "POST" }); await load(); }
+            catch (error) { notify(error.message, "error"); }
+          }, "coding-comment-action"));
+          if (comment.user_id === userId || state.user?.is_admin) actions.append(button("删除", async () => {
+            if (!await confirmAction("确定删除这条评论及其下属回复吗？")) return;
+            try { await api(`/coding/comments/${comment.id}`, { method: "DELETE" }); await load(); }
+            catch (error) { notify(error.message, "error"); }
+          }, "coding-comment-action danger"));
+          const replies = children.has(comment.id) ? el("div", "", "coding-comment-replies") : null;
+          if (replies) replies.append(renderItems(comment.id, depth + 1));
+          if (replies) card.append(meta, body, actions, replies); else card.append(meta, body, actions);
+          fragment.append(card);
+        }
+        return fragment;
+      };
+      list.replaceChildren(renderItems(0));
+      if (!items.length) list.append(el("p", "还没有讨论，写下第一条评论。", "coding-discussion-empty"));
+    } catch (error) { if (active(request, userId)) list.replaceChildren(el("p", error.message, "coding-form-error")); }
+  }
+  form.addEventListener("submit", async event => {
+    event.preventDefault(); if (!input.value.trim()) { input.focus(); return; }
+    post.disabled = true;
+    try { await api(`/coding/questions/${question.id}/comments`, { method: "POST", body: JSON.stringify({ body: input.value }) }); input.value = ""; await load(); }
+    catch (error) { notify(error.message, "error"); }
+    finally { post.disabled = false; }
+  });
+  void load();
+  return section;
 }
 function renderResult(target, result) {
   target.replaceChildren(el("span", `提交 #${result.id}`), statusBadge(result.status));
   if (result.judge_mode === "samples") target.append(el("span", `公开样例 ${result.passed_cases ?? 0}/${result.total_cases ?? 0}，未验证隐藏测试`));
   if (result.detail) target.append(el("pre", result.detail, "submission-result-detail"));
+}
+function renderRunResult(target, result) {
+  const passed = result.passed_cases ?? 0; const total = result.total_cases ?? 0;
+  target.replaceChildren(el("div", `通过 ${passed} / ${total}`, `coding-run-summary${result.status === "Accepted" ? " accepted" : " failed"}`));
+  for (const [index, item] of (result.cases || []).entries()) {
+    const row = el("details", "", "coding-run-case");
+    row.append(el("summary", `Case ${index + 1} · ${item.status}`, item.status === "Accepted" ? "accepted" : "failed"));
+    for (const [label, value] of [["输入", item.input], ["期望输出", item.expected_output], ["实际输出", item.actual_output]]) {
+      const output = el("div", "", "coding-run-output"); output.append(el("span", label), el("pre", value || "（空）")); row.append(output);
+    }
+    target.append(row);
+  }
+  if (result.detail && !result.cases?.length) target.append(el("pre", result.detail, "submission-result-detail"));
 }
 async function loadRecords(id, request, userId) {
   const turn = ++recordsRevision; const target = recordTarget;

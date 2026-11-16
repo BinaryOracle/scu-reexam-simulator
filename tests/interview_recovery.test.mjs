@@ -26,6 +26,21 @@ test('history keeps timed-out interviews available for review without listing ac
   assert.match(source, /closed \? "查看回顾 →" : reviewMode\(\) \? "查看回答 →" : "继续面试 →"/);
 });
 
+test('keeps the interview search toolbar exclusive to the records list', async () => {
+  assert.match(source, /\$\("interviewListToolbar"\)\.hidden = true;/);
+  assert.match(source, /\$\("interviewListToolbar"\)\.hidden = reviewMode\(\) \|\| !interviewItems\.length;/);
+  const returnStart = source.indexOf('const back = button');
+  const preparationStart = source.indexOf('if (preparing)', returnStart);
+  assert.match(source.slice(returnStart, preparationStart), /\$\("interviewListToolbar"\)\.hidden = reviewMode\(\) \|\| !interviewItems\.length;/);
+  const html = await readFile(new URL('../app/static/index.html', import.meta.url), 'utf8');
+  assert.match(html, /id="interviewListToolbar"[\s\S]*?搜索面试/);
+});
+
+test('describes the end action as returning to the first interview stage', () => {
+  assert.match(source, /返回第一个面试环节/);
+  assert.doesNotMatch(source, /返回 001 环节/);
+});
+
 test('keeps the preparation return action visible while scrolling the setup form', async () => {
   const styles = await readFile(new URL('../app/static/style.css', import.meta.url), 'utf8');
   assert.match(source, /preparationToolbar\.append\(el\("span", "INTERVIEW SETUP", "eyebrow"\), back\)/);

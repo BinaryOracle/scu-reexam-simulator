@@ -116,6 +116,29 @@ export async function refreshLuoguSettings() {
   $('luoguAppOrigin').value = `${settings.app_origin}/`;
   $('luoguSettingsStatus').hidden = true;
 }
+let modelSettingsRevision = 0;
+function renderModelSettings(settings) {
+  for (const fieldset of $('modelSettingsForm').querySelectorAll('[data-model-service]')) {
+    const service = settings.services[fieldset.dataset.modelService];
+    for (const field of ['base_url', 'model', 'provider', 'protocol', 'voice']) {
+      const input = fieldset.querySelector(`[name="${field}"]`);
+      if (input && service[field] !== undefined) input.value = service[field];
+    }
+    fieldset.querySelector('[name="api_key"]').value = '';
+    fieldset.querySelector('[name="clear_api_key"]').checked = false;
+    const status = fieldset.querySelector('[data-key-status]');
+    status.textContent = service.api_key_configured
+      ? `已配置 · ${service.api_key_source}`
+      : '尚未配置 API Key';
+  }
+}
+export async function refreshModelSettings() {
+  const revision = ++modelSettingsRevision;
+  const settings = await api('/admin/model-settings');
+  if (revision !== modelSettingsRevision || $('modelSettingsForm').dataset.saving === 'true') return;
+  renderModelSettings(settings);
+  $('modelSettingsStatus').hidden = true;
+}
 function questionEditorState() {
   return JSON.stringify([$("questionCategory").value, $("questionSubject").value, $("questionContent").value, $("questionActive").checked]);
 }
@@ -140,10 +163,11 @@ function syncQuestionCategory() {
 }
 function renderQuestionBank() {
   const filter = $("questionBankFilter").value;
+  const [category, subject] = filter.includes(":") ? filter.split(":", 2) : [filter, ""];
   const query = $("questionBankSearch").value.trim().toLowerCase();
   const filterKey = JSON.stringify([filter, query]);
   if (filterKey !== bankFilterKey) { bankPage = 1; bankFilterKey = filterKey; }
-  const rows = bankQuestions.filter((row) => (!filter || row.category === filter) && row.content.toLowerCase().includes(query));
+  const rows = bankQuestions.filter((row) => (!category || (row.category === category && (!subject || row.subject === subject))) && row.content.toLowerCase().includes(query));
   const pages = Math.max(1, Math.ceil(rows.length / 10));
   bankPage = Math.min(bankPage, pages);
   $("questionBankCount").textContent = `${rows.length} 道题目`;
@@ -575,6 +599,35 @@ export function setupAdmin() {
       status.hidden = false;
       status.classList.add('form-error');
     }).finally(() => { save.disabled = false; origin.readOnly = false; });
+  });
+  $("modelSettingsForm").addEventListener("submit", event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const save = form.querySelector('[type="submit"]');
+    const status = $("modelSettingsStatus");
+    const changes = {};
+    for (const fieldset of form.querySelectorAll('[data-model-service]')) {
+      const service = {};
+      for (const field of ['base_url', 'model', 'provider', 'protocol', 'voice']) {
+        const input = fieldset.querySelector('[name="' + field + '"]');
+        if (input) service[field] = input.value;
+      }
+      const key = fieldset.querySelector('[name="api_key"]').value;
+      if (key) service.api_key = key;
+      service.clear_api_key = fieldset.querySelector('[name="clear_api_key"]').checked;
+      changes[fieldset.dataset.modelService] = service;
+    }
+    form.dataset.saving = 'true'; save.disabled = true; status.hidden = true;
+    void api('/admin/model-settings', { method: 'PATCH', body: JSON.stringify(changes) })
+      .then(settings => {
+        renderModelSettings(settings);
+        status.textContent = '模型、接口和密钥状态已更新，后续请求将使用新设置。';
+        status.hidden = false; status.classList.remove('form-error');
+        notify('AI 服务设置已保存。');
+      }).catch(error => {
+        status.textContent = error.message;
+        status.hidden = false; status.classList.add('form-error');
+      }).finally(() => { form.dataset.saving = 'false'; save.disabled = false; });
   });
   $("questionBankForm").addEventListener("submit", (event) => void submitQuestion(event).catch((error) => notify(error.message, "error")));
   $("questionCategory").addEventListener("change", syncQuestionCategory);

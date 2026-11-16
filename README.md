@@ -4,17 +4,28 @@
 
 算法带刷另提供八阶段、430 道题的题单、已完成/未通过筛选、用户收藏、每日一题打卡、私人投稿与审核奖励；提交结果统一展示在提交记录面板。C/C++11/Python 3 公开样例采用受限 Docker 评测。题库来源、构建和奖励边界见[算法带刷说明](docs/coding-catalog.md)。
 
+直播课堂 V1 复用现有账号，提供课程与多课次、课程主持人授权、私有资料、评论举手、单人共享与服务端录播。音视频需要独立部署 LiveKit，录制另需 Egress、Redis 和共享私有存储；未配置时明确提示服务未就绪。使用、配置与上线验收见 [直播课堂部署与使用](docs/live-classroom.md)。Mac 本机部署使用 `.venv/bin/python scripts/live_local.py start`，已完成双人真实音视频、互动、录制与私有回放验证；尚未完成 50 人负载验收。
+
+## 热点趋势
+
+登录后可在「热点趋势」查看当日、当周、当月和当年的 AI 前沿摘要，正文采用 Markdown 展示，并附带 Google News、arXiv 与 GitHub 的原始检索来源。后台使用 Qwen `qwen3.7-plus` 自动生成内容，每天北京时间 06:00 刷新一次，应用启动时也立即刷新；失败周期每 15 分钟重试。每个周期只保留当前报告，新结果覆盖旧报告。管理员可编辑当前展示内容或手动刷新所选周期，不提供历史趋势归档。
+
+趋势检索使用公开平台接口，不代表完整互联网覆盖；网络不可用或来源没有结果时不会生成无来源摘要。`[trends]` 可设置模型、检索数、网络超时和自动刷新时间；模型密钥沿用服务端 `[ai]` 的 `api_key` / `api_key_env`，默认环境变量为 `DASHSCOPE_API_KEY`。SQLite schema 版本为 34，升级时每类趋势只保留最新一条记录。
+
 ## 快速启动
 
 ```sh
 python3.12 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 cp config.example.toml config.toml
+sh scripts/prepare_judge.sh
 .venv/bin/python -m scripts.create_user candidate
 .venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-空数据库首次启动会创建默认管理员：用户名 `root`，密码 `root`，并开通全部系统。以后启动不会重置已有账号或密码。命令行创建其他用户时交互输入密码。前台访问 http://127.0.0.1:8000，后台访问 http://127.0.0.1:8000/admin。配置文件 `config.toml` 集中设置数据路径、录音与 PPT 限制、转换程序、会话时长、面试题、AI/ASR 接口、评测镜像和资源限制。也可通过 `SCU_CONFIG=/path/to/config.toml` 指定配置；密钥放在被 Git 忽略的本地配置文件或指定环境变量中，只由后端读取。
+需要启用 Mac 本机直播与录播时，先运行 `.venv/bin/python scripts/live_local.py start`；它会部署媒体服务、配置私有密钥文件并启动网站。首次准备后直接重启 Uvicorn 也能读取直播密钥，详见 [直播部署说明](docs/live-classroom.md)。
+
+空数据库首次启动会创建默认管理员：用户名 `root`，密码 `root`，并开通全部系统。以后启动不会重置已有账号或密码。命令行创建其他用户时交互输入密码。`scripts/prepare_judge.sh` 会准备包含 C++11、C 和 Python 3 的隔离评测镜像；需要先启动 Docker Desktop。前台访问 http://127.0.0.1:8000，后台访问 http://127.0.0.1:8000/admin。配置文件 `config.toml` 集中设置数据路径、录音与 PPT 限制、转换程序、会话时长、面试题、AI/ASR 接口、评测镜像和资源限制。也可通过 `SCU_CONFIG=/path/to/config.toml` 指定配置；密钥放在被 Git 忽略的本地配置文件或指定环境变量中，只由后端读取。
 
 ## 账号与后台管理
 
@@ -97,6 +108,8 @@ cp config.example.toml config.toml
 
 AI 接口兼容 OpenAI Chat Completions 格式。语音识别使用阿里云 DashScope OpenAI 兼容音频接口，模型名 `qwen3-asr-flash`，发送 WAV Data URI；需要配置 DashScope URL 和服务端凭据。未配置 ASR 时尝试浏览器实时识别；不可用时保留原始录音供复盘，作答过程中不展示字幕；未配置 AI 时不会产生虚构追问或点评，接口返回清晰错误。
 
+超级管理员可在后台「系统设置 → 大模型与语音服务」配置面试多模态模型、ASR、TTS 与热点趋势模型的接口地址、模型名和 API Key。设置保存在 `app_settings`，API Key 使用 `security.password_key_file` 指定的 Fernet 密钥加密，接口与页面只返回配置状态和来源，不回显密钥。新设置对后续请求立即生效；模型服务密钥留空保持原值，勾选清除后回退到本地配置或环境变量。趋势模型未设置独立密钥时继承面试多模态服务的密钥。恢复数据库时必须同时恢复配套密钥文件。
+
 正式进入每个环节时自动播报环节名称，专家环节提示“专家给出的问题为”后继续播报题目。录音保持连续，播报期间暂停实时转写，建议佩戴耳机；结束或切换环节会取消旧播报，回顾记录时不自动发声。浏览器阻止自动播放时可点击“环节播报”重试。环节提示和专家问题播报使用百炼 `qwen-audio-3.1-tts-plus`。北京地域公共接口 `https://dashscope.aliyuncs.com/api/v1` 已通过真实调用验证，配置在 `[tts].base_url`，也可使用同地域的 Workspace 专属地址 `https://<WorkspaceId>.cn-beijing.maas.aliyuncs.com/api/v1`。请求路径由系统追加为 `/services/audio/tts/SpeechSynthesizer`；默认音色为该模型支持的 `longanhuan_v3.1`，输出 WAV/24 kHz。使用具有该模型访问权限的同地域 API Key，通过 `DASHSCOPE_API_KEY` 环境变量或服务端配置读取。具体字段和音色以[百炼 TTS API](https://help.aliyun.com/zh/model-studio/qwen-audio-tts-http-api)及[官方音色表](https://help.aliyun.com/zh/model-studio/qwen-audio-tts-voice-list)为准。语音失败不阻断文字提问和点评。
 
 VJudge 比赛页需登录后才能核实题目，本系统不抓取或复制其受限内容。管理员应仅录入有权使用的题目。比赛时长、试题、语言和评分规则由机构确认后配置；示例面试问题和计时并非四川大学官方规定。
@@ -105,7 +118,7 @@ VJudge 比赛页需登录后才能核实题目，本系统不抓取或复制其�
 
 ## 从旧角色版本升级
 
-先停止旧进程并备份数据库、录音、演示文件和公告图片目录，再启动新版本。启动时事务迁移至 SQLite `user_version=25`：原 `teacher` 账号转为管理员，原 `student` 账号转为普通用户，用户名、密码哈希、ID、会话和历史记录保持；`role` 字段被移除。旧迁移曾为管理员补齐模块开关；当前版本所有启用账号均可访问两个模块，旧开关值不再影响访问。旧账号名可继续使用，不代表系统角色。v3 新增演示文件表、面试流程版本和自我介绍完成状态；v4 为面试增加开始时间、截止时间和结束时间；v5 新增全程录音表；v6 增加可编辑的面试记录名称；v7 新增题库和答案的学科选择字段；v8 增加后台密码查看密文；v9 增加次数、卡密和兑换账本；v10 增加持久超级管理员、动态套餐和删除用户后的卡密兑换用户名快照；v11 保存专业课题目选择历史；v12 新增私有语音缓存表；v13 新增登录邮箱、验证码与限流数据；v14 新增邮箱变更及账号安全验证码；v15 为上机题目保存完整公开样例列表；v16 新增训练题库、顺序复习、收藏、投稿审核及连续签到；v17 新增次数转赠记录；v18 修复未被人工修改的题库参考答案断行；v19 新增题目掌握记录并回填历史自评；v20 按篇章隔离训练内容与进度；v21 新增 AI 文献翻译题库；v22 新增软件工程题库；v23 新增投稿奖励规则与账本；v24 新增图文公告及附件索引；v25 增加公告 Markdown 正文并迁移旧内容。备考首页使用版本化 JSON 整理白皮书资源导航，不覆盖题库数据库。历史内容与次数记录保持；迁移依赖支持 `DROP COLUMN` 的 SQLite 3.35 及以上版本；回退旧代码需恢复匹配的数据库和文件备份。
+先停止旧进程并备份数据库、录音、演示文件和公告图片目录，再启动新版本。数据库启动迁移会事务性升级 schema；旧版迁移会将原 `teacher` 账号转为管理员、原 `student` 账号转为普通用户，用户名、密码哈希、ID、会话和历史记录保持，旧 `role` 字段被移除。后续版本继续增加训练、公告、首页、直播课堂和热点趋势等结构；当前版本为 SQLite `user_version=34`。趋势迁移会清理旧趋势归档，每个日、周、月、年周期只保留最近一次生成结果。迁移依赖支持 `DROP COLUMN` 的 SQLite 3.35 及以上版本；回退旧代码需恢复匹配的数据库和文件备份。
 
 API 不再返回或接受 `role`、`can_interview` 或 `can_exam`，客户端使用管理员身份及账号启停字段。比赛创建改为 `POST /api/admin/contests`，题目录入改为 `POST /api/admin/contests/{cid}/problems`；后台记录统一通过 `/api/admin/…` 访问。命令行使用 `--admin` 区分管理员和普通用户。
 

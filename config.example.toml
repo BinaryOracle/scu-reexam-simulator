@@ -57,6 +57,15 @@ max_slide_pages = 60
 slide_image_size = 768
 max_context_chars = 120000
 
+[trends]
+model = "qwen3.7-plus"
+request_timeout_seconds = 300
+source_timeout_seconds = 15
+max_sources = 36
+auto_refresh = true
+refresh_time = "06:00" # Asia/Shanghai
+retry_interval_minutes = 15
+
 [tts]
 enabled = true
 provider = "dashscope"
@@ -132,3 +141,24 @@ max_import_items = 100
 max_import_bytes = 1048576
 max_question_chars = 12000
 max_answer_chars = 60000
+
+[live]
+url = "" # Browser LiveKit wss:// URL; empty disables live media
+api_url = "" # Server-side https:// LiveKit endpoint
+api_key_env = "LIVEKIT_API_KEY"
+api_secret_env = "LIVEKIT_API_SECRET"
+credentials_file = "" # Optional private JSON file; local deployment prepares this automatically
+max_participants = 50
+presence_seconds = 60
+token_seconds = 120
+material_max_mb = 25
+directory = "data/live" # Private, never mount under /static
+recording_enabled = false # Requires separately deployed LiveKit Egress
+# Egress /out must mount the same recordings directory as data/live/recordings.
+egress_directory = "/out"
+playback_seconds = 14400
+like_interval_seconds = 1
+screen_share_width = 1280
+screen_share_height = 720
+screen_share_frame_rate = 15
+screen_share_max_bitrate = 1500000

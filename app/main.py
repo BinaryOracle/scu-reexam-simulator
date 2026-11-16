@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.responses import StreamingResponse
 import io
 import zipfile
+from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ConfigDict, StrictInt, field_validator
 from typing import Annotated
@@ -18,13 +19,14 @@ from app.db import connect, initialize
 from app.services import ai, judge, expert_context, speech
 from app.services.security import verify_password
 from app.services.password_vault import PasswordVaultError, encrypt_password
-from app.services.auth import current_user, administrator, interview_user, exam_user, public_user
+from app.services.auth import current_user, administrator, interview_user, exam_user, issue_session, public_user
 from app.services.interviews import details, interview, active_interview, require_stage, summary, seed_answers
 from app.services.contest_scoring import submission_score
 from app.services.interview_clock import require_running, timing, timestamp
 from app.services import question_bank
 from app.services import luogu_catalog
 from app.services import contest_access, home_layout
+from app.routes.live import router as live_router
 from app.routes.home_layout import router as home_layout_router
 from app.routes.presentations import router as presentations_router
 from app.routes.admin import router as admin_router
@@ -37,9 +39,22 @@ from app.routes.training import router as training_router
 from app.routes.credit_transfers import router as credit_transfers_router
 from app.routes.announcements import router as announcements_router
 from app.routes.coding import router as coding_router
+from app.routes.trends import router as trends_router
 
 initialize()
-app = FastAPI(title='复试模拟系统')
+
+
+@asynccontextmanager
+async def lifespan(app):
+    from app.services import trend_scheduler
+    trend_scheduler.start()
+    try:
+        yield
+    finally:
+        trend_scheduler.stop()
+
+
+app = FastAPI(title='复试模拟系统', lifespan=lifespan)
 
 
 @app.exception_handler(PasswordVaultError)
@@ -57,7 +72,9 @@ app.include_router(training_router)
 app.include_router(credit_transfers_router)
 app.include_router(announcements_router)
 app.include_router(coding_router)
+app.include_router(trends_router)
 app.include_router(home_layout_router)
+app.include_router(live_router)
 app.mount('/static', StaticFiles(directory=ROOT / 'app/static'), name='static')
 
 @app.get('/api/home/resources')
@@ -149,13 +166,13 @@ def luogu_extension():
 @app.post('/api/login')
 def login(payload: Login):
     with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
         user = db.execute('SELECT * FROM users WHERE username=?', (payload.username,)).fetchone()
         if not user or not user['is_active'] or not verify_password(payload.password, user['password']):
             raise HTTPException(401, '用户名或密码错误')
         if not user['password_ciphertext']:
             db.execute('UPDATE users SET password_ciphertext=? WHERE id=?', (encrypt_password(payload.password), user['id']))
-        token = secrets.token_urlsafe(32)
-        db.execute('INSERT INTO sessions VALUES (?,?,?)', (token, user['id'], time.time() + load_config()['app']['session_hours'] * 3600))
+        token = issue_session(db, user['id'])
         return {'token': token, **public_user(user)}
 
 @app.get('/api/me')

@@ -11,6 +11,8 @@ let announcementsUnavailable = false;
 let releaseAnnouncementImages = null;
 let homeRevision = 0;
 let announcementRequestRevision = 0;
+let reminderToDismiss = null;
+let reminderCheckRevision = 0;
 
 /** Load private images with the current session; closing the reader cancels and releases them. */
 function prepareAnnouncementImage(image, source, session) {
@@ -51,6 +53,7 @@ function openAnnouncement(item, { returnToList = false } = {}) {
     session.urls.forEach(url => URL.revokeObjectURL(url));
     session.urls.clear();
   };
+  reminderToDismiss = item.reminder_pending ? item.id : null;
   $("announcementDialogTitle").textContent = item.title;
   const body = $("announcementDialogContent");
   body.replaceChildren();
@@ -207,6 +210,21 @@ export async function refreshHome() {
   }
   if (requestRevision !== announcementRequestRevision || token !== state.token) return;
   renderHome();
+  showPendingAnnouncementReminder();
+}
+
+/** Show the first enabled announcement the current account has not dismissed. */
+export async function showPendingAnnouncementReminder() {
+  const requestRevision = ++reminderCheckRevision;
+  const token = state.token;
+  if (!token || state.adminMode || $("announcementDialog").open) return;
+  try {
+    const items = await api("/announcements");
+    if (requestRevision !== reminderCheckRevision || token !== state.token || $("announcementDialog").open) return;
+    notices = items;
+    const pending = items.find(item => item.reminder_pending);
+    if (pending) openAnnouncement(pending);
+  } catch { /* The announcement band reports failures when the home view loads. */ }
 }
 
 export function setupHome() {
@@ -214,6 +232,12 @@ export function setupHome() {
   $("announcementDialog").addEventListener("close", () => {
     releaseAnnouncementImages?.(); releaseAnnouncementImages = null;
     $("announcementDialogContent").replaceChildren();
+    const dismissedId = reminderToDismiss;
+    reminderToDismiss = null;
+    if (dismissedId && state.token && !state.adminMode) {
+      void api(`/announcements/${dismissedId}/dismiss-reminder`, { method: "POST" })
+        .catch(error => notify(`公告已关闭，但提醒状态未能保存，下次仍可能显示：${error.message}`, "error"));
+    }
   });
 }
 
@@ -249,7 +273,8 @@ export async function refreshAnnouncementsAdmin() {
     for (const item of data.items) {
       const row=el("article","","announcement-admin-row");
       const copy=el("div");
-      copy.append(el("strong",item.title),el("small",statusLabel(item.status)+" · "+item.summary));
+      const meta=[statusLabel(item.status),item.remind_on_first_visit?"首次进入弹窗提醒":"不弹窗",item.summary].filter(Boolean).join(" · ");
+      copy.append(el("strong",item.title),el("small",meta));
       const controls=el("div","","action-group");
       controls.append(button("编辑",()=>editNotice(item),"button secondary"));
       controls.append(button("预览",()=>openAnnouncement(item),"button quiet"));
@@ -295,6 +320,9 @@ function editNotice(item) {
   const title=el("input");title.required=true;title.maxLength=120;title.value=item?.title||"";
   const summary=el("input");summary.maxLength=500;summary.value=item?.summary||"";
   const cover=el("input");cover.value=item?.cover_url||"";
+  const reminder=el("input");reminder.type="checkbox";reminder.checked=Boolean(item?.remind_on_first_visit);
+  const reminderLabel=el("label");reminderLabel.className="announcement-reminder-setting";
+  reminderLabel.append(reminder,el("span","首次进入提醒"),el("span","用户首次进入网站时弹出此公告；用户关闭后不再重复提醒。","muted"));
   const coverFile=el("input");coverFile.type="file";coverFile.accept="image/png,image/jpeg,image/webp";coverFile.hidden=true;
   const coverUpload=button("上传封面",()=>coverFile.click(),"button quiet");
   coverFile.addEventListener("change",async()=>{
@@ -350,7 +378,7 @@ function editNotice(item) {
     finally{imageInput.value="";}
   });
   const actions=el("div","","action-group");
-  const values=()=>({title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value});
+  const values=()=>({title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value,remind_on_first_visit:reminder.checked});
   let original=JSON.stringify(values());
   actions.append(button("取消",async()=>{
     if(JSON.stringify(values())!==original&&!await confirmAction("公告有尚未保存的修改，确定放弃吗？"))return;
@@ -360,14 +388,14 @@ function editNotice(item) {
   actions.append(button("预览",async()=>{
     try{
       const preview=await api("/admin/announcements/preview",{method:"POST",body:JSON.stringify({
-        title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value})});
+        title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value,remind_on_first_visit:reminder.checked})});
       openAnnouncement(preview);
     }catch(error){notify(error.message,"error");}
   },"button secondary"));
   const saveLabel=item?.status==="published"?"更新已发布公告":item?.status==="withdrawn"?"保存修改（保持撤下）":"保存草稿";
   actions.append(button(saveLabel,async()=>{
     if(item?.status==="published"&&!await confirmAction("这条公告当前已经发布。保存后会立即更新所有用户可见的内容，确定继续吗？"))return;
-    const payload={title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value};
+    const payload={title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value,remind_on_first_visit:reminder.checked};
     await api(item?"/admin/announcements/"+item.id:"/admin/announcements",{
       method:item?"PUT":"POST",body:JSON.stringify(payload)});
     notify(item?.status==="published"?"已发布公告已更新":item?.status==="withdrawn"?"已撤下公告已保存修改，仍保持撤下":"公告草稿已保存");
@@ -376,6 +404,6 @@ function editNotice(item) {
     try { await refreshAnnouncementsAdmin(); }
     catch(error) { notify(`草稿已保存，但列表刷新失败：${error.message}`,"error"); }
   },"button primary"));
-  form.append(titleLabel,summaryLabel,coverLabel,coverUpload,coverFile,blockHeading,markdown,addImage,imageInput,actions);
+  form.append(titleLabel,summaryLabel,coverLabel,reminderLabel,coverUpload,coverFile,blockHeading,markdown,addImage,imageInput,actions);
   root.append(form);form.scrollIntoView({behavior:"smooth",block:"start"});
 }

@@ -634,6 +634,7 @@ function renderInterview() {
   window.dispatchEvent(new Event("interview-layout-changed"));
   root.hidden = false;
   $("interviewOverview").hidden = true;
+  $("interviewListToolbar").hidden = true;
   $("newInterview").hidden = true;
   $("refreshInterviews").parentElement.hidden = true;
   $("interviewList").classList.add("compact");
@@ -666,6 +667,7 @@ function renderInterview() {
     root.hidden = true;
     root.dataset.immersive = "false";
     $("interviewOverview").hidden = false;
+    $("interviewListToolbar").hidden = reviewMode() || !interviewItems.length;
     $("interviewList").classList.remove("compact");
     $("interviewListTitle").hidden = false;
     $("interviewListTitle").replaceChildren(
@@ -937,7 +939,7 @@ async function endCurrentInterview({ automatic = false, returnStage = 1, showNot
   }
   const item = activeInterview;
   if (!item || item.status === "finished") return;
-  if (!automatic && !await confirmAction("确认结束本轮面试？系统会保存录音与回答并返回 001 环节，不会生成 AI 点评。")) return;
+  if (!automatic && !await confirmAction("确认结束本轮面试？系统会保存录音与回答并返回第一个面试环节，不会生成 AI 点评。")) return;
   if (ending || activeInterview !== item || activeInterview?.status === "finished") return;
   ending = true;
   cancelStageSpeech();

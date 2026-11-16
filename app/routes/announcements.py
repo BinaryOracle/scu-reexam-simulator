@@ -17,16 +17,22 @@ class Announcement(BaseModel):
     cover_url:str=Field(default='',max_length=500)
     body_markdown:str=Field(default='',max_length=100000)
     blocks:list[dict]=Field(default_factory=list,max_length=100)
+    remind_on_first_visit:bool=False
 
 
 @router.get('/api/announcements')
 def published(user=Depends(current_user)):
-    with connect() as db: return announcements.list_items(db)
+    with connect() as db: return announcements.list_items(db,user_id=user['id'])
 
 
 @router.get('/api/announcements/{aid}')
 def published_detail(aid:int,user=Depends(current_user)):
-    with connect() as db: return announcements.get_item(db,aid,public=True)
+    with connect() as db: return announcements.get_item(db,aid,public=True,user_id=user['id'])
+
+
+@router.post('/api/announcements/{aid}/dismiss-reminder')
+def dismiss_reminder(aid:int,user=Depends(current_user)):
+    with connect() as db: return announcements.dismiss_reminder(db,user['id'],aid)
 
 
 @router.get('/api/announcements/assets/{asset_id}')

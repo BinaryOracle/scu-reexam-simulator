@@ -1,0 +1,130 @@
+# 直播课堂 V1：使用与部署
+
+直播课堂用于不超过 50 人的互动小班。课程、课次、资料、评论和成员授权保存在本应用的 SQLite 中；音视频和屏幕共享由独立部署的 LiveKit SFU 传输，服务端录制依赖 LiveKit Egress。项目提供下面的 Mac 本机部署脚本；安装 Python 依赖不能替代媒体服务。本机已完成两个测试账号的真实 SFU/Egress 联调，尚未完成 50 人负载验证。
+
+## 当前 Mac 本机部署
+
+从项目根目录运行以下命令。先启动 Docker Desktop，安装好 `requirements.txt`，首次下载镜像建议预留至少 10 GiB 磁盘；脚本会在剩余空间低于 1 GiB 时中止自己发起的下载，不清理其他镜像或用户文件。
+
+```sh
+.venv/bin/python scripts/live_local.py start
+.venv/bin/python scripts/live_local.py status
+.venv/bin/python scripts/live_local.py logs
+.venv/bin/python scripts/live_local.py stop
+```
+
+`start` 准备配置、启动 Redis / LiveKit / Egress、检查录播服务健康状态，并在后台启动一个 Uvicorn worker，访问 `http://127.0.0.1:8000/` 后进入「直播课堂」。`stop` 只关闭本脚本管理的应用与 `scu-live-local` 容器，不关闭 Docker Desktop 或其他容器；课程、账号、资料和录播继续保留。重新开机后先打开 Docker Desktop，再运行 `start`。已有其他命令启动应用且占用 8000 时，先停止原命令；脚本不会接管或终止该进程。首次准备后，应用通过 `[live].credentials_file` 显式读取本机私有密钥，直接重启 Uvicorn 也能保留直播连接配置；媒体服务配置修改后使用 `stop` / `start` 重新载入。`status` 中的 HTTP 正常仅代表地址可达，不代替实际开课及入会验证。需要前台查看应用日志时，可单独运行 `.venv/bin/python scripts/live_local.py app`（要求 8000 空闲）。
+
+版本固定于 [Compose 文件](../deploy/live-local/compose.yaml)：LiveKit Server 1.13.11、Egress 1.15.0、Redis 7.4.8-alpine，同时锁定官方镜像摘要；支持本机 Apple Silicon，不需要 x86 模拟。浏览器信令为 `ws://127.0.0.1:7880`，应用 API 为 `http://127.0.0.1:7880`；7880/7881 TCP 和 7882 UDP 仅映射到宿主机回环地址，Redis 不映射宿主机端口。
+
+Egress 与 LiveKit 共用容器网络命名空间，LiveKit 同时提供容器内候选地址及映射后的回环地址，并关闭容器的额外 loopback ICE socket，避免 Mac 浏览器能连 WebSocket 却不能收发媒体。签名 webhook 使用 `host.docker.internal:8000` 回到应用。此配置仅用于当前 Mac；不能把地址直接发给外部学员，也不能作为外网或 TURN 环境的验收结果。
+
+首次 `prepare` / `start` 随机生成 API Key/Secret，保存在被 Git 忽略且权限受限的 `data/live-deploy/credentials.json`，以后启动复用；应用通过显式配置的私有文件读取，启动器也会注入相同环境变量；Egress 通过容器环境读取。配置写入 `config.toml` 的 `[live]`，其他业务配置保留，修改前备份在私有的 `data/live-deploy/config.before-live.toml`。`data/live-deploy/livekit.yaml` 含服务端密钥，不对外分享；浏览器只接收短期入会令牌。应用日志位于 `data/live-deploy/app.log`，关闭访问日志以免记录播放票据；容器日志做大小轮转。
+
+Egress 的 `/out` 与应用 `[live].directory/recordings` 挂载为同一私有目录，启动器准备目录。本机 Egress 限制为 4 个 CPU、3 GiB 内存，适合同时录制一间课堂；第二间课堂不保证具有录制资源。当前 Mac 的 Docker 虚拟机内存已调整为 4 GiB，减少默认 8 GiB 的交换压力，原 Docker 设置另备份于 `data/live-deploy/docker-settings.before-live.json`；此修改由部署时完成，启动器不会修改全局 Docker 设置。需要调整时在 Docker Desktop「Settings → Resources」修改。Egress 使用官方默认的无 Chrome sandbox 配置，仅用于本机可信课程；公网部署应按官方文档启用适当隔离。
+
+本机 2026-11-16 实测使用临时账号及浏览器测试设备，完成双向 720p 视频与音频、默认设备关闭、评论/点赞/举手、发言授权与撤销、合成屏幕轨道接收与收回、禁言、私有资料隔离、签名录播事件。生成的 MP4 为 H.264 + AAC、1280×720，时长约 216 秒；验证了成员播放、非成员拒绝、无票据拒绝及 HTTP Range 206。另已验证 Chrome 原生标签页共享选择器、真实共享轨道跨浏览器收看、停止与重新共享、Chrome 原生停止后接收端清除视频。整个桌面/独立窗口选择、外网 TLS/TURN、50 人音视频并发仍需在对应环境另行验收。
+
+## 使用流程与权限
+
+管理员在前台「直播课堂」管理课程、课次、主持人和课程成员。课程的创建管理员及超级管理员可以管理该课程；其他管理员仅在被加入课程或指定为主持人时获得相应访问权限。普通管理员搜索和分配名单时看不到其他管理员，允许选择自己。课程主持人是课程内授权，不新增全局教师角色。
+
+课程内可以创建多次课，设置标题、说明和预计开始时间。课次有「未开始」「直播中」「已结束」三个独立状态；只有课程主持人可以开始或结束直播，管理员身份本身不代替主持人权限。主持人离开不会结束课堂。已结束课次不能重新开始，需要新建课次；直播期间不能修改课程名单、主持人或删除直播课次。
+
+成员进入课堂前检查浏览器设备权限，默认关闭麦克风和摄像头。主持人具有音视频发布权限；学员通过举手或申请共享请求授权，主持人批准后仍由学员主动打开设备。撤销发言或共享会调用 LiveKit 服务端更新媒体发布权限。屏幕共享默认采用 1280×720、15 fps、1.5 Mbps 单路编码，关闭系统声音采集；课堂发言仍通过麦克风传输。共享者本机不预览自己的共享画面，避免共享整个桌面时出现递归预览；其他成员正常观看。建议选择课件窗口，Chrome 支持时会排除当前课堂标签页。取消选择会保留在课堂，权限失败会显示 macOS 屏幕录制权限的恢复说明。接收端须等视频真正开始播放才隐藏等待提示；浏览器拦截自动播放时可点击播放，12 秒没有视频帧会显示恢复按钮。发送端等待发布服务器响应并核查外发帧；30 秒仍未出帧时自动重新协商一次，仍失败会提示重新选择共享标签页。每次只允许一个共享者，主持人共享也需要获得自己的共享授权；切换共享者会先撤销原共享者。主持人也可暂停成员评论权限；禁言按课次和账号持久保存，离开或心跳过期后重新加入仍有效，直到主持人解除。
+
+评论、点赞和举手状态通过短轮询恢复，成员定时发送心跳。默认心跳有效期 60 秒，同一身份重连复用名额，过期成员在下一次入会时先从媒体房间移除再释放名额。服务端和 LiveKit 房间均设置人数上限，最多配置 50 人；上限是访问限制，不代表已经测得的实际承载能力。默认每人每秒最多点赞一次，评论最多 2000 字且每秒最多发送一条。
+
+主持人或有课程管理权限的管理员可上传资料，成员可下载。默认单个文件最大 25 MB，允许 PDF、文本、Markdown、Office 文档、PNG/JPEG 和 ZIP；不允许 HTML 或可执行文件。资料与录播均在私有目录保存，经课程成员鉴权读取，不得把该目录映射到 `/static` 或公共对象存储。删除课次或课程会先提交数据库删除，再清理对应私有文件；若清理失败，接口明确提示记录已经删除且需要管理员清理磁盘。
+
+## 应用配置
+
+安装 `requirements.txt`，其中固定 `livekit-api==1.2.3`；浏览器使用随项目分发的 SDK，不需要从 CDN 加载。将以下配置并入服务端 `config.toml`，域名和路径替换为自己的部署值：
+
+```toml
+[live]
+url = "wss://live.example.org"
+api_url = "https://live.example.org"
+api_key_env = "LIVEKIT_API_KEY"
+api_secret_env = "LIVEKIT_API_SECRET"
+credentials_file = "" # 本机部署脚本自动设置；可选的私有 JSON 路径
+max_participants = 50
+presence_seconds = 60
+token_seconds = 120
+material_max_mb = 25
+directory = "data/live"
+recording_enabled = false
+# Egress 容器内路径，与应用 data/live/recordings 指向同一私有卷。
+egress_directory = "/out"
+playback_seconds = 14400
+like_interval_seconds = 1
+screen_share_width = 1280
+screen_share_height = 720
+screen_share_frame_rate = 15
+screen_share_max_bitrate = 1500000
+```
+
+`url` 是浏览器可以访问的 WSS 地址，`api_url` 是应用服务器可以访问的 HTTP/HTTPS API 地址。正式部署使用 HTTPS/WSS；HTTP/WS 只适合受控本机调试。`directory` 相对项目根目录解析。共享参数 `screen_share_width` 范围 640–1920、`screen_share_height` 范围 360–1080、`screen_share_frame_rate` 范围 5–30、`screen_share_max_bitrate` 范围 300000–5000000 bps；修改后新入会生效。`max_participants` 必须在 1–50，入会令牌有效期 `token_seconds` 在 1–300 秒，资料上限在 1–100 MB。`playback_seconds` 默认四小时，可设为 1–86400 秒。心跳有效期 `presence_seconds` 最短 15 秒，须大于前端心跳间隔；网络代理需允许轮询持续正常请求。
+
+LiveKit 的 API Key 和 Secret 可通过完整的一对进程环境变量，或显式设置的 `credentials_file` 私有 JSON 文件提供，TOML 中不允许内联 `api_key` 或 `api_secret`。环境变量优先；只配置一个环境变量时不会与文件中的另一项混用。JSON 的两个字段名与 `api_key_env` / `api_secret_env` 一致，文件路径相对项目根目录解析；Mac/Linux 须设置为 `chmod 600`。指定文件不可读、格式错误、缺少密钥或权限过宽时返回明确的配置错误，不静默忽略。可使用部署平台的密钥管理注入 `LIVEKIT_API_KEY` 和 `LIVEKIT_API_SECRET`，并与媒体服务的服务端密钥保持一致。不要写入仓库、前端 JavaScript 或示例配置。浏览器只接收短期入会令牌，不接收服务端密钥。
+
+未配置媒体 URL 或有效凭据时，用户仍可查看有权访问的课程、课次和资料；开始/加入媒体课堂返回明确的服务未配置提示，不伪造连接或录制成功。Egress 尚未部署时保持 `recording_enabled=false`，录制操作会提示服务未配置。配置了媒体地址但服务不可达时返回操作失败，课堂不会被当作成功开始。
+
+## LiveKit、Redis 与网络
+
+生产环境需要独立运行 LiveKit Server，并按其官方部署文档选择固定版本和配置。LiveKit 与 Egress 使用同一个可达的 Redis 服务协调任务；Redis 仅对需要它的服务开放，不暴露到公网。LiveKit 的密钥配置必须与应用、Egress 使用的服务端密钥对应。
+
+反向代理为应用和 LiveKit 提供有效 TLS 证书，LiveKit 入口支持 WebSocket 升级。仅开放 HTTPS 入口不足以保证 WebRTC 可用：媒体节点还需要正确的公网地址和 ICE 端口映射。常见配置使用 TCP 7881 和 UDP 50000–60000；实际以自己选择的 LiveKit 配置为准，防火墙和容器映射必须一致。
+
+为校园网、企业网和限制 UDP 的网络部署 TURN，并配置浏览器能访问的 TURN/TLS 地址与证书。常见 TLS 端口为 5349，严格网络可使用独立域名/IP 的 443；不得让 TURN 与 HTTPS 代理争用同一监听地址。浏览器摄像头、麦克风和屏幕共享需要安全上下文；以真实外网 HTTPS 域名验证，不能用本机能打开页面代替媒体连通测试。
+
+服务端密钥、TURN 配置、端口与部署参数参考 [LiveKit 自托管文档](https://docs.livekit.io/home/self-hosting/) 和 [Egress 部署文档](https://docs.livekit.io/home/egress/deployment/)。本机脚本固定并验证的版本见上节；公网部署仍应单独验证证书、ICE 和 TURN 网络。
+
+## 签名 webhook
+
+LiveKit Server 必须向本应用的公开 HTTPS 地址发送 webhook，例如：
+
+```yaml
+# 合入 LiveKit Server 配置；键名示例不是实际凭据。
+webhook:
+  api_key: your-deployment-key-name
+  urls:
+    - https://app.example.org/api/live/webhook
+```
+
+`api_key` 指向 LiveKit 服务端已配置的密钥名称，对应 Secret 保留在服务端。代理必须原样传递 `Authorization` 和请求体，不能重写 JSON。此接口不使用用户 Bearer 会话，而由官方 SDK 验证媒体事件签名、时间和请求体摘要，事件 ID 持久化去重。
+
+webhook 不仅更新录制状态，也在成员重连时重新应用当前发布授权，并清退过期名额、停用账号或已经结束课次的连接。因此生产配置必须包含相关参与者事件，不能只验证录制事件。服务端撤销授权后，旧的短期入会令牌不应成为重新获得权限的途径。
+
+## Egress 与私有录播卷
+
+Egress 是独立服务，配置 LiveKit 地址、API Key/Secret 及 Redis；应用并不在本地浏览器录屏。按官方 Egress 文档配置容器运行权限、共享内存和 Chrome 合成器的网络访问。只有确认 Egress 能接任务且共享卷可写后，才把应用的 `recording_enabled` 改为 `true`。
+
+应用读取 `data/live/recordings`，Egress 默认向 `/out` 写入；两者必须挂载为**同一个私有持久卷**，应用和 Egress 的 UID/GID 都应具备所需访问权限。示意关系如下：
+
+```text
+宿主机 /srv/scu/live/recordings
+  ├─ 应用容器：/app/data/live/recordings
+  └─ Egress 容器：/out
+```
+
+应用 `directory` 为 `/app/data/live` 时上述路径一致；若使用其他位置，同时修改挂载与 `egress_directory`。不要把 `/out` 指向与应用不同的临时容器文件系统。录制采用房间合成 MP4，包含课堂音视频和共享轨道；只有经过签名的结束事件、精确匹配的生成文件名、非空文件结果及应用可读的本地文件同时满足，才标记可播放。代理或文件共享异常不会被标记成录制成功。
+
+主持人开始录制后状态依次可能为 `starting`、`recording`、`stopping`、`ready`；请求被接受不代表视频已生成。`failed` 显示失败原因，`unknown` 表示远端请求结果尚未确认。停止失败会保留活动状态和错误，供主持人重试。
+
+课次结束后主持人仍可核对录制，但不能重新开始或停止录制。出现 `unknown` 时使用「核对录制状态」（接口 `POST /api/live/lessons/{id}/recording`，请求体 `{"action":"reconcile"}`）核对。服务端查询该房间的 Egress 历史，通过任务 ID 或精确生成的输出路径关联原任务，再恢复其状态；已确认失败后才能重新开始。若远端历史中尚无匹配任务，返回明确提示并继续阻止重复开始。此时管理员需检查 Egress 日志、Redis、任务历史和共享卷，不能通过反复点击开始假设旧录制不存在。重复或延迟到达的进度事件不会覆盖终态或把停止中改回录制中。
+
+录播播放先通过用户 Bearer 会话申请不透明播放票据，默认四小时有效，视频接口支持 HTTP Range。票据不含原始会话令牌，每次读取仍检查账号是否启用及当前课程成员权限；退出课程或停用后原链接不能继续使用。前端到期前自动续票并保留进度，失败时提供重新加载入口。反向代理和日志系统应隐藏票据查询参数，禁止把这些 URL 写入公开日志或第三方分析。
+
+## 运行、备份与上线验收
+
+本应用采用本机 SQLite 和私有文件目录，使用 **一个 Uvicorn worker** 运行，不要直接通过多 worker 或多副本扩展课堂 API。音视频扩容由媒体服务单独规划；服务端写操作在短期排队并保持明确状态，媒体网络请求有超时。将 SQLite 数据库、`data/live` 和其他私有业务文件一起备份，监控录播磁盘空间和 Egress 任务失败。数据库启动时进行幂等 v32 迁移，不删除旧业务数据；升级前仍应备份。
+
+上线前至少执行以下真实环境验收，当前仓库测试结果不能替代它们：
+
+1. 使用两个独立账号、两个浏览器验证课程名单隔离、入会前设备关闭、评论和心跳恢复；非成员不能下载资料或播放录播。
+2. 验证主持人授权和撤销麦克风、摄像头、屏幕共享；切换共享者后前一个共享轨道停止；旧令牌重连不能恢复已撤销权限。
+3. 验证主持人离开仍保持课堂、主动结束会清退成员、刷新重连不重复占名额、过期名额可以回收。
+4. 分别验证正常网络和 TURN-only 网络，确认手机与桌面浏览器能在 HTTPS 下接收和发布媒体。
+5. 启动真实 Egress，验证签名事件、停止、生成 MP4、拖动进度后的 Range 播放、票据过期刷新，以及共享卷断开时明确失败。
+6. 在目标机器和真实媒体配置下做 50 人音视频、共享、录制负载测试，记录 CPU、内存、带宽、丢包及恢复情况，再验证第 51 人被拒绝。尚未执行这些步骤时不得宣称已支持该硬件下的 50 人稳定直播。

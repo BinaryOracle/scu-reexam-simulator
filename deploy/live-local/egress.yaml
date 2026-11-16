@@ -1,0 +1,10 @@
+# The official image defaults to an isolated recorder without Chrome's sandbox.
+# This deployment is for a single trusted local Mac, not a public media service.
+ws_url: ws://127.0.0.1:7880
+insecure: true
+redis:
+  address: redis:6379
+health_port: 9090
+enable_chrome_sandbox: false
+logging:
+  level: info

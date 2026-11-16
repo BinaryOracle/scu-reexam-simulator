@@ -1,0 +1,61 @@
+name: scu-live-local
+services:
+  redis:
+    image: redis:7.4.8-alpine@sha256:7aec734b2bb298a1d769fd8729f13b8514a41bf90fcdd1f38ec52267fbaa8ee6
+    restart: unless-stopped
+    command: [redis-server, --save, "", --appendonly, "no"]
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    mem_limit: 128m
+    logging: &logs
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "2"
+
+  livekit:
+    image: livekit/livekit-server:v1.13.11@sha256:25cd902de7cacbd5f1f779f6a6ac1eae20ba8f56b0935934ce6b0ab80d1e3d20
+    restart: unless-stopped
+    command: [--config, /etc/livekit.yaml]
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:7880:7880"
+      - "127.0.0.1:7881:7881"
+      - "127.0.0.1:7882:7882/udp"
+    volumes:
+      - ${LIVE_RUNTIME_DIR:?Run scripts/live_local.py prepare}/livekit.yaml:/etc/livekit.yaml:ro
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    mem_limit: 512m
+    logging: *logs
+
+  egress:
+    image: livekit/egress:v1.15.0@sha256:ac244a40268ce1dd1510fbff6eb529609ec68aceff1602343f79be8ca08c355b
+    restart: unless-stopped
+    # Loopback ICE must work both from this recorder and the Mac browser.
+    network_mode: service:livekit
+    depends_on:
+      livekit:
+        condition: service_started
+    environment:
+      EGRESS_CONFIG_FILE: /etc/egress.yaml
+      LIVEKIT_API_KEY: ${LIVEKIT_API_KEY:?Run scripts/live_local.py prepare}
+      LIVEKIT_API_SECRET: ${LIVEKIT_API_SECRET:?Run scripts/live_local.py prepare}
+    volumes:
+      - ./egress.yaml:/etc/egress.yaml:ro
+      - ${LIVE_RECORDINGS_DIR:?Run scripts/live_local.py prepare}:/out
+    shm_size: 1gb
+    healthcheck:
+      test: [CMD, curl, -fsS, http://127.0.0.1:9090/]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    mem_limit: 3g
+    cpus: 4
+    logging: *logs

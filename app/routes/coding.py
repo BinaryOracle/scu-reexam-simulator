@@ -7,6 +7,7 @@ from app.db import connect
 from app.services.auth import administrator, current_user, coding_user, require_coding
 from app.services import coding_catalog as catalog
 from app.services import coding_practice as practice
+from app.services import coding_comments
 from app.services import luogu_catalog
 
 router = APIRouter(tags=['算法带刷'])
@@ -117,6 +118,22 @@ class Submission(Payload):
     source: str = Field(min_length=1, max_length=100000)
 
 
+class LocalRun(Submission):
+    cases: list[Sample] = Field(min_length=1, max_length=50)
+
+
+class Comment(Payload):
+    body: str = Field(min_length=1, max_length=10000)
+    parent_id: StrictInt | None = None
+
+    @field_validator('body')
+    @classmethod
+    def body_not_blank(cls, value):
+        if not value.strip():
+            raise ValueError('评论内容不能为空')
+        return value.strip()
+
+
 class RemoteResult(Payload):
     remote_submission_id: str = Field(default='', max_length=64, pattern=r'^\d*$')
     remote_problem_id: str = Field(default='', max_length=32)
@@ -172,6 +189,67 @@ def unfavorite(qid: int, user=Depends(coding_user)):
         catalog.require_access(db, qid, user['id'])
         db.execute('DELETE FROM coding_favorites WHERE user_id=? AND question_id=?', (user['id'], qid))
         return {'favorited': False}
+
+
+@router.get('/api/coding/questions/{qid}/comments')
+def comments(qid: int, sort: Literal['hot', 'new'] = 'hot', user=Depends(coding_user)):
+    with connect() as db:
+        catalog.require_access(db, qid, user['id'], practice=True)
+        return {'items': coding_comments.list_comments(db, qid, user['id'], sort)}
+
+
+@router.post('/api/coding/questions/{qid}/comments', status_code=201)
+def create_comment(qid: int, payload: Comment, user=Depends(coding_user)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        catalog.require_access(db, qid, user['id'], practice=True)
+        return coding_comments.create(db, qid, user, payload.body, payload.parent_id)
+
+
+def _require_comment_access(db, comment_id, user):
+    row = db.execute('SELECT question_id FROM coding_comments WHERE id=?', (comment_id,)).fetchone()
+    if row is None:
+        raise HTTPException(404, '评论不存在')
+    catalog.require_access(db, row['question_id'], user['id'], practice=True)
+
+
+@router.put('/api/coding/comments/{comment_id}/like')
+def like_comment(comment_id: int, user=Depends(coding_user)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        _require_comment_access(db, comment_id, user)
+        return coding_comments.like(db, comment_id, user['id'], True)
+
+
+@router.delete('/api/coding/comments/{comment_id}/like')
+def unlike_comment(comment_id: int, user=Depends(coding_user)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        _require_comment_access(db, comment_id, user)
+        return coding_comments.like(db, comment_id, user['id'], False)
+
+
+@router.post('/api/coding/comments/{comment_id}/pin')
+def pin_comment(comment_id: int, user=Depends(administrator)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        return {'pinned': coding_comments.set_pinned(db, comment_id, True)}
+
+
+@router.delete('/api/coding/comments/{comment_id}/pin')
+def unpin_comment(comment_id: int, user=Depends(administrator)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        return {'pinned': coding_comments.set_pinned(db, comment_id, False)}
+
+
+@router.delete('/api/coding/comments/{comment_id}', status_code=204)
+def delete_comment(comment_id: int, user=Depends(coding_user)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        _require_comment_access(db, comment_id, user)
+        coding_comments.delete(db, comment_id, user)
+        return Response(status_code=204)
 
 
 @router.post('/api/coding/questions', status_code=201)
@@ -241,6 +319,19 @@ def submission(qid: int, payload: Submission, user=Depends(coding_user)):
     if failure:
         raise failure
     return completed
+
+
+@router.post('/api/coding/questions/{qid}/run')
+def run_code(qid: int, payload: LocalRun, user=Depends(coding_user)):
+    from app.services import coding_judge
+    with connect() as db:
+        catalog.require_access(db, qid, user['id'], practice=True)
+    try:
+        return coding_judge.evaluate(payload.language, payload.source, [case.model_dump() for case in payload.cases])
+    except coding_judge.JudgeUnavailable as error:
+        raise HTTPException(503, str(error)) from error
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
 
 
 @router.get('/api/coding/questions/{qid}/submissions')
