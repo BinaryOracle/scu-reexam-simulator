@@ -2,6 +2,7 @@
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, emptyState, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
 import { selectField, pagination, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
+import { mountLeaderboard } from './leaderboard.js?v=20261117-leaderboard-v1';
 let generation = 0, homeData = null, session = null;
 let listRequest = 0;
 let section = 'interview';
@@ -30,7 +31,7 @@ export async function refreshTraining() {
     homeData = value; session = null;
     if (collection && !value.collections.some(c => c.id === collection)) collection='';
     render();
-    if (tab !== 'home') await list();
+    if (tab !== 'home' && tab !== 'leaderboard') await list();
   } catch {
     if (!live(key, token)) return;
     const message = emptyState('训练暂时无法加载', '请检查网络连接后重试。', '◇');
@@ -49,7 +50,7 @@ function render() {
   const head = el('div', '', 'page-heading');
   const title = el('div'); title.append(el('span', 'A LITTLE EVERY DAY', 'eyebrow'), el('h1', '每日训练'), el('p', '把大目标，拆成每天的一小步。', 'muted'));
   head.append(title, button('新增题目', () => editQuestion(), 'button secondary'));
-  head.hidden = Boolean(session);
+  head.hidden = Boolean(session) || tab === 'leaderboard';
   root.append(head);
   const chapters = el('div', '', 'learning-chapters'); chapters.setAttribute('aria-label', '训练篇章');
   for (const item of homeData.sections) {
@@ -57,26 +58,30 @@ function render() {
       generation++;
       if (!await loadHome(item.id)) return;
       collection = ''; page = 1; session = null; search = '';
-      render(); if (tab !== 'home') await list();
+      render(); if (tab !== 'home' && tab !== 'leaderboard') await list();
     }, `learning-chapter ${section === item.id ? 'selected' : ''}`);
     control.setAttribute('aria-pressed', String(section === item.id));
     control.append(el('strong', item.name), el('span', item.count ? `${item.count} 道可练题目` : '等待你来补充'));
     chapters.append(control);
   }
-  if (!session) root.append(chapters);
+  if (!session && tab !== 'leaderboard') root.append(chapters);
   const tabs = el('div', '', 'learning-tabs');
   tabs.hidden = Boolean(session);
-  for (const [value, label] of [['home','今日练习'],['favorites','重点回顾'],['mine','我的题目']]) {
+  for (const [value, label] of [['home','今日练习'],['favorites','重点回顾'],['mine','我的题目'],['leaderboard','排行榜']]) {
     const control = button(label, async () => {
       if (value === 'favorites' && !homeData.can_training) { notify('尚未开通每日训练权限，请联系管理员', 'error'); return; }
       generation++;
       if (value === 'home' && !await loadHome()) return;
       tab = value; page = 1; session = null;
-      render(); if (tab !== 'home') await list();
+      render(); if (tab !== 'home' && tab !== 'leaderboard') await list();
     }, `button ${tab === value ? 'primary' : 'quiet'}`);
     control.setAttribute('aria-pressed', String(tab === value)); tabs.append(control);
   }
   root.append(tabs);
+  if (tab === 'leaderboard') {
+    void mountLeaderboard(root, { onBack: () => { tab = 'home'; render(); } });
+    return;
+  }
   if (session) renderSession(root);
   else if (tab === 'home') renderHome(root);
   else renderListShell(root);

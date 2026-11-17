@@ -7,6 +7,7 @@ import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?
 import { editCodingQuestion, codingDialog } from "./coding-form.mjs?v=20261115-coding-v1";
 import { codingQuestionId, filterCodingQuestions, codingDraftKey, acceptsCodingStatus } from "./coding-model.mjs?v=20261115-coding-v1";
 import { renderSubmissionDetails } from "./submission-details.mjs?v=20261116-submissions-v1";
+import { mountLeaderboard } from "./leaderboard.js?v=20261117-leaderboard-v1";
 
 let revision = 0;
 let requestLuoguSubmit;
@@ -113,11 +114,15 @@ function renderHome() {
   if (home.can_coding) daily.append(dailyActions);
   else daily.append(el("p", "算法题带刷权限尚未开通，题目浏览与个人投稿仍可使用。", "practice-access-notice"));
   const tabs = el("div", "", "coding-mode-tabs");
-  for (const [key, label] of [["roadmap", "阶段题单"], ["mine", "我的投稿"], ["solved", "已完成"], ["failed", "尝试未通过"], ["favorites", "收藏"]]) {
+  for (const [key, label] of [["roadmap", "阶段题单"], ["mine", "我的投稿"], ["solved", "已完成"], ["failed", "尝试未通过"], ["favorites", "收藏"], ["leaderboard", "排行榜"]]) {
     const tab = button(label, () => { mode = key; stageId = ""; topic = ""; page = 1; renderHome(); return refreshList(); }, `button ${mode === key ? "primary" : "secondary"}`);
     tab.setAttribute("aria-pressed", String(mode === key)); tabs.append(tab);
   }
   root.replaceChildren(hero);
+  if (mode === "leaderboard") {
+    void mountLeaderboard(root, { onBack: () => { mode = "roadmap"; renderHome(); void refreshList(); } });
+    return;
+  }
   if (mode === "roadmap") root.append(daily);
   root.append(tabs);
   if (mode === "roadmap") {

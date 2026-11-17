@@ -1,5 +1,6 @@
 /* Daily learning uses the shared ivory, vermilion and muted green palette. */
-.learning-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 26px;padding-bottom:14px;border-bottom:1px solid var(--border,#eae2d8)}
+.learning-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 28px;padding:0 0 16px;border-bottom:1px solid var(--border,#eae2d8)}
+.learning-tabs .button{min-height:40px;padding:8px 15px;border-radius:9px}
 .learning-overview{display:grid;grid-template-columns:1.15fr 1fr;gap:22px;margin-bottom:24px}
 .learning-goal,.learning-streak,.learning-setup,.learning-study{border:1px solid #eae2d8;border-radius:20px;background:#fffdf8;padding:30px}
 .learning-goal{background:linear-gradient(120deg,#f0e5d8,#faf5ed)}
