@@ -2,7 +2,7 @@
 
 本文从空环境部署四川大学计算机复试模拟系统。系统由 FastAPI 应用、SQLite 和私有文件目录组成；上机代码隔离运行于 Docker；直播音视频通过 LiveKit 传输，录播由 Egress 合成并写入私有存储。AI 面试点评、语音识别和语音合成使用服务端配置的阿里云百炼 API。洛谷提交插件运行在用户浏览器中，不在服务器保存洛谷凭证。
 
-本手册覆盖两种部署：Mac 本机试用使用仓库提供的一键脚本；面向异地学员的公网部署需要域名、HTTPS、可达的 WebRTC 媒体端口及 TURN 规划。`deploy/live-local` 只供本机使用，不能直接公开到互联网。
+本手册覆盖两种部署：Mac 本机试用使用仓库提供的一键脚本；面向异地学员的公网网站需要受浏览器信任的 HTTPS，可使用域名或公网 IP 证书。公网直播另需可达的 WebRTC 媒体端口及 TURN 规划。`deploy/live-local` 只供本机使用，不能直接公开到互联网。
 
 ## 组件清单
 
@@ -83,6 +83,8 @@ sh scripts/prepare_judge.sh
 
 公网部署适用于一个 Linux 主机上的单机试点。应用仍使用一个 Uvicorn worker、SQLite 和本地持久盘；不要通过多 worker 或多应用副本横向扩展。该版本没有提供公网 LiveKit/TURN 的自动安装器。管理员必须完成本节网络、证书、ICE、Egress sandbox 和持久卷配置后再开放服务。
 
+仅部署网站和面试、上机功能时，可直接使用公网 IP 和 Let’s Encrypt 的短期 IP 证书，无需自有域名。已验证的 systemd、Nginx、续期和评测镜像配置见 [IP HTTPS 部署配置](../deploy/linux/README.md)。普通公网 HTTP IP 不属于浏览器安全来源，不能正常使用麦克风；受信任的 HTTPS IP 可以。本机 `http://localhost` 和回环地址属于浏览器例外。
+
 ### 规划主机与域名
 
 以下命令以 Ubuntu 24.04 LTS、单台 Linux x86-64 主机和公网 IPv4 为例；其他发行版请将包名和服务管理命令换成对应版本。准备至少两个 DNS 名称：`app.example.org` 指向应用反向代理，`media.example.org` 指向 LiveKit 信令入口。部署前将文中的示例域名替换成自己的域名，并确认两条 DNS 记录均已生效。
@@ -93,7 +95,7 @@ sh scripts/prepare_judge.sh
 sudo apt update
 sudo apt install -y ca-certificates curl git python3.12 python3.12-venv \
   python3-pip docker.io docker-compose-v2 nginx certbot python3-certbot-nginx acl ufw \
-  ffmpeg libreoffice fonts-noto-cjk fontconfig
+  ffmpeg libreoffice libreoffice-impress fonts-noto-cjk fontconfig
 sudo systemctl enable --now docker nginx
 ```
 

@@ -1,0 +1,6 @@
+[Unit]
+Description=Renew the SCU simulator IP TLS certificate
+
+[Service]
+Type=oneshot
+ExecStart=/opt/scu-certbot/bin/certbot renew --quiet --config-dir /etc/letsencrypt-scu --work-dir /var/lib/letsencrypt-scu --logs-dir /var/log/letsencrypt-scu --deploy-hook "systemctl reload nginx"
