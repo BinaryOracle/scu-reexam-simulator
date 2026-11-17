@@ -46,12 +46,14 @@ initialize()
 
 @asynccontextmanager
 async def lifespan(app):
-    from app.services import trend_scheduler
+    from app.services import trend_scheduler, leaderboard_scheduler
     trend_scheduler.start()
+    leaderboard_scheduler.start()
     try:
         yield
     finally:
         trend_scheduler.stop()
+        leaderboard_scheduler.stop()
 
 
 app = FastAPI(title='复试模拟系统', lifespan=lifespan)

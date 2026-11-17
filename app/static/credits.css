@@ -32,7 +32,7 @@
 .voucher-code:hover { border-color: #ac8061; }
 .voucher-pagination { display: flex; justify-content: center; align-items: center; gap: 20px; border-top: 1px solid var(--line); padding: 18px; font-size: 12px; }
 .voucher-pagination .button { font-size: 11px; min-height: 34px; padding: 6px 12px; }
-.profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 24px 0; }
+.profile-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin: 24px 0; }
 .profile-stats:has(#profileRedemptionStats[hidden]) { grid-template-columns: minmax(0, 420px); }
 .profile-stat { padding: 22px 24px; display: grid; gap: 8px; }
 .profile-stat > span { font-size: 12px; color: var(--muted); }
@@ -285,3 +285,50 @@
   .transfer-fields { grid-template-columns: 1fr; gap: 12px; }
 }
 #profileUsername, #profileLoginEmail { overflow-wrap: anywhere; }
+.voucher-toolbar-actions { display: flex; flex-wrap: wrap; gap: 10px; flex-shrink: 0; }
+.voucher-package-tabs button { line-height: 1.5; text-align: left; }
+.points-settings-fields { display: grid; grid-template-columns: minmax(160px, 220px) auto; align-items: end; gap: 14px; }
+.points-shop, .points-history { margin-bottom: 24px; padding: 28px; }
+.points-shop-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.points-shop-heading h2 { margin: 7px 0 9px; font-size: 21px; }
+.points-shop-heading p, .points-shop-heading > .muted { font-size: 12px; line-height: 1.8; }
+.points-shop-mark { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border-radius: 14px; background: #f5e9d8; color: #a57842; font-size: 30px; }
+.profile-points-stat { background: linear-gradient(135deg, #fffaf1, #f8eee0); border-color: #e8d5ba; }
+.profile-stat { min-width: 0; }
+.profile-stat > strong { overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.profile-stat > small { line-height: 1.8; }
+.points-product { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 310px); gap: 36px; padding: 26px; border: 1px solid #eaded0; border-radius: 14px; background: #fcf9f4; }
+.points-product-copy { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.points-product-tag { padding: 5px 9px; border-radius: 6px; color: #9c6245; background: #f3e6d7; font-size: 11px; }
+.points-product h3 { margin: 15px 0 10px; font-size: 21px; line-height: 1.5; }
+.points-product-copy p { color: var(--muted); font-size: 12px; line-height: 1.8; }
+.points-product-copy > strong { display: block; margin-top: 22px; font-size: 24px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.points-purchase-form { display: grid; align-content: center; gap: 12px; padding-left: 30px; border-left: 1px solid #e9ded2; }
+.points-purchase-form label { margin: 0; font-size: 12px; }
+.points-purchase-form input { min-width: 0; }
+.points-purchase-total { color: var(--muted); font-size: 12px; line-height: 1.8; }
+.points-purchase-form .button { margin-top: 5px; min-height: 44px; }
+.points-history-list { display: grid; }
+.points-history-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 19px 0; border-top: 1px solid var(--line); }
+.points-history-row > div { min-width: 0; }
+.points-history-row strong { font-size: 13px; }
+.points-history-row p { margin-top: 8px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.points-history-row > strong { flex: none; font-variant-numeric: tabular-nums; }
+.points-income { color: #4c7156; }
+.points-expense { color: var(--accent); }
+@media (max-width: 1100px) { .profile-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px) {
+  .points-product { grid-template-columns: 1fr; gap: 24px; padding: 20px; }
+  .points-purchase-form { padding: 22px 0 0; border-left: 0; border-top: 1px solid #e9ded2; }
+  .points-shop, .points-history { padding: 22px 20px; }
+  .points-shop-heading { margin-bottom: 20px; }
+  .points-shop-heading h2, .points-product h3 { font-size: 19px; }
+  .voucher-toolbar-actions { width: 100%; }
+  .voucher-toolbar-actions .button { flex: 1; }
+  .points-settings-fields { width: 100%; }
+}
+@media (max-width: 420px) {
+  .profile-stats { grid-template-columns: 1fr; gap: 12px; }
+  .points-settings-fields { grid-template-columns: 1fr; }
+  .points-history-row { align-items: flex-start; gap: 12px; }
+}

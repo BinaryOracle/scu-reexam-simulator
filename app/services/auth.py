@@ -7,7 +7,7 @@ from app.config import load_config
 from app.db import connect
 from app.services.credits import ADMIN_CREDITS
 
-PUBLIC_USER_FIELDS = 'id,username,email,is_admin,is_superadmin,is_active,interview_credits,can_interview,can_exam,can_practice,can_training,can_coding'
+PUBLIC_USER_FIELDS = 'id,username,email,is_admin,is_superadmin,is_active,interview_credits,points,can_interview,can_exam,can_practice,can_training,can_coding'
 FLAGS = ('is_admin', 'is_superadmin', 'is_active')
 
 
@@ -33,6 +33,7 @@ def public_user(row, *, admin_view=False):
             'can_interview': bool(row['is_admin'] or row['can_interview']),
             'can_exam': bool(row['is_admin'] or row['can_exam']),
             'interview_credits': (ADMIN_CREDITS if admin_view else None) if row['is_admin'] else row['interview_credits'],
+            'points': row['points'],
             **{key: bool(row[key]) for key in FLAGS}}
 
 

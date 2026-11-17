@@ -76,7 +76,8 @@ def test_vouchers_are_unique_separate_packages_and_redeemed_atomically(client):
             json={'code': codes[0].lower().replace('-', ' ')}), [alice, bob]))
     assert sorted(response.status_code for response in responses) == [200, 409]
     profiles = [client.get('/api/profile', headers=headers).json() for headers in (alice, bob)]
-    assert sorted(profile['remaining'] for profile in profiles) == [1, 4]
+    assert [profile['remaining'] for profile in profiles] == [1, 1]
+    assert sorted(profile['points'] for profile in profiles) == [0, 3]
     assert sum(profile['redeemed_amount_fen'] for profile in profiles) == 200
     used = client.get('/api/admin/vouchers?package=three&status=redeemed', headers=manager).json()['items']
     assert len(used) == 1 and used[0]['redeemed_by'] in ('alice', 'bob')
@@ -94,7 +95,7 @@ def test_redemption_history_uses_issue_time_package_value_and_user_isolation(cli
     redeemed = client.post('/api/profile/redeem', headers=alice, json={'code': card['code']})
     assert redeemed.status_code == 200
     profile = client.get('/api/profile', headers=alice).json()
-    assert profile['remaining'] == 11 and profile['redeemed_amount_fen'] == 500
+    assert profile['remaining'] == 1 and profile['points'] == 10 and profile['redeemed_amount_fen'] == 500
     assert profile['redemptions'][0]['credits'] == 10
     assert card['code'] not in str(profile)
     assert client.get('/api/profile', headers=bob).json()['redemptions'] == []

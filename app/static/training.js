@@ -2,7 +2,7 @@
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, emptyState, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
 import { selectField, pagination, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
-import { mountLeaderboard } from './leaderboard.js?v=20261117-leaderboard-v1';
+import { mountLeaderboard } from './leaderboard.js?v=20261117-weekly-leaderboard-v2';
 let generation = 0, homeData = null, session = null;
 let listRequest = 0;
 let section = 'interview';
@@ -79,7 +79,7 @@ function render() {
   }
   root.append(tabs);
   if (tab === 'leaderboard') {
-    void mountLeaderboard(root, { onBack: () => { tab = 'home'; render(); } });
+    void mountLeaderboard(root, { scope: "training", onBack: () => { tab = 'home'; render(); } });
     return;
   }
   if (session) renderSession(root);
@@ -93,7 +93,8 @@ function checkinControl() {
     if (!live(key, token)) return;
     homeData = result.home;
     if (!await loadHome()) return;
-    notify(result.already_checked ? '今天已经打卡过了' : result.credits ? `打卡成功，获得 ${result.credits} 次模拟面试机会` : `打卡成功，已连续坚持 ${homeData.streak} 天`);
+    const earnedPoints = result.points ?? result.credits ?? 0;
+    notify(result.already_checked ? '今天已经打卡过了' : earnedPoints ? `打卡成功，获得 ${earnedPoints} 积分` : `打卡成功，已连续坚持 ${homeData.streak} 天`);
     render();
   }, 'button primary');
   control.disabled = homeData.checked_in || homeData.completed < homeData.goal;
@@ -117,8 +118,8 @@ function renderHome(root) {
     const item = el('div', '', day.checked_in ? 'checked' : '');
     item.title = day.date; item.append(el('span', day.date.slice(5).replace('-', '/')), el('b', day.checked_in ? '✓' : '·')); days.append(item);
   }
-  streak.append(days, el('p', homeData.is_admin ? '持续练习，让表达更从容。管理员无需领取面试次数。' : `下个节点：连续 ${homeData.next_milestone} 天，再得 ${homeData.next_reward} 次面试机会。`, 'muted'));
-  const rule = el('details', '', 'learning-rules'); rule.append(el('summary', '查看打卡奖励规则'), el('p', '第 7 天新增 1 次，第 14 天再新增 2 次，第 21 天再新增 3 次，依此递增。断签后从第 1 天重新累计，已获次数保留。以北京时间的自然日为准，同题当日仅计一次。'));
+  streak.append(days, el('p', homeData.is_admin ? '持续练习，让表达更从容。管理员无需领取积分。' : `下个节点：连续 ${homeData.next_milestone} 天，再得 ${homeData.next_reward} 积分。`, 'muted'));
+  const rule = el('details', '', 'learning-rules'); rule.append(el('summary', '查看打卡奖励规则'), el('p', '第 7 天获得 1 积分，第 14 天再获得 2 积分，第 21 天再获得 3 积分，依此递增。断签后从第 1 天重新累计，已获积分保留。以北京时间的自然日为准，同题当日仅计一次。'));
   streak.append(rule); overview.append(goal, streak); root.append(overview);
   if (homeData.active_session) {
     const active = homeData.active_session;
@@ -193,7 +194,7 @@ function renderHome(root) {
   root.append(setup);
   if (homeData.rewards.length) {
     const history = el('details', '', 'learning-reward-history'); history.append(el('summary', '我的打卡奖励'));
-    for (const reward of homeData.rewards) history.append(el('p', `${reward.date} · 连续 ${reward.streak} 天 · +${reward.credits} 次模拟面试`));
+    for (const reward of homeData.rewards) history.append(el('p', `${reward.date} · 连续 ${reward.streak} 天 · +${reward.credits} 积分`));
     root.append(history);
   }
 }

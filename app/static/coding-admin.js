@@ -145,12 +145,12 @@ function editStage(stage, turn, user) {
 function renderSettings(content, settings, turn, user) {
   const panel = el("form", "", "panel coding-settings"); panel.append(el("h3", "投稿奖励规则"), el("p", "仅统计首次审核通过的投稿。新规则只影响后续通过的题目，不重复发奖；管理员不获得奖励。", "muted"));
   const count = codingField("每通过多少道题发奖", "questions_per_reward", settings.questions_per_reward, { type: "number", min: 1, required: true });
-  const credits = codingField("每次奖励的面试次数", "credits_per_reward", settings.credits_per_reward, { type: "number", min: 1, required: true });
+  const credits = codingField("每次奖励的积分", "credits_per_reward", settings.credits_per_reward, { type: "number", min: 1, required: true });
   const save = el("button", "保存奖励规则", "button primary"); save.type = "submit"; const message = el("p", "", "coding-form-error"); message.setAttribute("role", "status"); panel.append(count.wrap, credits.wrap, save, message);
   panel.addEventListener("submit", async event => {
     event.preventDefault(); if (save.disabled) return; save.disabled = true;
     try { await api("/admin/coding/settings", { method: "PUT", body: JSON.stringify({ questions_per_reward: Number(count.input.value), credits_per_reward: Number(credits.input.value) }) }); if (valid(turn, user)) notify("奖励规则已保存。"); }
     catch (failure) { if (valid(turn, user)) message.textContent = failure.message; } finally { save.disabled = false; }
   });
-  content.append(panel, el("p", "每日打卡奖励：连续第 7、14、21…天，分别奖励 1、2、3…次面试。同一天重复打卡不会重复发奖。", "coding-settings-note"));
+  content.append(panel, el("p", "每日打卡奖励：连续第 7、14、21…天，分别奖励 1、2、3…积分。同一天重复打卡不会重复发奖。", "coding-settings-note"));
 }

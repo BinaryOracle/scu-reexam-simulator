@@ -1,6 +1,6 @@
 /** Account management UI. Backend APIs remain the source of authorization. */
 import { api, state } from "./api.js?v=20261114-ui-v17";
-import { readCreditSettings } from "./credits.js?v=20261115-dialog-v1";
+import { readCreditSettings } from "./credits.js?v=20261117-package-delete-v2";
 import {
   $,
   el,

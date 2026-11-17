@@ -7,7 +7,7 @@ import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?
 import { editCodingQuestion, codingDialog } from "./coding-form.mjs?v=20261115-coding-v1";
 import { codingQuestionId, filterCodingQuestions, codingDraftKey, acceptsCodingStatus } from "./coding-model.mjs?v=20261115-coding-v1";
 import { renderSubmissionDetails } from "./submission-details.mjs?v=20261116-submissions-v1";
-import { mountLeaderboard } from "./leaderboard.js?v=20261117-leaderboard-v1";
+import { mountLeaderboard } from "./leaderboard.js?v=20261117-weekly-leaderboard-v2";
 
 let revision = 0;
 let requestLuoguSubmit;
@@ -86,7 +86,7 @@ function renderHome() {
   progress.append(el("strong", `${home.progress.solved}`), el("span", `/ ${home.progress.total} 题已通过`));
   hero.append(intro, progress);
   const daily = el("section", "", "coding-daily panel");
-  const dailyText = el("div"); dailyText.append(el("span", "DAILY CHALLENGE", "eyebrow"), el("h3", home.daily.question_title || "今天，从一道题开始"), el("p", `${home.daily.date} · 连续打卡 ${home.daily.streak} 天 · 每连续 7 天递增奖励：第 7 天 1 次、第 14 天 2 次面试`));
+  const dailyText = el("div"); dailyText.append(el("span", "DAILY CHALLENGE", "eyebrow"), el("h3", home.daily.question_title || "今天，从一道题开始"), el("p", `${home.daily.date} · 连续打卡 ${home.daily.streak} 天 · 每连续 7 天递增奖励：第 7 天 1 积分、第 14 天 2 积分`));
   const dailyActions = el("div", "", "coding-actions");
   const dailyUnavailable = home.daily.question_id && home.daily.available === false;
   const dailyStart = button(dailyUnavailable ? "今日题目暂不可用" : home.daily.question_id ? "继续每日一题 →" : "随机抽取今日题 →", async () => {
@@ -104,7 +104,8 @@ function renderHome() {
       const current = revision; const owner = state.user.id;
       const result = await api("/coding/checkin", { method: "POST" });
       if (!active(current, owner)) return;
-      notify(result.already_checked ? "今天已经打卡。" : `打卡成功，连续 ${result.streak} 天${result.credits ? `，获得 ${result.credits} 次面试` : ""}。`);
+      const earnedPoints = result.points ?? result.credits ?? 0;
+      notify(result.already_checked ? "今天已经打卡。" : `打卡成功，连续 ${result.streak} 天${earnedPoints ? `，获得 ${earnedPoints} 积分` : ""}。`);
       await refreshCoding();
     });
     checkin.disabled = !home.daily.solved;
@@ -120,7 +121,7 @@ function renderHome() {
   }
   root.replaceChildren(hero);
   if (mode === "leaderboard") {
-    void mountLeaderboard(root, { onBack: () => { mode = "roadmap"; renderHome(); void refreshList(); } });
+    void mountLeaderboard(root, { scope: "coding", onBack: () => { mode = "roadmap"; renderHome(); void refreshList(); } });
     return;
   }
   if (mode === "roadmap") root.append(daily);
@@ -138,7 +139,7 @@ function renderHome() {
     root.append(roadmap);
   } else if (mode === "mine") {
     const contribution = el("div", "", "coding-contribution panel");
-    contribution.append(el("div", `已公开 ${home.contribution.approved_count} 道 · 已获得 ${home.contribution.credits_earned} 次面试奖励`), el("p", `每 ${home.contribution.questions_per_reward} 道首次审核通过，获得 ${home.contribution.credits_per_reward} 次面试。私人题只对自己可见，也参与自己的每日抽题。`, "muted"), button("＋ 添加我的题目", () => editQuestion(), "button primary")); root.append(contribution);
+    contribution.append(el("div", `已公开 ${home.contribution.approved_count} 道 · 已获得 ${home.contribution.credits_earned} 积分`), el("p", `每 ${home.contribution.questions_per_reward} 道首次审核通过，获得 ${home.contribution.credits_per_reward} 积分。私人题只对自己可见，也参与自己的每日抽题。`, "muted"), button("＋ 添加我的题目", () => editQuestion(), "button primary")); root.append(contribution);
   }
   if (!home.can_coding && mode !== "mine") return;
   const toolbar = el("div", "", "coding-toolbar");

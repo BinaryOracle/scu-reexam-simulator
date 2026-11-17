@@ -3,13 +3,22 @@ import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, el, button, emptyState, notify, run, dateTime, badge, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import { refreshAccountSettings, setupAccountSettings } from "./profile-account.js?v=20261116-ui-audit-v2";
 
-import { refreshTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
+import { refreshTransfers } from "./credit-transfers.js?v=20261117-points-v1";
 
 let voucherPackage = "";
 let voucherPage = 1;
 let voucherRequest = 0;
 let voucherSearchTimer;
 let defaultCreditsDirty = false;
+let pointsSettingsDirty = false;
+let packageOptions = [];
+let profilePoints = 0;
+let unitPointsCost = 1;
+let purchaseRequestKey = null;
+let purchaseQuantity = null;
+let purchaseToken = null;
+let purchaseBusy = false;
+let profileRequest = 0;
 const money = value => `¥${(value / 100).toFixed(2)}`;
 const download = (text, name) => {
   const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
@@ -35,15 +44,19 @@ export async function refreshVouchers() {
   try {
   const settings = await readCreditSettings();
   if (request !== voucherRequest) return;
-  if (!settings.packages.some(item => item.id === voucherPackage)) voucherPackage = settings.packages[0]?.id || "";
+  packageOptions = settings.packages;
+  if (!packageOptions.some(item => item.id === voucherPackage)) voucherPackage = packageOptions[0]?.id || "";
+  $("deleteVoucherPackage").disabled = !settings.packages.some(item => item.id === voucherPackage);
+  $("exportVouchers").disabled = !voucherPackage;
+  if (!pointsSettingsDirty) $("interviewPointsCost").value = settings.interview_points_cost;
   const selected = $("voucherGeneratePackage").value;
   $("voucherGeneratePackage").replaceChildren(...settings.packages.map(item => {
-    const option = el("option", `${money(item.price_fen)} / ${item.credits} 次`); option.value = item.id; return option;
+    const option = el("option", `${money(item.price_fen)} / ${item.credits} 积分`); option.value = item.id; return option;
   }));
-  $("voucherGeneratePackage").value = settings.packages.some(item => item.id === selected) ? selected : voucherPackage;
+  $("voucherGeneratePackage").value = settings.packages.some(item => item.id === selected) ? selected : settings.packages[0]?.id || "";
   $("voucherGenerateForm").querySelector('[type="submit"]').disabled = !settings.packages.length;
-  $("voucherPackageTabs").replaceChildren(...settings.packages.map(item => {
-    const control = button(`${money(item.price_fen)} / ${item.credits} 次`, () => {
+  $("voucherPackageTabs").replaceChildren(...packageOptions.map(item => {
+    const control = button(`${money(item.price_fen)} / ${item.credits} 积分`, () => {
       voucherPackage = item.id; voucherPage = 1; $("voucherBatch").value = "";
       return refreshVouchers();
     }, item.id === voucherPackage ? "selected" : "");
@@ -51,8 +64,9 @@ export async function refreshVouchers() {
     control.setAttribute("aria-pressed", String(item.id === voucherPackage));
     return control;
   }));
-  const query = new URLSearchParams({ package: voucherPackage, status: $("voucherStatus").value,
+  const query = new URLSearchParams({ status: $("voucherStatus").value,
     q: $("voucherSearch").value.trim(), batch: $("voucherBatch").value.trim(), page: voucherPage });
+  if (voucherPackage) query.set("package", voucherPackage);
   const data = await api(`/admin/vouchers?${query}`);
   if (request !== voucherRequest) return;
   $("voucherList").removeAttribute("aria-busy");
@@ -73,7 +87,7 @@ export async function refreshVouchers() {
   const table = el("table", "", "voucher-table");
   const mobileList = el("div", "", "voucher-mobile-list");
   const head = el("thead"); const titles = el("tr");
-  for (const title of ["卡密", "批次", "次数 / 标价", "兑换状态", "兑换用户", "兑换时间"]) {
+  for (const title of ["卡密", "批次", "积分 / 标价", "兑换状态", "兑换用户", "兑换时间"]) {
     const cell = el("th", title); cell.scope = "col"; titles.append(cell);
   }
   head.append(titles);
@@ -101,7 +115,7 @@ export async function refreshVouchers() {
     batch.append(makeBatchButton());
     const redeemed = Boolean(item.redeemed_at);
     const status = el("td"); status.append(badge(redeemed ? "已兑换" : "未兑换", redeemed ? "green" : "orange"));
-    row.append(code, batch, el("td", `${item.credits} 次 / ${money(item.price_fen)}`), status,
+    row.append(code, batch, el("td", `${item.credits} 积分 / ${money(item.price_fen)}`), status,
       el("td", item.redeemed_by || "—"), el("td", item.redeemed_at ? dateTime(item.redeemed_at) : "—"));
     body.append(row);
 
@@ -118,7 +132,7 @@ export async function refreshVouchers() {
       return field.querySelector("dd");
     };
     addField("批次", "").append(makeBatchButton());
-    addField("套餐", `${item.credits} 次 / ${money(item.price_fen)}`);
+    addField("套餐", `${item.credits} 积分 / ${money(item.price_fen)}`);
     addField("兑换用户", item.redeemed_by || "—");
     addField("兑换时间", item.redeemed_at ? dateTime(item.redeemed_at) : "—");
     card.append(cardHeading, details);
@@ -139,8 +153,20 @@ export async function refreshVouchers() {
 }
 
 export async function refreshProfile() {
+  const request = ++profileRequest, token = state.token;
   const data = await api("/profile");
+  if (request !== profileRequest || token !== state.token || !state.user) return;
   state.user.interview_credits = data.remaining;
+  state.user.points = data.points;
+  profilePoints = data.points;
+  unitPointsCost = data.interview_points_cost;
+  $("profilePoints").textContent = `${data.points.toLocaleString("zh-CN")} 积分`;
+  $("profilePointsStat").hidden = data.is_admin;
+  $("profileShopSection").hidden = data.is_admin;
+  $("profilePointsHistorySection").hidden = data.is_admin;
+  $("pointsProductPrice").textContent = `${unitPointsCost} 积分 / 次`;
+  updatePurchaseTotal();
+  renderPointsHistory(data.points_history);
   $("profileUsername").textContent = data.username;
   refreshAccountSettings();
   $("profileLoginEmail").hidden = !state.user.email;
@@ -164,13 +190,13 @@ export async function refreshProfile() {
   if (data.shop_url) shop.href = data.shop_url;
   else shop.removeAttribute("href");
   if (!data.redemptions.length) {
-    $("redemptionHistory").replaceChildren(emptyState("暂无兑换记录", "兑换成功后，次数和对应套餐金额会显示在这里。", "◇"));
+    $("redemptionHistory").replaceChildren(emptyState("暂无兑换记录", "兑换成功后，获得的积分和对应套餐金额会显示在这里。", "◇"));
   } else {
     const list = el("div", "", "redemption-list");
     for (const record of data.redemptions) {
       const row = el("article", "", "redemption-record");
       const copy = el("div");
-      copy.append(el("strong", `新增 ${record.credits} 次面试`), el("p", `卡密尾号 ${record.code_suffix} · ${dateTime(record.redeemed_at)}`));
+      copy.append(el("strong", `新增 ${record.points} 积分`), el("p", `卡密尾号 ${record.code_suffix} · ${dateTime(record.redeemed_at)}`));
       row.append(copy, el("span", money(record.amount_fen), "redemption-price"));
       list.append(row);
     }
@@ -178,38 +204,125 @@ export async function refreshProfile() {
   }
   try { await refreshTransfers(data, refreshProfile); }
   catch {
+    if (request !== profileRequest || token !== state.token) return;
     const message = emptyState("转赠记录暂时无法加载", "余额和兑换信息已更新；请稍后重试查看转赠记录。", "◇");
     message.append(button("重新加载", () => { void refreshProfile(); }, "button secondary"));
     $("profileTransfers").replaceChildren(message);
   }
   try {
     const contribution = await api("/training/contribution-rewards");
+    if (request !== profileRequest || token !== state.token) return;
     contributionRoot.replaceChildren();
     const contributionHeading = el("div", "", "contribution-heading");
     contributionHeading.append(el("div", "题库贡献奖励", "eyebrow"),
-      el("h2", contribution.exempt ? "管理员账号不参与奖励" : "分享题目，获得面试次数"));
+      el("h2", contribution.exempt ? "管理员账号不参与奖励" : "分享题目，获得积分"));
     const contributionProgress = el("p", contribution.exempt
       ? "普通用户投稿审核通过并公开后计入奖励。"
       : "当前规则：每 " + contribution.policy.questions_per_reward + " 道公开题奖励 " +
-        contribution.policy.credits_per_reward + " 次；本规则下已通过 " + contribution.approved_count +
+        contribution.policy.credits_per_reward + " 积分；本规则下已通过 " + contribution.approved_count +
         " 道，再通过 " + contribution.remaining_questions + " 道可达下一奖励。", "muted");
     contributionRoot.append(contributionHeading, contributionProgress);
     if (!contribution.exempt) {
       const history = el("div", "", "contribution-history");
       for (const grant of contribution.grants.slice(0, 5))
-        history.append(el("span", "+" + grant.credits + " 次 · " + new Date(grant.created * 1000).toLocaleDateString("zh-CN")));
+        history.append(el("span", "+" + grant.credits + " 积分 · " + new Date(grant.created * 1000).toLocaleDateString("zh-CN")));
       if (!contribution.grants.length) history.append(el("span", "审核通过的投稿达到规则数量后，会在这里显示奖励记录。"));
       contributionRoot.append(history);
     }
   } catch {
+    if (request !== profileRequest || token !== state.token) return;
     const message = emptyState("贡献奖励信息暂时无法加载", "账户余额与兑换记录仍可正常查看。", "◇");
     message.append(button("重新加载", () => { void refreshProfile(); }, "button secondary"));
     contributionRoot.replaceChildren(message);
   }
 }
 
+function updatePurchaseTotal() {
+  const quantity = Number($("pointsPurchaseQuantity").value);
+  const valid = Number.isInteger(quantity) && quantity > 0 && quantity <= 10000;
+  const total = valid ? quantity * unitPointsCost : 0;
+  $("pointsPurchaseTotal").textContent = valid ? `合计 ${total.toLocaleString("zh-CN")} 积分 · 当前可用 ${profilePoints} 积分` : "请输入 1～10000 的整数次数";
+  $("pointsPurchaseSubmit").disabled = purchaseBusy || !valid || total > profilePoints;
+  $("pointsPurchaseSubmit").textContent = valid && total > profilePoints ? "积分不足" : "确认购买";
+}
+
+function renderPointsHistory(records) {
+  const labels = { redemption: "卡密兑换", checkin_reward: "每日训练连续签到", coding_checkin: "算法带刷连续签到", question_contribution: "题库贡献奖励", coding_contribution: "算法投稿奖励", leaderboard_reward: "周榜奖励", ranking_award: "周榜奖励", purchase_interview: "购买模拟面试次数", admin: "管理员调整" };
+  if (!records.length) {
+    $("pointsHistory").replaceChildren(emptyState("还没有积分记录", "签到、榜单奖励和卡密兑换获得积分后，可在这里查看收支。", "◇"));
+    return;
+  }
+  const list = el("div", "", "points-history-list");
+  for (const record of records) {
+    const row = el("article", "", "points-history-row");
+    const copy = el("div");
+    copy.append(el("strong", labels[record.kind] || "积分变动"), el("p", `${dateTime(record.created)} · 余额 ${record.balance_after} 积分`));
+    row.append(copy, el("strong", `${record.delta > 0 ? "+" : ""}${record.delta} 积分`, record.delta > 0 ? "points-income" : "points-expense"));
+    list.append(row);
+  }
+  $("pointsHistory").replaceChildren(list);
+}
+
 export function setupCredits() {
   setupAccountSettings();
+  $("interviewPointsCost").addEventListener("input", () => { pointsSettingsDirty = true; });
+  $("pointsSettingsForm").addEventListener("submit", event => {
+    event.preventDefault();
+    run(async () => {
+      const value = $("interviewPointsCost").value;
+      await api("/admin/credit-settings", { method: "PATCH", body: JSON.stringify({ interview_points_cost: Number(value) }) });
+      pointsSettingsDirty = $("interviewPointsCost").value !== value;
+      notify("积分购买规则已更新，后续购买立即生效。");
+    }, event.submitter);
+  });
+  $("deleteVoucherPackage").addEventListener("click", event => run(async () => {
+    const item = packageOptions.find(value => value.id === voucherPackage);
+    if (!item || item.deleted) return;
+    if (!await confirmAction(`删除「${money(item.price_fen)} / ${item.credits} 积分」套餐会同时永久删除该套餐下的全部卡密记录。未兑换卡密将立即失效，兑换历史也会删除；已经到账的积分不会退回。此操作不可撤销。`, { title: "删除套餐及全部卡密？", confirmText: "确认永久删除", danger: true })) return;
+    await api(`/admin/voucher-packages/${encodeURIComponent(item.id)}`, { method: "DELETE" });
+    notify("套餐及该套餐下的卡密记录已永久删除。");
+    try { await refreshVouchers(); }
+    catch { notify("套餐及卡密已删除，但列表刷新失败，请重新加载确认状态。", "error"); }
+  }, event.currentTarget));
+  $("pointsPurchaseQuantity").addEventListener("input", () => {
+    if (purchaseQuantity !== Number($("pointsPurchaseQuantity").value)) purchaseRequestKey = null;
+    $("pointsPurchaseError").hidden = true;
+    updatePurchaseTotal();
+  });
+  $("pointsPurchaseForm").addEventListener("submit", event => {
+    event.preventDefault();
+    if (purchaseBusy || $("pointsPurchaseSubmit").disabled) return;
+    const quantity = Number($("pointsPurchaseQuantity").value), expectedCost = unitPointsCost, token = state.token;
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10000 || quantity * expectedCost > profilePoints) return;
+    purchaseBusy = true;
+    $("pointsPurchaseQuantity").disabled = true;
+    void run(async () => {
+      $("pointsPurchaseError").hidden = true;
+      if (!await confirmAction(`使用 ${quantity * expectedCost} 积分购买 ${quantity} 次模拟面试。兑换成功后，次数会立即加入账户。`, { title: "确认积分购买", confirmText: "确认购买" })) return;
+      if (token !== state.token || $("profile").hidden) return;
+      if (purchaseToken !== token || purchaseQuantity !== quantity) purchaseRequestKey = null;
+      purchaseToken = token;
+      purchaseQuantity = quantity;
+      purchaseRequestKey ||= crypto.randomUUID();
+      try {
+        const result = await api("/profile/purchases", { method: "POST", body: JSON.stringify({ product: "interview", quantity, idempotency_key: purchaseRequestKey, expected_unit_cost: expectedCost }) });
+        if (token !== state.token) return;
+        purchaseRequestKey = null;
+        notify(result.already_purchased ? "该笔购买已完成，已更新余额。" : `购买成功，已增加 ${quantity} 次模拟面试。`);
+        try { await refreshProfile(); }
+        catch { notify("购买已成功，余额刷新失败，请重新进入个人主页查看。", "error"); }
+      } catch (error) {
+        if (token !== state.token) return;
+        $("pointsPurchaseError").textContent = error.message;
+        $("pointsPurchaseError").hidden = false;
+        if (error.status === 409) { purchaseRequestKey = null; await refreshProfile(); }
+      }
+    }, event.submitter).finally(() => {
+      purchaseBusy = false;
+      $("pointsPurchaseQuantity").disabled = false;
+      updatePurchaseTotal();
+    });
+  });
   $("defaultCredits").addEventListener("input", () => { defaultCreditsDirty = true; });
   $("voucherPackageForm").addEventListener("submit", event => {
     event.preventDefault();
@@ -288,9 +401,9 @@ export function setupCredits() {
       }
       try {
         await refreshProfile();
-        notify(`兑换成功，当前剩余 ${result.remaining} 次模拟面试。`);
+        notify(`兑换成功，当前可用 ${result.points} 积分。可在积分购买区兑换面试次数。`);
       } catch {
-        notify("兑换已成功，但余额刷新失败。请重新加载个人主页确认次数；不要重复兑换。", "error");
+        notify("兑换已成功，但余额刷新失败。请重新加载个人主页确认积分；不要重复兑换。", "error");
       }
     }, event.submitter);
   });

@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
 from app.db import connect
 from app.services.auth import administrator, current_user
-from app.services import credits
+from app.services import credits, points
 
 router = APIRouter()
 Package = Annotated[str, Field(min_length=1, max_length=64, pattern=r'^[A-Za-z0-9_-]+$')]
@@ -24,7 +24,8 @@ class VoucherBatch(BaseModel):
 
 class CreditSettings(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    default_credits: StrictInt = Field(ge=0, le=1000000)
+    default_credits: StrictInt | None = Field(default=None, ge=0, le=1000000)
+    interview_points_cost: StrictInt | None = Field(default=None, ge=1, le=1000000)
 
 
 class VoucherPackage(BaseModel):
@@ -38,11 +39,24 @@ def create_package(payload: VoucherPackage, user=Depends(administrator)):
     key = 'pkg_' + secrets.token_hex(12)
     with connect() as db:
         try:
-            db.execute('INSERT INTO voucher_packages VALUES (?,?,?,?)',
+            db.execute('INSERT INTO voucher_packages(id,price_fen,credits,created) VALUES (?,?,?,?)',
                        (key, payload.price_fen, payload.credits, time.time()))
         except sqlite3.IntegrityError as error:
-            raise HTTPException(409, '相同金额与次数的套餐已存在，请直接选择') from error
+            raise HTTPException(409, '相同金额与积分的套餐已存在，请直接选择') from error
     return {'id': key, **payload.model_dump()}
+
+
+@router.delete('/api/admin/voucher-packages/{package}', status_code=204)
+def delete_package(package: str, user=Depends(administrator)):
+    """Permanently delete a package and every issued voucher that belongs to it."""
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        exists = db.execute('SELECT 1 FROM voucher_packages WHERE id=? AND deleted=0', (package,)).fetchone()
+        if not exists:
+            raise HTTPException(404, '套餐不存在或已删除')
+        db.execute('DELETE FROM vouchers WHERE package=?', (package,))
+        db.execute('DELETE FROM voucher_packages WHERE id=?', (package,))
+    return Response(status_code=204)
 
 
 class Redeem(BaseModel):
@@ -74,8 +88,7 @@ def redeem(payload: Redeem, user=Depends(current_user)):
             raise HTTPException(409, '该卡密已被兑换，请勿重复使用')
         db.execute('UPDATE vouchers SET redeemed_by=?,redeemed_at=?,redeemed_username=? WHERE id=? AND redeemed_at IS NULL',
                    (user['id'], time.time(), account['username'], card['id']))
-        credits.adjust(db, user['id'], account['interview_credits'] + card['credits'],
-                       kind='redemption', amount_fen=card['price_fen'], reference=str(card['id']))
+        points.adjust(db, user['id'], card['credits'], kind='redemption', reference=str(card['id']))
         return credits.profile(db, user['id'])
 
 
@@ -84,14 +97,39 @@ def get_settings(user=Depends(administrator)):
     from app.config import load_config
     with connect() as db:
         return {'default_credits': credits.default_credits(db), 'packages': credits.packages(db),
+                'interview_points_cost': points.cost(db),
                 'max_voucher_batch': load_config()['credits']['max_voucher_batch']}
 
 
 @router.patch('/api/admin/credit-settings')
 def update_settings(payload: CreditSettings, user=Depends(administrator)):
     with connect() as db:
-        db.execute("UPDATE app_settings SET value=? WHERE key='default_interview_credits'", (str(payload.default_credits),))
+        if payload.default_credits is not None:
+            db.execute("UPDATE app_settings SET value=? WHERE key='default_interview_credits'", (str(payload.default_credits),))
+        if payload.interview_points_cost is not None:
+            db.execute("UPDATE app_settings SET value=? WHERE key='interview_points_cost'", (str(payload.interview_points_cost),))
     return get_settings(user)
+
+
+class Purchase(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    product: Literal['interview'] = 'interview'
+    quantity: StrictInt = Field(default=1, ge=1, le=10000)
+    idempotency_key: str = Field(min_length=8, max_length=100)
+    expected_unit_cost: StrictInt = Field(ge=1, le=1000000)
+
+
+@router.get('/api/profile/shop')
+def shop(user=Depends(current_user)):
+    with connect() as db:
+        return points.shop(db, user['id'])
+
+
+@router.post('/api/profile/purchases')
+def purchase(payload: Purchase, user=Depends(current_user)):
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        return points.purchase(db, user['id'], payload.quantity, payload.idempotency_key, payload.expected_unit_cost)
 
 
 @router.post('/api/admin/vouchers', status_code=201)

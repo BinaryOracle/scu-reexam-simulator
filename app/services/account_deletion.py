@@ -29,7 +29,7 @@ def delete_account(db, account):
     db.execute('UPDATE vouchers SET redeemed_by=NULL,redeemed_username=? WHERE redeemed_by=?', (account['username'], uid))
     for table in ('answers', 'interview_recordings', 'presentations'):
         db.execute(f'DELETE FROM {table} WHERE interview_id IN ({owned})', (uid,))
-    for table in ('interviews', 'submissions', 'sessions', 'credit_ledger'):
+    for table in ('interviews', 'submissions', 'sessions', 'credit_ledger', 'points_ledger'):
         db.execute(f'DELETE FROM {table} WHERE user_id=?', (uid,))
     db.execute('DELETE FROM email_challenges WHERE email=? COLLATE NOCASE', (account['email'],))
     db.execute('''INSERT INTO app_settings(key,value) VALUES ('user_id_highwater',?)

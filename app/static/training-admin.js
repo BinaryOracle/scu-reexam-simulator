@@ -61,7 +61,7 @@ async function list() {
   for(const item of result.items){
     const row=el('article','','learning-list-item');const info=el('div'),actions=el('div','','learning-list-actions');
     if(tab==='rewards'){
-      info.append(el('h3',item.username),el('p',`${item.date} · 连续打卡 ${item.streak} 天`,'muted'));actions.append(badge(`+${item.credits} 次`,'green'));
+      info.append(el('h3',item.username),el('p',`${item.date} · 连续打卡 ${item.streak} 天`,'muted'));actions.append(badge(`+${item.credits} 积分`,'green'));
     }else{
       info.append(badge(item.collection_name),button(item.question,()=>questionPreview(item),`learning-question-link ${item.category === 'translation' ? 'learning-passage-link' : ''}`),el('p',`贡献者：${item.owner_name} · ${item.active?'启用':'已停用'}`,'muted'));
       if(item.category==='translation')info.append(el('p','点击原文查看完整内容与参考译文','muted'));
@@ -86,14 +86,14 @@ async function renderContribution(root) {
   const form=el('form','','contribution-policy-form');
   const questions=el('input');questions.type='number';questions.min='1';questions.max='10000';questions.required=true;questions.value=String(value.policy.questions_per_reward);
   const credits=el('input');credits.type='number';credits.min='1';credits.max='1000000';credits.required=true;credits.value=String(value.policy.credits_per_reward);
-  for(const [text,input] of [['审核通过题数',questions],['奖励面试次数',credits]]){const label=el('label',text);label.append(input);form.append(label);}
+  for(const [text,input] of [['审核通过题数',questions],['奖励积分',credits]]){const label=el('label',text);label.append(input);form.append(label);}
   form.append(button('保存新规则',async()=>{
     await api('/admin/training/contribution-rewards',{method:'PUT',body:JSON.stringify({questions_per_reward:Number(questions.value),credits_per_reward:Number(credits.value)})});
     notify('投稿奖励新规则已生效');await refreshTrainingAdmin();
   },'button primary'));
   panel.append(heading,form,el('p','当前统计 ' + value.total + ' 个普通用户 · 规则版本 ' + value.policy.id,'muted'));
   const table=el('div','','contribution-admin-list');
-  for(const item of value.items){const row=el('div','','contribution-admin-row');row.append(el('strong',item.username),el('span',item.approved_count+' 道通过'),el('span','累计 +'+item.credits_earned+' 次'));table.append(row);}
+  for(const item of value.items){const row=el('div','','contribution-admin-row');row.append(el('strong',item.username),el('span',item.approved_count+' 道通过'),el('span','累计 +'+item.credits_earned+' 积分'));table.append(row);}
   panel.append(table);root.append(panel);
 }
 function renderSettings(root){

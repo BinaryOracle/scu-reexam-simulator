@@ -16,7 +16,7 @@ from app.services.security import hash_password
 from app.services.password_vault import decrypt_password, encrypt_password
 from app.services.password_vault import PasswordVaultError
 from app.services import model_settings
-from app.services import credits
+from app.services import credits, points
 from app.services.account_deletion import delete_account, remove_account_files
 from app.services.problem_content import public_problem
 
@@ -37,6 +37,7 @@ class AccountCreate(BaseModel):
     can_exam: StrictBool = True
     can_practice: StrictBool | None = None
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
+    points: Annotated[StrictInt, Field(ge=0, le=1000000000)] | None = None
 
     @field_validator('email')
     @classmethod
@@ -59,6 +60,7 @@ class AccountUpdate(BaseModel):
     # Kept for one release so older clients can update the former combined grant.
     can_practice: StrictBool | None = None
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
+    points: Annotated[StrictInt, Field(ge=0, le=1000000000)] | None = None
 
 
 class PasswordReset(BaseModel):
@@ -330,6 +332,8 @@ def create_user(payload: AccountCreate, actor=Depends(administrator)):
         except sqlite3.IntegrityError as error:
             raise HTTPException(409, '用户名或邮箱已存在，请使用其他用户名或邮箱') from error
         credits.adjust(db, uid, initial, kind='initial')
+        if payload.points:
+            points.adjust(db, uid, payload.points, kind='admin_adjust')
         return public_user(find_user(db, uid), admin_view=True)
 
 
@@ -363,6 +367,8 @@ def update_user(uid: int, payload: AccountUpdate, actor=Depends(administrator)):
             changes['can_interview'] = changes['can_exam'] = 1
         if 'interview_credits' in changes:
             credits.adjust(db, uid, changes.pop('interview_credits'))
+        if 'points' in changes:
+            points.adjust(db, uid, changes.pop('points') - old['points'], kind='admin_adjust')
         # Field names are drawn only from the closed AccountUpdate model.
         assignments = ','.join(f'{key}=?' for key in changes)
         if changes:

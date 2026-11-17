@@ -6,7 +6,7 @@ import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from fastapi import HTTPException
-from app.services import credits
+from app.services import points
 from app.services import coding_catalog as catalog
 
 TERMINAL = {'Accepted', 'Wrong Answer', 'Output Limit Exceeded', 'Time Limit Exceeded',
@@ -65,11 +65,9 @@ def reward_contribution(db, question):
         VALUES (?,?,?,?,?)''', (uid, policy['id'], milestone, policy['credits_per_reward'], time.time()))
     if not cursor.rowcount:
         return
-    balance = db.execute('SELECT interview_credits FROM users WHERE id=?', (uid,)).fetchone()[0]
-    credits.adjust(db, uid, balance + policy['credits_per_reward'], kind='coding_contribution',
+    points.adjust(db, uid, policy['credits_per_reward'], kind='coding_contribution',
                    reference=f"{policy['id']}:{milestone}")
-    ledger = db.execute('SELECT last_insert_rowid()').fetchone()[0]
-    db.execute('UPDATE coding_contribution_grants SET ledger_id=? WHERE id=?', (ledger, cursor.lastrowid))
+
 
 
 def daily(db, user):
@@ -133,7 +131,7 @@ def checkin(db, user):
     """Persist attendance, milestone reward and ledger under the caller's write lock."""
     status = daily(db, user)
     if status['checked_in']:
-        return dict(already_checked=True, credits=status['reward'], streak=status['streak'], home=home(db, user))
+        return dict(already_checked=True, credits=status['reward'], points=status['reward'], streak=status['streak'], home=home(db, user))
     if not status['question_id'] or not status['solved']:
         raise HTTPException(409, '请先通过今天的每日一题评测，再打卡')
     streak = status['streak'] + 1
@@ -142,10 +140,8 @@ def checkin(db, user):
     cid = db.execute('INSERT INTO coding_checkins(user_id,date,streak,credits) VALUES (?,?,?,?)',
                      (user['id'], status['date'], streak, amount)).lastrowid
     if amount:
-        credits.adjust(db, user['id'], account['interview_credits'] + amount, kind='coding_checkin', reference=str(cid))
-        ledger = db.execute('SELECT last_insert_rowid()').fetchone()[0]
-        db.execute('UPDATE coding_checkins SET ledger_id=? WHERE id=?', (ledger, cid))
-    return dict(already_checked=False, credits=amount, streak=streak, home=home(db, user))
+        points.adjust(db, user['id'], amount, kind='coding_checkin', reference=str(cid))
+    return dict(already_checked=False, credits=amount, points=amount, streak=streak, home=home(db, user))
 
 
 def submission(db, sid, user, *, owner_only=False):

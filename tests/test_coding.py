@@ -237,9 +237,9 @@ def test_seven_fourteen_day_rewards_concurrent_checkin_and_broken_streak(client,
         assert all(result.json()['streak'] == streak for result in results)
         assert results[0].json()['credits'] == (streak // 7 if streak % 7 == 0 else 0)
         day += timedelta(days=1)
-    assert client.get('/api/profile', headers=alice).json()['remaining'] == 4
+    assert client.get('/api/profile', headers=alice).json()['points'] == 3
     with connect() as db:
-        assert db.execute("SELECT COUNT(*),SUM(delta) FROM credit_ledger WHERE kind='coding_checkin'").fetchone()[:] == (2, 3)
+        assert db.execute("SELECT COUNT(*),SUM(delta) FROM points_ledger WHERE kind='coding_checkin'").fetchone()[:] == (2, 3)
     day += timedelta(days=1)
     client.post('/api/coding/daily', headers=alice)
     _solve(client, alice, item['id'])
@@ -267,7 +267,7 @@ def test_contribution_first_five_reward_and_policy_version_isolation(client):
     progress = client.get('/api/coding/home', headers=alice).json()['contribution']
     assert progress['approved_count'] == 2 and progress['credits_earned'] == 4
     with connect() as db:
-        assert db.execute("SELECT COUNT(*),SUM(delta) FROM credit_ledger WHERE kind='coding_contribution'").fetchone()[:] == (2, 4)
+        assert db.execute("SELECT COUNT(*),SUM(delta) FROM points_ledger WHERE kind='coding_contribution'").fetchone()[:] == (2, 4)
         assert db.execute('SELECT COUNT(*) FROM coding_contribution_approvals').fetchone()[0] == 7
 
 
@@ -284,7 +284,7 @@ def test_concurrent_review_grants_one_approval(client):
                                                        json={'version': pending['version'], 'approve': True}), range(3)))
     assert sorted(response.status_code for response in responses) == [200, 409, 409]
     with connect() as db:
-        assert db.execute("SELECT COUNT(*),SUM(delta) FROM credit_ledger WHERE kind='coding_contribution'").fetchone()[:] == (1, 2)
+        assert db.execute("SELECT COUNT(*),SUM(delta) FROM points_ledger WHERE kind='coding_contribution'").fetchone()[:] == (1, 2)
 
 
 def test_local_judge_unavailable_and_private_history_survives_tombstone(client, monkeypatch):
@@ -456,16 +456,16 @@ def test_malformed_source_url_is_rejected_without_internal_error(client):
 def test_failed_ledger_write_rolls_back_review_and_reward(client, monkeypatch):
     import pytest
     from app.db import connect
-    from app.services import credits
+    from app.services import points
     alice, admin = login(client, 'alice'), login(client, 'manager')
     stage = _stage(client, admin)
     client.put('/api/admin/coding/settings', headers=admin, json={'questions_per_reward': 1, 'credits_per_reward': 1})
     item = _question(client, alice, stage)
     pending = client.post(f"/api/coding/questions/{item['id']}/submit", headers=alice, json={'version': 1}).json()
-    original_adjust = credits.adjust
+    original_adjust = points.adjust
     def unavailable(*args, **kwargs):
         raise RuntimeError('模拟账本写入故障')
-    monkeypatch.setattr(credits, 'adjust', unavailable)
+    monkeypatch.setattr(points, 'adjust', unavailable)
     with pytest.raises(RuntimeError, match='模拟账本写入故障'):
         client.post(f"/api/admin/coding/questions/{item['id']}/review", headers=admin,
                     json={'version': pending['version'], 'approve': True})
@@ -473,10 +473,10 @@ def test_failed_ledger_write_rolls_back_review_and_reward(client, monkeypatch):
         assert db.execute('SELECT review_status FROM coding_questions WHERE id=?', (item['id'],)).fetchone()[0] == 'pending'
         assert db.execute('SELECT COUNT(*) FROM coding_contribution_approvals').fetchone()[0] == 0
         assert db.execute('SELECT COUNT(*) FROM coding_contribution_grants').fetchone()[0] == 0
-    monkeypatch.setattr(credits, 'adjust', original_adjust)
+    monkeypatch.setattr(points, 'adjust', original_adjust)
     assert client.post(f"/api/admin/coding/questions/{item['id']}/review", headers=admin,
                        json={'version': pending['version'], 'approve': True}).status_code == 200
-    assert client.get('/api/profile', headers=alice).json()['remaining'] == 2
+    assert client.get('/api/profile', headers=alice).json()['points'] == 1
 
 
 def test_changing_judged_content_requires_a_new_pass_but_sorting_and_review_do_not(client, monkeypatch):

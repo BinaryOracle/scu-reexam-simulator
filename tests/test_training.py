@@ -148,17 +148,17 @@ def test_streak_rewards_7_14_21_and_repeat_checkin(client, monkeypatch):
         assert response.json()['credits'] == ((n+1)//7 if (n+1)%7 == 0 else 0)
         assert post(client, '/training/checkin', a).json()['already_checked'] is True
     profile = client.get('/api/profile', headers=a).json()
-    assert profile['remaining'] == 7 and profile['redeemed_amount_fen'] == 0
+    assert profile['remaining'] == 1 and profile['points'] == 6 and profile['redeemed_amount_fen'] == 0
     from app.db import connect
     with connect() as db:
-        assert [r[0] for r in db.execute("SELECT delta FROM credit_ledger WHERE kind='checkin_reward' ORDER BY id")] == [1,2,3]
+        assert [r[0] for r in db.execute("SELECT delta FROM points_ledger WHERE kind='checkin_reward' ORDER BY id")] == [1,2,3]
     monkeypatch.setattr(training, 'today', lambda: base + timedelta(days=22))
     finish(client, a, start(client, a))
     assert post(client, '/training/checkin', a).json()['home']['streak'] == 1
 
 
 def test_concurrent_checkin_rewards_once_and_rolls_back_failure(client, monkeypatch):
-    from app.services import training, credits
+    from app.services import training, points
     from app.db import connect
     a = login(client, 'alice')
     day = training.today()
@@ -167,23 +167,23 @@ def test_concurrent_checkin_rewards_once_and_rolls_back_failure(client, monkeypa
         uid = db.execute("SELECT id FROM users WHERE username='alice'").fetchone()[0]
         db.execute('INSERT INTO training_checkins(user_id,date,streak,streak_start) VALUES (?,?,?,?)',
                    (uid, (day-timedelta(days=1)).isoformat(), 6, (day-timedelta(days=6)).isoformat()))
-    original = credits.adjust
+    original = points.adjust
     def failure(*args, **kwargs):
         original(*args, **kwargs)
         raise RuntimeError('forced ledger rollback')
-    monkeypatch.setattr(credits, 'adjust', failure)
+    monkeypatch.setattr(points, 'adjust', failure)
     import pytest
     with pytest.raises(RuntimeError):
         post(client, '/training/checkin', a)
     with connect() as db:
         assert db.execute('SELECT COUNT(*) FROM training_checkins WHERE user_id=? AND date=?', (uid, day.isoformat())).fetchone()[0] == 0
         assert db.execute('SELECT interview_credits FROM users WHERE id=?', (uid,)).fetchone()[0] == 1
-    monkeypatch.setattr(credits, 'adjust', original)
+    monkeypatch.setattr(points, 'adjust', original)
     with ThreadPoolExecutor(max_workers=3) as pool:
         responses = list(pool.map(lambda _: post(client, '/training/checkin', a), range(3)))
     assert all(r.status_code == 200 for r in responses)
     assert sum(not r.json()['already_checked'] for r in responses) == 1
-    assert client.get('/api/profile', headers=a).json()['remaining'] == 2
+    assert client.get('/api/profile', headers=a).json()['points'] == 1
 
 
 def test_image_requires_auth_and_migration_keeps_admin_edits(client):

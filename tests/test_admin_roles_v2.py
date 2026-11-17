@@ -118,7 +118,7 @@ def test_dynamic_packages_can_be_created_generated_exported_and_redeemed(client)
     assert client.get(f'/api/admin/vouchers?package={package}', headers=manager).json()['total'] == 2
     assert client.get(f'/api/admin/vouchers/export?package={package}', headers=manager).text.splitlines() == codes
     redeemed = client.post('/api/profile/redeem', headers=alice, json={'code': codes[0]})
-    assert redeemed.json()['remaining'] == 7 and redeemed.json()['redeemed_amount_fen'] == 350
+    assert redeemed.json()['remaining'] == 1 and redeemed.json()['points'] == 6 and redeemed.json()['redeemed_amount_fen'] == 350
 
 
 def test_logout_revokes_server_session_and_frontend_apis_hide_admin_allowance(client):

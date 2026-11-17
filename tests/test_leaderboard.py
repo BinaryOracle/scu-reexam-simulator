@@ -36,23 +36,25 @@ def test_leaderboard_excludes_admin_and_deduplicates_accepted(client):
                 'int main(){}', 'Accepted', created, '2026-11-16',
             ))
 
-    response = client.get('/api/leaderboard', headers=alice)
+    response = client.get('/api/leaderboard?scope=training&range=all', headers=alice)
     assert response.status_code == 200, response.text
     payload = response.json()
-    assert set(payload['boards']) == {'checkins', 'training_questions', 'coding_solved'}
+    assert set(payload['boards']) == {'training_checkins', 'training_questions'}
     assert all(item['username'] != 'manager' for board in payload['boards'].values() for item in board)
-    assert next(item for item in payload['boards']['checkins'] if item['username'] == 'alice')['value'] == 2
+    assert next(item for item in payload['boards']['training_checkins'] if item['username'] == 'alice')['value'] == 2
     assert next(item for item in payload['boards']['training_questions'] if item['username'] == 'alice')['value'] == 1
-    assert next(item for item in payload['boards']['coding_solved'] if item['username'] == 'alice')['value'] == 1
-    assert payload['me']['coding_solved'] == 1
-    assert client.get('/api/leaderboard', headers=bob).json()['me']['checkins'] == 2
-    assert client.get('/api/leaderboard', headers=manager).json()['me'] is None
+    coding = client.get('/api/leaderboard?scope=coding&range=all', headers=alice).json()
+    assert set(coding['boards']) == {'coding_checkins', 'coding_solved'}
+    assert next(item for item in coding['boards']['coding_solved'] if item['username'] == 'alice')['value'] == 1
+    assert coding['me']['coding_solved'] == 1
+    assert client.get('/api/leaderboard?scope=training&range=all', headers=bob).json()['me']['training_checkins'] == 2
+    assert client.get('/api/leaderboard?scope=training&range=all', headers=manager).json()['me'] is None
 
 
 def test_leaderboard_ties_are_sorted_by_username(client):
     alice = login(client, 'alice')
     bob = login(client, 'bob')
-    response = client.get('/api/leaderboard', headers=alice)
+    response = client.get('/api/leaderboard?scope=training&range=all', headers=alice)
     assert response.status_code == 200
     rows = response.json()['boards']['training_questions']
     assert [row['username'] for row in rows[:2]] == ['alice', 'bob']

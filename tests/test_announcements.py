@@ -13,8 +13,10 @@ def test_default_guidance_announcement_is_seeded_and_visible(client):
     assert any(block['type']=='link' and 'wzyp.cn/shop/E1GQFV0P' in block['url'] for block in notice['blocks'])
     content=' '.join(block.get('text','') for block in notice['blocks'])
     assert '每 5 道' in content
-    assert '第 7 天新增 1 次' in content and '第 14 天再新增 2 次' in content
-    assert '卡密兑换' in content and '转赠' in content
+    assert '每 5 道通过审核的题目奖励 1 积分' in content
+    assert '第 7 天获得 1 积分' in content and '第 14 天再获得 2 积分' in content
+    assert '卡密兑换' in content and '积分转赠' in content
+    assert '每次模拟面试' not in content
 
 
 def test_initialization_refreshes_only_untouched_default_announcement(client):
@@ -24,7 +26,7 @@ def test_initialization_refreshes_only_untouched_default_announcement(client):
         db.execute("UPDATE announcements SET blocks='[]',summary='旧规则' WHERE title='平台功能与奖励规则说明'")
         initialize(db)
         seeded=db.execute("SELECT * FROM announcements WHERE title='平台功能与奖励规则说明'").fetchone()
-        assert '第 14 天再新增 2 次' in ' '.join(block.get('text','') for block in __import__('json').loads(seeded['blocks']))
+        assert '第 14 天再获得 2 积分' in ' '.join(block.get('text','') for block in __import__('json').loads(seeded['blocks']))
         db.execute("UPDATE announcements SET blocks='[]',summary='管理员版本',updated_by=1 WHERE id=?",(seeded['id'],))
         initialize(db)
         preserved=db.execute('SELECT summary,blocks FROM announcements WHERE id=?',(seeded['id'],)).fetchone()

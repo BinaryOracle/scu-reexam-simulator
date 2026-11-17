@@ -19,20 +19,20 @@ import {
   setupContestCreation,
   requestLuoguSubmit,
 } from "./contest.js?v=20261116-ui-audit-v2";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261117-accounts-v1";
-import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261116-ui-audit-v2";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261117-accounts-v2";
+import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261117-package-delete-v2";
 import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
 
-import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261116-active-round-copy-v1";
-import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261115-empty-state-v1";
+import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261117-points-v1";
+import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261117-points-v1";
 
-import { clearTransfers } from "./credit-transfers.js?v=20261115-dialog-v1";
+import { clearTransfers } from "./credit-transfers.js?v=20261117-points-v1";
 import { refreshHome, refreshAnnouncementsAdmin, setupHome, showPendingAnnouncementReminder } from "./home.js?v=20261116-announcement-delete-v1";
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
-import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261116-submission-ui-v2";
-import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261115-coding-v1";
+import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261117-points-v1";
+import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261117-points-v1";
 import { refreshTrends } from "./trends.js?v=20261116-trends-admin-v1";
 
 configureCodingBridge(requestLuoguSubmit);
@@ -49,7 +49,7 @@ const views = {
   trainingAdmin: { label: "训练题库", refresh: refreshTrainingAdmin },
   users: { label: "用户管理", refresh: refreshUsers },
   questionBank: { label: "面试题库", refresh: refreshQuestionBank },
-  vouchers: { label: "卡密与次数", refresh: refreshVouchers },
+  vouchers: { label: "积分与卡密", refresh: refreshVouchers },
   systemSettings: { label: "系统设置", refresh: async () => { await Promise.all([refreshLuoguSettings(), refreshModelSettings()]); } },
   profile: { label: "个人主页", refresh: refreshProfile },
   interview: {

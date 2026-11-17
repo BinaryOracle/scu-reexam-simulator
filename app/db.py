@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 34
+SCHEMA_VERSION = 35
 
 
 @contextmanager
@@ -138,10 +138,17 @@ def initialize():
         if 'interview_credits' not in columns:
             db.execute('ALTER TABLE users ADD COLUMN interview_credits INTEGER NOT NULL DEFAULT 1 CHECK(interview_credits>=0)')
             db.execute('UPDATE users SET interview_credits=?', (initial_credits,))
+        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
+        if 'points' not in columns:
+            # Existing interview allowances remain usable and are never duplicated
+            # into the new wallet.
+            db.execute('ALTER TABLE users ADD COLUMN points INTEGER NOT NULL DEFAULT 0 CHECK(points>=0)')
         db.execute('CREATE TABLE IF NOT EXISTS app_settings(key TEXT PRIMARY KEY,value TEXT NOT NULL)')
         db.execute("""INSERT INTO app_settings(key,value) VALUES ('user_id_highwater',?)
             ON CONFLICT(key) DO UPDATE SET value=excluded.value""", (str(_user_id_highwater(db)),))
         db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('default_interview_credits',?)", (str(initial_credits),))
+        db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('default_points','0')")
+        db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('interview_points_cost','1')")
         db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('luogu_app_origin',?)", ('http://127.0.0.1:8000',))
         db.execute('''CREATE TABLE IF NOT EXISTS vouchers(
             id INTEGER PRIMARY KEY,code TEXT NOT NULL UNIQUE,package TEXT NOT NULL CHECK(package IN ('three','ten')),
@@ -155,6 +162,11 @@ def initialize():
             balance_after INTEGER NOT NULL CHECK(balance_after>=0),kind TEXT NOT NULL,
             amount_fen INTEGER NOT NULL DEFAULT 0,reference TEXT NOT NULL DEFAULT '',created REAL NOT NULL)''')
         db.execute('CREATE INDEX IF NOT EXISTS ledger_by_user ON credit_ledger(user_id,created)')
+        db.execute('''CREATE TABLE IF NOT EXISTS points_ledger(
+            id INTEGER PRIMARY KEY,user_id INTEGER NOT NULL REFERENCES users(id),delta INTEGER NOT NULL,
+            balance_after INTEGER NOT NULL CHECK(balance_after>=0),kind TEXT NOT NULL,
+            reference TEXT NOT NULL DEFAULT '',created REAL NOT NULL)''')
+        db.execute('CREATE INDEX IF NOT EXISTS points_ledger_by_user ON points_ledger(user_id,created)')
         if 'role' in columns:
             # The old teacher account managed exams; it becomes the administrator.
             for field, default in [('is_admin', 0), ('is_active', 1)]:
@@ -271,4 +283,6 @@ def initialize():
         initialize_live(db)
         from .services.trends import initialize as initialize_trends
         initialize_trends(db)
+        from .services.points import initialize as initialize_points
+        initialize_points(db)
         db.execute(f'PRAGMA user_version={SCHEMA_VERSION}')

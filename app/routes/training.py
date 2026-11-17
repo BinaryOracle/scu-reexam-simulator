@@ -88,9 +88,9 @@ def home(section_id: str = Query('interview', max_length=40), user=Depends(curre
         return practice.home(db, user, section_id)
 
 @router.get('/api/leaderboard')
-def leaderboard(user=Depends(current_user)):
+def leaderboard(scope: Literal['training', 'coding'] = 'training', range: Literal['weekly', 'all'] = 'weekly', user=Depends(current_user)):
     with connect() as db:
-        return leaderboard_service.snapshot(db, user)
+        return leaderboard_service.snapshot(db, user, scope, range)
 
 
 @router.get('/api/training/contribution-rewards')

@@ -11,6 +11,7 @@ from app.config import load_config
 
 DEFAULT_COVER = '/static/assets/announcement-cover.png'
 DEFAULT_TITLE = '平台功能与奖励规则说明'
+GUIDANCE_VERSION = 'default_guidance_points_v2'
 ASSET_PATH = re.compile(r'^/api/announcements/assets/([a-f0-9]{32})$')
 
 
@@ -63,6 +64,21 @@ def render_markdown(content):
 
 def default_blocks():
     return [
+        {'type':'heading','text':'提交题目，积累积分'},
+        {'type':'paragraph','text':'你提交到训练题库的题目，经管理员审核通过并公开后计入贡献奖励。当前默认每 5 道通过审核的题目奖励 1 积分，具体规则以平台设置为准。积分和奖励记录可在个人主页查看。'},
+        {'type':'heading','text':'每日训练与连续签到'},
+        {'type':'paragraph','text':'完成每日训练目标后可签到（当前默认每天完成 5 道不同题，具体目标以系统设置为准）。连续签到第 7 天获得 1 积分，第 14 天再获得 2 积分，第 21 天再获得 3 积分，依此递增；连续 14 天累计获得 3 积分。中断后连续天数从第 1 天重新计算，已获得的积分保留。'},
+        {'type':'heading','text':'使用积分购买模拟面试'},
+        {'type':'paragraph','text':'在联动小铺购买积分卡密后，登录本网站并进入个人主页，在“卡密兑换”中粘贴并提交。兑换成功后积分会加入账户；再到“积分购买”页面按当前价格购买模拟面试次数。当前默认 1 积分可购买 1 次面试，具体价格以页面显示为准。'},
+        {'type':'link','text':'前往联动小铺','url':'https://wzyp.cn/shop/E1GQFV0P'},
+        {'type':'heading','text':'转赠积分'},
+        {'type':'paragraph','text':'普通用户可在个人主页将积分转赠给其他普通用户，并查看转赠记录。请核对接收方用户名或邮箱和转赠数量；确认后积分会立即转入对方账户。管理员账户不参与转赠。'},
+        {'type':'paragraph','text':'模拟面试次数在正式开始后扣除。每日签到、题目贡献和每周排行榜奖励均按平台实际记录发放积分。'}]
+
+
+def legacy_default_blocks():
+    """Return the exact prior system seed so initialization can migrate it safely."""
+    return [
         {'type':'heading','text':'提交题目，积累面试次数'},
         {'type':'paragraph','text':'你提交到训练题库的题目，经管理员审核通过并公开后计入贡献奖励。当前规则为每 5 道通过审核的题目奖励 1 次模拟面试。进度和奖励记录可在个人主页查看；规则可能由管理员调整，以平台当前规则为准。'},
         {'type':'heading','text':'每日训练与连续签到'},
@@ -111,12 +127,22 @@ def initialize(db):
             json.dumps(blocks, ensure_ascii=False), blocks_to_markdown(blocks), now, now, now))
     if not seed:
         db.execute("INSERT INTO announcement_seed_state(name,initialized) VALUES ('default_guidance',?)", (time.time(),))
+    migrated = db.execute('SELECT 1 FROM announcement_seed_state WHERE name=?', (GUIDANCE_VERSION,)).fetchone()
+    if not migrated:
+        existing = db.execute('SELECT * FROM announcements WHERE title=? LIMIT 1', (DEFAULT_TITLE,)).fetchone()
+        legacy_markdown = blocks_to_markdown(legacy_default_blocks())
+        if existing and existing['created_by'] is None and existing['body_markdown'] == legacy_markdown:
+            blocks = default_blocks()
+            db.execute('UPDATE announcements SET summary=?,cover_url=?,blocks=?,body_markdown=?,updated=? WHERE id=?',
+                       ('题目投稿、积分签到、积分兑换与积分转赠说明', DEFAULT_COVER,
+                        json.dumps(blocks, ensure_ascii=False), blocks_to_markdown(blocks), time.time(), existing['id']))
+        db.execute('INSERT INTO announcement_seed_state(name,initialized) VALUES (?,?)', (GUIDANCE_VERSION, time.time()))
     existing = db.execute('SELECT * FROM announcements WHERE title=? LIMIT 1', (DEFAULT_TITLE,)).fetchone()
     if existing and existing['created_by'] is None and existing['updated_by'] is None:
-        # Refresh only the untouched system seed; preserve administrator edits and publication state.
+        # Keep the system-owned default current while preserving administrator edits.
         blocks = default_blocks()
         db.execute('UPDATE announcements SET summary=?,cover_url=?,blocks=?,body_markdown=?,updated=? WHERE id=?',
-                   ('题目投稿、每日签到、次数购买兑换与转赠说明', DEFAULT_COVER,
+                   ('题目投稿、积分签到、积分兑换与积分转赠说明', DEFAULT_COVER,
                     json.dumps(blocks, ensure_ascii=False), blocks_to_markdown(blocks), time.time(), existing['id']))
 
 
