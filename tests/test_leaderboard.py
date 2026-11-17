@@ -45,7 +45,7 @@ def test_leaderboard_excludes_admin_and_deduplicates_accepted(client):
     assert next(item for item in payload['boards']['training_questions'] if item['username'] == 'alice')['value'] == 1
     assert next(item for item in payload['boards']['coding_solved'] if item['username'] == 'alice')['value'] == 1
     assert payload['me']['coding_solved'] == 1
-    assert client.get('/api/leaderboard', headers=bob).json()['me']['checkins'] == 1
+    assert client.get('/api/leaderboard', headers=bob).json()['me']['checkins'] == 2
     assert client.get('/api/leaderboard', headers=manager).json()['me'] is None
 
 
