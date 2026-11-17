@@ -3,14 +3,14 @@ import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, emptyState, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
 import { selectField, pagination, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
 import { mountLeaderboard } from './leaderboard.js?v=20261117-weekly-leaderboard-v3';
-let generation = 0, homeData = null, session = null;
+let generation = 0, homeData = null, session = null, reviewingCardId = null, roundReviewMode = false;
 let listRequest = 0;
 let section = 'interview';
 let collection = '', source = 'all', mode = 'random', tab = 'home', page = 1, search = '';
 let questionCount = null, countMode = 'custom';
 function live(key, token) { return key === generation && token === state.token && !$('training').hidden; }
 export function clearTraining() {
-  generation++; session = null; homeData = null; clearLearningMedia();
+  generation++; session = null; homeData = null; reviewingCardId = null; roundReviewMode = false; clearLearningMedia();
   $('trainingContent')?.replaceChildren();
 }
 async function loadHome(selectedSection = section) {
@@ -28,7 +28,7 @@ export async function refreshTraining() {
   try {
     const value = await api(`/training/home?section_id=${section}`);
     if (!live(key, token)) return;
-    homeData = value; session = null;
+    homeData = value; session = null; reviewingCardId = null; roundReviewMode = false;
     if (collection && !value.collections.some(c => c.id === collection)) collection='';
     render();
     if (tab !== 'home' && tab !== 'leaderboard') await list();
@@ -72,7 +72,7 @@ function render() {
       if (value === 'favorites' && !homeData.can_training) { notify('尚未开通每日训练权限，请联系管理员', 'error'); return; }
       generation++;
       if (value === 'home' && !await loadHome()) return;
-      tab = value; page = 1; session = null;
+      tab = value; page = 1; session = null; reviewingCardId = null; roundReviewMode = false;
       render(); if (tab !== 'home' && tab !== 'leaderboard') await list();
     }, `button ${tab === value ? 'primary' : 'quiet'}`);
     control.setAttribute('aria-pressed', String(tab === value)); tabs.append(control);
@@ -182,7 +182,7 @@ function renderHome(root) {
     const key = ++generation, token = state.token;
     const value = await api('/training/sessions', { method: 'POST', body: JSON.stringify({ section_id: section, collection_id: collection, source, mode,
       question_count: countMode === 'all' ? 'all' : Number(amount.value) }) });
-    if (!live(key, token)) return; session = value; render(); $('trainingContent').scrollIntoView({ behavior: 'smooth' });
+    if (!live(key, token)) return; session = value; reviewingCardId = null; roundReviewMode = false; render(); $('trainingContent').scrollIntoView({ behavior: 'smooth' });
   }, 'button primary'); begin.disabled = Boolean(homeData.active_session) || !homeData.can_training;
   filters.append(c.wrap, s.wrap, m.wrap);
   roundOptions.append(amountMode.wrap, amountWrap, begin); updateCount();
@@ -201,27 +201,73 @@ function renderHome(root) {
 async function resume(id) {
   const key = ++generation, token = state.token;
   const value = await api(`/training/sessions/${id}`);
-  if (live(key, token)) { session = value; section = value.section_id; collection = value.collection_id; tab = 'home'; render(); }
+  if (live(key, token)) { session = value; reviewingCardId = null; roundReviewMode = false; section = value.section_id; collection = value.collection_id; tab = 'home'; render(); }
 }
 async function returnToTrainingHome() {
   generation++;
   if (!await loadHome()) return;
-  session = null; tab = 'home'; render();
+  session = null; reviewingCardId = null; roundReviewMode = false; tab = 'home'; render();
+}
+function renderQuestionDock(root, activeCard) {
+  const dock = el('aside', '', 'learning-question-dock');
+  const toggle = button('题目列表', () => {
+    const open = !dock.classList.contains('is-open');
+    dock.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  }, 'learning-question-dock-toggle');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-controls', 'learningQuestionList');
+  const list = el('nav', '', 'learning-question-dock-panel');
+  list.id = 'learningQuestionList'; list.setAttribute('aria-label', '本轮题目');
+  list.append(el('strong', `本轮题目 · ${session.completed}/${session.total}`, 'learning-question-dock-title'));
+  for (const [index, item] of session.cards.entries()) {
+    const isActive = item.id === activeCard?.id;
+    const isReview = item.id === reviewingCardId;
+    const isSelected = isReview || (isActive && !reviewingCardId);
+    const label = item.completed ? '已完成' : isActive ? '当前' : '未作答';
+    const control = button(`第 ${index + 1} 题 · ${label}`, () => {
+      reviewingCardId = roundReviewMode ? item.id : item.completed && !isActive ? item.id : null;
+      render();
+    }, `learning-question-dock-item${isSelected ? ' selected' : ''}`);
+    control.disabled = !roundReviewMode && !item.completed && !isActive;
+    control.setAttribute('aria-current', isSelected ? 'true' : 'false');
+    list.append(control);
+  }
+  dock.append(toggle, list);
+  root.append(dock);
+}
+function appendSelfRatingControls(footer, complete) {
+  footer.className += ' learning-rating-footer';
+  footer.append(
+    button('还需练习，下一题 →', () => complete('again'), 'button learning-rating-button learning-rating-again'),
+    button('暂不自评，下一题 →', () => complete('done'), 'button learning-rating-button learning-rating-skip'),
+    button('已掌握，下一题 →', () => complete('known'), 'button learning-rating-button learning-rating-known'),
+    el('p', '还需练习：下轮随机训练更容易抽中 · 暂不自评：不更改掌握记录 · 已掌握：下轮随机训练降低抽中概率', 'learning-rating-help'),
+  );
 }
 function renderSession(root) {
   const panel = el('section', '', 'learning-study');
   const top = el('div', '', 'learning-study-top');
   top.append(button('← 返回今日练习', returnToTrainingHome, 'button quiet'), el('span', session.mode === 'sequential' ? '按顺序复习' : '随机训练', 'muted'));
   panel.append(top);
-  if (session.status !== 'active') {
+  if (session.status !== 'active' && !roundReviewMode) {
     panel.classList.add('learning-complete');
     panel.append(el('span', '✓', 'learning-complete-icon'), el('h2', '这一轮，完成了。'), el('p', `已完成 ${session.completed} 道卡片。继续练习，或回到今日目标完成打卡。`, 'muted'));
-    panel.append(button('查看今日进度', returnToTrainingHome, 'button primary'));
+    const actions = el('div', '', 'learning-complete-actions');
+    actions.append(button('回顾本轮题目', () => {
+      roundReviewMode = true; reviewingCardId = session.cards[0]?.id || null; render();
+    }, 'button primary'), button('结束本轮训练', returnToTrainingHome, 'button secondary'));
+    panel.append(actions);
     root.append(panel); return;
   }
-  const card = session.cards.find(c => !c.completed);
+  const activeCard = session.cards.find(c => !c.completed);
+  const card = session.cards.find(c => c.id === reviewingCardId) || activeCard;
+  const isReviewing = card.completed;
+  const reviewIndex = session.cards.findIndex(item => item.id === card.id);
+  renderQuestionDock(root, activeCard);
   const bar = el('div', '', 'learning-progress'); const fill = el('span'); fill.style.width = `${session.completed/session.total*100}%`; bar.append(fill);
   const meta = el('div', '', 'learning-card-meta'); meta.append(badge(card.collection_name), el('span', `${session.completed + 1} / ${session.total}`));
+  if (isReviewing) meta.children[1].textContent = `回顾第 ${reviewIndex + 1} 题`;
   if (card.available) meta.firstChild.append(el('span', card.mastery.status === 'again' ? ' · 还需巩固' : card.mastery.status === 'known' ? ' · 已掌握' : ' · 未自评'));
   panel.append(bar, meta);
   if (card.category === 'translation') panel.classList.add('learning-translation');
@@ -245,16 +291,45 @@ function renderSession(root) {
     } finally { saving = false; }
   };
   const footer = el('div', '', 'learning-study-footer');
-  if (!card.available) footer.append(button('跳过不可用题目', () => complete('done'), 'button primary'));
+  if (isReviewing) {
+    panel.append(el('p', card.mastery?.status === 'again' ? '自评：还需练习' : card.mastery?.status === 'known' ? '自评：已掌握' : '回顾中 · 已完成', 'learning-review-status'));
+    const answerSlot = el('div', '', 'learning-review-answer-slot');
+    if (card.category !== 'oral' && card.available) {
+      const reveal = button(card.category === 'translation' ? '查看参考译文' : '查看参考答案', () => {
+        reveal.disabled = true; reveal.textContent = '参考答案已展开';
+        panel.insertBefore(referenceAnswer(card), footer);
+      }, 'button secondary');
+      answerSlot.append(reveal);
+    }
+    footer.append(answerSlot);
+    if (roundReviewMode) {
+      footer.className += ' learning-review-footer';
+      const navigation = el('div', '', 'learning-review-navigation');
+      const previous = button('← 上一题', () => {
+        reviewingCardId = session.cards[reviewIndex - 1].id; render();
+      }, 'button secondary');
+      const next = button('下一题 →', () => {
+        reviewingCardId = session.cards[reviewIndex + 1].id; render();
+      }, 'button secondary');
+      previous.disabled = reviewIndex <= 0;
+      next.disabled = reviewIndex >= session.cards.length - 1;
+      navigation.append(previous, next);
+      footer.append(navigation);
+    }
+    footer.append(button(roundReviewMode ? '结束回顾' : '返回当前题目', () => {
+      if (roundReviewMode) { roundReviewMode = false; reviewingCardId = null; }
+      else reviewingCardId = null;
+      render();
+    }, 'button primary learning-review-exit'));
+  } else if (!card.available) footer.append(button('跳过不可用题目', () => complete('done'), 'button primary'));
   else if (card.category === 'oral') {
-    panel.append(el('p', '试着用英文完整回答，无需录音。此类题目不提供示例答案。', 'learning-study-hint'));
-    footer.append(button('完成本题，下一题 →', () => complete('done'), 'button primary'));
+    panel.append(el('p', '试着用英文完整回答，无需录音；完成后可选择是否记录掌握情况。', 'learning-study-hint'));
+    appendSelfRatingControls(footer, complete);
   } else {
     const reveal = button(card.category === 'translation' ? '查看参考译文' : '查看参考答案', () => {
       reveal.remove(); panel.insertBefore(referenceAnswer(card), footer);
-      footer.replaceChildren(button('还需练习，下一题 →', () => complete('again')), button('已掌握，下一题 →', () => complete('known'), 'button primary'));
-      const explanation = el('p', '自评会保存：还需练习的题在下轮随机训练中更容易抽中，已掌握后降低权重。', 'learning-rating-hint');
-      panel.insertBefore(explanation,footer);
+      footer.replaceChildren();
+      appendSelfRatingControls(footer, complete);
     }, 'button primary');
     panel.append(el('p', card.category === 'translation' ? '先独立翻译，再对照参考译文。留意术语与逻辑关系。' : '先回忆，再对照。不必着急翻看答案。', 'learning-study-hint'));
     footer.append(reveal);

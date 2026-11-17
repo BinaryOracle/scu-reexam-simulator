@@ -23,7 +23,7 @@ import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguS
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261117-package-delete-v2";
 import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
 
-import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261117-points-v1";
+import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261118-review-layout-v1";
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261117-points-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261117-points-v1";

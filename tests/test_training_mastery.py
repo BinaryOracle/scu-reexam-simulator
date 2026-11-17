@@ -86,6 +86,18 @@ def test_weighted_sampling_favors_again_and_does_not_repeat():
     assert len({row['id'] for row in weighted_sample(rows, 100, weights)}) == 3
 
 
+def test_done_rating_preserves_unseen_mastery(client):
+    a = login(client, 'alice')
+    session = start(client, a, question_count=1)
+    card = session['cards'][0]
+    result = post(client, f"/training/sessions/{session['id']}/cards/{card['id']}/complete", a, {'rating': 'done'}).json()
+    assert result['cards'][0]['mastery']['status'] == 'unseen'
+    from app.db import connect
+    with connect() as db:
+        uid = db.execute("SELECT id FROM users WHERE username='alice'").fetchone()[0]
+        assert db.execute('SELECT COUNT(*) FROM training_mastery WHERE user_id=? AND question_id=?', (uid, card['question_id'])).fetchone()[0] == 0
+
+
 def test_next_random_round_uses_latest_mastery_weights(client, monkeypatch):
     from app.services import training_mastery
     a = login(client, 'alice')
