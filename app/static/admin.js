@@ -324,15 +324,10 @@ function renderUsers() {
   const head = document.createElement("thead");
   const tr = document.createElement("tr");
   for (const text of [
-    "用户",
+    "用户信息",
     "密码",
-    "邮箱",
     "面试次数",
-    "每日训练权限",
-    "算法题带刷权限",
-    "模拟面试权限",
-    "上机考试权限",
-    "管理权限",
+    "功能权限",
     "账号状态",
     "操作",
   ]) {
@@ -345,16 +340,19 @@ function renderUsers() {
   for (const user of visible) {
     const row = document.createElement("tr");
     if (!user.is_active) row.className = "account-disabled";
-    const name = accountCell("用户");
+    const name = accountCell("用户", "account-identity-cell");
     const cell = el("div", "", "account-name");
-    const text = el("div");
+    const text = el("div", "", "account-identity-copy");
     text.append(
-      el("strong", user.username),
+      el("strong", user.username, "account-username"),
       el(
         "small",
         `ID ${String(user.id).padStart(3, "0")}${user.id === state.user.id ? " · 当前账号" : ""}`,
       ),
     );
+    text.firstChild.title = user.username;
+    const role = el("span", user.is_superadmin ? "超级管理员" : user.is_admin ? "管理员" : "普通用户", `account-role${user.is_admin ? " account-role-admin" : ""}`);
+    text.append(role);
     cell.append(
       el(
         "span",
@@ -366,8 +364,9 @@ function renderUsers() {
     name.append(cell);
     const password = accountCell("密码", "account-password-cell");
     password.append(passwordControl(user));
-    const email = accountCell("邮箱", "account-email-cell");
-    email.append(el("span", user.email || "未绑定", "account-email-address"));
+    const email = el("span", user.email || "未绑定邮箱", "account-email-address");
+    email.title = user.email || "未绑定邮箱";
+    text.append(email);
     const credits = accountCell("面试次数", "account-credits-cell");
     if (user.is_admin) credits.append(el("span", "已开通", "muted"));
     else {
@@ -391,13 +390,6 @@ function renderUsers() {
       });
       form.append(input, el("span", "次"), save); credits.append(form);
     }
-    const admin = accountCell("管理权限");
-    admin.append(
-      badge(
-        user.is_superadmin ? "超级管理员" : user.is_admin ? "管理员" : "普通用户",
-        user.is_admin ? "orange" : "gray",
-      ),
-    );
     const active = accountCell("账号状态");
     const statusControl = button(
       user.is_active ? "已启用" : "已停用",
@@ -417,7 +409,7 @@ function renderUsers() {
       ? "不能停用当前登录账号"
       : `点击${user.is_active ? "停用" : "启用"}账号`;
     active.append(statusControl);
-    const actions = accountCell("操作");
+    const actions = accountCell("操作", "account-actions-cell");
     const group = el("div", "", "table-actions");
     group.append(
       button("重置用户名", () => openUsername(user), "text-button"),
@@ -431,25 +423,32 @@ function renderUsers() {
       catch { notify("用户已删除，但列表刷新失败。请点击刷新用户列表；不要重复删除。", "error"); }
     }, "text-button danger"));
     actions.append(group);
-    const permissionCell = (key, label) => {
-      const cell = accountCell(label);
+    const permissionCell = (key, label, shortLabel) => {
+      const cell = el("div", "", "account-permission-item");
       const enabled = Boolean(user[key]);
-      if (user.is_admin) cell.append(el("span", "默认开通", "muted"));
+      if (user.is_admin) cell.append(el("span", shortLabel, "account-permission-default"));
       else {
-        const control = button(enabled ? "已开通" : "未开通", async () => {
+        const control = button(shortLabel, async () => {
           const next = !Boolean(user[key]);
           await saveUserFields(user, { [key]: next }, `${user.username} 的${label}已${next ? "开启" : "关闭"}。`);
         }, `account-status-button ${enabled ? "active" : "inactive"}`);
         control.setAttribute("aria-label", `${enabled ? "关闭" : "开通"} ${user.username} 的${label}`);
+        control.title = `${label}：${enabled ? "已开通，点击关闭" : "未开通，点击开通"}`;
         control.setAttribute("aria-pressed", String(enabled)); cell.append(control);
       }
       return cell;
     };
-    const trainingPermission = permissionCell("can_training", "每日训练权限");
-    const codingPermission = permissionCell("can_coding", "算法题带刷权限");
-    const interviewPermission = permissionCell("can_interview", "模拟面试权限");
-    const examPermission = permissionCell("can_exam", "上机考试权限");
-    row.append(name, password, email, credits, trainingPermission, codingPermission, interviewPermission, examPermission, admin, active, actions);
+    const permissions = accountCell("功能权限", "account-permissions-cell");
+    const permissionGroup = el("div", "", "account-permission-grid");
+    permissionGroup.append(
+      permissionCell("can_training", "每日训练权限", "每日训练"),
+      permissionCell("can_coding", "算法题带刷权限", "算法带刷"),
+      permissionCell("can_interview", "模拟面试权限", "模拟面试"),
+      permissionCell("can_exam", "上机考试权限", "上机考试"),
+    );
+    permissions.append(permissionGroup);
+    if (user.is_admin) permissions.append(el("small", "全部功能已开通", "account-permission-note"));
+    row.append(name, password, credits, permissions, active, actions);
     body.append(row);
   }
   table.append(head, body);
@@ -459,6 +458,8 @@ function renderUsers() {
 }
 function syncAccountType() {
   const admin = $("accountTypeAdmin").checked;
+  $("accountPermissions").hidden = admin;
+  $("accountAdminNote").hidden = !admin;
   $("initialCreditsField").hidden = admin;
   $("accountCredits").disabled = admin;
   $("trainingPermissionField").hidden = admin;

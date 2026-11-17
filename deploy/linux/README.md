@@ -1,6 +1,6 @@
 # 单机网站与 IP HTTPS 配置
 
-这些配置用于 Ubuntu 24.04 上的单机网站，不启动 LiveKit 或 Egress。应用运行在 `/srv/scu/current`，私有配置为 `/etc/scu/config.toml`，数据独立保存在 `/srv/scu/data`。Git 更新只更新代码，不能覆盖私有配置、数据库、音频和密码查看密钥。
+这些配置用于 Ubuntu 24.04 上的单机网站；可选部署原生 LiveKit 与 Redis，Egress 录制需额外资源。应用运行在 `/srv/scu/current`，私有配置为 `/etc/scu/config.toml`，数据独立保存在 `/srv/scu/data`。Git 更新只更新代码，不能覆盖私有配置、数据库、音频和密码查看密钥。
 
 `scu.service` 使用一个 Uvicorn worker，监听 `127.0.0.1:8000`，Nginx 对外提供 HTTP/HTTPS。首次空数据库生成的管理员为 `root / root`；已有数据库的账号不会重置。正式使用时通过后台更改默认密码。
 
@@ -76,6 +76,21 @@ docker build -t scu-judge:1 -f deploy/linux/judge.Dockerfile judge
 ```
 
 应以 `scu` 用户实际运行 C++11、C、Python 3 样例，并验证 PPT 转换。镜像可见、进程 active 和首页 HTTP 200 不能代替这些功能验收。网站部署不代表公网直播、真实 ASR/TTS 调用或多人负载已通过验收。
+
+## 公网直播媒体服务
+
+本机 Docker Compose 配置不适用于这台 1 GB 内存的公网机。可从 LiveKit 官方 [v1.13.11 Linux release](https://github.com/livekit/livekit/releases/tag/v1.13.11) 安装原生 SFU，Redis 只绑定回环地址；应用连接 `127.0.0.1:7880`，浏览器走现有 IP TLS 证书和 Nginx `/livekit/` WebSocket 路径。先校验 release checksum，再把 `livekit-server`、`configure_live.py`、`scu-livekit.service` 和 `renew_live_tls.sh` 放到服务器 `/tmp/`，以 root 执行：
+
+```sh
+printf '1e9ee90ca301e1842b2887fc77cb122759756a9c8aeb4334ee91de3325ec43fb  livekit_1.13.11_linux_amd64.tar.gz\n' | sha256sum -c -
+tar -xzf livekit_1.13.11_linux_amd64.tar.gz livekit-server
+install -o root -g root -m 0755 livekit-server /usr/local/bin/livekit-server
+python3 configure_live.py --public-ip 123.57.76.66
+```
+
+脚本生成 `/etc/scu-live/` 下的随机 API 密钥，配置 `scu-livekit.service`、Redis、Nginx 反代与证书续期钩子，并更新应用 `[live]` 配置。它不会启用录制。阿里云安全组和主机防火墙须开放 TCP 7881、5349，UDP 7882 和 UDP 30000–30100；应用端口 7880 与 Redis 6379 只允许回环访问。未开放媒体端口时，网页和 HTTPS 信令可能正常，但音视频无法连通。登录两种外网浏览器真实验证发布、接收与 TURN 网络前，不要把 HTTP 200 或服务 active 视为课堂媒体可用。
+
+服务器可用内存不足 400 MiB、只有 2 vCPU，未在该机器上部署 Egress。开启合成 MP4 录制需另配 Egress、至少约 4 GiB 可用内存、足够 CPU 和持久共享录制卷；启用前完成录制/回放验收。查看状态使用 `systemctl status scu-livekit redis-server scu nginx --no-pager` 与 `journalctl -u scu-livekit -n 80 --no-pager`。
 
 ## 更新与排查
 

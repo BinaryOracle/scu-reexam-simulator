@@ -7,9 +7,10 @@ const adminSource = await readFile(new URL("../app/static/admin.js", import.meta
 const styleSource = await readFile(new URL("../app/static/style.css", import.meta.url), "utf8");
 
 test("mobile account cards label each field and keep actions in the same card", () => {
-  for (const label of ["用户", "密码", "邮箱", "面试次数", "每日训练权限", "算法题带刷权限", "管理权限", "账号状态", "操作"])
+  for (const label of ["用户", "密码", "面试次数", "功能权限", "账号状态", "操作"])
     assert.ok(adminSource.includes(`"${label}"`), `missing mobile label ${label}`);
-  assert.match(adminSource, /accountCell\(label\)/);
+  assert.match(adminSource, /text\.append\(email\)/);
+  assert.match(adminSource, /text\.append\(role\)/);
   assert.match(styleSource, /\.account-table tbody tr \{[^}]*display: grid/s);
   assert.match(styleSource, /\.account-table thead \{ display: none; \}/);
   assert.match(styleSource, /\.account-cell-label \{ display: block/);
@@ -18,8 +19,8 @@ test("mobile account cards label each field and keep actions in the same card", 
 });
 
 test("account permissions are independent and report the changed permission state", () => {
-  assert.match(adminSource, /permissionCell\("can_training", "每日训练权限"\)/);
-  assert.match(adminSource, /permissionCell\("can_coding", "算法题带刷权限"\)/);
+  assert.match(adminSource, /permissionCell\("can_training", "每日训练权限", "每日训练"\)/);
+  assert.match(adminSource, /permissionCell\("can_coding", "算法题带刷权限", "算法带刷"\)/);
   assert.match(adminSource, /saveUserFields\(user, \{ \[key\]: next \}, `\$\{user\.username\} 的\$\{label\}已\$\{next \? "开启" : "关闭"\}。`\)/);
   assert.match(adminSource, /account-status-button \$\{enabled \? "active" : "inactive"\}/);
 });

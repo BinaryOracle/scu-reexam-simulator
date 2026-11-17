@@ -1,0 +1,22 @@
+[Unit]
+Description=SCU live classroom media server
+After=network-online.target redis-server.service
+Wants=network-online.target
+Requires=redis-server.service
+
+[Service]
+User=scu-livekit
+Group=scu-livekit
+ExecStart=/usr/local/bin/livekit-server --config /etc/scu-live/livekit.json
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+MemoryHigh=192M
+MemoryMax=320M
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

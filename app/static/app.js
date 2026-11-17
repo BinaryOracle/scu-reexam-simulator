@@ -19,7 +19,7 @@ import {
   setupContestCreation,
   requestLuoguSubmit,
 } from "./contest.js?v=20261116-ui-audit-v2";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261116-model-settings-v3";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261117-accounts-v1";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261116-ui-audit-v2";
 import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
 
