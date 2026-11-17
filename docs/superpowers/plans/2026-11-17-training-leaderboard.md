@@ -73,7 +73,7 @@ def _ranked(rows: list[dict]) -> list[dict]: ...
 def snapshot(db, user: sqlite3.Row | dict) -> dict: ...
 ```
 
-`_rows` 的 SQL 必须连接 `users u` 并包含 `WHERE u.is_admin=0`；返回 `rank`、`username`、`value`。`snapshot` 返回 `boards`（`training_checkins`、`coding_checkins`、`training_questions`、`coding_solved`）以及 `me`。`me` 只为普通用户计算排名，管理员返回 `None`。查询结果限制 100 条。
+`_rows` 的 SQL 必须连接 `users u` 并包含 `WHERE u.is_admin=0`；返回 `rank`、`username`、`value`。`snapshot` 返回 `boards`（`checkins`、`training_questions`、`coding_solved`）以及 `me`。`me` 只为普通用户计算排名，管理员返回 `None`。查询结果限制 100 条。
 
 - [ ] **Step 4: 挂载认证路由**
 
