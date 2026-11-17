@@ -12,6 +12,7 @@ from app.services import training as practice
 from app.services import training_catalog as catalog
 from app.services.training_schema import ASSETS
 from app.services import contribution_rewards
+from app.services import leaderboard as leaderboard_service
 
 router = APIRouter(tags=['每日训练'])
 
@@ -85,6 +86,11 @@ class ContributionPolicy(Payload):
 def home(section_id: str = Query('interview', max_length=40), user=Depends(current_user)):
     with connect() as db:
         return practice.home(db, user, section_id)
+
+@router.get('/api/leaderboard')
+def leaderboard(user=Depends(current_user)):
+    with connect() as db:
+        return leaderboard_service.snapshot(db, user)
 
 
 @router.get('/api/training/contribution-rewards')
