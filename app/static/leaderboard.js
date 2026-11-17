@@ -32,6 +32,8 @@ function boardData(payload, key) {
 function renderRows(board, currentRank) {
   const list = el("div", "", "leaderboard-rows");
   list.setAttribute("role", "list");
+  list.setAttribute("aria-label", "排行榜排名，可滚动查看更多");
+  list.tabIndex = 0;
   if (!board.length) {
     list.append(emptyState("还没有上榜记录", "完成一次练习后，这里会显示你的排名。", "◇"));
     return list;

@@ -2,7 +2,7 @@
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, emptyState, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
 import { selectField, pagination, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
-import { mountLeaderboard } from './leaderboard.js?v=20261117-weekly-leaderboard-v2';
+import { mountLeaderboard } from './leaderboard.js?v=20261117-weekly-leaderboard-v3';
 let generation = 0, homeData = null, session = null;
 let listRequest = 0;
 let section = 'interview';

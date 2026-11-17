@@ -20,9 +20,9 @@ test("leaderboard renders four distinct weekly boards with regular-user names", 
 });
 
 test("daily training and algorithm practice show only their own two boards", () => {
-  assert.match(training, /from '\.\/leaderboard\.js\?v=20261117-weekly-leaderboard-v2'/);
+  assert.match(training, /from '\.\/leaderboard\.js\?v=20261117-weekly-leaderboard-v3'/);
   assert.match(training, /mountLeaderboard\(root, \{ scope: "training", onBack:/);
-  assert.match(coding, /from "\.\/leaderboard\.js\?v=20261117-weekly-leaderboard-v2"/);
+  assert.match(coding, /from "\.\/leaderboard\.js\?v=20261117-weekly-leaderboard-v3"/);
   assert.match(coding, /mountLeaderboard\(root, \{ scope: "coding", onBack:/);
 });
 
@@ -34,10 +34,12 @@ test("leaderboard errors distinguish auth and missing API and provide retry", ()
 });
 
 test("leaderboard styling presents four boards cleanly on desktop and mobile", () => {
-  assert.match(markup, /leaderboard\.css\?v=20261117-weekly-leaderboard-v2/);
+  assert.match(markup, /leaderboard\.css\?v=20261117-weekly-leaderboard-v3/);
   assert.match(styles, /\.leaderboard-grid\{display:grid;grid-template-columns:repeat\(2/);
   assert.match(styles, /\.leaderboard-row\.current/);
   assert.match(styles, /\.leaderboard-rewards/);
+  assert.match(styles, /\.leaderboard-rows\{[^}]*max-height:634px[^}]*overflow-y:auto/);
+  assert.match(styles, /overscroll-behavior:contain/);
   assert.match(styles, /@media \(max-width:700px\)/);
   assert.match(styles, /leaderboard-grid\{grid-template-columns:1fr/);
 });
@@ -96,6 +98,19 @@ test("coding leaderboard requests its scope and renders both cards", async () =>
   assert.equal(fixture.find(node => node.className.includes("leaderboard-card-coding_checkins"))?.text.includes("算法带刷打卡"), true);
   assert.equal(fixture.find(node => node.className.includes("leaderboard-card-coding_solved"))?.text.includes("算法带刷通过"), true);
   assert.equal(fixture.root.text.includes("null"), false);
+});
+
+test("long ranking lists retain every row inside a keyboard-focusable scroll area", async () => {
+  const rows = Array.from({ length: 12 }, (_, index) => ({ rank: index + 1, username: `user-${index + 1}`, value: 12 - index }));
+  const payload = { boards: { coding_checkins: rows, coding_solved: rows }, period: { label: "11.14 — 11.20" } };
+  const fixture = leaderboardFixture(async () => payload);
+  await fixture.mount({ scope: "coding" });
+  const list = fixture.find(node => node.className === "leaderboard-rows");
+  assert.ok(list);
+  assert.equal(list.attributes.role, "list");
+  assert.equal(list.tabIndex, 0);
+  assert.equal(list.attributes["aria-label"], "排行榜排名，可滚动查看更多");
+  assert.equal(list.children.filter(node => node.attributes.role === "listitem").length, 12);
 });
 
 test("leaderboard error keeps retry and return actions available", async () => {

@@ -7,7 +7,7 @@ import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?
 import { editCodingQuestion, codingDialog } from "./coding-form.mjs?v=20261115-coding-v1";
 import { codingQuestionId, filterCodingQuestions, codingDraftKey, acceptsCodingStatus } from "./coding-model.mjs?v=20261115-coding-v1";
 import { renderSubmissionDetails } from "./submission-details.mjs?v=20261116-submissions-v1";
-import { mountLeaderboard } from "./leaderboard.js?v=20261117-weekly-leaderboard-v2";
+import { mountLeaderboard } from "./leaderboard.js?v=20261117-weekly-leaderboard-v3";
 
 let revision = 0;
 let requestLuoguSubmit;
