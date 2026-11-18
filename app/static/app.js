@@ -1,4 +1,4 @@
-import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261116-frames-v1";
+import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261118-course-v12";
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import {
@@ -38,7 +38,7 @@ import { refreshTrends } from "./trends.js?v=20261116-trends-admin-v1";
 configureCodingBridge(requestLuoguSubmit);
 
 const views = {
-  live: { label: "直播课堂", refresh: refreshLive },
+  live: { label: "课程", refresh: refreshLive },
   home: { label: "备考首页", refresh: refreshHome },
   trends: { label: "热点趋势", refresh: refreshTrends },
   announcementsAdmin: { label: "公告管理", refresh: refreshAnnouncementsAdmin },

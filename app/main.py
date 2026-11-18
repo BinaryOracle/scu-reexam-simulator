@@ -40,6 +40,7 @@ from app.routes.credit_transfers import router as credit_transfers_router
 from app.routes.announcements import router as announcements_router
 from app.routes.coding import router as coding_router
 from app.routes.trends import router as trends_router
+from app.routes.courses import router as courses_router
 
 initialize()
 
@@ -76,6 +77,7 @@ app.include_router(announcements_router)
 app.include_router(coding_router)
 app.include_router(trends_router)
 app.include_router(home_layout_router)
+app.include_router(courses_router)
 app.include_router(live_router)
 app.mount('/static', StaticFiles(directory=ROOT / 'app/static'), name='static')
 

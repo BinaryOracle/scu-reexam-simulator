@@ -63,6 +63,19 @@ def load_config():
         raise ValueError('trends.retry_interval_minutes 必须在 1 到 1440 之间')
     _email_auth_config(config)
     _live_config(config)
+    course_media = config.setdefault('course_media', {})
+    course_media.setdefault('directory', str(Path(config['live']['directory']) / 'courses'))
+    course_media.setdefault('document_max_mb', 25)
+    course_media.setdefault('video_max_mb', 2048)
+    course_media.setdefault('playback_seconds', 14400)
+    for key, minimum, maximum in [('document_max_mb', 1, 100), ('video_max_mb', 1, 20480),
+                                  ('playback_seconds', 60, 86400)]:
+        if type(course_media[key]) is not int or not minimum <= course_media[key] <= maximum:
+            raise ValueError(f'course_media.{key} 必须在 {minimum} 到 {maximum} 之间')
+    if not isinstance(course_media['directory'], str) or not course_media['directory'] or '\x00' in course_media['directory']:
+        raise ValueError('course_media.directory 必须是有效目录路径')
+    media_directory = Path(course_media['directory'])
+    course_media['directory'] = str(media_directory if media_directory.is_absolute() else ROOT / media_directory)
     judge = config['judge']
     judge.setdefault('cleanup_timeout_seconds', 5)
     for key, default, maximum in [('compile_timeout_seconds', 30, 120),

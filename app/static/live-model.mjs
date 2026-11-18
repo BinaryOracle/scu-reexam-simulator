@@ -1,6 +1,14 @@
 /** Parse only supported classroom routes with safe database identifiers. */
 export function liveRoute(hash) {
-  const match = /^#view=live\/(course|lesson)\/([1-9]\d*)$/.exec(hash || '');
+  const editor = /^#view=live\/editor\/(new|[1-9]\d*)(?:\/(info|content|publish))?$/.exec(hash || '');
+  if (editor) {
+    const id = editor[1] === 'new' ? null : Number(editor[1]);
+    if (id === null || Number.isSafeInteger(id))
+      return {kind:'editor',id,step:editor[2]||'info'};
+  }
+  const named = /^#view=live\/(plaza|manage)$/.exec(hash || '');
+  if (named) return {kind:named[1] === 'plaza' ? 'public' : 'manage'};
+  const match = /^#view=live\/(course|study|lesson|preview)\/([1-9]\d*)$/.exec(hash || '');
   if (!match || !Number.isSafeInteger(Number(match[2]))) return {kind:'list'};
   return {kind:match[1],id:Number(match[2])};
 }

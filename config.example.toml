@@ -42,6 +42,12 @@ price_fen = 200
 credits = 10
 price_fen = 500
 
+[course_media]
+directory = "data/live/courses" # 私有媒体目录，不要映射到 /static
+document_max_mb = 25
+video_max_mb = 2048
+playback_seconds = 14400
+
 [ai]
 base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 model = "qwen3.8-omni-flash"

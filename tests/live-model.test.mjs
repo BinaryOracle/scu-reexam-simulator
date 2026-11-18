@@ -4,7 +4,14 @@ import { liveRoute, elapsed, recordingText, orderedMembers, mayJoin, needsLesson
 test('accepts only positive safe course and lesson route identifiers',()=>{
   assert.deepEqual(liveRoute('#view=live/course/12'),{kind:'course',id:12});
   assert.deepEqual(liveRoute('#view=live/lesson/2'),{kind:'lesson',id:2});
-  for(const hash of ['#view=live/course/0','#view=live/lesson/-1','#view=live/lesson/9007199254740992','#view=live/lesson/2evil']) assert.deepEqual(liveRoute(hash),{kind:'list'});
+  assert.deepEqual(liveRoute('#view=live/plaza'),{kind:'public'});
+  assert.deepEqual(liveRoute('#view=live/manage'),{kind:'manage'});
+  assert.deepEqual(liveRoute('#view=live/editor/new'),{kind:'editor',id:null,step:'info'});
+  assert.deepEqual(liveRoute('#view=live/editor/12/info'),{kind:'editor',id:12,step:'info'});
+  assert.deepEqual(liveRoute('#view=live/editor/12/content'),{kind:'editor',id:12,step:'content'});
+  assert.deepEqual(liveRoute('#view=live/editor/12/publish'),{kind:'editor',id:12,step:'publish'});
+  assert.deepEqual(liveRoute('#view=live/preview/42'),{kind:'preview',id:42});
+  for(const hash of ['#view=live/course/0','#view=live/lesson/-1','#view=live/lesson/9007199254740992','#view=live/lesson/2evil','#view=live/editor/0/content','#view=live/editor/9007199254740992/content','#view=live/editor/1/unknown']) assert.deepEqual(liveRoute(hash),{kind:'list'});
 });
 test('formats elapsed classroom time without negative or invalid clocks',()=>{
   assert.equal(elapsed(0),'00:00');assert.equal(elapsed(3661),'01:01:01');assert.equal(elapsed(-1),'00:00');

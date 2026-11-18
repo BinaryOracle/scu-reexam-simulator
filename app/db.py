@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 35
+SCHEMA_VERSION = 36
 
 
 @contextmanager
@@ -281,6 +281,8 @@ def initialize():
         initialize_home_layout(db)
         from .services.live_schema import initialize_live
         initialize_live(db)
+        from .services.course_schema import initialize_course_learning
+        initialize_course_learning(db)
         from .services.trends import initialize as initialize_trends
         initialize_trends(db)
         from .services.points import initialize as initialize_points

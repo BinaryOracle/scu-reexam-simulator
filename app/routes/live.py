@@ -12,6 +12,7 @@ from livekit import api
 from app.db import connect
 from app.services.auth import current_user, administrator
 from app.services import live as store, live_media as media
+from app.services import course_learning as learning
 
 router = APIRouter(prefix='/api/live', tags=['live'])
 _grant_locks = {}
@@ -135,8 +136,18 @@ def create_lesson(cid: int, payload: LessonInput, user=Depends(administrator)):
         parent = store.course(db, cid, user)
         if not store.manage(parent, user):
             raise HTTPException(403, '需要课程管理权限')
-        lid = db.execute('INSERT INTO live_lessons(course_id,title,description,starts_at) VALUES (?,?,?,?)',
-                         (cid, payload.title, payload.description, payload.starts_at)).lastrowid
+        section = db.execute('SELECT id FROM course_sections WHERE course_id=? ORDER BY position,id LIMIT 1', (cid,)).fetchone()
+        if not section:
+            section_id = db.execute("INSERT INTO course_sections(course_id,title,position) VALUES (?,'直播课程内容',0)", (cid,)).lastrowid
+        else:
+            section_id = section['id']
+        position = db.execute('SELECT COUNT(*) FROM course_lessons WHERE section_id=?', (section_id,)).fetchone()[0]
+        course_lesson_id = db.execute('''INSERT INTO course_lessons(course_id,section_id,title,description,position)
+            VALUES (?,?,?,?,?)''', (cid, section_id, payload.title, payload.description, position)).lastrowid
+        lid = db.execute('''INSERT INTO live_lessons(course_id,title,description,starts_at,course_lesson_id)
+            VALUES (?,?,?,?,?)''', (cid, payload.title, payload.description, payload.starts_at, course_lesson_id)).lastrowid
+        db.execute('''INSERT INTO course_lesson_items(lesson_id,kind,position,live_lesson_id)
+            VALUES (?,'live',0,?)''', (course_lesson_id, lid))
         row, parent = store.lesson(db, lid, user)
         return store.lesson_view(db, row, parent, user)
 
@@ -149,6 +160,9 @@ def update_lesson(lid: int, payload: LessonInput, user=Depends(administrator)):
             raise HTTPException(409, '直播期间不能修改课次')
         db.execute('UPDATE live_lessons SET title=?,description=?,starts_at=? WHERE id=?',
                    (payload.title, payload.description, payload.starts_at, lid))
+        if row.get('course_lesson_id'):
+            db.execute('UPDATE course_lessons SET title=?,description=? WHERE id=?',
+                       (payload.title, payload.description, row['course_lesson_id']))
         row, parent = store.lesson(db, lid, user)
         return store.lesson_view(db, row, parent, user)
 
@@ -189,7 +203,13 @@ def delete_lesson(lid: int, user=Depends(administrator)):
         if row['status'] == 'live':
             raise HTTPException(409, '请先结束直播')
         files = deletion_files(db, 'lesson', lid)
+        course_lesson_id = row.get('course_lesson_id')
+        section_id = db.execute('SELECT section_id FROM course_lessons WHERE id=?',
+                                (course_lesson_id,)).fetchone() if course_lesson_id else None
+        db.execute('DELETE FROM course_lessons WHERE id=?', (course_lesson_id,))
         db.execute('DELETE FROM live_lessons WHERE id=?', (lid,))
+        if section_id:
+            learning.compact_positions(db, 'course_lessons', 'section_id', section_id['section_id'])
     delete_files(files)
     return {}
 
@@ -553,7 +573,7 @@ async def webhook(request: Request):
                 admitted = db.execute('''SELECT p.*,c.host_id FROM live_presence p
                     JOIN live_lessons l ON l.id=p.lesson_id JOIN live_courses c ON c.id=l.course_id
                     JOIN users u ON u.id=p.user_id
-                    WHERE p.lesson_id=? AND p.user_id=? AND l.status='live' AND u.is_active=1
+                    WHERE p.lesson_id=? AND p.user_id=? AND l.status='live' AND c.publication_status='published' AND u.is_active=1
                     AND p.seen>=? AND (c.host_id=p.user_id OR EXISTS(
                         SELECT 1 FROM live_members m WHERE m.course_id=c.id AND m.user_id=p.user_id))''',
                     (lid, uid, time.time()-media.settings()['presence_seconds'])).fetchone()

@@ -10,10 +10,11 @@
     <link rel="stylesheet" href="/static/style.css?v=20261117-accounts-v1" />
     <link rel="stylesheet" href="/static/workspace.css?v=20261115-workspace-v8" />
     <link rel="stylesheet" href="/static/contest-focus.css?v=20261115-contest-records-v2" />
-    <link rel="stylesheet" href="/static/live.css?v=20261116-frames-v1" />
+    <link rel="stylesheet" href="/static/live.css?v=20261118-course-v9" />
+    <link rel="stylesheet" href="/static/course-learning.css?v=20261118-course-v21" />
     <link rel="stylesheet" href="/static/coding.css?v=20261117-filters-v1" />
     <link rel="stylesheet" href="/static/home-layout.css?v=20261115-layout-v1" />
-    <link rel="stylesheet" href="/static/training.css?v=20261118-review-layout-v1" />
+    <link rel="stylesheet" href="/static/training.css?v=20261118-empty-error-hidden-v1" />
     <link rel="stylesheet" href="/static/leaderboard.css?v=20261117-weekly-leaderboard-v3" />
     <link rel="stylesheet" href="/static/credits.css?v=20261117-points-v1" />
     <link rel="stylesheet" href="/static/select-controls.css?v=20261116-v2" />
@@ -157,7 +158,7 @@
           <button type="button" class="nav-item" data-view="home" hidden><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">备考首页</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="training" hidden><span class="nav-icon" aria-hidden="true">◈</span><span class="nav-label">每日训练</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="trends" hidden><span class="nav-icon" aria-hidden="true">⌁</span><span class="nav-label">热点趋势</span><span class="nav-arrow" aria-hidden="true">›</span></button>
-          <button type="button" class="nav-item" data-view="live" hidden><span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label">直播课堂</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+          <button type="button" class="nav-item" data-view="live" hidden><span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label">课程</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="coding" hidden><span class="nav-icon" aria-hidden="true">⌘</span><span class="nav-label">算法带刷</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="codingAdmin" hidden><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">带刷题库</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="trainingAdmin" hidden><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">训练题库</span><span class="nav-arrow" aria-hidden="true">›</span></button>
@@ -250,7 +251,7 @@
         <main id="mainContent" class="page-content" tabindex="-1">
           <section id="home" aria-label="备考首页" hidden></section>
           <section id="trends" aria-label="AI 热点趋势" hidden><div id="trendsContent"></div></section>
-          <section id="live" aria-label="直播课堂" hidden><div id="liveContent"></div></section>
+          <section id="live" aria-label="课程" hidden><div id="liveContent"></div></section>
           <section id="homeLayoutAdmin" aria-label="首页编排" hidden></section>
           <section id="announcementsAdmin" aria-label="公告管理" hidden></section>
           <section id="users" aria-labelledby="usersTitle" hidden>
@@ -900,6 +901,6 @@
       </form>
     </dialog>
     <dialog id="announcementDialog" class="account-dialog announcement-dialog" aria-labelledby="announcementDialogTitle"><div class="dialog-header"><div><span class="eyebrow">公告</span><h2 id="announcementDialogTitle">公告详情</h2></div><button id="closeAnnouncementDialog" type="button" class="icon-button" aria-label="关闭公告">×</button></div><div id="announcementDialogContent" class="dialog-body announcement-dialog-content"></div></dialog>
-    <script type="module" src="/static/app.js?v=20261118-review-layout-v1"></script>
+    <script type="module" src="/static/app.js?v=20261118-course-v12"></script>
   </body>
 </html>

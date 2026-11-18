@@ -11,8 +11,12 @@ def manage(course, user):
 
 def course(db, cid, user):
     row = db.execute('SELECT * FROM live_courses WHERE id=?', (cid,)).fetchone()
-    if not row or not (manage(row, user) or row['host_id'] == user['id'] or db.execute(
-            'SELECT 1 FROM live_members WHERE course_id=? AND user_id=?', (cid, user['id'])).fetchone()):
+    privileged = row and (manage(row, user) or row['host_id'] == user['id'])
+    enrolled = row and row['publication_status'] == 'published' and db.execute(
+            '''SELECT 1 FROM live_members WHERE course_id=? AND user_id=? UNION ALL
+            SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=? LIMIT 1''',
+            (cid, user['id'], cid, user['id'])).fetchone()
+    if not row or not (privileged or enrolled):
         raise HTTPException(404, '课程不存在或未加入课程')
     return dict(row)
 

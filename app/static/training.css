@@ -47,3 +47,4 @@
 @media(max-width:620px){.learning-review-navigation{gap:10px}.learning-review-navigation .button{min-height:46px;padding-inline:10px}}
 @media(max-width:850px){.sidebar-collapsed .learning-question-dock{left:12px}}
 @media(max-width:620px){.sidebar-collapsed .learning-question-dock{left:10px}}
+.learning-dialog .form-error:empty{display:none}
