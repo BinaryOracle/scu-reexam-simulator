@@ -1,4 +1,4 @@
-import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261118-course-v12";
+import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261118-course-v13";
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import {

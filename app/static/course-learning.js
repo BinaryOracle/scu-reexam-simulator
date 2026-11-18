@@ -85,13 +85,13 @@ async function renderCatalog(turn,initialScope){
 }
 
 async function renderPreview(id,turn){
-  const course=await api(`/courses/public/${id}`);if(turn!==generation)return;const target=root();target.replaceChildren();
+  const course=await api(`/courses/public/${id}`);if(turn!==generation)return;const target=root();target.replaceChildren();const shell=el('div','','course-page-shell course-preview-shell');
   const back=button('← 返回课程广场',()=>route('/plaza'),'text-button course-back');const header=el('header','','course-preview-header');header.append(pageTitle(course.title,course.description||'课程简介暂未填写。'));
   const facts=el('div','','course-preview-facts');if(hostName(course))facts.append(el('span',hostName(course)));facts.append(el('span',`${course.lesson_count} 个课时`));
   const actions=el('div','','course-preview-actions');if(course.is_enrolled){const lessonId=course.resume_lesson_id;actions.append(button(course.progress_summary?.percent===100?'复习课程':'继续学习',()=>route(lessonId?`/study/${lessonId}`:`/course/${course.id}`),'button primary'));if(course.progress_summary?.total)actions.append(el('span',`${course.progress_summary.percent}% · ${course.progress_summary.completed}/${course.progress_summary.total} 课时`,'course-muted'));}else if(course.can_manage)actions.append(button('管理课程',()=>route(`/editor/${course.id}/content`),'button primary'));else actions.append(button('加入并开始学习',async()=>{const enrolled=await api(`/courses/${course.id}/enroll`,{method:'POST'});notify('已加入课程，开始第一课');const first=allLessons(enrolled)[0];await route(first?`/study/${first.id}`:`/course/${course.id}`);},'button primary'));
   header.append(facts,actions);const outline=el('section','','course-preview-outline');outline.append(sectionTitle('课程目录',`${course.sections.length} 章 · ${course.lesson_count} 个课时`));
   for(const [sectionIndex,section]of course.sections.entries()){const group=el('section','','course-preview-section');group.append(el('h2',`${String(sectionIndex+1).padStart(2,'0')}  ${section.title}`));const list=el('ol','','course-preview-lessons');for(const lesson of section.lessons){const row=el('li','','course-preview-lesson');row.append(el('span',lesson.title));list.append(row);}group.append(list);outline.append(group);}
-  target.append(back,header,outline);
+  shell.append(back,header,outline);target.append(shell);
 }
 
 function deleteCourseAction(course){
@@ -157,7 +157,7 @@ async function renderCourse(id,turn,editor=false){
   });
   if(!course.sections.length)sections.append(el('p','课程还没有章节。','course-muted'));
   if(editor){const shell=el('div','','course-editor-shell');shell.append(back,header);const panel=el('section','','course-editor-content-panel');const titleRow=sectionTitle('课程目录',`${course.sections.length} 章 · ${course.progress_summary.total} 课时`);titleRow.append(button('＋ 添加章节',()=>addSection(course,editor),'button secondary'));panel.append(titleRow,sections);shell.append(panel);target.append(shell);return;}
-  target.append(back,header);if(!course.can_manage)target.append(summary);if(readiness)target.append(readiness);target.append(sectionTitle('课程目录',`${course.sections.length} 章 · ${course.progress_summary.total} 课时`),sections);
+  const shell=el('div','','course-page-shell course-detail-shell');shell.append(back,header);if(!course.can_manage)shell.append(summary);if(readiness)shell.append(readiness);shell.append(sectionTitle('课程目录',`${course.sections.length} 章 · ${course.progress_summary.total} 课时`),sections);target.append(shell);
 }
 
 function scheduleLive(lesson,editor=false){
@@ -275,7 +275,7 @@ async function renderStudy(lessonId,turn){
   const lesson=await api(`/courses/lessons/${lessonId}`);if(turn!==generation)return;const course=await api(`/courses/${lesson.course_id}`);if(turn!==generation)return;
   const lessons=allLessons(course);const index=lessons.findIndex(item=>item.id===lesson.id);const target=root();target.replaceChildren();
   const back=button('← 课程目录',()=>route(`/course/${course.id}`),'text-button course-back');const top=el('header','','course-study-heading');top.append(pageTitle(lesson.title,lesson.description));top.append(el('span',`${course.title} · ${lesson.progress.completed?'已完成':'学习中'}`,'course-muted'));
-  const layout=el('div','','course-study-layout');const nav=el('aside','','course-study-nav');const navHeading=sectionTitle('本课程',`${course.progress_summary.completed}/${course.progress_summary.total} 已完成`);const navToggle=button('',()=>{const expanded=navToggle.getAttribute('aria-expanded')!=='true';navToggle.setAttribute('aria-expanded',String(expanded));nav.classList.toggle('is-expanded',expanded);navContent.hidden=!expanded;},'course-study-nav-toggle');navToggle.setAttribute('aria-expanded','false');navToggle.append(el('span',`课程目录 · ${course.progress_summary.completed}/${course.progress_summary.total} 已完成`),el('span','⌄','course-nav-chevron'));const navContent=el('div','','course-study-nav-content');navContent.hidden=matchMedia('(max-width: 760px)').matches;
+  const shell=el('div','','course-page-shell course-study-shell');const layout=el('div','','course-study-layout');const nav=el('aside','','course-study-nav');const navHeading=sectionTitle('本课程',`${course.progress_summary.completed}/${course.progress_summary.total} 已完成`);const navToggle=button('',()=>{const expanded=navToggle.getAttribute('aria-expanded')!=='true';navToggle.setAttribute('aria-expanded',String(expanded));nav.classList.toggle('is-expanded',expanded);navContent.hidden=!expanded;},'course-study-nav-toggle');navToggle.setAttribute('aria-expanded','false');navToggle.append(el('span',`课程目录 · ${course.progress_summary.completed}/${course.progress_summary.total} 已完成`),el('span','⌄','course-nav-chevron'));const navContent=el('div','','course-study-nav-content');navContent.hidden=matchMedia('(max-width: 760px)').matches;
   for(const section of course.sections){const group=el('section','','course-study-group');group.append(el('h3',section.title));for(const item of section.lessons){const link=button('',()=>route(`/study/${item.id}`),'course-study-link');link.classList.toggle('current',item.id===lesson.id);link.append(el('span',item.progress.completed?'✓':String(item.position+1).padStart(2,'0'),'course-study-link-number'),el('span',item.title));group.append(link);}navContent.append(group);}nav.append(navHeading,navToggle,navContent);
   const content=el('main','','course-study-content');const contentMeta=el('div','','course-lesson-content-meta');contentMeta.append(el('span',`第 ${index+1} / ${lessons.length} 课时`,'course-muted'));content.append(contentMeta);
   const media=el('div','','course-study-media');const markdown=el('div','','course-reading-list');const attachments=el('section','','course-materials');const pendingRecordings=[];let mediaCount=0,markdownCount=0,attachmentCount=0;
@@ -312,7 +312,7 @@ async function renderStudy(lessonId,turn){
   if(attachmentCount){attachments.prepend(el('h2','课程资料'));content.append(attachments);}
   if(lesson.progress.completed)content.append(el('p','本小节已完成','course-completed-note'));
   else content.append(button('标记本小节完成',()=>markLessonComplete(lesson),'button secondary course-complete-action'));
-  const navigation=el('footer','','course-study-navigation');const previous=button('← 上一课',()=>route(`/study/${lessons[index-1].id}`),'button secondary');previous.disabled=index<=0;const next=button('下一课 →',()=>route(`/study/${lessons[index+1].id}`),'button primary');next.disabled=index<0||index>=lessons.length-1;navigation.append(previous,next);content.append(navigation);layout.append(nav,content);target.append(back,top,layout);watchRecordings(pendingRecordings,lesson,turn);
+  const navigation=el('footer','','course-study-navigation');const previous=button('← 上一课',()=>route(`/study/${lessons[index-1].id}`),'button secondary');previous.disabled=index<=0;const next=button('下一课 →',()=>route(`/study/${lessons[index+1].id}`),'button primary');next.disabled=index<0||index>=lessons.length-1;navigation.append(previous,next);content.append(navigation);layout.append(nav,content);shell.append(back,top,layout);target.append(shell);watchRecordings(pendingRecordings,lesson,turn);
 }
 
 async function markLessonComplete(lesson){
