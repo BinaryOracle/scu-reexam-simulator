@@ -1,6 +1,8 @@
 """Course visibility, enrollment, lesson ordering, and learner progress."""
 import time
 from fastapi import HTTPException
+from markdown_it import MarkdownIt
+from mdit_py_plugins.dollarmath import dollarmath_plugin
 from app.services.live import manage
 
 
@@ -71,6 +73,9 @@ def lesson_view(db, row, user):
             live = db.execute('SELECT id,title,description,starts_at,status FROM live_lessons WHERE id=?',
                               (item['live_lesson_id'],)).fetchone()
             value['live'] = dict(live) if live else None
+            value['recordings'] = [dict(recording) for recording in db.execute(
+                'SELECT id,status FROM live_recordings WHERE lesson_id=? ORDER BY id',
+                (item['live_lesson_id'],))]
         elif item['asset_id']:
             asset = db.execute('SELECT id,kind,original_name,size,mime_type FROM course_assets WHERE id=?',
                                (item['asset_id'],)).fetchone()
@@ -78,6 +83,20 @@ def lesson_view(db, row, user):
         items.append(value)
     return {**row, 'items': items, 'progress': dict(progress) if progress else {
         'position_seconds': 0, 'completed': 0}}
+
+
+def render_lesson_markdown(text):
+    """Render lesson Markdown without raw HTML or remotely loaded images."""
+    renderer = MarkdownIt('commonmark', {'html': False, 'breaks': True})
+    renderer.enable(['table', 'strikethrough']).disable('image')
+    renderer.use(dollarmath_plugin, allow_digits=True, allow_space=True)
+    tokens = renderer.parse(text or '')
+    for token in tokens:
+        for child in token.children or []:
+            if child.type == 'link_open':
+                child.attrSet('target', '_blank')
+                child.attrSet('rel', 'noopener noreferrer')
+    return renderer.renderer.render(tokens, renderer.options, {})
 
 
 def course_detail(db, course_id, user):

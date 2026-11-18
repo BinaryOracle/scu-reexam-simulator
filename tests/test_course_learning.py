@@ -233,6 +233,68 @@ def test_course_catalog_orders_courses_by_the_current_users_recent_activity(clie
     assert ordered_ids.index(newer['id']) < ordered_ids.index(older['id'])
 
 
+def test_course_lesson_includes_safe_recording_status_for_its_live_item(client):
+    from app.db import connect
+
+    admin, learner = login(client, 'manager'), login(client, 'alice')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': '直播回放并入课时', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    created = client.post(f"/api/courses/sections/{course['sections'][0]['id']}/live", headers=admin,
+                          json={'title': '第一讲', 'starts_at': 123, 'position': 0})
+    assert created.status_code == 201, created.text
+    lesson = created.json()['sections'][0]['lessons'][0]
+    live_id = lesson['items'][0]['live_lesson_id']
+    with connect() as db:
+        ready_id = db.execute(
+            "INSERT INTO live_recordings(lesson_id,status,path) VALUES (?,'ready','private-ready.mp4')",
+            (live_id,)).lastrowid
+        pending_id = db.execute(
+            "INSERT INTO live_recordings(lesson_id,status,path) VALUES (?,'recording','private-pending.mp4')",
+            (live_id,)).lastrowid
+
+    published = {key: course[key] for key in ('title', 'description', 'access_mode', 'host_id', 'member_ids')}
+    published['publication_status'] = 'published'
+    assert client.patch(f"/api/courses/{course['id']}", headers=admin, json=published).status_code == 200
+    assert client.post(f"/api/courses/{course['id']}/enroll", headers=learner).status_code == 200
+
+    response = client.get(f"/api/courses/lessons/{lesson['id']}", headers=learner)
+    assert response.status_code == 200
+    live_item = next(item for item in response.json()['items'] if item['kind'] == 'live')
+    assert live_item['recordings'] == [
+        {'id': ready_id, 'status': 'ready'}, {'id': pending_id, 'status': 'recording'}]
+    assert 'path' not in str(live_item['recordings'])
+    assert client.post(f'/api/live/recordings/{ready_id}/playback', headers=learner).status_code == 200
+    assert client.post(f'/api/live/recordings/{pending_id}/playback', headers=learner).status_code == 409
+
+
+def test_course_markdown_document_renders_safe_html_for_enrolled_learners(client):
+    admin, learner, outsider = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': 'Markdown 正文', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    lesson = client.post(f"/api/courses/sections/{course['sections'][0]['id']}/lessons", headers=admin,
+                         json={'title': '正文课时', 'position': 0}).json()
+    uploaded = client.post(f"/api/courses/lessons/{lesson['id']}/assets?kind=document", headers=admin,
+                           files={'file': ('lesson.md', '# 本节内容\n\n<script>alert(1)</script>\n\n**重点**\n\n公式：$x^2$\n\n![外部图](https://example.com/image.png)\n\n[危险链接](javascript:alert(1))'.encode(), 'text/markdown')})
+    assert uploaded.status_code == 201, uploaded.text
+    published = {key: course[key] for key in ('title', 'description', 'access_mode', 'host_id', 'member_ids')}
+    published['publication_status'] = 'published'
+    assert client.patch(f"/api/courses/{course['id']}", headers=admin, json=published).status_code == 200
+    assert client.post(f"/api/courses/{course['id']}/enroll", headers=learner).status_code == 200
+
+    response = client.get(f"/api/courses/assets/{uploaded.json()['id']}/markdown", headers=learner)
+    assert response.status_code == 200
+    assert '<h1>本节内容</h1>' in response.text
+    assert '<strong>重点</strong>' in response.text
+    assert 'class="math inline"' in response.text
+    assert '<script>' not in response.text
+    assert '&lt;script&gt;alert(1)&lt;/script&gt;' in response.text
+    assert '<img' not in response.text
+    assert 'href="javascript:' not in response.text
+    assert client.get(f"/api/courses/assets/{uploaded.json()['id']}/markdown", headers=outsider).status_code == 404
+
+
 def test_course_deletion_requires_admin_and_removes_course_and_live_files(client):
     from app.db import connect
     from app.config import load_config

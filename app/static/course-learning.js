@@ -1,6 +1,7 @@
 import {api,state} from './api.js?v=20261114-ui-v17';
 import {el,button,notify,run,confirmAction} from './ui.js?v=20261114-ui-v17';
 import {modal,field,input,textArea,uploadFile} from './live-ui.js?v=1';
+import {renderProblemMath} from './problem-content.js?v=20261118-math-v1';
 
 let goTo=()=>{},generation=0;
 const courseProgressFlushers=new Set();
@@ -26,14 +27,6 @@ function statusText(course){
   return course.access_mode==='public'?'公开课程':'名单课程';
 }
 function allLessons(course){return (course.sections||[]).flatMap(section=>section.lessons||[]);}
-function unitType(lesson){
-  const kinds=new Set((lesson.items||[]).map(item=>item.kind));
-  if(kinds.has('live')&&kinds.size===1)return '直播课时';
-  if(kinds.has('video')&&kinds.has('document'))return '综合课时';
-  if(kinds.has('video'))return '录播课时';
-  if(kinds.has('document'))return '资料课时';
-  return '待完善';
-}
 function setBusy(node,value){node.setAttribute('aria-busy',String(value));}
 export function configureCourseLearning(navigate){goTo=navigate;}
 export function clearCourseLearning(){generation++;document.body.classList.remove('course-center-active');void flushCourseProgress();}
@@ -57,19 +50,21 @@ async function renderCatalog(turn,initialScope){
   const shell=el('div','','course-catalog');
   const hero=el('header','','course-library-hero');const heading=pageTitle(initialScope==='public'?'发现课程':initialScope==='managed'?'课程管理':'我的课程',initialScope==='public'?'先看看课程内容，再决定是否加入。':initialScope==='managed'?'创建课程、整理课时并发布给学员。':'查看已加入的课程和学习进度。');hero.append(heading);
   if(initialScope==='managed')hero.append(button('＋ 新建课程',()=>route('/editor/new/info'),'button primary'));
-  const tabs=el('nav','','course-tabs');tabs.setAttribute('aria-label','课程工作区');
-  const itemList=admin?[['mine','我的课程',''],['public','课程广场','/plaza'],['managed','课程管理','/manage']]:[['mine','我的课程',''],['public','课程广场','/plaza']];
-  for(const [scope,label,path]of itemList){const tab=button(label,()=>route(path),'course-tab');tab.classList.toggle('selected',scope===initialScope);tab.setAttribute('aria-current',scope===initialScope?'page':'false');tabs.append(tab);}
-  const filters=el('nav','','course-filters');filters.setAttribute('aria-label','按课程内容筛选');let selectedKind='all',pageIndex=0;const pageSize=12;
-  for(const [kind,label]of [['all','全部课程'],['live','含直播'],['video','含录播'],['document','含资料']]){const filter=button(label,()=>{selectedKind=kind;pageIndex=0;filters.querySelectorAll('button').forEach(item=>{const active=item.dataset.kind===kind;item.classList.toggle('selected',active);item.setAttribute('aria-pressed',String(active));});paint();},'course-filter');filter.dataset.kind=kind;filter.classList.toggle('selected',kind==='all');filter.setAttribute('aria-pressed',String(kind==='all'));filters.append(filter);}
+  let tabs;
+  if(initialScope!=='managed'){
+    tabs=el('nav','','course-tabs');tabs.setAttribute('aria-label','课程工作区');
+    const itemList=admin?[['mine','我的课程',''],['public','课程广场','/plaza'],['managed','课程管理','/manage']]:[['mine','我的课程',''],['public','课程广场','/plaza']];
+    for(const [scope,label,path]of itemList){const tab=button(label,()=>route(path),'course-tab');tab.classList.toggle('selected',scope===initialScope);tab.setAttribute('aria-current',scope===initialScope?'page':'false');tabs.append(tab);}
+  }
+  let pageIndex=0;const pageSize=12;
   const toolbar=el('div','','course-catalog-toolbar');const count=el('span','','course-muted');const controls=el('div','','course-catalog-controls');const search=input('','search');search.placeholder=initialScope==='managed'?'搜索课程名称':'搜索课程';search.setAttribute('aria-label',search.placeholder);search.className='course-search';controls.append(search);let statusFilter;
   if(initialScope==='managed'){statusFilter=el('select','','course-status-filter');for(const [value,label]of [['all','全部状态'],['draft','草稿'],['published','已发布'],['archived','已归档']]){const option=el('option',label);option.value=value;statusFilter.append(option);}statusFilter.setAttribute('aria-label','按课程状态筛选');controls.append(statusFilter);}
   toolbar.append(count,controls);
   const grid=el('div','','course-card-grid');const pagination=el('nav','','course-pagination');pagination.setAttribute('aria-label','课程分页');
   const paint=()=>{
-    if(turn!==generation)return;grid.replaceChildren();pagination.replaceChildren();const query=search.value.trim().toLocaleLowerCase();const filtered=data.filter(course=>[course.title,course.description,course.host_name].some(value=>(value||'').toLocaleLowerCase().includes(query))&&(selectedKind==='all'||(course.content_kinds||[]).includes(selectedKind))&&(initialScope!=='managed'||statusFilter.value==='all'||course.publication_status===statusFilter.value));const pageCount=Math.ceil(filtered.length/pageSize);pageIndex=Math.min(pageIndex,Math.max(0,pageCount-1));const start=pageIndex*pageSize;count.textContent=filtered.length?`${start+1}–${Math.min(start+pageSize,filtered.length)} / ${filtered.length} 门课程`:'0 门课程';
+    if(turn!==generation)return;grid.replaceChildren();pagination.replaceChildren();const query=search.value.trim().toLocaleLowerCase();const filtered=data.filter(course=>[course.title,course.description,course.host_name].some(value=>(value||'').toLocaleLowerCase().includes(query))&&(initialScope!=='managed'||statusFilter.value==='all'||course.publication_status===statusFilter.value));const pageCount=Math.ceil(filtered.length/pageSize);pageIndex=Math.min(pageIndex,Math.max(0,pageCount-1));const start=pageIndex*pageSize;count.textContent=filtered.length?`${start+1}–${Math.min(start+pageSize,filtered.length)} / ${filtered.length} 门课程`:'0 门课程';
     if(!filtered.length){const empty=el('section','','course-empty');const noMatches=Boolean(data.length);empty.append(el('h2',noMatches?'没有符合条件的课程':initialScope==='public'?'暂时没有公开课程':initialScope==='managed'?'还没有课程':'还没有加入课程'),el('p',noMatches?'可以更换关键词，或清除筛选条件查看全部课程。':initialScope==='public'?'公开课程会显示在这里，加入后即可开始学习。':initialScope==='managed'?'先创建课程，再逐步添加课时。':'去课程广场挑选一门课程，加入后就能开始学习。'));
-      if(noMatches)empty.append(button('清除筛选条件',()=>{search.value='';selectedKind='all';if(statusFilter)statusFilter.value='all';pageIndex=0;filters.querySelectorAll('button').forEach(item=>{const active=item.dataset.kind==='all';item.classList.toggle('selected',active);item.setAttribute('aria-pressed',String(active));});paint();},'button secondary'));
+      if(noMatches)empty.append(button('清除搜索',()=>{search.value='';if(statusFilter)statusFilter.value='all';pageIndex=0;paint();},'button secondary'));
       else if(initialScope==='mine')empty.append(button('前往课程广场',()=>route('/plaza'),'button primary'));
       else if(initialScope==='managed')empty.append(button('创建课程',()=>route('/editor/new/info'),'button primary'));
       grid.append(empty);return;}
@@ -77,7 +72,6 @@ async function renderCatalog(turn,initialScope){
       const card=el('article','','course-card');const body=el('div','','course-card-body');const labels=el('div','','course-card-labels');
       const status=initialScope==='managed'?statusText(course):course.is_enrolled?'已加入':course.access_mode==='public'?'公开加入':'名单课程';labels.append(el('span',status,'course-chip'),el('span',`${course.lesson_count||0} 课时`,'course-muted'));body.append(labels,el('h3',course.title),el('p',course.description||'按章节学习课程内容。','course-card-description'));
       if(course.host_name)body.append(el('p',`主讲 · ${course.host_name}`,'course-card-host'));
-      const kinds=el('div','','course-kind-list');for(const [kind,label]of [['live','直播'],['video','录播'],['document','资料']])if((course.content_kinds||[]).includes(kind))kinds.append(el('span',label,'course-kind'));if(kinds.childElementCount)body.append(kinds);
       if(initialScope==='mine'&&course.progress_summary?.total){const progress=el('div','','course-card-progress');const track=el('div','','course-progress-track');const bar=el('span');bar.style.width=`${course.progress_summary.percent}%`;track.append(bar);progress.append(track,el('span',`${course.progress_summary.percent}% · ${course.progress_summary.completed}/${course.progress_summary.total} 课时`,'course-muted'));body.append(progress);}
       if(initialScope==='managed'&&course.access_mode==='roster')body.append(el('p','仅指定学员可见','course-muted'));
       const actions=el('div','','course-card-actions');
@@ -86,17 +80,17 @@ async function renderCatalog(turn,initialScope){
     }
     if(pageCount>1){const previous=button('← 上一页',()=>{pageIndex--;paint();},'button secondary');previous.disabled=pageIndex===0;const current=el('span',`第 ${pageIndex+1} / ${pageCount} 页`,'course-muted');const next=button('下一页 →',()=>{pageIndex++;paint();},'button secondary');next.disabled=pageIndex>=pageCount-1;pagination.append(previous,current,next);}
   };
-  search.addEventListener('input',()=>{pageIndex=0;paint();});statusFilter?.addEventListener('change',()=>{pageIndex=0;paint();});const panel=el('div','','course-catalog-content');panel.append(filters,toolbar,grid,pagination);shell.append(hero,tabs,panel);target.replaceChildren(shell);setBusy(target,true);grid.replaceChildren(el('p','正在加载课程…','course-muted'));
+  search.addEventListener('input',()=>{pageIndex=0;paint();});statusFilter?.addEventListener('change',()=>{pageIndex=0;paint();});const panel=el('div','','course-catalog-content');panel.append(toolbar,grid,pagination);shell.append(hero);if(tabs)shell.append(tabs);shell.append(panel);target.replaceChildren(shell);setBusy(target,true);grid.replaceChildren(el('p','正在加载课程…','course-muted'));
   try{const result=await api(`/courses?scope=${initialScope}`);if(turn!==generation)return;data=result.items||[];paint();}finally{if(turn===generation)setBusy(target,false);}
 }
 
 async function renderPreview(id,turn){
   const course=await api(`/courses/public/${id}`);if(turn!==generation)return;const target=root();target.replaceChildren();
   const back=button('← 返回课程广场',()=>route('/plaza'),'text-button course-back');const header=el('header','','course-preview-header');header.append(pageTitle(course.title,course.description||'课程简介暂未填写。'));
-  const facts=el('div','','course-preview-facts');if(hostName(course))facts.append(el('span',hostName(course)));facts.append(el('span',`${course.lesson_count} 个课时`),el('span',(course.content_kinds||[]).map(kind=>({live:'直播',video:'录播',document:'资料'}[kind])).join(' · ')||'课程内容准备中'));
+  const facts=el('div','','course-preview-facts');if(hostName(course))facts.append(el('span',hostName(course)));facts.append(el('span',`${course.lesson_count} 个课时`));
   const actions=el('div','','course-preview-actions');if(course.is_enrolled){const lessonId=course.resume_lesson_id;actions.append(button(course.progress_summary?.percent===100?'复习课程':'继续学习',()=>route(lessonId?`/study/${lessonId}`:`/course/${course.id}`),'button primary'));if(course.progress_summary?.total)actions.append(el('span',`${course.progress_summary.percent}% · ${course.progress_summary.completed}/${course.progress_summary.total} 课时`,'course-muted'));}else if(course.can_manage)actions.append(button('管理课程',()=>route(`/editor/${course.id}/content`),'button primary'));else actions.append(button('加入并开始学习',async()=>{const enrolled=await api(`/courses/${course.id}/enroll`,{method:'POST'});notify('已加入课程，开始第一课');const first=allLessons(enrolled)[0];await route(first?`/study/${first.id}`:`/course/${course.id}`);},'button primary'));
   header.append(facts,actions);const outline=el('section','','course-preview-outline');outline.append(sectionTitle('课程目录',`${course.sections.length} 章 · ${course.lesson_count} 个课时`));
-  for(const [sectionIndex,section]of course.sections.entries()){const group=el('section','','course-preview-section');group.append(el('h2',`${String(sectionIndex+1).padStart(2,'0')}  ${section.title}`));const list=el('ol','','course-preview-lessons');for(const lesson of section.lessons){const row=el('li','','course-preview-lesson');row.append(el('span',lesson.title),el('span',(lesson.content_kinds||[]).map(kind=>({live:'直播',video:'录播',document:'资料'}[kind])).join(' · ')||'内容准备中','course-muted'));list.append(row);}group.append(list);outline.append(group);}
+  for(const [sectionIndex,section]of course.sections.entries()){const group=el('section','','course-preview-section');group.append(el('h2',`${String(sectionIndex+1).padStart(2,'0')}  ${section.title}`));const list=el('ol','','course-preview-lessons');for(const lesson of section.lessons){const row=el('li','','course-preview-lesson');row.append(el('span',lesson.title));list.append(row);}group.append(list);outline.append(group);}
   target.append(back,header,outline);
 }
 
@@ -152,7 +146,7 @@ async function renderCourse(id,turn,editor=false){
     const lessonList=el('div','','course-lesson-list');
     if(!section.lessons.length){const empty=el('div','','course-first-lesson');empty.append(el('span','本章还没有课时。','course-muted'));if(course.can_manage)empty.append(button('添加第一课时',()=>addLesson(course,section,editor),'button primary'));lessonList.append(empty);}
     section.lessons.forEach((lesson,lessonIndex)=>{
-      const row=el('article','','course-lesson-row');const details=el('div','','course-lesson-copy');const name=el('div','','course-lesson-name');name.append(el('span',String(lessonIndex+1).padStart(2,'0'),'course-lesson-number'),el('h3',lesson.title),el('span',unitType(lesson),'course-unit-type'));if(lesson.progress.completed)name.append(el('span','已完成','course-complete-chip'));const liveItem=lesson.items.find(item=>item.kind==='live'&&item.live);const liveTime=liveItem?.live?.starts_at?` · ${new Date(liveItem.live.starts_at*1000).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})}`:'';details.append(name,el('p',`${lesson.description||lesson.items.map(item=>item.kind==='live'?'直播课':item.kind==='video'?'录播视频':'文档资料').join(' · ')||'课程管理员正在准备内容'}${liveTime}`,'course-muted'));
+      const row=el('article','','course-lesson-row');const details=el('div','','course-lesson-copy');const name=el('div','','course-lesson-name');name.append(el('span',String(lessonIndex+1).padStart(2,'0'),'course-lesson-number'),el('h3',lesson.title));if(lesson.progress.completed)name.append(el('span','已完成','course-complete-chip'));details.append(name,el('p',lesson.description||'打开课时，学习本节内容。','course-muted'));
       const buttons=el('div','','course-lesson-actions');
       if(course.can_manage){const open=lesson.items.length?button('预览课时 →',()=>route(`/study/${lesson.id}`),'button secondary'):button('添加内容',()=>addLessonContent(course,lesson,editor),'button primary');buttons.append(open);if(lesson.items.length)buttons.append(button('＋ 添加内容',()=>addLessonContent(course,lesson,editor),'button secondary'));const more=el('details','','course-lesson-more');const summary=el('summary','更多');const menu=el('div','','course-lesson-more-menu');if(lessonIndex>0)menu.append(button('上移课时',async()=>{const ids=section.lessons.map(x=>x.id);[ids[lessonIndex-1],ids[lessonIndex]]=[ids[lessonIndex],ids[lessonIndex-1]];await api(`/courses/sections/${section.id}/lessons/order`,{method:'PUT',body:json({ids})});await refreshManagedCourse(id,editor);},'text-button'));if(lessonIndex<section.lessons.length-1)menu.append(button('下移课时',async()=>{const ids=section.lessons.map(x=>x.id);[ids[lessonIndex+1],ids[lessonIndex]]=[ids[lessonIndex],ids[lessonIndex+1]];await api(`/courses/sections/${section.id}/lessons/order`,{method:'PUT',body:json({ids})});await refreshManagedCourse(id,editor);},'text-button'));menu.append(button('重命名课时',()=>editLesson(course,lesson,editor),'text-button'));const removeLesson=button('删除课时',async()=>{if(await confirmAction(`删除空课时“${lesson.title}”？请先移除视频和资料；直播课次请在直播课堂中删除。`,{title:'删除课时？',danger:true,confirmText:'删除课时'})){await api(`/courses/lessons/${lesson.id}`,{method:'DELETE'});await refreshManagedCourse(id,editor);}},'text-button danger');removeLesson.disabled=lesson.items.length>0;removeLesson.title=lesson.items.length?'请先移除课时中的内容':'';menu.append(removeLesson);more.append(summary,menu);buttons.append(more);}
       else{buttons.append(button('开始学习 →',()=>route(`/study/${lesson.id}`),'button primary'));}
@@ -227,12 +221,55 @@ function pickAsset(lessonId,kind,courseId,editor=false){
   picker.addEventListener('change',()=>{const file=picker.files?.[0];if(!file){picker.remove();return;}void run(async()=>{try{await uploadFile(`/courses/lessons/${lessonId}/assets?kind=${kind}`,file);notify(kind==='video'?'视频已加入课时':'资料已加入课时');await refreshManagedCourse(courseId,editor);}finally{picker.remove();}});});picker.click();
 }
 
-async function privateAsset(asset,asText=false){
+async function privateAsset(asset){
   const response=await fetch(`/api/courses/assets/${asset.id}/file`,{headers:{Authorization:`Bearer ${state.token}`}});
   if(!response.ok)throw new Error('资料读取失败，请刷新课程后重试');
-  return asText?response.text():URL.createObjectURL(await response.blob());
+  return URL.createObjectURL(await response.blob());
 }
 async function videoUrl(asset){const result=await api(`/courses/assets/${asset.id}/playback`,{method:'POST'});return result.url;}
+function markdownAsset(asset){return fetch(`/api/courses/assets/${asset.id}/markdown`,{headers:{Authorization:`Bearer ${state.token}`}});}
+function isMarkdown(asset){return asset.original_name?.toLocaleLowerCase().endsWith('.md')||asset.mime_type==='text/markdown';}
+function resumeLessonVideo(player,lesson){
+  if(lesson.progress.position_seconds>0)player.addEventListener('loadedmetadata',()=>{
+    player.currentTime=Math.min(lesson.progress.position_seconds,Math.max(0,player.duration-1));
+  },{once:true});
+}
+function trackLessonVideo(player,lesson){
+  let lastSaved=0,pending=null,saving=null;
+  const save=(completed=false)=>{pending={position_seconds:Math.floor(player.currentTime||0),completed};if(saving)return saving;saving=(async()=>{while(pending){const snapshot=pending;pending=null;try{await api(`/courses/lessons/${lesson.id}/progress`,{method:'PUT',body:json(snapshot)});}catch(error){pending=snapshot;notify(`播放进度保存失败，切换页面前会重试：${error.message}`,'error');return false;}}return true;})().finally(()=>{saving=null;});return saving;};
+  courseProgressFlushers.add(()=>save());
+  player.addEventListener('timeupdate',()=>{if(player.currentTime-lastSaved>=15){lastSaved=player.currentTime;void save();}});
+  player.addEventListener('pause',()=>void save());player.addEventListener('ended',()=>void save(true));
+  return save;
+}
+async function replayPlayer(recording,lesson){
+  const replay=el('div','','course-replay');replay.append(el('h3','直播回放'));
+  try{const ticket=await api(`/live/recordings/${recording.id}/playback`,{method:'POST'});const player=el('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=ticket.url;resumeLessonVideo(player,lesson);trackLessonVideo(player,lesson);replay.append(player);}
+  catch(error){replay.append(el('p',error.message,'course-error-text'));}
+  return replay;
+}
+function watchRecordings(entries,lesson,turn){
+  if(!entries.length)return;
+  const poll=async()=>{
+    if(turn!==generation)return;
+    const active=entries.filter(entry=>entry.statusNode.isConnected);
+    if(!active.length)return;
+    try{
+      const fresh=await api(`/courses/lessons/${lesson.id}`);if(turn!==generation)return;
+      const recordings=new Map(fresh.items.flatMap(item=>item.recordings||[]).map(recording=>[recording.id,recording]));
+      for(const entry of active){
+        const recording=recordings.get(entry.id);if(!recording)continue;
+        if(recording.status==='ready'){const replay=await replayPlayer(recording,lesson);if(turn!==generation)return;entry.statusNode.replaceWith(replay);}
+        else if(recording.status==='failed')entry.statusNode.textContent='本次直播录制未能生成回放。';
+        else entry.statusNode.textContent='直播回放正在生成，完成后会显示在本小节。';
+      }
+      if(active.some(entry=>entry.statusNode.isConnected&&recordings.get(entry.id)?.status!=='failed'))setTimeout(poll,8000);
+    }catch(error){
+      if(turn===generation)active.forEach(entry=>{if(entry.statusNode.isConnected)entry.statusNode.textContent='回放状态暂时无法更新，请稍后刷新课程。';});
+    }
+  };
+  setTimeout(poll,8000);
+}
 
 async function renderStudy(lessonId,turn){
   const lesson=await api(`/courses/lessons/${lessonId}`);if(turn!==generation)return;const course=await api(`/courses/${lesson.course_id}`);if(turn!==generation)return;
@@ -240,36 +277,42 @@ async function renderStudy(lessonId,turn){
   const back=button('← 课程目录',()=>route(`/course/${course.id}`),'text-button course-back');const top=el('header','','course-study-heading');top.append(pageTitle(lesson.title,lesson.description));top.append(el('span',`${course.title} · ${lesson.progress.completed?'已完成':'学习中'}`,'course-muted'));
   const layout=el('div','','course-study-layout');const nav=el('aside','','course-study-nav');const navHeading=sectionTitle('本课程',`${course.progress_summary.completed}/${course.progress_summary.total} 已完成`);const navToggle=button('',()=>{const expanded=navToggle.getAttribute('aria-expanded')!=='true';navToggle.setAttribute('aria-expanded',String(expanded));nav.classList.toggle('is-expanded',expanded);navContent.hidden=!expanded;},'course-study-nav-toggle');navToggle.setAttribute('aria-expanded','false');navToggle.append(el('span',`课程目录 · ${course.progress_summary.completed}/${course.progress_summary.total} 已完成`),el('span','⌄','course-nav-chevron'));const navContent=el('div','','course-study-nav-content');navContent.hidden=matchMedia('(max-width: 760px)').matches;
   for(const section of course.sections){const group=el('section','','course-study-group');group.append(el('h3',section.title));for(const item of section.lessons){const link=button('',()=>route(`/study/${item.id}`),'course-study-link');link.classList.toggle('current',item.id===lesson.id);link.append(el('span',item.progress.completed?'✓':String(item.position+1).padStart(2,'0'),'course-study-link-number'),el('span',item.title));group.append(link);}navContent.append(group);}nav.append(navHeading,navToggle,navContent);
-  const content=el('main','','course-study-content');const contentMeta=el('div','','course-lesson-content-meta');contentMeta.append(el('span',`第 ${index+1} / ${lessons.length} 课时`,'course-muted'),el('span',unitType(lesson),'course-chip'));content.append(contentMeta);
-  if(!lesson.items.length){const empty=el('div','','course-empty');empty.append(el('h2','本课时内容正在准备'),el('p','课程管理员会在这里添加直播、录播或文档资料。'));content.append(empty);}
+  const content=el('main','','course-study-content');const contentMeta=el('div','','course-lesson-content-meta');contentMeta.append(el('span',`第 ${index+1} / ${lessons.length} 课时`,'course-muted'));content.append(contentMeta);
+  const media=el('div','','course-study-media');const markdown=el('div','','course-reading-list');const attachments=el('section','','course-materials');const pendingRecordings=[];let mediaCount=0,markdownCount=0,attachmentCount=0;
+  if(!lesson.items.length)content.append(el('p','本小节内容正在准备中。','course-empty'));
   for(const item of lesson.items){
-    if(item.kind==='live'){
-      if(!item.live){content.append(el('p','该直播已删除。','course-muted'));continue;}
-      const panel=el('section','','course-content-block course-live-block');panel.append(el('span','直播课','course-chip'));
-      if(item.live.title!==lesson.title)panel.append(el('h2',item.live.title));
-      if(item.live.description&&item.live.description!==lesson.description)panel.append(el('p',item.live.description,'course-muted'));
+    if(item.kind==='video'&&item.asset){
+      mediaCount++;const entry=el('section','','course-media-entry');entry.append(el('h2',item.asset.original_name,'course-media-title'));
+      try{const url=await videoUrl(item.asset);if(turn!==generation)return;const player=el('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=url;resumeLessonVideo(player,lesson);trackLessonVideo(player,lesson);entry.append(player);}catch(error){if(turn!==generation)return;entry.append(el('p',error.message,'course-error-text'));}media.append(entry);
+    }else if(item.kind==='live'){
+      mediaCount++;const entry=el('section','','course-media-entry course-live-entry');
+      if(!item.live){entry.append(el('p','该直播课次已删除。','course-muted'));media.append(entry);continue;}
+      const session=el('div','','course-live-summary');session.append(el('span','直播','course-live-label'),el('h2',item.live.title===lesson.title?lesson.title:item.live.title));
       const starts=item.live.starts_at?new Date(item.live.starts_at*1000).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}):'时间待安排';
       const liveStatus={scheduled:'等待开课',live:'直播进行中',ended:'直播已结束'}[item.live.status]||'直播状态待确认';
-      panel.append(el('p',`开课时间 ${starts} · ${liveStatus}`,'course-muted'));
-      panel.append(button(item.live.status==='live'?'进入直播课堂 →':item.live.status==='ended'?'查看课堂与回放 →':'查看直播安排',()=>route(`/lesson/${item.live.id}`),'button primary'));
-      if(item.live.status==='ended'){const complete=button(lesson.progress.completed?'本课时已完成':'标记本课时完成',()=>markLessonComplete(lesson),'button secondary');complete.disabled=Boolean(lesson.progress.completed);panel.append(complete);}
-      content.append(panel);
-    }else if(item.kind==='video'&&item.asset){
-      const panel=el('section','','course-content-block course-video-block');panel.append(el('div',item.asset.original_name,'course-content-title'));
-      try{const player=el('video');player.controls=true;player.playsInline=true;player.preload='metadata';player.src=await videoUrl(item.asset);if(lesson.progress.position_seconds>0)player.addEventListener('loadedmetadata',()=>{player.currentTime=Math.min(lesson.progress.position_seconds,Math.max(0,player.duration-1));},{once:true});let lastSaved=0,pending=null,saving=null;
-        const save=(completed=false)=>{pending={position_seconds:Math.floor(player.currentTime||0),completed};if(saving)return saving;saving=(async()=>{while(pending){const snapshot=pending;pending=null;try{await api(`/courses/lessons/${lesson.id}/progress`,{method:'PUT',body:json(snapshot)});}catch(error){pending=snapshot;notify(`播放进度保存失败，切换页面前会重试：${error.message}`,'error');return false;}}return true;})().finally(()=>{saving=null;});return saving;};
-        courseProgressFlushers.add(()=>save());
-        player.addEventListener('timeupdate',()=>{if(player.currentTime-lastSaved>=15){lastSaved=player.currentTime;void save();}});player.addEventListener('pause',()=>void save());player.addEventListener('ended',()=>void save(true));panel.append(player);
-      }catch(error){panel.append(el('p',error.message,'course-error-text'));}content.append(panel);
+      session.append(el('p',`${starts} · ${liveStatus}`,'course-muted'),button(item.live.status==='live'?'进入直播课堂 →':'查看直播课次 →',()=>route(`/lesson/${item.live.id}`),'button secondary'));entry.append(session);
+      for(const recording of item.recordings||[]){
+        if(recording.status==='ready'){const replay=await replayPlayer(recording,lesson);if(turn!==generation)return;entry.append(replay);}
+        else if(['starting','recording','stopping','unknown'].includes(recording.status)){const statusNode=el('p','直播回放正在生成，完成后会显示在本小节。','course-muted');entry.append(statusNode);pendingRecordings.push({id:recording.id,statusNode});}
+        else if(recording.status==='failed')entry.append(el('p','本次直播录制未能生成回放。','course-error-text'));
+      }
+      media.append(entry);
     }else if(item.kind==='document'&&item.asset){
-      const panel=el('section','','course-content-block course-document-block');const title=el('div','','course-content-title');title.append(el('span',item.asset.original_name),el('span',`${(item.asset.size/1024/1024).toFixed(1)} MB`,'course-muted'));panel.append(title);
-      const view=button('预览资料',async()=>{const url=await privateAsset(item.asset);const frame=el('iframe');frame.src=url;frame.title=item.asset.original_name;frame.loading='lazy';frame.className='course-document-preview';panel.replaceChildren(title,frame,actions);},'button secondary');
-      const download=button('下载',async()=>{const url=await privateAsset(item.asset);const link=el('a');link.href=url;link.download=item.asset.original_name;link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);},'button secondary');
-      const complete=button(lesson.progress.completed?'已完成':'标记本课时完成',()=>markLessonComplete(lesson),'button primary');complete.disabled=Boolean(lesson.progress.completed);
-      const actions=el('div','','course-document-actions');actions.append(view,download,complete);panel.append(actions);content.append(panel);
+      if(isMarkdown(item.asset)){
+        markdownCount++;const body=el('article','','course-reading-body');
+        try{const response=await markdownAsset(item.asset);if(turn!==generation)return;if(!response.ok)throw new Error('课程正文暂时无法加载，请刷新后重试');body.innerHTML=await response.text();if(turn!==generation)return;await renderProblemMath(body);}catch(error){if(turn!==generation)return;body.replaceChildren(el('p',error.message,'course-error-text'));}markdown.append(body);
+      }else{
+        attachmentCount++;const row=el('div','','course-material-row');row.append(el('span',item.asset.original_name,'course-material-name'),el('span',`${(item.asset.size/1024/1024).toFixed(1)} MB`,'course-muted'));
+        row.append(button('下载',async()=>{const url=await privateAsset(item.asset);const link=el('a');link.href=url;link.download=item.asset.original_name;link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);},'button secondary'));attachments.append(row);
+      }
     }
   }
-  const navigation=el('footer','','course-study-navigation');const previous=button('← 上一课',()=>route(`/study/${lessons[index-1].id}`),'button secondary');previous.disabled=index<=0;const next=button('下一课 →',()=>route(`/study/${lessons[index+1].id}`),'button primary');next.disabled=index<0||index>=lessons.length-1;navigation.append(previous,next);content.append(navigation);layout.append(nav,content);target.append(back,top,layout);
+  if(mediaCount)content.append(media);
+  if(markdownCount){const reading=el('section','','course-study-reading');reading.append(el('h2','课程正文'));reading.append(markdown);content.append(reading);}
+  if(attachmentCount){attachments.prepend(el('h2','课程资料'));content.append(attachments);}
+  if(lesson.progress.completed)content.append(el('p','本小节已完成','course-completed-note'));
+  else content.append(button('标记本小节完成',()=>markLessonComplete(lesson),'button secondary course-complete-action'));
+  const navigation=el('footer','','course-study-navigation');const previous=button('← 上一课',()=>route(`/study/${lessons[index-1].id}`),'button secondary');previous.disabled=index<=0;const next=button('下一课 →',()=>route(`/study/${lessons[index+1].id}`),'button primary');next.disabled=index<0||index>=lessons.length-1;navigation.append(previous,next);content.append(navigation);layout.append(nav,content);target.append(back,top,layout);watchRecordings(pendingRecordings,lesson,turn);
 }
 
 async function markLessonComplete(lesson){

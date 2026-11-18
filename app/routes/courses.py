@@ -3,7 +3,7 @@ import secrets
 import time
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel, Field, StrictBool, StrictInt, ConfigDict
 from app.db import connect
 from app.config import load_config
@@ -466,6 +466,27 @@ def asset_file(asset_id: int, user=Depends(current_user)):
             raise HTTPException(404, '课程文件不可用，请联系管理员')
         return FileResponse(path, media_type=asset['mime_type'], filename=asset['original_name'],
                             headers={'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff'})
+
+
+@router.get('/assets/{asset_id}/markdown', response_class=HTMLResponse)
+def markdown_asset(asset_id: int, user=Depends(current_user)):
+    with connect() as db:
+        asset = db.execute('SELECT * FROM course_assets WHERE id=?', (asset_id,)).fetchone()
+        if not asset:
+            raise HTTPException(404, '课程资料不存在')
+        courses.require_access(db, asset['course_id'], user)
+        if asset['kind'] != 'document' or Path(asset['original_name']).suffix.lower() != '.md':
+            raise HTTPException(404, '该课程资料不是 Markdown 文档')
+        path = asset_path(asset['storage_name'])
+        if not path.is_file():
+            raise HTTPException(404, '课程资料不可用，请联系管理员')
+        try:
+            source = path.read_text(encoding='utf-8-sig')
+        except UnicodeDecodeError as error:
+            raise HTTPException(422, 'Markdown 文档编码无效，请重新上传 UTF-8 文件') from error
+        return HTMLResponse(courses.render_lesson_markdown(source), headers={
+            'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff',
+            'Content-Security-Policy': "default-src 'none'; style-src 'none'; img-src 'none'; base-uri 'none'"})
 
 
 @router.post('/assets/{asset_id}/playback')
