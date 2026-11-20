@@ -6,7 +6,7 @@ import pytest
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    config = Path('config.example.toml').read_text(encoding='utf-8').replace('data/app.db', (tmp_path / 'test.db').as_posix()).replace('data/audio', (tmp_path / 'audio').as_posix()).replace('data/presentations', (tmp_path / 'presentations').as_posix())
+    config = Path('config.example.toml').read_text().replace('data/app.db', str(tmp_path / 'test.db')).replace('data/audio', str(tmp_path / 'audio')).replace('data/presentations', str(tmp_path / 'presentations')).replace('data/live', str(tmp_path / 'live')).replace('auto_refresh = true', 'auto_refresh = false')
     (tmp_path / 'config.toml').write_text(config)
     monkeypatch.setenv('SCU_CONFIG', str(tmp_path / 'config.toml'))
     from app.db import initialize, connect
@@ -14,7 +14,8 @@ def client(tmp_path, monkeypatch):
     initialize()
     with connect() as db:
         for name in ['manager', 'alice', 'bob']:
-            db.execute('INSERT INTO users(username,password,is_admin) VALUES (?,?,?)', (name,hash_password('password123'),name=='manager'))
+            db.execute('INSERT INTO users(username,password,is_admin,can_interview,can_exam,can_practice) VALUES (?,?,?,?,?,1)',
+                       (name, hash_password('password123'), name == 'manager', 1, 1))
     # Route fixtures use placeholder audio bytes; conversion is covered by provider tests.
     from app.services import ai
     monkeypatch.setattr(ai, 'media_audio', lambda paths: [{'type': 'input_audio', 'input_audio': {'data': 'route-test-audio'}}])
@@ -26,6 +27,14 @@ def login(c, name):
     r=c.post('/api/login', json={'username':name,'password':'password123'})
     assert r.status_code == 200
     return {'Authorization':'Bearer '+r.json()['token']}
+
+def test_new_login_replaces_the_previous_account_session(client):
+    first = login(client, 'alice')
+    second = login(client, 'alice')
+
+    assert client.get('/api/me', headers=first).status_code == 401
+    assert client.get('/api/me', headers=second).status_code == 200
+    assert client.get('/api/me', headers=login(client, 'bob')).status_code == 200
 
 def test_interview_permissions_and_ai(client, monkeypatch):
     from app.services import ai
@@ -49,7 +58,7 @@ def test_contest_access_and_hidden_cases(client, monkeypatch):
     monkeypatch.setattr(judge,'judge',lambda language,source,tests: 'Accepted')
     t,a=login(client,'manager'),login(client,'alice')
     now=time.time()
-    body={'title':'比赛','starts':now-10,'ends':now+100,'judge_mode':'docker','problems':[
+    body={'participant_ids':[3,4],'title':'比赛','starts':now-10,'ends':now+100,'judge_mode':'docker','problems':[
         {'title':'加法','statement':'求和','tests':[{'input':'1 2','output':'3'}]}]}
     assert client.post('/api/admin/contests',headers=a,json=body).status_code == 403
     created=client.post('/api/admin/contests',headers=t,json=body).json()
@@ -60,7 +69,7 @@ def test_contest_access_and_hidden_cases(client, monkeypatch):
     assert client.get(f'/api/contests/{cid}',headers=a).json()['problems'][0]['attempt_count'] == 0
     r=client.post(f'/api/problems/{pid}/submissions',headers=a,json={'source':'print(3)','language':'python3'})
     assert r.json()['status']=='Accepted'
-    expired=client.post('/api/admin/contests',headers=t,json={'title':'过期','starts':now-100,'ends':now-10,'judge_mode':'docker','problems':[
+    expired=client.post('/api/admin/contests',headers=t,json={'participant_ids':[3,4],'title':'过期','starts':now-100,'ends':now-10,'judge_mode':'docker','problems':[
         {'title':'题','statement':'题','tests':[{'input':'','output':''}]}]}).json()['id']
     p=client.get(f'/api/contests/{expired}/problems',headers=a).json()[0]['id']
     assert client.post(f'/api/problems/{p}/submissions',headers=a,json={'source':'pass'}).status_code == 403
@@ -69,7 +78,7 @@ def test_luogu_submission_waits_for_browser_bridge_and_accepts_remote_result(cli
     manager, alice = login(client, 'manager'), login(client, 'alice')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'洛谷赛','starts':now-10,'ends':now+100,
+        'participant_ids':[3,4], 'title':'洛谷赛','starts':now-10,'ends':now+100,
         'problems':[{'title':'加法','statement':'求和','remote_problem_id':'P1000'}]
     })
     cid = contest.json()['id']
@@ -115,7 +124,7 @@ def test_submissions_are_paginated_have_private_details_and_feed_contest_ranking
     manager, alice, bob = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'成绩赛','starts':now-10,'ends':now+100,'show_ranking':True,
+        'participant_ids':[3,4], 'title':'成绩赛','starts':now-10,'ends':now+100,'show_ranking':True,
         'ranking_rule':'score','problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000','points':250}]
     }).json()
     pid = contest['problem_ids'][0]
@@ -138,10 +147,12 @@ def test_submissions_are_paginated_have_private_details_and_feed_contest_ranking
     page = client.get('/api/submissions?page=1&page_size=1', headers=alice)
     assert page.status_code == 200
     assert page.json()['total'] == 2 and page.json()['pages'] == 2
+    assert 'remote_submission_id' not in page.json()['items'][0]
     detail = client.get(f'/api/submissions/{first}', headers=alice)
     assert detail.status_code == 200
     assert detail.json()['source'] == 'int main(){}'
     assert detail.json()['detail'] == '测试点 2 答案错误'
+    assert 'remote_submission_id' not in detail.json()
     assert client.get(f'/api/submissions/{first}', headers=bob).status_code == 404
 
     overview = client.get(f'/api/contests/{contest["id"]}', headers=alice).json()
@@ -153,23 +164,102 @@ def test_submissions_are_paginated_have_private_details_and_feed_contest_ranking
     assert ranking.json()['rows'][0]['score'] == 250
     assert ranking.json()['rows'][0]['problems'][0]['attempts'] == 2
 
+    client.post(f'/api/problems/{pid}/submissions', headers=bob, json={'source':'print(1)','language':'python3'})
+    client.post(f'/api/problems/{pid}/submissions', headers=bob, json={'source':'print(2)','language':'python3'})
+    admin_first = client.get('/api/admin/submissions?page=1&page_size=2', headers=manager).json()
+    admin_second = client.get('/api/admin/submissions?page=2&page_size=2', headers=manager).json()
+    assert admin_first['total']==admin_second['total']==4
+    assert [row['username'] for row in admin_first['items']]==['bob','bob']
+    assert [row['username'] for row in admin_second['items']]==['alice','alice']
+    all_ids = [row['id'] for row in admin_first['items'] + admin_second['items']]
+    assert all_ids == sorted(all_ids, reverse=True)
+
+def test_contest_ranking_awards_ceiling_proportional_score_for_partial_luogu_results(client):
+    manager, alice = login(client, 'manager'), login(client, 'alice')
+    now = time.time()
+    contest = client.post('/api/admin/contests', headers=manager, json={
+        'participant_ids':[3,4], 'title':'部分分赛','starts':now-10,'ends':now+100,'show_ranking':True,
+        'ranking_rule':'score','problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000','points':100}]
+    }).json()
+    pid = contest['problem_ids'][0]
+    first = client.post(f'/api/problems/{pid}/submissions', headers=alice, json={
+        'source':'int main(){}','language':'cpp11'
+    }).json()['id']
+    assert client.post(f'/api/submissions/{first}/remote-result', headers=alice, json={
+        'remote_submission_id':'8123456','status':'Wrong Answer',
+        'detail':'通过测试用例数：7 / 12\n测试点 #1：AC\n测试点 #2：WA'
+    }).status_code == 200
+    ranking = client.get(f'/api/contests/{contest["id"]}/ranking', headers=alice).json()
+    assert ranking['rows'][0]['score'] == 59
+    assert ranking['rows'][0]['problems'][0]['score'] == 59
+    assert ranking['rows'][0]['problems'][0]['solved'] is False
+    assert ranking['rows'][0]['problems'][0]['passed_cases'] == 7
+    assert ranking['rows'][0]['problems'][0]['total_cases'] == 12
+
+def test_admin_submission_directory_and_each_users_submissions_are_paginated_separately(client):
+    manager, alice, bob = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
+    now = time.time()
+    contest = client.post('/api/admin/contests', headers=manager, json={
+        'participant_ids':[3,4], 'title':'分层分页赛','starts':now-10,'ends':now+100,
+        'problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000'}]
+    }).json()
+    pid = contest['problem_ids'][0]
+    for source in ('print(1)', 'print(2)', 'print(3)'):
+        assert client.post(f'/api/problems/{pid}/submissions', headers=alice,
+                           json={'source':source,'language':'python3'}).status_code == 200
+    assert client.post(f'/api/problems/{pid}/submissions', headers=bob,
+                       json={'source':'print(4)','language':'python3'}).status_code == 200
+    assert client.post(f'/api/problems/{pid}/submissions', headers=manager,
+                       json={'source':'print(5)','language':'python3'}).status_code == 200
+
+    first_users = client.get('/api/admin/submissions/users?page=1&page_size=1', headers=manager)
+    second_users = client.get('/api/admin/submissions/users?page=2&page_size=1', headers=manager)
+    assert first_users.status_code == second_users.status_code == 200
+    assert (first_users.json()['total'], first_users.json()['pages']) == (2, 2)
+    assert first_users.json()['items'][0]['username'] == 'alice'
+    assert first_users.json()['items'][0]['submission_count'] == 3
+    assert second_users.json()['items'][0]['username'] == 'bob'
+
+    alice_id = first_users.json()['items'][0]['user_id']
+    first_submissions = client.get(f'/api/admin/submissions/users/{alice_id}?page=1&page_size=2', headers=manager)
+    second_submissions = client.get(f'/api/admin/submissions/users/{alice_id}?page=2&page_size=2', headers=manager)
+    assert first_submissions.status_code == second_submissions.status_code == 200
+    assert (first_submissions.json()['total'], first_submissions.json()['pages']) == (3, 2)
+    assert len(first_submissions.json()['items']) == 2
+    assert len(second_submissions.json()['items']) == 1
+    assert all(row['username'] == 'alice' for row in first_submissions.json()['items'] + second_submissions.json()['items'])
+
 def test_contest_ranking_can_be_hidden_and_invalid_language_is_rejected(client):
     manager, alice = login(client, 'manager'), login(client, 'alice')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'不公开榜单','starts':now-10,'ends':now+100,'show_ranking':False,
+        'participant_ids':[3,4], 'title':'不公开榜单','starts':now-10,'ends':now+100,'show_ranking':False,
         'problems':[{'title':'A题','statement':'题面','remote_problem_id':'P1000'}]
     }).json()
     response = client.get(f'/api/contests/{contest["id"]}/ranking', headers=alice)
     assert response.status_code == 200 and response.json()['visible'] is False
+    from app.db import connect
+    with connect() as db:
+        db.execute("INSERT INTO submissions(user_id,problem_id,language,source,status,created) VALUES (?,?,?,?,?,?)",
+                   (3, contest['problem_ids'][0], 'cpp11', 'int main(){}', 'Accepted', now))
+    for suffix in ('', '/problems', '/ranking'):
+        path = f'/api/contests/{contest["id"]}{suffix}'
+        candidate_response = client.get(path, headers=alice)
+        admin_response = client.get(path, headers=manager)
+        assert candidate_response.status_code == admin_response.status_code == 200
+        hidden = candidate_response.json() if suffix == '/problems' else candidate_response.json()['problems']
+        visible = admin_response.json() if suffix == '/problems' else admin_response.json()['problems']
+        assert hidden[0]['attempt_count'] is None and hidden[0]['accepted_count'] is None
+        assert visible[0]['attempt_count'] == visible[0]['accepted_count'] == 1
+        assert hidden[0]['points'] == 100
     invalid = client.post(f'/api/problems/{contest["problem_ids"][0]}/submissions', headers=alice,
                           json={'source':'x','language':'brainfuck'})
     assert invalid.status_code == 422
 
 def test_old_oj_schema_migrates_without_changing_local_judge_defaults(tmp_path, monkeypatch):
     config = Path('config.example.toml').read_text()
-    config = config.replace('data/app.db', (tmp_path / 'legacy.db').as_posix()).replace('data/audio', (tmp_path / 'audio').as_posix())
-    config = config.replace('data/presentations', (tmp_path / 'presentations').as_posix())
+    config = config.replace('data/app.db', str(tmp_path / 'legacy.db')).replace('data/audio', str(tmp_path / 'audio'))
+    config = config.replace('data/presentations', str(tmp_path / 'presentations'))
     config_path = tmp_path / 'config.toml'
     config_path.write_text(config)
     monkeypatch.setenv('SCU_CONFIG', str(config_path))
@@ -227,7 +317,7 @@ def test_admin_manages_luogu_extension_origin_and_rejects_unsafe_urls(client):
 def test_luogu_contest_requires_a_problem_and_creates_it_atomically(client):
     manager, alice = login(client, 'manager'), login(client, 'alice')
     now = time.time()
-    base = {'title':'洛谷模拟赛','starts':now-10,'ends':now+100}
+    base = {'participant_ids':[3,4], 'title':'洛谷模拟赛','starts':now-10,'ends':now+100}
     assert client.post('/api/admin/contests', headers=manager, json=base).status_code == 422
     created = client.post('/api/admin/contests', headers=manager, json={
         **base,
@@ -278,7 +368,7 @@ def test_admin_can_delete_contest_and_its_problem_submissions(client):
     manager, alice = login(client, 'manager'), login(client, 'alice')
     now = time.time()
     contest = client.post('/api/admin/contests', headers=manager, json={
-        'title':'待删除比赛','starts':now-10,'ends':now+100,
+        'participant_ids':[3,4], 'title':'待删除比赛','starts':now-10,'ends':now+100,
         'problems':[{'title':'题目','statement':'描述','remote_problem_id':'P1000'}]
     }).json()
     cid = contest['id']

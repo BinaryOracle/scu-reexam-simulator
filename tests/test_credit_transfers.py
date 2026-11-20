@@ -1,6 +1,14 @@
 """Transfers conserve credits, isolate history and survive retries atomically."""
 from concurrent.futures import ThreadPoolExecutor
 import pytest
+
+
+@pytest.fixture(autouse=True)
+def funded_wallets(client):
+    from app.db import connect
+    with connect() as db:
+        db.execute("UPDATE users SET points=1 WHERE username IN ('alice','bob')")
+
 from test_system import client, login
 
 
@@ -15,7 +23,7 @@ def test_transfer_receipts_retry_and_zero_spending(client):
         r=client.post('/api/profile/transfers',headers=a,json=payload)
         assert r.status_code==201 and r.json()['already_transferred'] is repeat
         assert r.json()['remaining']==0
-    assert client.get('/api/profile',headers=b).json()['remaining']==2
+    assert client.get('/api/profile',headers=b).json()['points']==2
     assert client.get('/api/profile',headers=b).json()['redeemed_amount_fen']==0
     outgoing=client.get('/api/profile/transfers',headers=a).json()
     incoming=client.get('/api/profile/transfers',headers=b).json()
@@ -39,14 +47,14 @@ def test_transfer_resolves_username_or_case_insensitive_email_and_retries(client
     assert first.status_code == repeated.status_code == 201
     assert first.json()['recipient'] == 'bob'
     assert repeated.json()['already_transferred'] is True
-    assert client.get('/api/profile', headers=login(client, 'bob')).json()['remaining'] == 2
+    assert client.get('/api/profile', headers=login(client, 'bob')).json()['points'] == 2
 
 
 def test_transfer_history_pages_five_records_at_a_time(client):
     from app.db import connect
     sender = login(client, 'alice')
     with connect() as db:
-        db.execute("UPDATE users SET interview_credits=6 WHERE username='alice'")
+        db.execute("UPDATE users SET points=6 WHERE username='alice'")
     for index in range(6):
         response = client.post('/api/profile/transfers', headers=sender, json={
             'recipient':'bob', 'credits':1, 'idempotency_key':f'page-transfer-{index:03d}'})
@@ -64,7 +72,7 @@ def test_concurrent_transfers_cannot_overspend_or_double_receive(client):
         return client.post('/api/profile/transfers',headers=a,json={'recipient':'bob','credits':1,'idempotency_key':f'concurrent-{i}'})
     with ThreadPoolExecutor(max_workers=2) as pool:r=list(pool.map(act,range(2)))
     assert sorted(x.status_code for x in r)==[201,409]
-    assert client.get('/api/profile',headers=login(client,'bob')).json()['remaining']==2
+    assert client.get('/api/profile',headers=login(client,'bob')).json()['points']==2
 
 
 def test_self_invalid_admin_and_inactive_receiver_rejected(client):
@@ -88,9 +96,9 @@ def test_transfer_failure_rolls_back_both_accounts_and_receipt(client,monkeypatc
     monkeypatch.setattr(credit_transfers,'adjust',fail)
     with pytest.raises(RuntimeError):send(client,a)
     with connect() as db:
-        assert list(r[0] for r in db.execute("SELECT interview_credits FROM users WHERE username IN ('alice','bob') ORDER BY username"))==[1,1]
+        assert list(r[0] for r in db.execute("SELECT points FROM users WHERE username IN ('alice','bob') ORDER BY username"))==[1,1]
         assert db.execute('SELECT COUNT(*) FROM credit_transfers').fetchone()[0]==0
-        assert db.execute("SELECT COUNT(*) FROM credit_ledger WHERE kind LIKE 'transfer_%'").fetchone()[0]==0
+        assert db.execute("SELECT COUNT(*) FROM points_ledger WHERE kind LIKE 'transfer_%'").fetchone()[0]==0
 
 
 def test_receiving_user_keeps_receipt_after_sender_account_deleted(client):
@@ -100,4 +108,4 @@ def test_receiving_user_keeps_receipt_after_sender_account_deleted(client):
     assert client.delete(f'/api/admin/users/{uid}',headers=m).status_code==204
     receipt=client.get('/api/profile/transfers',headers=b).json()['items'][0]
     assert receipt['other_username']=='alice' and receipt['credits']==1
-    assert client.get('/api/profile',headers=b).json()['remaining']==2
+    assert client.get('/api/profile',headers=b).json()['points']==2

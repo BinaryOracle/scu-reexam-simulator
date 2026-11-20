@@ -1,6 +1,6 @@
 /** Shared accessible learning forms and authenticated source images. */
 import { api, state } from './api.js?v=20261114-ui-v17';
-import { el, button, notify } from './ui.js?v=20261114-ui-v17';
+import { el, button, notify, confirmAction } from './ui.js?v=20261114-ui-v17';
 export const chapterNames = { interview: '面试篇', written_c: '笔试-软件工程篇', written_ai: '笔试-人工智能篇' };
 const urls = new Set();
 export function clearLearningMedia() {
@@ -27,22 +27,44 @@ export function pagination(container, result, change) {
   nav.append(prev, el('span', `第 ${result.page} / ${Math.ceil(result.total / result.page_size)} 页`), next);
   container.append(nav);
 }
-export function learningDialog(title) {
+export function learningDialog(title, requestClose) {
   const dialog = el('dialog', '', 'account-dialog learning-dialog');
   const head = el('div', '', 'dialog-header');
   const heading = el('h2', title); heading.id = `learning-dialog-${crypto.randomUUID()}`;
   dialog.setAttribute('aria-labelledby', heading.id);
-  const close = button('×', () => dialog.close(), 'icon-button'); close.setAttribute('aria-label', '关闭对话框');
+  const close = button('×', () => requestClose ? requestClose() : dialog.close(), 'icon-button'); close.setAttribute('aria-label', '关闭对话框');
   head.append(heading, close);
   const body = el('div', '', 'dialog-body'); const footer = el('div', '', 'dialog-footer');
   dialog.append(head, body, footer);
   const prior = document.activeElement;
+  dialog.addEventListener('keydown', event => {
+    if (event.key !== 'Tab') return;
+    const controls = [...dialog.querySelectorAll('button, input, select, textarea, a[href], [tabindex]')]
+      .filter(node => !node.disabled && node.tabIndex >= 0 && node.getClientRects().length);
+    if (!controls.length) { event.preventDefault(); return; }
+    const first = controls[0]; const last = controls[controls.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  });
+  if (requestClose) dialog.addEventListener('cancel', event => {
+    event.preventDefault();
+    void Promise.resolve(requestClose()).catch(error => notify(error.message, 'error'));
+  });
   dialog.addEventListener('close', () => { dialog.remove(); if (prior?.isConnected) prior.focus(); }, { once: true });
   document.body.append(dialog); dialog.showModal();
   return { dialog, body, footer };
 }
 export function questionEditor(collections, item, save, official = false, defaultSection = 'interview', defaultCollectionId = '') {
-  const { dialog, body, footer } = learningDialog(item ? '编辑题目' : official ? '新增公开训练题' : '新增私人题目');
+  let saving = false, confirmingClose = false;
+  const requestClose = async () => {
+    if (saving || confirmingClose) return;
+    confirmingClose = true;
+    try {
+      if (values() !== original && !await confirmAction('题目有尚未保存的修改，确定放弃吗？')) return;
+      if (!saving && dialog.open) dialog.close();
+    } finally { confirmingClose = false; }
+  };
+  const { dialog, body, footer } = learningDialog(item ? '编辑题目' : official ? '新增公开训练题' : '新增私人题目', requestClose);
   const form = el('form'); form.id = `question-form-${crypto.randomUUID()}`;
   const enabled = collections.filter(c => c.active !== 0 && c.active !== false);
   const initial = collections.find(c => c.id === (item?.collection_id || defaultCollectionId))?.section_id || defaultSection;
@@ -73,16 +95,18 @@ export function questionEditor(collections, item, save, official = false, defaul
   collection.input.addEventListener('change', update); update();
   form.append(help, chapter.wrap, collection.wrap, qlabel, question, answerWrap, error); body.append(form);
   const submit = el('button', '保存题目', 'button primary'); submit.type = 'submit'; submit.setAttribute('form', form.id);
-  footer.append(button('取消', () => dialog.close()), submit);
+  const values = () => JSON.stringify([chapter.input.value, collection.input.value, question.value, answer.value]);
+  const original = values();
+  footer.append(button('取消', requestClose), submit);
   const token = state.token;
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (submit.disabled) return;
-    submit.disabled = true; error.textContent = '';
+    saving = true; submit.disabled = true; error.textContent = '';
     try {
       await save({ collection_id: collection.input.value, question: question.value.trim(), answer: answerWrap.hidden ? '' : answer.value.trim() });
       if (state.token === token && dialog.open) dialog.close();
     } catch (failure) { if (dialog.isConnected) error.textContent = failure.message; }
-    finally { submit.disabled = false; }
+    finally { saving = false; submit.disabled = false; }
   });
 }
 export function passageContext(item) {
@@ -180,17 +204,28 @@ export function downloadTemplate() {
   const a = el('a'); a.href = url; a.download = '训练题导入模板.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 export function importDialog(done) {
-  const { dialog, body, footer } = learningDialog('批量导入私人题目');
+  let importing = false;
+  const requestClose = () => { if (!importing) dialog.close(); };
+  const { dialog, body, footer } = learningDialog('批量导入私人题目', requestClose);
   body.append(el('p', '上传 JSON 列表，预览确认后统一保存，默认仅自己可见。专业课集合还支持 operating_systems、computer_networks。', 'muted'));
   body.append(button('下载 JSON 模板', downloadTemplate));
   const file = el('input'); file.type = 'file'; file.accept = '.json,application/json'; file.setAttribute('aria-label', '选择 JSON 题目文件');
   const preview = el('div', '', 'learning-import-preview');
   const save = button('确认导入', async () => {
-    const result = await api('/training/import', { method: 'POST', body: JSON.stringify({ items }) });
-    if (dialog.isConnected) { dialog.close(); notify(`已保存 ${result.created} 道私人题目`); await done(); }
+    if (importing) return;
+    importing = true; file.disabled = true;
+    try {
+      const result = await api('/training/import', { method: 'POST', body: JSON.stringify({ items }) });
+      if (dialog.isConnected) {
+        dialog.close(); notify(`已保存 ${result.created} 道私人题目`);
+        try { await done(); }
+        catch (error) { notify(`题目已导入，但列表刷新失败：${error.message}。请刷新列表查看。`, 'error'); }
+      }
+    } finally { importing = false; file.disabled = false; }
   }, 'button primary'); save.disabled = true;
   let items = []; let generation = 0;
   file.addEventListener('change', async () => {
+    if (importing) return;
     const selected = file.files[0]; items = []; save.disabled = true;
     const request = ++generation; if (!selected) return;
     preview.replaceChildren(el('p', '正在检查文件…'));
@@ -204,5 +239,5 @@ export function importDialog(done) {
       items = result.items; save.disabled = !items.length || Boolean(result.errors.length);
     } catch (error) { if (dialog.isConnected && request === generation) preview.replaceChildren(el('p', error.message, 'form-error')); }
   });
-  body.append(file, preview); footer.append(button('取消', () => dialog.close()), save);
+  body.append(file, preview); footer.append(button('取消', requestClose), save);
 }

@@ -73,12 +73,14 @@ export function presentationView(item, readOnly, controls, options = {}) {
     root.append(info);
     const viewer = el("div", "", "slide-viewer");
     viewer.tabIndex = 0;
-    viewer.setAttribute("aria-label", "PPT 放映区，可使用上下方向键翻页");
+    viewer.setAttribute("aria-label", "PPT 放映区，可点击或使用滚轮、方向键翻页");
     const image = el("img", "", "slide-image");
     image.hidden = true;
     const status = el("p", "正在加载演示页…", "slide-status");
     status.setAttribute("role", "status");
-    viewer.append(image, status);
+    const retry = button("重新加载本页", () => show(page), "text-button slide-retry");
+    retry.hidden = true;
+    viewer.append(image, status, retry);
     root.append(viewer);
     const key = `${item.id}:${showTemplate ? "template" : "uploaded"}:${presentation.name}`;
     let page = Math.min(positions.get(key) || 1, presentation.pages);
@@ -105,6 +107,7 @@ export function presentationView(item, readOnly, controls, options = {}) {
       image.hidden = true;
       status.hidden = false;
       status.textContent = "正在加载演示页…";
+      retry.hidden = true;
       try {
         const response = await fetch(
           showTemplate
@@ -125,11 +128,19 @@ export function presentationView(item, readOnly, controls, options = {}) {
         previews.add(currentUrl);
         image.src = currentUrl;
         image.alt = `${presentation.name}，第 ${page} 页`;
+        try {
+          await image.decode();
+        } catch (error) {
+          throw new Error("演示页无法显示，请重新加载本页。");
+        }
+        if (turn !== request || token !== generation) return;
         image.hidden = false;
         status.hidden = true;
       } catch (error) {
-        if (turn === request && token === generation)
+        if (turn === request && token === generation) {
           status.textContent = error.message;
+          retry.hidden = false;
+        }
       }
     }
     const toolbar = el("div", "", "slide-toolbar");
@@ -148,6 +159,20 @@ export function presentationView(item, readOnly, controls, options = {}) {
     root.append(toolbar);
     keyboardController?.abort();
     keyboardController = new AbortController();
+    const inFullscreen = () => Boolean(document.fullscreenElement?.contains(viewer));
+    viewer.addEventListener("click", (event) => {
+      if (!inFullscreen() || event.target.closest("button, a, input, select, textarea")) return;
+      void show(page + 1);
+    }, { signal: keyboardController.signal });
+    let lastWheelNavigation = Number.NEGATIVE_INFINITY;
+    viewer.addEventListener("wheel", (event) => {
+      if (!inFullscreen() || event.deltaY === 0) return;
+      event.preventDefault();
+      const now = performance.now();
+      if (now - lastWheelNavigation < 250) return;
+      lastWheelNavigation = now;
+      void show(page + (event.deltaY > 0 ? 1 : -1));
+    }, { passive: false, signal: keyboardController.signal });
     document.addEventListener("keydown", (event) => {
       if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key) ||
           event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ||
@@ -156,9 +181,6 @@ export function presentationView(item, readOnly, controls, options = {}) {
       event.preventDefault();
       void show(page + (["ArrowDown", "ArrowRight"].includes(event.key) ? 1 : -1));
     }, { signal: keyboardController.signal });
-    root.append(
-      button("重新加载本页", () => show(page), "text-button slide-retry"),
-    );
     void show(page);
   } else if (waitingToStart) {
     const gate = el("div", "", "presentation-start-gate");
@@ -194,6 +216,14 @@ export function presentationView(item, readOnly, controls, options = {}) {
           return;
         }
         const file = input.files[0];
+        if (!/\.(ppt|pptx|pdf)$/i.test(file.name)) {
+          input.value = "";
+          throw new Error("请选择 PPT、PPTX 或 PDF 文件。");
+        }
+        if (!file.size) {
+          input.value = "";
+          throw new Error("文件为空，请选择有效的演示文件。");
+        }
         if (file.size > item.presentation_limits.max_mb * 1024 * 1024) {
           input.value = "";
           throw new Error(`文件不能超过 ${item.presentation_limits.max_mb} MB`);

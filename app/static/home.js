@@ -1,30 +1,111 @@
 /** Renders the authenticated preparation home and published announcement reader. */
 import { api, state } from "./api.js?v=20261114-ui-v17";
-import { $, el, button, notify } from "./ui.js?v=20261114-ui-v17";
+import { $, el, button, notify, confirmAction } from "./ui.js?v=20261114-ui-v17";
+import { renderHomeBlocks } from "./home-layout.js?v=20261115-layout-v1";
+import { homeLayoutErrorMessage } from "./home-feedback.mjs?v=20261115-home-feedback-v1";
 
-let timer = null;
 let notices = [];
-let activeNotice = 0;
+let announcementIndex = 0;
+let announcementTimer = null;
+let announcementsUnavailable = false;
+let releaseAnnouncementImages = null;
+let homeRevision = 0;
+let announcementRequestRevision = 0;
+let reminderToDismiss = null;
+let reminderCheckRevision = 0;
 
-function openAnnouncement(item) {
+/** Load private images with the current session; closing the reader cancels and releases them. */
+function prepareAnnouncementImage(image, source, session) {
+  image.classList.add("announcement-content-image");
+  image.removeAttribute("src");
+  const match = /^\/api\/(?:admin\/)?announcements\/assets\/([a-f0-9]{32})$/.exec(source);
+  if (!match) { image.src = source; return; }
+  const status = el("span", "图片加载中…", "announcement-image-status");
+  image.hidden = true;
+  const load = async () => {
+    status.textContent = "图片加载中…";
+    try {
+      const response = await fetch(announcementAssetUrl(match[1]), {
+        headers: { Authorization: `Bearer ${session.token}` }, signal: session.controller.signal,
+      });
+      if (!response.ok) throw new Error(response.status === 401 ? "登录已过期，请重新登录后查看图片" : "图片加载失败");
+      const blob = await response.blob();
+      if (session.controller.signal.aborted || state.token !== session.token || !image.isConnected) return;
+      const url = URL.createObjectURL(blob); session.urls.add(url);
+      image.src = url;
+      try { await image.decode(); }
+      catch (error) { URL.revokeObjectURL(url); session.urls.delete(url); throw new Error("图片无法显示，请重新上传"); }
+      if (session.controller.signal.aborted) return;
+      image.hidden = false; status.remove();
+    } catch (error) {
+      if (session.controller.signal.aborted || !image.isConnected) return;
+      status.replaceChildren(el("span", error.message), button("重试", load, "button quiet"));
+    }
+  };
+  return { status, load };
+}
+
+function openAnnouncement(item, { returnToList = false } = {}) {
+  releaseAnnouncementImages?.();
+  const session = { controller: new AbortController(), urls: new Set(), token: state.token };
+  releaseAnnouncementImages = () => {
+    session.controller.abort();
+    session.urls.forEach(url => URL.revokeObjectURL(url));
+    session.urls.clear();
+  };
+  reminderToDismiss = item.reminder_pending ? item.id : null;
   $("announcementDialogTitle").textContent = item.title;
   const body = $("announcementDialogContent");
   body.replaceChildren();
+  if (returnToList) body.append(button("← 返回公告列表", openAnnouncementList, "button quiet announcement-list-back"));
+  const content = document.createElement("template");
   if (item.cover_url) {
     const image = el("img", "", "announcement-detail-cover");
-    image.src = state.adminMode
-      ? item.cover_url.replace("/api/announcements/assets/", "/api/admin/announcements/assets/")
-      : item.cover_url;
+    image.dataset.assetSource = item.cover_url;
     image.alt = "";
-    body.append(image);
+    content.content.append(image);
   }
-  if (item.summary) body.append(el("p", item.summary, "announcement-summary"));
-  body.insertAdjacentHTML("beforeend", item.body_html || "");
-  for (const image of body.querySelectorAll("img")) {
-    image.classList.add("announcement-content-image");
-    if (state.adminMode) image.src = image.src.replace("/api/announcements/assets/", "/api/admin/announcements/assets/");
+  if (item.summary) content.content.append(el("p", item.summary, "announcement-summary"));
+  const markdown = document.createElement("template");
+  markdown.innerHTML = item.body_html || "";
+  content.content.append(markdown.content);
+  const loads = [];
+  for (const image of content.content.querySelectorAll("img")) {
+    const task = prepareAnnouncementImage(image, image.dataset.assetSource || image.getAttribute("src") || "", session);
+    if (task) { image.before(task.status); loads.push(task.load); }
   }
-  $("announcementDialog").showModal();
+  body.append(content.content);
+  if (!$("announcementDialog").open) $("announcementDialog").showModal();
+  body.scrollTop = 0;
+  body.querySelector(".announcement-list-back")?.focus({ preventScroll: true });
+  loads.forEach(load => { void load(); });
+}
+
+function openAnnouncementList() {
+  releaseAnnouncementImages?.(); releaseAnnouncementImages = null;
+  $("announcementDialogTitle").textContent = "全部公告";
+  const body = $("announcementDialogContent");
+  body.replaceChildren(el("p", `共 ${notices.length} 条公告`, "announcement-list-count"));
+  const list = el("ul", "", "announcement-public-list");
+  for (const item of notices) {
+    const row = el("li");
+    const control = button("", () => openAnnouncement(item, { returnToList: true }), "announcement-public-item");
+    const copy = el("span", "", "announcement-public-copy");
+    copy.append(el("strong", item.title));
+    if (item.summary) copy.append(el("span", item.summary, "announcement-public-summary"));
+    if (item.published_at) {
+      const date = el("time", new Date(item.published_at * 1000).toLocaleDateString("zh-CN"));
+      date.dateTime = new Date(item.published_at * 1000).toISOString();
+      copy.append(date);
+    }
+    const arrow = el("span", "→", "announcement-public-arrow"); arrow.setAttribute("aria-hidden", "true");
+    control.append(copy, arrow); row.append(control); list.append(row);
+  }
+  if (notices.length) body.append(list);
+  else body.append(el("p", "暂无已发布的公告。", "empty-state"));
+  if (!$("announcementDialog").open) $("announcementDialog").showModal();
+  body.scrollTop = 0;
+  $("closeAnnouncementDialog").focus({ preventScroll: true });
 }
 
 function announcementAssetUrl(assetId) {
@@ -32,18 +113,44 @@ function announcementAssetUrl(assetId) {
 }
 
 function renderNotices(root) {
+  clearInterval(announcementTimer);
+  announcementTimer = null;
   const band = el("section", "", "home-announcement-band");
   band.setAttribute("aria-label", "平台公告");
-  const current = notices[activeNotice];
-  const open = button(current ? current.title : "暂无公告", () => current && openAnnouncement(current), "home-announcement-title");
-  open.disabled = !current;
-  band.append(el("span", "公告", "home-announcement-label"), open);
-  if (notices.length > 1) {
-    const controls = el("div", "", "home-announcement-controls");
-    controls.append(button("‹", () => { activeNotice = (activeNotice + notices.length - 1) % notices.length; renderHome(); }, "icon-button"));
-    controls.append(button("›", () => { activeNotice = (activeNotice + 1) % notices.length; renderHome(); }, "icon-button"));
-    band.append(controls);
+  const viewport = el("div", "", "home-announcement-viewport");
+  const controls = el("div", "", "home-announcement-controls");
+  viewport.setAttribute("aria-live", "polite");
+  if (announcementsUnavailable) {
+    viewport.append(el("span", "公告暂时无法加载", "home-announcement-error"),
+      button("重试", () => { void refreshHome(); }, "text-button home-announcement-retry"));
+  } else if (!notices.length) viewport.append(el("span", "暂无公告"));
+  else {
+    announcementIndex %= notices.length;
+    const title = button("", () => openAnnouncement(notices[announcementIndex]), "home-announcement-title");
+    const position = el("span", "", "home-announcement-position");
+    const showNotice = (animate = false) => {
+      title.textContent = notices[announcementIndex].title;
+      position.textContent = notices.length > 1 ? `${announcementIndex + 1} / ${notices.length}` : "";
+      if (animate) {
+        title.classList.remove("is-rolling");
+        void title.offsetWidth;
+        title.classList.add("is-rolling");
+      }
+    };
+    showNotice();
+    viewport.append(title);
+    if (notices.length > 1) {
+      controls.append(position);
+    }
+    announcementTimer = setInterval(() => {
+      announcementIndex = (announcementIndex + 1) % notices.length;
+      showNotice(true);
+    }, 5000);
   }
+  const label = button("公告", openAnnouncementList, "home-announcement-label");
+  label.title = "查看全部公告";
+  band.append(label, viewport);
+  if (controls.childNodes.length) band.append(controls);
   root.append(band);
 }
 
@@ -64,6 +171,7 @@ function renderHome() {
     ["training", "每日训练", "题库练习 · 连续签到", "◈"],
     ["interview", "模拟面试", "PPT、语音回答与点评", "◉"],
     ["contest", "上机考试", "限时编程与在线评测", "</>"],
+    ["coding", "算法带刷", "分阶段题单 · 每日一题", "⌘"],
   ]) {
     const control = button("", () => navigate(item[0]), "home-action");
     control.append(el("span", item[3], "home-action-icon"), el("span", item[1], "home-action-title"),
@@ -71,61 +179,66 @@ function renderHome() {
     actions.append(control);
   }
   hero.append(actions); root.append(hero);
-  const roadmap = el("section", "", "home-roadmap");
-  const heading = el("div", "", "home-section-heading");
-  heading.append(el("div", "复试准备路线", "eyebrow"), el("h2", "先夯实基础，再练习表达"));
-  roadmap.append(heading);
-  const stages = el("div", "", "home-roadmap-steps");
-  for (const item of [
-    ["01", "基础与 AI", "数学基础 · 机器学习 · 深度学习 · LLM"],
-    ["02", "笔试与机试", "软件工程 · AI 笔试 · 文献翻译 · 算法题"],
-    ["03", "面试准备", "专业课 · 英文 · PPT 自我介绍 · 专家问答"],
-  ]) {
-    const stage = el("article", "", "home-roadmap-stage");
-    stage.append(el("span", item[0], "home-stage-number"), el("h3", item[1]), el("p", item[2]));
-    stages.append(stage);
-  }
-  roadmap.append(stages); root.append(roadmap);
-  fetch("/api/home/resources", { headers: { Authorization: "Bearer " + state.token } }).then(response => {
-    if (!response.ok) throw new Error("备考资源暂时无法读取");
-    return response.json();
-  }).then(resources => {
-    if ($("home").hidden) return;
-    const groups = [...new Set(resources.map(item => item.group))];
-    for (const group of groups) {
-      const section = el("section", "", "home-resource-section");
-      section.append(el("div", group, "eyebrow"));
-      const grid = el("div", "", "home-resource-grid");
-      for (const item of resources.filter(resource => resource.group === group)) {
-        const control = button("", () => {
-          if (item.kind === "external") window.open(item.url, "_blank", "noopener,noreferrer");
-          else navigate(item.view, item.section);
-        }, "home-resource-card");
-        control.append(el("span", "★".repeat(item.stars) + "☆".repeat(5-item.stars), "home-resource-stars"),
-          el("strong", item.title), el("span", item.summary, "home-resource-summary"));
-        if (item.notice) control.append(el("small", item.notice, "home-resource-notice"));
-        if (item.kind === "external") control.append(el("span", "外部资料 ↗", "home-resource-type"));
-        grid.append(control);
-      }
-      section.append(grid); root.append(section);
-    }
-  }).catch(error => notify(error.message, "error"));
+  const content = el("div"); root.append(content);
+  const token = state.token, revision = ++homeRevision;
+  content.append(el("p", "正在加载备考内容…", "muted"));
+  api("/home/layout").then(layout => {
+    if (revision !== homeRevision || token !== state.token || !content.isConnected) return;
+    content.replaceChildren(); renderHomeBlocks(content, layout.blocks, navigate);
+  }).catch(error => {
+    if (revision === homeRevision && token === state.token && content.isConnected)
+      content.replaceChildren(el("p", homeLayoutErrorMessage(error), "form-error"), button("重新加载", refreshHome, "button secondary"));
+  });
 }
 
 export async function refreshHome() {
-  clearInterval(timer); timer = null;
-  try { notices = await api("/announcements"); }
-  catch (error) { notices = []; notify(error.message, "error"); }
-  activeNotice = Math.min(activeNotice, Math.max(0, notices.length - 1));
+  const requestRevision = ++announcementRequestRevision;
+  const token = state.token;
+  // Paint the workspace before waiting on optional announcement content. This keeps
+  // the primary practice actions usable when the announcement service is slow.
+  notices = [];
+  announcementIndex = 0;
+  announcementsUnavailable = false;
   renderHome();
-  if (notices.length > 1) timer = setInterval(() => {
-    activeNotice = (activeNotice + 1) % notices.length;
-    const root=$("home");root.querySelector(".home-announcement-band")?.remove();renderNotices(root);
-  }, 8000);
+  try {
+    notices = await api("/announcements");
+    announcementIndex = 0;
+    announcementsUnavailable = false;
+  } catch {
+    notices = [];
+    announcementsUnavailable = true;
+  }
+  if (requestRevision !== announcementRequestRevision || token !== state.token) return;
+  renderHome();
+  showPendingAnnouncementReminder();
+}
+
+/** Show the first enabled announcement the current account has not dismissed. */
+export async function showPendingAnnouncementReminder() {
+  const requestRevision = ++reminderCheckRevision;
+  const token = state.token;
+  if (!token || state.adminMode || $("announcementDialog").open) return;
+  try {
+    const items = await api("/announcements");
+    if (requestRevision !== reminderCheckRevision || token !== state.token || $("announcementDialog").open) return;
+    notices = items;
+    const pending = items.find(item => item.reminder_pending);
+    if (pending) openAnnouncement(pending);
+  } catch { /* The announcement band reports failures when the home view loads. */ }
 }
 
 export function setupHome() {
   $("closeAnnouncementDialog").addEventListener("click", () => $("announcementDialog").close());
+  $("announcementDialog").addEventListener("close", () => {
+    releaseAnnouncementImages?.(); releaseAnnouncementImages = null;
+    $("announcementDialogContent").replaceChildren();
+    const dismissedId = reminderToDismiss;
+    reminderToDismiss = null;
+    if (dismissedId && state.token && !state.adminMode) {
+      void api(`/announcements/${dismissedId}/dismiss-reminder`, { method: "POST" })
+        .catch(error => notify(`公告已关闭，但提醒状态未能保存，下次仍可能显示：${error.message}`, "error"));
+    }
+  });
 }
 
 export async function refreshAnnouncementsAdmin() {
@@ -140,19 +253,28 @@ export async function refreshAnnouncementsAdmin() {
   root.append(heading);
   const toolbar = el("div", "", "announcement-admin-toolbar");
   const search = el("input"); search.type = "search"; search.placeholder = "搜索公告标题";
+  search.setAttribute("aria-label", "搜索公告标题");
   const status = el("select");
+  status.setAttribute("aria-label", "按公告状态筛选");
   for (const [value,label] of [["","全部状态"],["draft","草稿"],["published","已上架"],["withdrawn","已下架"]]) {
     const option = el("option",label); option.value=value; status.append(option);
   }
   const list = el("div", "", "announcement-admin-list"); list.id="announcementAdminList";
+  let request = 0;
+  let page = 1;
+  let searchTimer = null;
   const load = async () => {
-    const query = new URLSearchParams({status:status.value,q:search.value.trim()});
+    const currentRequest = ++request;
+    const query = new URLSearchParams({status:status.value,q:search.value.trim(),page:String(page),page_size:"10"});
     const data = await api("/admin/announcements?" + query);
+    if (currentRequest !== request || root.hidden) return;
+    if (page > Math.max(1, data.pages)) { page = Math.max(1, data.pages); return load(); }
     list.replaceChildren();
     for (const item of data.items) {
       const row=el("article","","announcement-admin-row");
       const copy=el("div");
-      copy.append(el("strong",item.title),el("small",statusLabel(item.status)+" · "+item.summary));
+      const meta=[statusLabel(item.status),item.remind_on_first_visit?"首次进入弹窗提醒":"不弹窗",item.summary].filter(Boolean).join(" · ");
+      copy.append(el("strong",item.title),el("small",meta));
       const controls=el("div","","action-group");
       controls.append(button("编辑",()=>editNotice(item),"button secondary"));
       controls.append(button("预览",()=>openAnnouncement(item),"button quiet"));
@@ -160,13 +282,30 @@ export async function refreshAnnouncementsAdmin() {
         await api("/admin/announcements/"+item.id+"/status",{method:"POST",body:JSON.stringify({status:item.status==="published"?"withdrawn":"published"})});
         await load();
       },item.status==="published"?"button quiet":"button secondary"));
+      controls.append(button("删除",async()=>{
+        if(!await confirmAction(`删除公告“${item.title}”后，用户将无法再查看，且这项操作不能撤销。`,
+          {title:"删除公告",confirmText:"删除",danger:true}))return;
+        await api("/admin/announcements/"+item.id,{method:"DELETE"});
+        notify("公告已删除");
+        await load();
+      },"button danger-button"));
       row.append(copy,controls);list.append(row);
     }
     if(!data.items.length)list.append(el("p","当前没有匹配的公告。","empty-state"));
+    toolbar.querySelector(".announcement-admin-pagination")?.remove();
+    if(data.pages>1){
+      const pagination=el("nav","","announcement-admin-pagination");pagination.setAttribute("aria-label","公告列表分页");
+      const previous=button("上一页",()=>{page--;void load().catch(error=>notify(error.message,"error"));},"button secondary");previous.disabled=page<=1;
+      const next=button("下一页",()=>{page++;void load().catch(error=>notify(error.message,"error"));},"button secondary");next.disabled=page>=data.pages;
+      pagination.append(previous,el("span",`第 ${page} / ${data.pages} 页 · 共 ${data.total} 条`),next);toolbar.append(pagination);
+    }
   };
   toolbar.append(search,status);
-  search.addEventListener("input",()=>void load().catch(error=>notify(error.message,"error")));
-  status.addEventListener("change",()=>void load().catch(error=>notify(error.message,"error")));
+  search.addEventListener("input",()=>{
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(()=>{page=1;void load().catch(error=>notify(error.message,"error"));},180);
+  });
+  status.addEventListener("change",()=>{page=1;void load().catch(error=>notify(error.message,"error"));});
   root.append(toolbar,list);
   await load();
 }
@@ -177,11 +316,20 @@ function statusLabel(status) {
 
 function editNotice(item) {
   const root=$("announcementsAdmin");
+  const heading=root.querySelector(":scope > .page-heading");
+  const toolbar=root.querySelector(":scope > .announcement-admin-toolbar");
+  const list=root.querySelector(":scope > .announcement-admin-list");
+  if(heading)heading.hidden=true;
+  if(toolbar)toolbar.hidden=true;
+  if(list)list.hidden=true;
   root.querySelector(".announcement-editor")?.remove();
   const form=el("form","","panel announcement-editor");
   const title=el("input");title.required=true;title.maxLength=120;title.value=item?.title||"";
   const summary=el("input");summary.maxLength=500;summary.value=item?.summary||"";
   const cover=el("input");cover.value=item?.cover_url||"";
+  const reminder=el("input");reminder.type="checkbox";reminder.checked=Boolean(item?.remind_on_first_visit);
+  const reminderLabel=el("label");reminderLabel.className="announcement-reminder-setting";
+  reminderLabel.append(reminder,el("span","首次进入提醒"),el("span","用户首次进入网站时弹出此公告；用户关闭后不再重复提醒。","muted"));
   const coverFile=el("input");coverFile.type="file";coverFile.accept="image/png,image/jpeg,image/webp";coverFile.hidden=true;
   const coverUpload=button("上传封面",()=>coverFile.click(),"button quiet");
   coverFile.addEventListener("change",async()=>{
@@ -222,6 +370,8 @@ function editNotice(item) {
   });
   const blockHeading=el("div","","announcement-editor-heading");
   blockHeading.append(el("h2","公告正文 · Markdown"),el("p","支持标题、列表、引用、表格和链接。将图片粘贴到正文框，会自动上传并插入图片引用。","muted"));
+  if(item?.status==="published")form.append(el("p","当前公告已发布；保存修改会立即更新所有用户可见的内容。","announcement-published-warning"));
+  else if(item?.status==="withdrawn")form.append(el("p","当前公告已撤下；保存内容不会重新发布。","announcement-withdrawn-note"));
   const imageInput=el("input");imageInput.type="file";imageInput.accept="image/png,image/jpeg,image/webp";imageInput.hidden=true;
   const addImage=button("插入图片",()=>imageInput.click(),"button quiet");
   imageInput.addEventListener("change",async()=>{
@@ -235,21 +385,32 @@ function editNotice(item) {
     finally{imageInput.value="";}
   });
   const actions=el("div","","action-group");
-  actions.append(button("取消",()=>form.remove(),"button quiet"));
+  const values=()=>({title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value,remind_on_first_visit:reminder.checked});
+  let original=JSON.stringify(values());
+  actions.append(button("取消",async()=>{
+    if(JSON.stringify(values())!==original&&!await confirmAction("公告有尚未保存的修改，确定放弃吗？"))return;
+    form.remove();
+    for(const node of [heading,toolbar,list])if(node)node.hidden=false;
+  },"button quiet"));
   actions.append(button("预览",async()=>{
     try{
       const preview=await api("/admin/announcements/preview",{method:"POST",body:JSON.stringify({
-        title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value})});
+        title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value,remind_on_first_visit:reminder.checked})});
       openAnnouncement(preview);
     }catch(error){notify(error.message,"error");}
   },"button secondary"));
-  actions.append(button("保存草稿",async()=>{
-    const payload={title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value};
-    const saved=await api(item?"/admin/announcements/"+item.id:"/admin/announcements",{
+  const saveLabel=item?.status==="published"?"更新已发布公告":item?.status==="withdrawn"?"保存修改（保持撤下）":"保存草稿";
+  actions.append(button(saveLabel,async()=>{
+    if(item?.status==="published"&&!await confirmAction("这条公告当前已经发布。保存后会立即更新所有用户可见的内容，确定继续吗？"))return;
+    const payload={title:title.value,summary:summary.value,cover_url:cover.value,body_markdown:markdown.value,remind_on_first_visit:reminder.checked};
+    await api(item?"/admin/announcements/"+item.id:"/admin/announcements",{
       method:item?"PUT":"POST",body:JSON.stringify(payload)});
-    notify("公告草稿已保存");
-    if(!item)editNotice(saved);else await refreshAnnouncementsAdmin();
+    notify(item?.status==="published"?"已发布公告已更新":item?.status==="withdrawn"?"已撤下公告已保存修改，仍保持撤下":"公告草稿已保存");
+    form.remove();
+    for(const node of [heading,toolbar,list])if(node)node.hidden=false;
+    try { await refreshAnnouncementsAdmin(); }
+    catch(error) { notify(`草稿已保存，但列表刷新失败：${error.message}`,"error"); }
   },"button primary"));
-  form.append(titleLabel,summaryLabel,coverLabel,coverUpload,coverFile,blockHeading,markdown,addImage,imageInput,actions);
+  form.append(titleLabel,summaryLabel,coverLabel,reminderLabel,coverUpload,coverFile,blockHeading,markdown,addImage,imageInput,actions);
   root.append(form);form.scrollIntoView({behavior:"smooth",block:"start"});
 }

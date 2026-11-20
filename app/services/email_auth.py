@@ -13,7 +13,7 @@ from fastapi import HTTPException
 
 from app.config import load_config
 from app.db import connect, allocate_user_id
-from app.services.auth import public_user
+from app.services.auth import issue_session, public_user
 from app.services.credits import default_credits, adjust
 from app.services.security import hash_password, verify_password
 from app.services.password_vault import encrypt_password
@@ -246,7 +246,8 @@ def _create_user(db, email):
     password = secrets.token_urlsafe(48)
     uid = allocate_user_id(db)
     db.execute("""INSERT INTO users(id,username,password,password_ciphertext,email,interview_credits,
-        is_admin,is_superadmin,is_active) VALUES (?,?,?,?,?,0,0,0,1)""",
+        is_admin,is_superadmin,is_active,can_interview,can_exam,can_practice,can_training,can_coding)
+        VALUES (?,?,?,?,?,0,0,0,1,1,1,0,0,0)""",
         (uid, email, hash_password(password), encrypt_password(password), email))
     adjust(db, uid, default_credits(db), kind='initial')
     return db.execute('SELECT * FROM users WHERE id=?', (uid,)).fetchone()
@@ -277,9 +278,7 @@ def login(value: str, code: str, ip: str):
                 failure = HTTPException(403, '账号已停用，请联系管理员')
             else:
                 user = user or _create_user(db, email)
-                token = secrets.token_urlsafe(32)
-                db.execute('INSERT INTO sessions VALUES (?,?,?)',
-                           (token, user['id'], time.time() + load_config()['app']['session_hours'] * 3600))
+                token = issue_session(db, user['id'])
                 result = {'token': token, **public_user(user)}
     # Failed guesses and consumed codes remain committed even when returning an HTTP error.
     if failure:

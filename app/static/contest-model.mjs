@@ -8,6 +8,18 @@ export function refreshContestProblemStats(overview, stats) {
   };
 }
 
+/** Reveal source problem IDs to participants only after their contest ends. */
+export function canRevealLuoguSource(contest, now = Date.now() / 1000, isAdmin = false) {
+  return isAdmin || now > contest.ends;
+}
+
+/** Explain why contest submissions are unavailable before or after the contest. */
+export function contestSubmitGuidance(contest, now = Date.now() / 1000) {
+  if (now < contest.starts) return "比赛尚未开始，开始后即可提交；代码草稿保存在此浏览器。";
+  if (now > contest.ends) return "本场比赛已结束，可继续复盘题目；提交已关闭，不会计入排名。";
+  return "";
+}
+
 /** Normalize paginated and legacy submission responses before rendering. */
 export function normalizeSubmissionPage(response) {
   const countStatuses = (items) => ({
@@ -42,4 +54,12 @@ export function normalizeSubmissionPage(response) {
     }
     : countStatuses(response.items);
   return { ...response, items: response.items, total, page, page_size: pageSize, pages, stats };
+}
+
+/** Return user-facing copy for contest submission panel states. */
+export function submissionPanelMessage(state) {
+  if (state === "loading") return { title: "正在加载提交记录", description: "提交记录正在同步，请稍候。" };
+  if (state === "empty") return { title: "还没有提交记录", description: "完成代码后提交评测，结果将在这里展示。" };
+  if (state === "error") return { title: "提交记录暂时无法加载", description: "请检查网络连接后重试。" };
+  throw new Error(`未知的提交记录面板状态：${state}`);
 }

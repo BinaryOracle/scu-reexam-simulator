@@ -24,6 +24,11 @@ def test_omni_and_tts_defaults_are_configurable(tmp_path, monkeypatch):
     assert config['tts']['protocol'] == 'dashscope_audio'
     assert config['tts']['voice'] == 'longanhuan_v3.1'
     assert config['asr']['max_segment_seconds'] == 30
+    assert config['trends'] == {
+        'model': 'qwen3.7-plus', 'request_timeout_seconds': 300,
+        'source_timeout_seconds': 15, 'max_sources': 36,
+        'auto_refresh': True, 'refresh_time': '06:00', 'retry_interval_minutes': 15,
+    }
 
 
 @pytest.mark.parametrize('section,key,value', [
@@ -32,6 +37,9 @@ def test_omni_and_tts_defaults_are_configurable(tmp_path, monkeypatch):
     ('tts', 'download_hosts', ['https://example.com']),
     ('tts', 'cache_lock_timeout_seconds', 0),
     ('asr', 'max_segment_seconds', 0),
+    ('trends', 'max_sources', 101),
+    ('trends', 'refresh_time', '6am'),
+    ('trends', 'retry_interval_minutes', 0),
 ])
 def test_invalid_provider_settings_fail_before_serving(tmp_path, monkeypatch, section, key, value):
     path = config_file(tmp_path, monkeypatch)

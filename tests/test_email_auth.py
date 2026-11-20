@@ -24,7 +24,7 @@ def test_email_defaults_are_disabled_and_use_qq_tls(tmp_path, monkeypatch):
 @pytest.fixture
 def email_client(tmp_path, monkeypatch):
     from app.config import load_config
-    text = Path('config.example.toml').read_text().replace('data/app.db', (tmp_path / 'email.db').as_posix())
+    text = Path('config.example.toml').read_text().replace('data/app.db', str(tmp_path / 'email.db'))
     path = tmp_path / 'config.toml'
     path.write_text(text)
     monkeypatch.setenv('SCU_CONFIG', str(path))
@@ -111,6 +111,8 @@ def test_email_creates_normal_account_with_current_default_and_single_use(email_
     assert result.status_code == 200, result.text
     body = result.json()
     assert body['is_admin'] is False and body['is_superadmin'] is False
+    assert body['can_interview'] is True and body['can_exam'] is True
+    assert body['can_training'] is False and body['can_coding'] is False
     assert body['interview_credits'] == 4
     assert body['email'] == email
     assert body['username'] == email
@@ -126,12 +128,29 @@ def test_email_creates_normal_account_with_current_default_and_single_use(email_
         assert len(ledger) == 1 and ledger[0]['kind'] == 'initial'
         assert ledger[0]['delta'] == 4 and ledger[0]['balance_after'] == 4
     assert login(client, value, email).status_code == 401
+    with connect() as db:
+        db.execute('UPDATE users SET can_interview=0,can_exam=0,can_training=1,can_coding=1,can_practice=1 WHERE id=?',
+                   (body['id'],))
     clock[0] += settings['resend_seconds']
     assert send(client, email).status_code == 200
     again = login(client, code(messages[-1]), email)
     assert again.status_code == 200 and again.json()['id'] == body['id']
+    assert again.json()['can_interview'] is False and again.json()['can_exam'] is False
+    assert again.json()['can_training'] is True and again.json()['can_coding'] is True
     with connect() as db:
         assert db.execute('SELECT COUNT(*) FROM credit_ledger WHERE user_id=?', (body['id'],)).fetchone()[0] == 1
+
+
+def test_new_email_login_replaces_the_previous_session(email_client):
+    client, settings, messages, _, clock = email_client
+    assert send(client).status_code == 200
+    first = login(client, code(messages[-1])).json()['token']
+    clock[0] += settings['resend_seconds'] + 1
+    assert send(client).status_code == 200
+    second = login(client, code(messages[-1])).json()['token']
+
+    assert client.get('/me', headers={'Authorization': 'Bearer ' + first}).status_code == 401
+    assert client.get('/me', headers={'Authorization': 'Bearer ' + second}).status_code == 200
 
 
 def test_resend_expiry_attempt_limits_and_header(email_client):
@@ -401,10 +420,13 @@ def test_rebind_requires_auth_new_mailbox_and_preserves_identity(email_client):
     from app.db import connect
     client, settings, messages, _, clock = email_client
     account, headers = authenticated(client, messages)
+    original_session = headers
     clock[0] += settings['resend_seconds']
     assert send(client).status_code == 200
     old_value = code(messages[-1])
-    other = login(client, old_value).json()['token']
+    current_token = login(client, old_value).json()['token']
+    assert client.get('/me', headers=original_session).status_code == 401
+    headers = {'Authorization': 'Bearer ' + current_token}
     clock[0] += settings['resend_seconds']
     assert send(client).status_code == 200
     outstanding_old = code(messages[-1])
@@ -424,7 +446,7 @@ def test_rebind_requires_auth_new_mailbox_and_preserves_identity(email_client):
     assert body['username'] == account['username'] and body['interview_credits'] == account['interview_credits']
     assert body['reauth_required'] is False
     assert client.get('/me', headers=headers).status_code == 200
-    assert client.get('/me', headers={'Authorization': 'Bearer ' + other}).status_code == 401
+    assert client.get('/me', headers=original_session).status_code == 401
     assert login(client, outstanding_old).status_code == 401
     assert login(client, login_value, 'new@example.com').status_code == 401
     with connect() as db:
