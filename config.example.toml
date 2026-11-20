@@ -9,6 +9,17 @@ max_audio_mb = 20
 # 必须连同数据库备份此文件；不要提交到版本库。
 # password_key_file = "/private/path/password-view.key"
 
+[courses]
+# 资料与录播私有目录；省略 directory 时，默认位于数据库旁边的 courses/。
+# directory = "data/courses"
+max_material_mb = 50
+max_video_mb = 1024
+max_live_minutes = 180
+max_concurrent_live = 1
+# 优先使用 PATH 的 ffmpeg；默认找不到时尝试 imageio-ffmpeg 随包提供的可执行文件。
+# 自定义可执行文件请填写绝对路径；Windows 路径可使用 D:/tools/ffmpeg/bin/ffmpeg.exe。
+ffmpeg = "ffmpeg"
+
 [email_auth]
 enabled = false # 配置 SMTP 后开启；未配置时明确返回不可用，不生成演示验证码
 smtp_host = "smtp.qq.com" # 腾讯企业邮箱可使用 smtp.exmail.qq.com，其他服务商按其文档填写
@@ -42,12 +53,6 @@ price_fen = 200
 credits = 10
 price_fen = 500
 
-[course_media]
-directory = "data/live/courses" # 私有媒体目录，不要映射到 /static
-document_max_mb = 25
-video_max_mb = 2048
-playback_seconds = 14400
-
 [ai]
 base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 model = "qwen3.8-omni-flash"
@@ -62,15 +67,6 @@ max_audio_mb = 8 # 合并压缩后的单个音频上限
 max_slide_pages = 60
 slide_image_size = 768
 max_context_chars = 120000
-
-[trends]
-model = "qwen3.7-plus"
-request_timeout_seconds = 300
-source_timeout_seconds = 15
-max_sources = 36
-auto_refresh = true
-refresh_time = "06:00" # Asia/Shanghai
-retry_interval_minutes = 15
 
 [tts]
 enabled = true
@@ -103,9 +99,6 @@ image = "scu-judge:1"
 timeout_seconds = 5
 cleanup_timeout_seconds = 5 # 超时后强制移除本次评测容器的等待上限
 memory_mb = 256
-compile_timeout_seconds = 30
-output_limit_bytes = 65536 # 每个样例 stdout/stderr 各自的最大字节数
-artifact_limit_bytes = 16777216 # 编译产物及容器文件写入上限
 
 [interview]
 duration_seconds = 600
@@ -147,29 +140,3 @@ max_import_items = 100
 max_import_bytes = 1048576
 max_question_chars = 12000
 max_answer_chars = 60000
-
-[live]
-url = "" # Browser LiveKit wss:// URL; empty disables live media
-api_url = "" # Server-side https:// LiveKit endpoint
-api_key_env = "LIVEKIT_API_KEY"
-api_secret_env = "LIVEKIT_API_SECRET"
-credentials_file = "" # Optional private JSON file; local deployment prepares this automatically
-max_participants = 50
-presence_seconds = 60
-token_seconds = 120
-material_max_mb = 25
-directory = "data/live" # Private, never mount under /static
-recording_enabled = false # Requires separately deployed LiveKit Egress
-# Egress /out must mount the same recordings directory as data/live/recordings.
-egress_directory = "/out"
-playback_seconds = 14400
-like_interval_seconds = 1
-screen_share_width = 1920
-screen_share_height = 1080
-screen_share_frame_rate = 15
-screen_share_max_bitrate = 3000000
-recording_width = 1920
-recording_height = 1080
-recording_frame_rate = 30
-recording_video_bitrate = 4500
-recording_audio_bitrate = 128

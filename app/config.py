@@ -51,44 +51,27 @@ def load_config():
         path = ROOT / 'config.example.toml'
     with path.open('rb') as f:
         config = tomllib.load(f)
-    trends = config.setdefault('trends', {})
-    trends.setdefault('auto_refresh', True)
-    trends.setdefault('refresh_time', '06:00')
-    trends.setdefault('retry_interval_minutes', 15)
-    if type(trends['auto_refresh']) is not bool:
-        raise ValueError('trends.auto_refresh 必须是布尔值')
-    if not isinstance(trends['refresh_time'], str) or not re.fullmatch(r'(?:[01]\d|2[0-3]):[0-5]\d', trends['refresh_time']):
-        raise ValueError('trends.refresh_time 必须使用 HH:MM 格式')
-    if type(trends['retry_interval_minutes']) is not int or not 1 <= trends['retry_interval_minutes'] <= 1440:
-        raise ValueError('trends.retry_interval_minutes 必须在 1 到 1440 之间')
     _email_auth_config(config)
-    _live_config(config)
-    course_media = config.setdefault('course_media', {})
-    course_media.setdefault('directory', str(Path(config['live']['directory']) / 'courses'))
-    course_media.setdefault('document_max_mb', 25)
-    course_media.setdefault('video_max_mb', 2048)
-    course_media.setdefault('playback_seconds', 14400)
-    for key, minimum, maximum in [('document_max_mb', 1, 100), ('video_max_mb', 1, 20480),
-                                  ('playback_seconds', 60, 86400)]:
-        if type(course_media[key]) is not int or not minimum <= course_media[key] <= maximum:
-            raise ValueError(f'course_media.{key} 必须在 {minimum} 到 {maximum} 之间')
-    if not isinstance(course_media['directory'], str) or not course_media['directory'] or '\x00' in course_media['directory']:
-        raise ValueError('course_media.directory 必须是有效目录路径')
-    media_directory = Path(course_media['directory'])
-    course_media['directory'] = str(media_directory if media_directory.is_absolute() else ROOT / media_directory)
     judge = config['judge']
     judge.setdefault('cleanup_timeout_seconds', 5)
-    for key, default, maximum in [('compile_timeout_seconds', 30, 120),
-                                   ('output_limit_bytes', 65536, 1048576),
-                                   ('artifact_limit_bytes', 16777216, 67108864)]:
-        judge.setdefault(key, default)
-        if type(judge[key]) is not int or not 1 <= judge[key] <= maximum:
-            raise ValueError(f'judge.{key} 必须在 1 到 {maximum} 之间')
     if type(judge['cleanup_timeout_seconds']) is not int or judge['cleanup_timeout_seconds'] <= 0:
         raise ValueError('judge.cleanup_timeout_seconds 必须是正整数')
     for key in ('database', 'upload_dir'):
         p = Path(config['app'][key])
         config['app'][key] = str(p if p.is_absolute() else ROOT / p)
+    courses = config.setdefault('courses', {})
+    for key, value, maximum in [('max_material_mb', 50, 1024), ('max_video_mb', 1024, 10240),
+                                ('max_live_minutes', 180, 360), ('max_concurrent_live', 1, 10)]:
+        courses.setdefault(key, value)
+        if type(courses[key]) is not int or not 1 <= courses[key] <= maximum:
+            raise ValueError(f'courses.{key} 必须在 1 到 {maximum} 之间')
+    courses.setdefault('directory', str(Path(config['app']['database']).with_name('courses')))
+    courses.setdefault('ffmpeg', 'ffmpeg')
+    for key in ('directory', 'ffmpeg'):
+        if not isinstance(courses[key], str) or not courses[key].strip():
+            raise ValueError(f'courses.{key} 必须为非空字符串')
+    course_directory = Path(courses['directory'])
+    courses['directory'] = str(course_directory if course_directory.is_absolute() else ROOT / course_directory)
     security = config.setdefault('security', {})
     key_file = security.setdefault('password_key_file', str(Path(config['app']['database']).with_name('password-view.key')))
     if not isinstance(key_file, str) or not key_file:
@@ -168,17 +151,6 @@ def load_config():
         parsed = urlsplit(url) if isinstance(url, str) else None
         if not parsed or parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password:
             raise ValueError(f'{section}.base_url 必须是 HTTP/HTTPS 接口地址')
-    trends = config.setdefault('trends', {})
-    for key, default in {
-        'model': 'qwen3.7-plus', 'request_timeout_seconds': 300,
-        'max_sources': 36, 'source_timeout_seconds': 15,
-    }.items():
-        trends.setdefault(key, default)
-    if not isinstance(trends['model'], str) or not trends['model'].strip():
-        raise ValueError('trends.model 必须是非空字符串')
-    for key, maximum in [('request_timeout_seconds', 300), ('max_sources', 100), ('source_timeout_seconds', 60)]:
-        if type(trends[key]) is not int or not 1 <= trends[key] <= maximum:
-            raise ValueError(f'trends.{key} 必须在 1 到 {maximum} 之间')
     recording = config.setdefault('recording', {})
     for key, default in [('bitrate', 64000), ('checkpoint_seconds', 15),
                          ('finalize_grace_seconds', 120), ('live_chunk_seconds', 5)]:
@@ -246,54 +218,3 @@ def load_config():
     except (ZoneInfoNotFoundError, TypeError, ValueError) as error:
         raise ValueError('training.timezone 必须是有效的 IANA 时区') from error
     return config
-
-
-def _live_config(config):
-    """Validate media deployment settings without reading or exposing credentials."""
-    live = config.setdefault('live', {})
-    defaults = {'url': '', 'api_url': '', 'api_key_env': 'LIVEKIT_API_KEY',
-                'api_secret_env': 'LIVEKIT_API_SECRET', 'credentials_file': '', 'max_participants': 50,
-                'presence_seconds': 60, 'token_seconds': 120, 'material_max_mb': 25,
-                'directory': 'data/live', 'egress_directory': '/out',
-                'recording_enabled': False, 'playback_seconds': 14400, 'like_interval_seconds': 1}
-    defaults.update(screen_share_width=1920, screen_share_height=1080,
-                    screen_share_frame_rate=15, screen_share_max_bitrate=3000000,
-                    recording_width=1920, recording_height=1080,
-                    recording_frame_rate=30, recording_video_bitrate=4500,
-                    recording_audio_bitrate=128)
-    for key, value in defaults.items():
-        live.setdefault(key, value)
-    for key, minimum, maximum in [('screen_share_width', 640, 1920), ('screen_share_height', 360, 1080),
-                                  ('screen_share_frame_rate', 5, 30), ('screen_share_max_bitrate', 300000, 5000000),
-                                  ('recording_width', 640, 1920), ('recording_height', 360, 1080),
-                                  ('recording_frame_rate', 5, 30), ('recording_video_bitrate', 500, 12000),
-                                  ('recording_audio_bitrate', 32, 320)]:
-        if type(live[key]) is not int or not minimum <= live[key] <= maximum:
-            raise ValueError(f'live.{key} 必须在 {minimum} 到 {maximum} 之间')
-    for key in ('max_participants', 'presence_seconds', 'token_seconds', 'material_max_mb', 'playback_seconds', 'like_interval_seconds'):
-        maximum = {'max_participants': 50, 'material_max_mb': 100, 'token_seconds': 300, 'playback_seconds': 86400}.get(key, 3600)
-        minimum = 15 if key == 'presence_seconds' else 1
-        if type(live[key]) is not int or not minimum <= live[key] <= maximum:
-            raise ValueError(f'live.{key} 必须在 {minimum} 到 {maximum} 之间')
-    for key in ('api_key_env', 'api_secret_env'):
-        if not isinstance(live[key], str) or not re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', live[key]):
-            raise ValueError(f'live.{key} 必须是环境变量名称')
-    if 'api_key' in live or 'api_secret' in live:
-        raise ValueError('LiveKit 凭据须使用环境变量或受保护的 credentials_file，不允许内联密钥')
-    if not isinstance(live['credentials_file'], str) or '\x00' in live['credentials_file']:
-        raise ValueError('live.credentials_file 必须是文件路径或空字符串')
-    if live['credentials_file']:
-        credentials_path = Path(live['credentials_file'])
-        live['credentials_file'] = str(credentials_path if credentials_path.is_absolute() else ROOT / credentials_path)
-    for key, schemes in [('url', ('ws', 'wss')), ('api_url', ('http', 'https'))]:
-        value = live[key]
-        parsed = urlsplit(value) if isinstance(value, str) else None
-        if not parsed or (value and (parsed.scheme not in schemes or not parsed.hostname or parsed.username or parsed.password)):
-            raise ValueError(f'live.{key} 地址无效')
-    if type(live['recording_enabled']) is not bool:
-        raise ValueError('live.recording_enabled 必须是布尔值')
-    for key in ('directory', 'egress_directory'):
-        if not isinstance(live[key], str) or not live[key]:
-            raise ValueError(f'live.{key} 必须是目录')
-    directory = Path(live['directory'])
-    live['directory'] = str(directory if directory.is_absolute() else ROOT / directory)

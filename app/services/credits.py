@@ -4,7 +4,6 @@ import sqlite3
 import time
 from fastapi import HTTPException
 from app.config import load_config
-from app.services import points
 
 ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 ADMIN_CREDITS = 999999
@@ -15,7 +14,7 @@ def default_credits(db):
 
 
 def packages(db):
-    return [dict(row) for row in db.execute('SELECT id,price_fen,credits FROM voucher_packages WHERE deleted=0 ORDER BY created,id')]
+    return [dict(row) for row in db.execute('SELECT id,price_fen,credits FROM voucher_packages ORDER BY created,id')]
 
 
 def adjust(db, uid, balance, *, kind='admin', amount_fen=0, reference=''):
@@ -37,7 +36,7 @@ def charge_interview(db, iid, uid):
     user = db.execute('SELECT is_admin,interview_credits FROM users WHERE id=?', (uid,)).fetchone()
     if not user['is_admin']:
         if user['interview_credits'] < 1:
-            raise HTTPException(409, '模拟面试次数已用完，请在个人主页使用积分购买次数后再开始')
+            raise HTTPException(409, '模拟面试次数已用完，请在个人主页兑换卡密后再开始')
         adjust(db, uid, user['interview_credits'] - 1, kind='interview', reference=str(iid))
     db.execute('UPDATE interviews SET credit_charged=1 WHERE id=?', (iid,))
 
@@ -47,7 +46,7 @@ def generate_vouchers(db, package, count):
     config = load_config()['credits']
     if count > config['max_voucher_batch']:
         raise HTTPException(422, f"单批最多生成 {config['max_voucher_batch']} 张卡密")
-    item = db.execute('SELECT * FROM voucher_packages WHERE id=? AND deleted=0', (package,)).fetchone()
+    item = db.execute('SELECT * FROM voucher_packages WHERE id=?', (package,)).fetchone()
     if item is None:
         raise HTTPException(422, '请选择有效的卡密套餐')
     batch = secrets.token_hex(12)
@@ -70,14 +69,12 @@ def generate_vouchers(db, package, count):
 
 
 def profile(db, uid):
-    user = db.execute('SELECT username,is_admin,interview_credits,points FROM users WHERE id=?', (uid,)).fetchone()
+    user = db.execute('SELECT username,is_admin,interview_credits FROM users WHERE id=?', (uid,)).fetchone()
     redemptions = [{'id': row['id'], 'code_suffix': row['code'][-4:], 'package': row['package'],
-                    'credits': row['credits'], 'points': row['credits'], 'amount_fen': row['price_fen'], 'redeemed_at': row['redeemed_at']}
+                    'credits': row['credits'], 'amount_fen': row['price_fen'], 'redeemed_at': row['redeemed_at']}
                    for row in db.execute('SELECT * FROM vouchers WHERE redeemed_by=? ORDER BY redeemed_at DESC,id DESC', (uid,))]
     return {'username': user['username'], 'is_admin': bool(user['is_admin']),
             'shop_url': load_config()['credits']['shop_url'],
-            'points': user['points'], 'interview_points_cost': points.cost(db),
-            'points_history': [dict(row) for row in db.execute('SELECT id,delta,balance_after,kind,reference,created FROM points_ledger WHERE user_id=? ORDER BY id DESC LIMIT 50', (uid,))],
             'remaining': None if user['is_admin'] else user['interview_credits'],
             'redeemed_amount_fen': sum(row['amount_fen'] for row in redemptions),
             'redemptions': redemptions}

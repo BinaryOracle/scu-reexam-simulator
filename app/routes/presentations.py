@@ -1,8 +1,6 @@
 """Presentation upload, private previews and recorded introduction completion."""
-import hashlib
 import shutil
 import time
-from uuid import UUID
 from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile
 from starlette.concurrency import run_in_threadpool
 from app.config import load_config
@@ -25,35 +23,15 @@ def interview_setup(user=Depends(interview_user)):
             'duration_seconds': config['interview']['duration_seconds']}
 
 
-def started_retry(db, uid, key, digest):
-    """Recover one user's committed start, rejecting a key reused for another deck."""
-    if key is None:
-        return None
-    receipt = db.execute('''SELECT interview_id,digest FROM interview_start_requests
-        WHERE user_id=? AND request_key=?''', (uid, str(key))).fetchone()
-    if receipt is None:
-        return None
-    if receipt['digest'] != digest:
-        raise HTTPException(409, '这次开始请求已使用其他演示文件，请选择原文件重试')
-    return details(db, receipt['interview_id'])
-
-
 @router.post('/api/interviews/start', status_code=201)
-async def create_started_interview(file: UploadFile = File(...), authorization: str = Header(),
-                                   idempotency_key: UUID | None = Header(default=None), user=Depends(interview_user)):
-    """Create and charge once per optional request key while the login session stays active."""
+async def create_started_interview(file: UploadFile = File(...), authorization: str = Header(), user=Depends(interview_user)):
+    """Create and charge after conversion only while the original login session remains active."""
     config = load_config()
     limit = config['presentation']['max_mb'] * 1024 * 1024
     content = await file.read(limit + 1)
     if not content or len(content) > limit:
         raise HTTPException(400, '演示文件为空或超出大小限制')
-    digest = hashlib.sha256((file.filename or '').encode() + b'\0' + content).hexdigest()
-    with connect() as db:
-        existing = started_retry(db, user['id'], idempotency_key, digest)
-        if existing is not None:
-            return existing
     prepared = await run_in_threadpool(presentations.prepare, content, file.filename or '')
-    retained = False
     try:
         with connect() as db:
             db.execute('BEGIN IMMEDIATE')
@@ -62,9 +40,6 @@ async def create_started_interview(file: UploadFile = File(...), authorization: 
                 (authorization[7:], user['id'], time.time())).fetchone()
             if session is None:
                 raise HTTPException(401, '登录已过期或账号已停用，请重新登录后上传演示文件')
-            existing = started_retry(db, user['id'], idempotency_key, digest)
-            if existing is not None:
-                return existing
             now = timestamp()
             iid = db.execute('''INSERT INTO interviews(user_id,created,workflow_version,started_at,deadline_at)
                 VALUES (?,?,5,?,?)''', (user['id'], now, now, now + config['interview']['duration_seconds'])).lastrowid
@@ -72,14 +47,10 @@ async def create_started_interview(file: UploadFile = File(...), authorization: 
             seed_answers(db, iid)
             db.execute('INSERT INTO presentations(interview_id,directory,name,pages) VALUES (?,?,?,?)',
                        (iid, prepared['directory'], prepared['name'], prepared['pages']))
-            if idempotency_key is not None:
-                db.execute('''INSERT INTO interview_start_requests(user_id,request_key,digest,interview_id)
-                    VALUES (?,?,?,?)''', (user['id'], str(idempotency_key), digest, iid))
             result = details(db, iid)
-        retained = True
-    finally:
-        if not retained:
-            shutil.rmtree(prepared['directory'], ignore_errors=True)
+    except BaseException:
+        shutil.rmtree(prepared['directory'], ignore_errors=True)
+        raise
     return result
 
 

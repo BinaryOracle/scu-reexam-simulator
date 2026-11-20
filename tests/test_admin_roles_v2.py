@@ -118,7 +118,7 @@ def test_dynamic_packages_can_be_created_generated_exported_and_redeemed(client)
     assert client.get(f'/api/admin/vouchers?package={package}', headers=manager).json()['total'] == 2
     assert client.get(f'/api/admin/vouchers/export?package={package}', headers=manager).text.splitlines() == codes
     redeemed = client.post('/api/profile/redeem', headers=alice, json={'code': codes[0]})
-    assert redeemed.json()['remaining'] == 1 and redeemed.json()['points'] == 6 and redeemed.json()['redeemed_amount_fen'] == 350
+    assert redeemed.json()['remaining'] == 7 and redeemed.json()['redeemed_amount_fen'] == 350
 
 
 def test_logout_revokes_server_session_and_frontend_apis_hide_admin_allowance(client):
@@ -136,7 +136,7 @@ def test_v9_upgrade_preserves_redeemed_cards_balances_and_single_owner(tmp_path,
     from pathlib import Path
     from app.services.security import hash_password
     path = tmp_path/'v9.db'
-    config = Path('config.example.toml').read_text().replace('data/app.db', str(path))
+    config = Path('config.example.toml').read_text().replace('data/app.db', path.as_posix())
     config += '\n[credits.packages.custom]\ncredits = 8\nprice_fen = 600\n'
     (tmp_path/'config.toml').write_text(config)
     monkeypatch.setenv('SCU_CONFIG', str(tmp_path/'config.toml'))
