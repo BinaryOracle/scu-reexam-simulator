@@ -11,6 +11,7 @@ from urllib.parse import urlsplit, urlunsplit
 import httpx
 from fastapi import HTTPException
 from app.config import load_config
+from app.services import model_settings
 
 
 def _key(cfg, service):
@@ -58,23 +59,24 @@ def _message_text(body):
     return content.strip()
 
 
-def chat(prompt, *, system=None, media=None):
+def chat(prompt, *, system=None, media=None, model=None, request_timeout_seconds=None, service='interview'):
     """Keep the expert role separate from user material and request text-only output."""
-    cfg = load_config()['ai']
+    cfg = model_settings.resolve(service, load_config())
     key = _key(cfg, 'AI')
     messages = []
     if system:
         messages.append({'role': 'system', 'content': system})
     content = [{'type': 'text', 'text': prompt}, *media] if media else prompt
     messages.append({'role': 'user', 'content': content})
-    payload = {'model': cfg['model'], 'messages': messages, 'stream': False}
-    if 'omni' in cfg['model'].lower():
+    selected_model = model or cfg['model']
+    payload = {'model': selected_model, 'messages': messages, 'stream': False}
+    if 'omni' in selected_model.lower():
         payload['modalities'] = ['text']
         payload['reasoning_effort'] = 'none'
     try:
         response = httpx.post(cfg['base_url'].rstrip('/') + '/chat/completions',
             headers={'Authorization': 'Bearer ' + key}, json=payload,
-            timeout=cfg.get('request_timeout_seconds', 90))
+            timeout=request_timeout_seconds or cfg.get('request_timeout_seconds', 90))
         response.raise_for_status()
         text = _message_text(response.json())
         if not text:
@@ -82,6 +84,9 @@ def chat(prompt, *, system=None, media=None):
         return text
     except httpx.HTTPStatusError as error:
         raise _provider_failure(error.response, 'AI') from error
+    except httpx.TimeoutException as error:
+        raise HTTPException(504,
+            '等待 AI 响应超时；模型服务可能已受理请求，Token 费用以阿里云用量记录为准，请核对后再重试') from error
     except (httpx.HTTPError, KeyError, IndexError, ValueError, TypeError) as error:
         raise HTTPException(502, 'AI 服务返回异常，请稍后重试') from error
 
@@ -103,7 +108,7 @@ def media_audio(paths):
     """Combine local recordings into one 16 kHz mono MP3 for an Omni request."""
     if not paths:
         return []
-    cfg = load_config()['ai']
+    cfg = model_settings.resolve('interview', load_config())
     inputs = [argument for path in paths for argument in ('-i', str(path))]
     if len(paths) > 1:
         filters = ''.join(f'[{i}:a:0]aresample=16000,aformat=sample_fmts=fltp:channel_layouts=mono[a{i}];' for i in range(len(paths)))
@@ -120,7 +125,7 @@ def media_audio(paths):
 
 def transcribe(path):
     """Convert recordings and split long audio before requesting ASR."""
-    cfg = load_config()['asr']
+    cfg = model_settings.resolve('asr', load_config())
     try:
         key = _key(cfg, '语音识别')
     except HTTPException as error:
@@ -202,7 +207,7 @@ def _download_speech(url, cfg, maximum):
 
 def synthesize(text):
     """Synthesize one expert question, bounded by configured size and trusted hosts."""
-    cfg = load_config()['tts']
+    cfg = model_settings.resolve('tts', load_config())
     if not cfg.get('enabled', True):
         raise HTTPException(503, '专家语音播报暂未启用，可直接阅读问题')
     key = _key(cfg, '语音合成')

@@ -1,9 +1,9 @@
-import { SessionAudio, microphoneCheck, stopMicrophoneTest } from "./interview-audio.js?v=20261114-ui-v17";
+import { SessionAudio, microphoneCheck, stopMicrophoneTest } from "./interview-audio.js?v=20261115-interview-recovery-v1";
 import {
   presentationView,
   releasePresentation,
   clearPresentation,
-} from "./presentation.js?v=20261114-ui-v17";
+} from "./presentation.js?v=20261115-mouse-navigation-v1";
 import { api, audioBlob, state } from "./api.js?v=20261114-ui-v17";
 import {
   $,
@@ -41,8 +41,19 @@ let interviewClock = null;
 let preparationFile = null;
 const drafts = new Map();
 const interimTexts = new Map();
+const transcriptionNotices = new Map();
 const collapsedFeedback = new Set();
 let liveSaveTimer = null;
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || document.querySelector("dialog[open]")) return;
+  const drawer = document.querySelector(".stage-drawer.is-open");
+  const toggle = drawer?.querySelector(".stage-drawer-toggle");
+  if (!toggle) return;
+  event.preventDefault();
+  toggle.focus();
+  toggle.click();
+});
 let expertSpeechPlaying = false;
 let stageSpeech = null;
 const sessionAudio = new SessionAudio({
@@ -55,6 +66,11 @@ function updateRecordingStatus() {
     node.textContent = sessionAudio.active ? "● 全程录音中 · 切换环节不中断" : sessionAudio.pending ? "录音待保存，请重试上传" : "全程录音已停止";
     node.classList.toggle("is-recording", sessionAudio.active);
   });
+  const notice = $("interviewRecordingNotice");
+  if (notice) {
+    notice.textContent = [sessionAudio.backupError, sessionAudio.liveError].filter(Boolean).join(" ");
+    notice.hidden = !notice.textContent;
+  }
 }
 function receiveLiveText(stage, final, interim) {
   const item = activeInterview;
@@ -128,9 +144,36 @@ const answerKey = (id, stage) => `${id}:${stage}`;
 const stageName = (answer, item) => answer.stage === item.expert_stage ? "专家问答"
   : answer.stage === 1 && item.workflow_version >= 2 ? "PPT 自我介绍"
   : (item.workflow_version >= 5 ? { 2: "专业课问答", 3: "英文翻译", 4: "英文问答" }[answer.stage] : null) || `第 ${answer.stage} 个环节`;
+function answerIsComplete(item, answer) {
+  if (answer.stage === 1 && item.workflow_version >= 2) return Boolean(item.intro_completed);
+  return Boolean(answer.transcript?.trim() || answer.has_audio);
+}
 const reviewMode = () => state.adminMode;
 const interviewPath = (path) => `${reviewMode() ? "/admin" : ""}${path}`;
 const resumeKey = () => `scu:${state.user.id}:interview-in-session`;
+function startRequestKey(file) {
+  const storageKey = `${resumeKey()}:start`;
+  const identity = JSON.stringify([file.name, file.size, file.lastModified]);
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(storageKey) || "null");
+    if (saved?.identity === identity && /^[0-9a-f-]{36}$/i.test(saved.key)) return saved.key;
+  } catch (error) { /* The current preparation keeps its request key in memory. */ }
+  const key = crypto.randomUUID();
+  try { sessionStorage.setItem(storageKey, JSON.stringify({ identity, key })); }
+  catch (error) { /* Retry remains stable until the preparation page is left. */ }
+  return key;
+}
+function clearStartRequestKey(key) {
+  try {
+    const storageKey = `${resumeKey()}:start`;
+    if (JSON.parse(sessionStorage.getItem(storageKey) || "null")?.key === key)
+      sessionStorage.removeItem(storageKey);
+  } catch (error) { /* A completed start does not depend on browser storage. */ }
+}
+function rememberTranscriptionResult(key, transcript) {
+  if (transcript.trim()) transcriptionNotices.delete(key);
+  else transcriptionNotices.set(key, "没有识别到语音内容，请检查录音或直接填写回答。");
+}
 function rememberInterview(item) {
   if (reviewMode() || !item.id) return;
   try {
@@ -158,7 +201,7 @@ export function allowNavigation() {
   return true;
 }
 export function hasUnsavedWork() {
-  return sessionAudio.active || sessionAudio.pending || recording || uploading || ending || drafts.size > 0;
+  return sessionAudio.active || sessionAudio.pending || recording || uploading || ending || drafts.size > 0 || Boolean(preparationFile);
 }
 export function pauseInterviewAudio() {
   cancelStageSpeech();
@@ -379,7 +422,7 @@ export async function refreshInterviews() {
     catch (error) { /* A restricted browser can still start and finish a session. */ }
     if (allItems.some(item => item.id === resumeId && item.status !== "finished")) await openInterview(resumeId);
   }
-  interviewItems = allItems.filter(item => item.status === "finished");
+  interviewItems = allItems.filter(item => item.status === "finished" || item.status === "expired");
   $("interviewFinished").textContent = interviewItems.length;
   renderInterviewList();
 }
@@ -425,7 +468,8 @@ $("interviewSearch").addEventListener("input", () => {
   renderInterviewList();
 });
 function renderInterviewCard(item) {
-    const statusLabel = item.status === "finished" ? "已完成" : item.status === "expired" ? "已超时" : item.status === "preparing" ? "待开始" : "进行中";
+    const closed = item.status === "finished" || item.status === "expired";
+    const statusLabel = item.status === "expired" ? "已超时" : item.status === "finished" ? "已完成" : item.status === "preparing" ? "待开始" : "进行中";
     const card = el("article", "", "record-card");
     const top = el("div", "", "record-top");
     top.append(
@@ -444,7 +488,7 @@ function renderInterviewCard(item) {
     const bottom = el("div", "", "record-bottom");
     const actions = el("div", "", "record-actions");
     actions.append(button(
-      item.status === "finished" ? "查看详情 →" : reviewMode() ? "查看回答 →" : "继续面试 →",
+      closed ? "查看回顾 →" : reviewMode() ? "查看回答 →" : "继续面试 →",
       () => openInterview(item.id),
       "text-button",
     ));
@@ -468,7 +512,9 @@ function renderInterviewCard(item) {
     bottom.append(
       el(
         "span",
-        item.status === "finished"
+        item.status === "expired"
+          ? "时间已到，回答已保存，可查看回顾"
+          : item.status === "finished"
           ? feedbackRequests.has(item.id) ? "AI 点评正在生成，可先查看回答" : item.has_feedback ? "回答与点评已归档" : "面试已结束，回答已归档"
           : item.status === "preparing"
             ? "上传 PPT 后开始面试"
@@ -588,10 +634,11 @@ function renderInterview() {
   window.dispatchEvent(new Event("interview-layout-changed"));
   root.hidden = false;
   $("interviewOverview").hidden = true;
+  $("interviewListToolbar").hidden = true;
   $("newInterview").hidden = true;
-  $("refreshInterviews").parentElement.hidden = !reviewMode();
+  $("refreshInterviews").parentElement.hidden = true;
   $("interviewList").classList.add("compact");
-  $("interviewListTitle").hidden = !reviewMode();
+  $("interviewListTitle").hidden = true;
   const topline = el("div", "", "detail-topline");
   const title = el("div", "", "detail-title");
   title.append(
@@ -610,6 +657,7 @@ function renderInterview() {
       await endCurrentInterview({ automatic: true });
     }
     if (!allowNavigation()) return;
+    if (preparationFile && !await confirmAction("返回后需要重新选择 PPT，是否继续？", { title: "离开面试准备？", confirmText: "返回面试记录" })) return;
     preparationFile = null;
     activeInterview = null;
     document.body.classList.remove("interview-immersive", "interview-shell-open");
@@ -619,6 +667,7 @@ function renderInterview() {
     root.hidden = true;
     root.dataset.immersive = "false";
     $("interviewOverview").hidden = false;
+    $("interviewListToolbar").hidden = reviewMode() || !interviewItems.length;
     $("interviewList").classList.remove("compact");
     $("interviewListTitle").hidden = false;
     $("interviewListTitle").replaceChildren(
@@ -636,13 +685,12 @@ function renderInterview() {
   if (preparing) {
     stopInterviewTimer();
     const preparation = el("section", "", "panel interview-preparation");
+    const preparationToolbar = el("div", "", "interview-preparation-toolbar");
+    preparationToolbar.append(el("span", "INTERVIEW SETUP", "eyebrow"), back);
     preparation.append(
-      el("span", "INTERVIEW SETUP", "eyebrow"),
+      preparationToolbar,
       el("h2", "正式开始前，请先上传你的复试 PPT"),
-      el(
-        "p",
-        "选好文件并检查麦克风后，点击页面底部的「开始模拟面试」。正式开始前不会创建面试记录。",
-      ),
+      el("p", "准备好 PPT 后，可先检测麦克风并试听。点击页面底部的「开始模拟面试」后，才会正式请求麦克风权限、创建面试记录并开始计时。"),
     );
     const session = el("div", "", "presentation-session");
     session.append(
@@ -664,11 +712,7 @@ function renderInterview() {
   }
   const workspace = el("div", "", "interview-workspace");
   const stages = el("aside", "", "panel stage-panel");
-  const complete = item.answers.filter((a) =>
-    a.stage === 1 && item.workflow_version >= 2
-      ? item.intro_completed
-      : a.transcript.trim(),
-  ).length;
+  const complete = item.answers.filter((answer) => answerIsComplete(item, answer)).length;
   const progress = el("div", "", "stage-progress");
   const fill = el("span");
   fill.style.width = `${(100 * complete) / Math.max(item.answers.length, 1)}%`;
@@ -685,10 +729,7 @@ function renderInterview() {
   const stageList = el("nav", "", "stage-list");
   stageList.setAttribute("aria-label", "面试环节");
   item.answers.forEach((answer) => {
-    const saved =
-      answer.stage === 1 && item.workflow_version >= 2
-        ? item.intro_completed
-        : !!answer.transcript.trim();
+    const saved = answerIsComplete(item, answer);
     const stageButton = button(
       "",
       async () => {
@@ -764,17 +805,15 @@ function renderInterview() {
   drawer.addEventListener("focusout", event => {
     if (!pointerInsideDrawer && !drawer.contains(event.relatedTarget)) setDrawerOpen(false);
   });
-  drawer.addEventListener("keydown", event => {
-    if (event.key === "Escape") {
-      stageToggle.focus();
-      setDrawerOpen(false);
-    }
-  });
   workspace.append(drawer);
   const answerReview = el("section", "", "panel answer-review-panel");
   answerReview.id = "answerReview";
   if (answer) workspace.append(renderAnswer(item, answer, readOnly, answerReview));
-  container.replaceChildren(topline, workspace);
+  const recordingNotice = el("p", "", "field-hint live-transcription-status");
+  recordingNotice.id = "interviewRecordingNotice";
+  recordingNotice.setAttribute("role", "status");
+  recordingNotice.hidden = true;
+  container.replaceChildren(topline, recordingNotice, workspace);
   if (feedbackRequests.has(item.id)) {
     const progress = el("section", "", "panel feedback-progress");
     progress.setAttribute("role", "status");
@@ -900,7 +939,7 @@ async function endCurrentInterview({ automatic = false, returnStage = 1, showNot
   }
   const item = activeInterview;
   if (!item || item.status === "finished") return;
-  if (!automatic && !await confirmAction("确认结束本轮面试？系统会保存录音与回答并返回 001 环节，不会生成 AI 点评。")) return;
+  if (!automatic && !await confirmAction("确认结束本轮面试？系统会保存录音与回答并返回第一个面试环节，不会生成 AI 点评。")) return;
   if (ending || activeInterview !== item || activeInterview?.status === "finished") return;
   ending = true;
   cancelStageSpeech();
@@ -1056,7 +1095,7 @@ function sessionPlaybackControl(item, part, index, panel) {
     if (length <= 0) return;
     duration.textContent = formatPlaybackTime(length);
     seek.disabled = false;
-    updateProgress();
+    if (!seeking) updateProgress();
   };
   const probeDuration = () => {
     if (audio.duration !== Infinity) return;
@@ -1087,7 +1126,10 @@ function sessionPlaybackControl(item, part, index, panel) {
     updateProgress();
   };
   seek.addEventListener("change", commitSeek);
-  seek.addEventListener("pointercancel", commitSeek);
+  seek.addEventListener("pointercancel", () => {
+    seeking = false;
+    updateProgress();
+  });
   audio.addEventListener("loadedmetadata", () => { updateDuration(); probeDuration(); });
   audio.addEventListener("durationchange", updateDuration);
   audio.addEventListener("seeked", updateDuration);
@@ -1270,6 +1312,7 @@ function renderAnswer(item, answer, readOnly, reviewContainer) {
   label.append(inputLabel, status);
   const count = el("span", `${input.value.length} / 20000`);
   input.addEventListener("input", () => {
+    transcriptionNotices.delete(key);
     if (input.value === answer.transcript) drafts.delete(key);
     else drafts.set(key, input.value);
     status.textContent = drafts.has(key) ? "有修改尚未保存" : "回答已保存";
@@ -1290,6 +1333,8 @@ function renderAnswer(item, answer, readOnly, reviewContainer) {
     ),
     count,
   );
+  if (transcriptionNotices.has(key))
+    help.prepend(el("span", transcriptionNotices.get(key), "transcription-warning"));
   editor.append(help);
   const actions = el("div", "", "answer-actions");
   const left = el("div", "", "action-group");
@@ -1331,8 +1376,10 @@ function renderAnswer(item, answer, readOnly, reviewContainer) {
           );
           answer.transcript = result.transcript;
           drafts.delete(key);
+          rememberTranscriptionResult(key, result.transcript);
           renderInterview();
-          notify("转写已保存，请检查专业名词并修正。");
+          notify(result.transcript.trim() ? "转写已保存，请检查专业名词并修正。" : "没有识别到语音内容，请检查录音或直接填写回答。",
+            result.transcript.trim() ? "success" : "info");
         },
         "button soft",
       ),
@@ -1462,7 +1509,10 @@ function presentationControls() {
           if (!preparationFile) throw new Error("请先选择自己的复试 PPT。");
           const form = new FormData();
           form.append("file", preparationFile);
-          updated = await api("/interviews/start", { method: "POST", body: form });
+          item.startRequestKey ||= startRequestKey(preparationFile);
+          updated = await api("/interviews/start", { method: "POST", body: form,
+            headers: { "Idempotency-Key": item.startRequestKey } });
+          clearStartRequestKey(item.startRequestKey);
           preparationFile = null;
         } else {
           updated = await api(`/interviews/${item.id}/start`, { method: "POST" });
@@ -1623,6 +1673,7 @@ export function clearInterviewState() {
   sessionAudio.clear();
   interimTexts.clear();
   drafts.clear();
+  transcriptionNotices.clear();
   clearPresentation();
   activeInterview = null;
   document.body.classList.remove("interview-immersive", "interview-shell-open");

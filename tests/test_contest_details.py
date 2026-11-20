@@ -6,7 +6,7 @@ from test_system import client, login
 
 def make_contest(client, manager):
     now = time.time()
-    payload = {'title': '模拟赛', 'starts': now - 60, 'ends': now + 3600,
+    payload = {'participant_ids': [3,4], 'title': '模拟赛', 'starts': now - 60, 'ends': now + 3600,
                'problems': [{'title': '画画', 'statement': '**题意**：$n \\le 50$',
                              'remote_problem_id': 'P4708',
                              'samples': [{'input': '4', 'output': '3'}, {'input': '5', 'output': '7'}]}]}
@@ -69,6 +69,24 @@ def test_luogu_current_nested_content_and_all_samples(monkeypatch):
     assert '内存限制：128 MiB' in result['statement']
 
 
+def test_luogu_resource_limits_collapse_repeated_values_and_keep_distinct_limits(monkeypatch):
+    from app.services import luogu_catalog
+    monkeypatch.setattr(luogu_catalog, '_page', lambda *args: {'problem': {
+        'pid': 'P1000', 'name': 'A+B', 'content': {}, 'samples': [],
+        'limits': {'time': [1000] * 24, 'memory': [131072] * 24}}})
+    result = luogu_catalog.problem('P1000')
+    assert '时间限制：1000 ms' in result['statement']
+    assert '内存限制：128 MiB' in result['statement']
+    assert '1000-1000' not in result['statement']
+
+    monkeypatch.setattr(luogu_catalog, '_page', lambda *args: {'problem': {
+        'pid': 'P1000', 'name': 'A+B', 'content': {}, 'samples': [],
+        'limits': {'time': [1000, 2000, 1000], 'memory': [131072, 262144, 131072]}}})
+    result = luogu_catalog.problem('P1000')
+    assert '时间限制：1000-2000 ms' in result['statement']
+    assert '内存限制：128-256 MiB' in result['statement']
+
+
 def test_statement_html_and_math_cannot_execute_remote_markup():
     from app.services.problem_content import render_statement
     rendered = render_statement('## 描述\n\n**加粗**\n\n$n \\le 50$\n\n$$x^2$$\n\n<script>alert(1)</script>\n\n[恶意](javascript:alert(1))\n\n`$literal$`')
@@ -105,3 +123,13 @@ def test_future_contest_overview_is_visible_but_statement_is_not(client):
     assert overview.json()['problems'][0]['title'] == '画画'
     assert 'statement' not in overview.json()['problems'][0]
     assert client.get(f'/api/contests/{created["id"]}/problems', headers=alice).status_code == 403
+
+
+def test_existing_luogu_problem_displays_deduplicated_resource_limits():
+    from app.services.problem_content import public_problem
+    row = {'id': 1, 'title': 'A', 'statement': '## 资源限制：\n- 时间限制：1000-2000-1000 ms\n- 内存限制：128-128 MiB',
+           'sample_input': '', 'sample_output': '', 'remote_problem_id': 'P1000', 'samples': '[]'}
+    result = public_problem(row)
+    assert '时间限制：1000-2000 ms' in result['statement_html']
+    assert '内存限制：128 MiB' in result['statement_html']
+    assert row['statement'].endswith('128-128 MiB')

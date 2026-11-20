@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "知序 · 洛谷提交桥接",
-  "version": "1.1.3",
+  "version": "1.1.5",
   "description": "在用户浏览器中使用其现有洛谷登录状态提交代码；不会读取或上传密码、Cookie。",
   "permissions": ["storage", "scripting", "tabs"],
   "host_permissions": ["https://www.luogu.com.cn/*", "http://127.0.0.1:8000/*"],

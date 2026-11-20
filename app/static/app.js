@@ -1,3 +1,4 @@
+import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261118-course-v13";
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import {
@@ -8,48 +9,59 @@ import {
   hasUnsavedWork,
   pauseInterviewAudio,
   clearInterviewState,
-} from "./interview.js?v=20261114-ui-v20";
+} from "./interview.js?v=20261116-interview-search-v1";
 import {
   refreshContests,
   refreshSubmissions,
   createContest,
   clearContestState,
+  suspendContestWorkspace,
   setupContestCreation,
-} from "./contest.js?v=20261115-navigation-v3";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, setupAdmin } from "./admin.js?v=20261114-ui-v23";
-import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261114-training-v9";
-import { clearProfilePassword } from "./profile-account.js?v=20261114-ui-v17";
+  requestLuoguSubmit,
+} from "./contest.js?v=20261116-ui-audit-v2";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261117-accounts-v2";
+import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261117-package-delete-v2";
+import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
 
-import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261114-training-v11";
-import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261114-training-v11";
+import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261118-review-layout-v1";
+import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261117-points-v1";
 
-import { clearTransfers } from "./credit-transfers.js?v=20261114-training-v10";
-import { refreshHome, refreshAnnouncementsAdmin, setupHome } from "./home.js?v=20261114-home-v3";
-import { cancelCapture, clearCourses, getCapture, refreshCourses } from "./courses.js?v=3";
+import { clearTransfers } from "./credit-transfers.js?v=20261117-points-v1";
+import { refreshHome, refreshAnnouncementsAdmin, setupHome, showPendingAnnouncementReminder } from "./home.js?v=20261116-announcement-delete-v1";
+import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
+import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261117-points-v1";
+import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261117-points-v1";
+import { refreshTrends } from "./trends.js?v=20261116-trends-admin-v1";
+
+configureCodingBridge(requestLuoguSubmit);
+
 const views = {
+  live: { label: "课程", refresh: refreshLive },
   home: { label: "备考首页", refresh: refreshHome },
+  trends: { label: "热点趋势", refresh: refreshTrends },
   announcementsAdmin: { label: "公告管理", refresh: refreshAnnouncementsAdmin },
+  homeLayoutAdmin: { label: "首页编排", refresh: refreshHomeLayoutAdmin },
+  coding: { label: "算法带刷", refresh: refreshCoding },
+  codingAdmin: { label: "带刷题库", refresh: refreshCodingAdmin },
   training: { label: "每日训练", refresh: refreshTraining },
   trainingAdmin: { label: "训练题库", refresh: refreshTrainingAdmin },
-  courses: { label: "课程", refresh: refreshCourses },
-  coursesAdmin: { label: "课程管理", refresh: refreshCourses },
   users: { label: "用户管理", refresh: refreshUsers },
   questionBank: { label: "面试题库", refresh: refreshQuestionBank },
-  vouchers: { label: "卡密与次数", refresh: refreshVouchers },
-  systemSettings: { label: "系统设置", refresh: refreshLuoguSettings },
+  vouchers: { label: "积分与卡密", refresh: refreshVouchers },
+  systemSettings: { label: "系统设置", refresh: async () => { await Promise.all([refreshLuoguSettings(), refreshModelSettings()]); } },
   profile: { label: "个人主页", refresh: refreshProfile },
   interview: {
     label: state.adminMode ? "面试记录" : "模拟面试",
     refresh: refreshInterviews,
   },
   contest: {
-    label: state.adminMode ? "考务管理" : "上机考试",
+    label: "上机考试",
     refresh: refreshContests,
   },
   submissions: {
-    label: state.adminMode ? "提交总览" : "提交记录",
+    label: "提交记录",
     refresh: refreshSubmissions,
   },
   adminDenied: { label: "后台管理", refresh: async () => {} },
@@ -62,8 +74,14 @@ function configureSidebar() {
   document.body.classList.toggle("sidebar-collapsed", collapsed);
   syncSidebarToggle();
   window.addEventListener("interview-layout-changed", syncSidebarToggle);
+  window.addEventListener("resize", syncSidebarToggle);
+  window.addEventListener("resize", revealActiveNavigation);
   $("sidebarToggle").addEventListener("click", () => {
     if (document.body.classList.contains("interview-immersive")) {
+      if (window.matchMedia("(max-width: 620px)").matches) {
+        document.body.classList.toggle("interview-shell-open");
+        syncSidebarToggle();
+      }
       return;
     }
     const isCollapsed = document.body.classList.toggle("sidebar-collapsed");
@@ -76,14 +94,46 @@ function configureSidebar() {
     item.setAttribute("aria-label", item.title);
   }
 }
+function revealActiveNavigation() {
+  if (!window.matchMedia("(max-width: 620px)").matches) return;
+  const item = document.querySelector(".sidebar .nav-item.active");
+  const navigation = item?.closest("nav");
+  if (!item || !navigation) return;
+  const itemBounds = item.getBoundingClientRect();
+  const navigationBounds = navigation.getBoundingClientRect();
+  const delta = itemBounds.left < navigationBounds.left
+    ? itemBounds.left - navigationBounds.left
+    : itemBounds.right > navigationBounds.right
+      ? itemBounds.right - navigationBounds.right
+      : 0;
+  if (delta) navigation.scrollBy({ left: delta, behavior: "instant" });
+}
+function configureContestNavigation() {
+  const submenu = $("contestSubnav");
+  const toggle = $("contestNavToggle");
+  const admin = state.adminMode && Boolean(state.user?.is_admin);
+  const isExpanded = !admin;
+  submenu.hidden = admin;
+  toggle.hidden = true;
+  toggle.setAttribute("aria-expanded", String(isExpanded));
+  toggle.setAttribute("aria-label", `${isExpanded ? "收起" : "展开"}上机考试菜单`);
+  toggle.title = `${isExpanded ? "收起" : "展开"}上机考试菜单`;
+  toggle.querySelector("span").textContent = isExpanded ? "⌃" : "⌄";
+}
 function syncSidebarToggle() {
-  const collapsed = document.body.classList.contains("interview-immersive")
-    ? !document.body.classList.contains("interview-shell-open")
+  const immersive = document.body.classList.contains("interview-immersive");
+  const menuOpen = document.body.classList.contains("interview-shell-open");
+  const collapsed = immersive
+    ? !menuOpen
     : document.body.classList.contains("sidebar-collapsed");
   const control = $("sidebarToggle");
-  control.hidden = document.body.classList.contains("interview-immersive");
-  control.textContent = collapsed ? "›" : "‹";
-  control.title = collapsed ? "展开侧边栏" : "收起侧边栏";
+  control.hidden = immersive && !window.matchMedia("(max-width: 620px)").matches;
+  control.textContent = immersive
+    ? menuOpen ? "×" : "☰"
+    : collapsed ? "›" : "‹";
+  control.title = immersive
+    ? menuOpen ? "关闭菜单" : "打开菜单"
+    : collapsed ? "展开侧边栏" : "收起侧边栏";
   control.setAttribute("aria-label", control.title);
   control.setAttribute("aria-expanded", String(!collapsed));
 }
@@ -91,9 +141,12 @@ function syncSidebarToggle() {
 function allowedViews() {
   if (state.adminMode)
     return state.user.is_admin
-      ? ["users", "questionBank", "trainingAdmin", "coursesAdmin", "announcementsAdmin", "vouchers", "systemSettings", "interview", "contest", "submissions", "profile"]
+      ? ["live", "users", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "homeLayoutAdmin", "vouchers", "systemSettings", "trends", "interview", "contest", "profile"]
       : ["adminDenied"];
-  return ["home", "training", "courses", "interview", "contest", "submissions", "profile"];
+  const views = ["home", "training", "trends", "coding", "live", "profile"];
+  if (state.user.can_interview) views.push("interview");
+  if (state.user.can_exam) views.push("contest", "submissions");
+  return views;
 }
 function configureAccess() {
   const allowed = allowedViews();
@@ -108,14 +161,14 @@ function configureAccess() {
       ? state.user.is_superadmin ? "超级管理员" : "后台管理员"
       : "普通用户"
     : "用户工作台";
+  configureContestNavigation();
   return allowed;
 }
 async function show(view, force = false, { historyMode = "push" } = {}) {
+  if (state.adminMode && view === "submissions") view = "contest";
   if (!force && !allowNavigation()) return;
-  if (getCapture() && view !== currentView) {
-    notify("请先结束直播或取消开播准备", "error");
-    return;
-  }
+  if (view !== "live" && liveActive() && !await allowLiveNavigation()) return;
+  if (view !== "contest") suspendContestWorkspace();
   clearVisiblePasswords();
   clearProfilePassword();
   clearTransfers();
@@ -123,15 +176,14 @@ async function show(view, force = false, { historyMode = "push" } = {}) {
   state.user = user;
   const allowed = configureAccess();
   const selected = allowed.includes(view) ? view : allowed[0];
-  if (getCapture() && selected !== "coursesAdmin") cancelCapture();
   if (historyMode !== "none") writeAppViewRoute(selected, Object.keys(views), { replace: historyMode === "replace" });
   document.body.classList.toggle("interview-immersive", selected === "interview" && !$("interviewDetail").hidden && $("interviewDetail").dataset.immersive === "true");
   document.body.classList.toggle("contest-immersive", selected === "contest" && document.body.dataset.contestWorkspace === "true" && !state.adminMode);
+  document.body.classList.toggle("coding-immersive", selected === "coding" && /^#view=coding\/question\/\d+$/.test(location.hash));
   document.body.classList.remove("interview-shell-open");
   syncSidebarToggle();
-  if (selected !== currentView) {
-    pauseInterviewAudio(); clearTraining(); clearTrainingAdmin(); clearCourses();
-  }
+  if (selected !== currentView) { pauseInterviewAudio(); clearTraining(); clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); }
+  if (selected !== "live") clearLive();
   currentView = selected;
   for (const [key, value] of Object.entries(views)) {
     $(key).hidden = key !== selected;
@@ -144,6 +196,7 @@ async function show(view, force = false, { historyMode = "push" } = {}) {
       document.title = `${value.label} · 知序${state.adminMode ? "后台" : ""}`;
     }
   }
+  revealActiveNavigation();
   window.scrollTo({ top: 0, behavior: "instant" });
   await views[selected].refresh();
 }
@@ -152,7 +205,7 @@ async function enterWorkspace() {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); clearLive();
   $("login").hidden = true;
   $("app").hidden = false;
   $("today").textContent = new Date().toLocaleDateString("zh-CN", {
@@ -163,7 +216,10 @@ async function enterWorkspace() {
   configureInterviewMode();
   configureAccess();
   const fallback = state.adminMode ? "users" : "home";
-  await show(readAppRoute(location.hash, allowedViews(), fallback), false, { historyMode: "replace" });
+  const route = readAppRoute(location.hash, Object.keys(views), fallback);
+  await show(route, false, { historyMode: "replace" });
+  if (!state.adminMode) void showPendingAnnouncementReminder();
+  document.documentElement.classList.remove("session-restoring");
 }
 function configureShell() {
   document.body.classList.toggle("admin-mode", state.adminMode);
@@ -176,7 +232,7 @@ function configureShell() {
   $("workspaceLabel").textContent = "平台管理空间";
   document.querySelector(".login-card h2").textContent = "登录管理后台";
   document.querySelector(".login-description").textContent =
-    "使用管理员账号，管理用户、题库与考务。";
+    "使用管理员账号，管理用户、题库与上机考试。";
   document.querySelector(".login-story .brand-subtitle").textContent =
     "后台管理系统";
   for (const item of document.querySelectorAll("[data-view]")) {
@@ -189,7 +245,7 @@ function configureShell() {
     if (span) span.textContent = views[item.dataset.view].label;
   }
   $("contestTitleHeading").replaceChildren(
-    document.createTextNode("考务管理"),
+    document.createTextNode("上机考试"),
     Object.assign(document.createElement("span"), {
       textContent: ".",
       className: "heading-dot",
@@ -207,10 +263,9 @@ window.addEventListener("popstate", () => {
   if (!state.user) return;
   if (!isAppRouteHash(location.hash)) return;
   const fallback = state.adminMode ? "users" : "home";
-  const route = readAppRoute(location.hash, allowedViews(), fallback);
-  const capture = getCapture();
-  if (capture || !allowNavigation()) {
-    writeAppRoute(capture ? `coursesAdmin/${capture.cid}/${capture.lid}` : currentView || fallback, { replace: true });
+  const route = readAppRoute(location.hash, Object.keys(views), fallback);
+  if (!allowNavigation()) {
+    writeAppRoute(currentView || fallback, { replace: true });
     return;
   }
   void show(route, true, { historyMode: "none" }).catch(error => notify(error.message, "error"));
@@ -328,15 +383,15 @@ $("togglePassword").addEventListener("click", () => {
 });
 async function logout() {
   if (!allowNavigation()) return;
-  if (getCapture()) throw new Error("请先结束直播或取消开播准备");
-  if (hasUnsavedWork() && !await confirmAction("有尚未保存的面试文本，退出后将丢失这些修改。", { title: "退出登录？", confirmText: "退出登录" })) return;
+  if (!await allowLiveNavigation()) return;
+  if (hasUnsavedWork() && !await confirmAction("有尚未保存的面试内容或已选择的 PPT，退出后需要重新准备。", { title: "退出登录？", confirmText: "退出登录" })) return;
   await api("/logout", { method: "POST" });
   clearProfilePassword();
   clearTransfers();
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); clearLive();
   sessionStorage.removeItem("token");
   state.token = null;
   location.reload();
@@ -364,7 +419,7 @@ $("contestForm").addEventListener("submit", (event) => {
   run(createContest, $("contestForm").querySelector('[type="submit"]'));
 });
 window.addEventListener("beforeunload", (event) => {
-  if (hasUnsavedWork() || getCapture()) {
+  if (hasUnsavedWork()) {
     event.preventDefault();
     event.returnValue = "";
   }
@@ -374,8 +429,7 @@ window.addEventListener("account-access-updated", () =>
 );
 let updatingAccess = false;
 window.addEventListener("session-expired", () => {
-  cancelCapture();
-  clearCourses();
+  document.documentElement.classList.remove("session-restoring");
   clearProfilePassword();
   clearTransfers();
   state.token = null;
@@ -384,19 +438,17 @@ window.addEventListener("session-expired", () => {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); clearLive();
   for (const dialog of document.querySelectorAll("dialog[open]"))
     dialog.close();
   $("app").hidden = true;
   $("login").hidden = false;
   document.title = "登录 · 知序";
   $("emailCodeStatus").hidden = true;
-  $("loginError").textContent = "登录已过期或账号已停用，请重新登录。";
+  $("loginError").textContent = "登录状态已失效；同一账号仅允许一处登录，请重新登录。";
   $("loginError").hidden = false;
 });
 window.addEventListener("account-session-ended", event => {
-  cancelCapture();
-  clearCourses();
   clearProfilePassword();
   clearTransfers();
   $("loginEmail").value = event.detail.deleted ? "" : state.user?.email || "";
@@ -420,7 +472,7 @@ window.addEventListener("account-session-ended", event => {
   clearInterviewState();
   clearContestState();
   clearTraining();
-  clearTrainingAdmin();
+  clearTrainingAdmin(); clearCoding(); clearCodingAdmin(); clearLive();
   for (const dialog of document.querySelectorAll("dialog[open]")) dialog.close();
   currentView = null;
   $("app").hidden = true;
@@ -459,4 +511,5 @@ if (state.token)
     sessionStorage.removeItem("token");
     $("app").hidden = true;
     $("login").hidden = false;
+    document.documentElement.classList.remove("session-restoring");
   });

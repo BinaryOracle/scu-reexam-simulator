@@ -59,7 +59,7 @@ test("forwards extension request failures as bridge errors", async () => {
   assert.equal(posted[0].payload, undefined);
 });
 
-async function runResultTracker(polls, delivered) {
+async function runResultTracker(polls, delivered, contextName) {
   const source = await readFile(new URL("../browser-extension/background.js", import.meta.url), "utf8");
   const chrome = {
     runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} }, onMessage: { addListener() {} } },
@@ -79,7 +79,7 @@ async function runResultTracker(polls, delivered) {
   const executable = source.replace('import { APP_ORIGIN } from "./extension-config.js";',
     'const APP_ORIGIN = "http://127.0.0.1:8000";');
   runInNewContext(`${executable}\nglobalThis.trackResultForTest = trackResult;`, context);
-  await context.trackResultForTest(3, 4, { submission_id: 1, remote_submission_id: "8123" });
+  await context.trackResultForTest(3, 4, { context: contextName, submission_id: 1, remote_submission_id: "8123" });
 }
 
 test("does not publish repeated Luogu judging states", async () => {
@@ -93,6 +93,16 @@ test("does not publish repeated Luogu judging states", async () => {
   ];
   await runResultTracker(polls, delivered);
   assert.deepEqual(delivered.map(item => item.status), ["Judging", "Accepted"]);
+});
+
+test("reports Luogu testcase pass counts for failed submissions", async () => {
+  const delivered = [];
+  await runResultTracker([{
+    status: "Wrong Answer",
+    detail: { subtasks: [{ records: [{ status: 12 }, { status: 12 }, { status: 6 }] }] },
+  }], delivered);
+  assert.equal(delivered.length, 1);
+  assert.equal(delivered[0].detail, "通过测试用例数：2 / 3\n测试点 #1：AC\n测试点 #2：AC\n测试点 #3：WA");
 });
 
 test("retries a transient Luogu record read failure", async () => {
@@ -129,9 +139,9 @@ test("guides the user through Luogu captcha verification instead of hiding the c
 
   await assert.rejects(
     context.handleRequestForTest("SUBMIT", { problem_id: "P1000", language: "python3", source: "print(1)" }, 4),
-    /已切换到洛谷题目页.*手动完成验证.*回到知序重新提交/,
+    /请在已登录的洛谷页面处理安全验证，再回到知序重新提交/,
   );
-  assert.deepEqual(JSON.parse(JSON.stringify(activatedTabs)), [{ tabId: 8, active: true }]);
+  assert.deepEqual(JSON.parse(JSON.stringify(activatedTabs)), []);
   assert.deepEqual(JSON.parse(JSON.stringify(openedTabs)), []);
 });
 
@@ -169,7 +179,7 @@ test("records sanitized Luogu rejection diagnostics for captcha failures", async
   assert.doesNotMatch(JSON.stringify(logs), /SECRET_CODE_SHOULD_NOT_LOG|csrf-token-value/);
 });
 
-test("submits with the CSRF token from the exact Luogu problem page", async () => {
+test("submits with the CSRF token from the existing signed-in Luogu tab", async () => {
   const source = await readFile(new URL("../browser-extension/background.js", import.meta.url), "utf8");
   const targets = [];
   const chrome = {
@@ -197,7 +207,7 @@ test("submits with the CSRF token from the exact Luogu problem page", async () =
   }, 4);
 
   assert.equal(result.remote_submission_id, "8123456");
-  assert.deepEqual(targets, [8, 12, 12]);
+  assert.deepEqual(targets, [8, 8]);
 });
 
 test("uses Luogu's expected field names and captcha field in submit requests", async () => {
@@ -354,11 +364,12 @@ test("maps each workspace language to its Luogu language id", async () => {
   }
 });
 
-test("opens the exact problem page when only an unrelated Luogu tab is available", async () => {
+test("submits through an existing Luogu tab without opening or activating a problem page", async () => {
   const source = await readFile(new URL("../browser-extension/background.js", import.meta.url), "utf8");
   const openedTabs = [];
   const queriedUrls = [];
   const scriptTargets = [];
+  const activatedTabs = [];
   const chrome = {
     runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} }, onMessage: { addListener() {} } },
     storage: { local: { async get() { return {}; }, async set() {}, async remove() {} } },
@@ -366,14 +377,14 @@ test("opens the exact problem page when only an unrelated Luogu tab is available
       async query({ url }) {
         queriedUrls.push(url);
         if (Array.isArray(url)) return [{ id: 8, status: "complete" }];
-        return url.endsWith("/problem/P1000*") ? [] : [{ id: 8, status: "complete" }];
+        return [];
       },
       async create(options) { openedTabs.push(options); return { id: 19, status: "complete" }; },
       async get(tabId) { return { id: tabId, status: "complete" }; },
+      async update(tabId, options) { activatedTabs.push({ tabId, ...options }); },
     },
     scripting: { async executeScript({ target, func }) {
       scriptTargets.push(target.tabId);
-      if (func.toString().includes("expectedPath")) return [{ result: { ready: true, loggedIn: true, username: "candidate" } }];
       if (func.toString().includes("meta[name=\"csrf-token\"]")) return [{ result: { id: "8123456" } }];
       return [{ result: { loggedIn: true, username: "candidate" } }];
     } },
@@ -388,15 +399,15 @@ test("opens the exact problem page when only an unrelated Luogu tab is available
   }, 4);
 
   assert.equal(result.remote_submission_id, "8123456");
-  assert.ok(queriedUrls.includes("https://www.luogu.com.cn/problem/P1000*"));
-  assert.deepEqual(JSON.parse(JSON.stringify(openedTabs)), [{ url: "https://www.luogu.com.cn/problem/P1000", active: false }]);
-  assert.deepEqual(scriptTargets, [8, 19, 19]);
+  assert.deepEqual(JSON.parse(JSON.stringify(openedTabs)), []);
+  assert.deepEqual(JSON.parse(JSON.stringify(activatedTabs)), []);
+  assert.deepEqual(scriptTargets, [8, 8]);
 });
 
 test("reports the installed extension version during connection checks", async () => {
   const source = await readFile(new URL("../browser-extension/background.js", import.meta.url), "utf8");
   const manifest = JSON.parse(await readFile(new URL("../browser-extension/manifest.json", import.meta.url), "utf8"));
-  assert.equal(manifest.version, "1.1.3");
+  assert.equal(manifest.version, "1.1.5");
   const chrome = {
     runtime: {
       getManifest() { return manifest; },
@@ -417,7 +428,7 @@ test("reports the installed extension version during connection checks", async (
   assert.deepEqual(JSON.parse(JSON.stringify(response)), {
     connected: true,
     account: "candidate",
-    extension_version: "1.1.3",
+    extension_version: "1.1.5",
   });
 });
 
@@ -472,9 +483,9 @@ test("leaves interactive verification to Luogu instead of fetching an unrelated 
       errorData: { interactive: { type: "YIDUN", state: "private-state" } },
     }; },
   }));
-  await assert.rejects(bridge.submit(), /手动完成验证/);
+  await assert.rejects(bridge.submit(), /处理安全验证/);
   assert.equal(bridge.requests.length, 1, "interactive verification must not fetch an IMAGE captcha");
-  assert.deepEqual(bridge.activated, [8]);
+  assert.deepEqual(bridge.activated, []);
 });
 
 test("does not forward oversized captcha images across the bridge", async () => {
@@ -484,13 +495,35 @@ test("does not forward oversized captcha images across the bridge", async () => 
     ok: true, headers: { get() { return "image/png"; } },
     async arrayBuffer() { return new Uint8Array(100001).buffer; },
   });
-  await assert.rejects(bridge.submit(), /手动完成验证/);
+  await assert.rejects(bridge.submit(), /处理安全验证/);
 });
 
 test("shows actionable guidance for a non-JSON security response", async () => {
   const bridge = await runInjectedSubmit(async () => ({
     ok: false, status: 403, async json() { throw new SyntaxError("HTML response"); },
   }));
-  await assert.rejects(bridge.submit(), /HTTP 403.*手动完成验证/);
-  assert.deepEqual(bridge.activated, [8]);
+  await assert.rejects(bridge.submit(), /HTTP 403.*处理安全验证/);
+  assert.deepEqual(bridge.activated, []);
+});
+
+test("preserves compiler diagnostics when no testcases were run", async () => {
+  const delivered = [];
+  await runResultTracker([{status: "Compile Error", detail: {compileResult: {message: "main.cpp:1: error: expected ';'"}}}], delivered);
+  assert.match(delivered[0].detail, /main.cpp:1: error/);
+  assert.match(delivered[0].detail, /未运行测试用例/);
+});
+
+test("counts testcases with nested metrics without counting a subtask verdict", async () => {
+  const delivered = [];
+  await runResultTracker([{status: "Wrong Answer", detail: {subtasks: [{status: 6, testCases: [
+    {status: 12, metrics: {time: 1}}, {status: 6, metrics: {time: 2}}
+  ]}]}}], delivered);
+  assert.match(delivered[0].detail, /通过测试用例数：1 \/ 2/);
+});
+
+
+test("keeps coding callbacks isolated from contest submissions", async () => {
+  const delivered = [];
+  await runResultTracker([{status: "Accepted"}], delivered, "coding");
+  assert.equal(delivered[0].context, "coding");
 });

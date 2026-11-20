@@ -15,10 +15,9 @@ def profile_client(client):
         yield result
 
 
-def test_profile_rename_preserves_email_records_balance_and_all_sessions(client, profile_client):
+def test_profile_rename_preserves_email_records_balance_and_current_session(client, profile_client):
     from app.db import connect
     alice = login(client, 'alice')
-    another = login(client, 'alice')
     uid = client.get('/api/me', headers=alice).json()['id']
     iid = client.post('/api/interviews', headers=alice).json()['id']
     with connect() as db:
@@ -27,12 +26,13 @@ def test_profile_rename_preserves_email_records_balance_and_all_sessions(client,
     assert changed.status_code == 200
     assert changed.json()['id'] == uid and changed.json()['username'] == ' 新 用户/@ '
     assert changed.json()['email'] == 'alice@example.com' and changed.json()['interview_credits'] == 7
-    assert client.get('/api/me', headers=another).json()['username'] == ' 新 用户/@ '
     assert client.get(f'/api/interviews/{iid}', headers=alice).status_code == 200
-    assert login(client, ' 新 用户/@ ')
+    renamed = login(client, ' 新 用户/@ ')
+    assert client.get('/api/me', headers=alice).status_code == 401
+    assert client.get('/api/me', headers=renamed).json()['username'] == ' 新 用户/@ '
     assert client.post('/api/login', json={'username': 'alice', 'password': 'password123'}).status_code == 401
     for payload, status in [({'username': ''}, 422), ({'username': 'bob'}, 409), ({'username': 'new', 'is_admin': True}, 422)]:
-        assert profile_client.post('/api/profile/username', headers=alice, json=payload).status_code == status
+        assert profile_client.post('/api/profile/username', headers=renamed, json=payload).status_code == status
     assert profile_client.post('/api/profile/username', json={'username': 'missing'}).status_code == 401
 
 
@@ -71,11 +71,11 @@ def test_profile_password_reveal_rechecks_revoked_session(client, profile_client
     assert profile_client.post('/api/profile/reveal-password', headers=alice).status_code == 401
 
 
-def test_unbound_password_change_requires_old_password_and_revokes_every_session(client, profile_client):
+def test_unbound_password_change_requires_old_password_and_revokes_current_session(client, profile_client):
     from app.db import connect
     from app.services.security import verify_password
     from app.services.password_vault import decrypt_password
-    alice, another = login(client, 'alice'), login(client, 'alice')
+    alice = login(client, 'alice')
     for payload, status in [({'password': '1'}, 422), ({'password': '1', 'current_password': 'wrong'}, 400), ({'password': '', 'current_password': 'password123'}, 422)]:
         assert profile_client.post('/api/profile/password', headers=alice, json=payload).status_code == status
         assert client.get('/api/me', headers=alice).status_code == 200
@@ -83,7 +83,6 @@ def test_unbound_password_change_requires_old_password_and_revokes_every_session
         json={'password': '1', 'current_password': 'password123'})
     assert response.status_code == 200
     assert client.get('/api/me', headers=alice).status_code == 401
-    assert client.get('/api/me', headers=another).status_code == 401
     with connect() as db:
         row = db.execute("SELECT password,password_ciphertext FROM users WHERE username='alice'").fetchone()
         assert verify_password('1', row['password']) and decrypt_password(row['password_ciphertext']) == '1'

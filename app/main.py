@@ -9,19 +9,25 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.responses import StreamingResponse
 import io
 import zipfile
+from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, StrictInt, field_validator
+from typing import Annotated
 from app.services.problem_content import public_problem
 from app.config import load_config, ROOT
 from app.db import connect, initialize
 from app.services import ai, judge, expert_context, speech
 from app.services.security import verify_password
 from app.services.password_vault import PasswordVaultError, encrypt_password
-from app.services.auth import current_user, administrator, interview_user, exam_user, public_user
+from app.services.auth import current_user, administrator, interview_user, exam_user, issue_session, public_user
 from app.services.interviews import details, interview, active_interview, require_stage, summary, seed_answers
+from app.services.contest_scoring import submission_score
 from app.services.interview_clock import require_running, timing, timestamp
 from app.services import question_bank
 from app.services import luogu_catalog
+from app.services import contest_access, home_layout
+from app.routes.live import router as live_router
+from app.routes.home_layout import router as home_layout_router
 from app.routes.presentations import router as presentations_router
 from app.routes.admin import router as admin_router
 from app.routes.recordings import router as recordings_router
@@ -32,10 +38,26 @@ from app.routes.profile_account import router as profile_account_router
 from app.routes.training import router as training_router
 from app.routes.credit_transfers import router as credit_transfers_router
 from app.routes.announcements import router as announcements_router
+from app.routes.coding import router as coding_router
+from app.routes.trends import router as trends_router
 from app.routes.courses import router as courses_router
 
 initialize()
-app = FastAPI(title='复试模拟系统')
+
+
+@asynccontextmanager
+async def lifespan(app):
+    from app.services import trend_scheduler, leaderboard_scheduler
+    trend_scheduler.start()
+    leaderboard_scheduler.start()
+    try:
+        yield
+    finally:
+        trend_scheduler.stop()
+        leaderboard_scheduler.stop()
+
+
+app = FastAPI(title='复试模拟系统', lifespan=lifespan)
 
 
 @app.exception_handler(PasswordVaultError)
@@ -52,13 +74,18 @@ app.include_router(profile_account_router)
 app.include_router(training_router)
 app.include_router(credit_transfers_router)
 app.include_router(announcements_router)
+app.include_router(coding_router)
+app.include_router(trends_router)
+app.include_router(home_layout_router)
 app.include_router(courses_router)
+app.include_router(live_router)
 app.mount('/static', StaticFiles(directory=ROOT / 'app/static'), name='static')
 
 @app.get('/api/home/resources')
 def home_resources(user=Depends(current_user)):
-    catalog=ROOT/'app/assets/home-resources-v1.json'
-    return JSONResponse(json.loads(catalog.read_text(encoding='utf-8')),headers={'Cache-Control':'no-cache'})
+    with connect() as db:
+        return [{**item, 'group': block['title']} for block in home_layout.read(db, public=True)['blocks']
+                if block['type'] == 'resources' for item in block['items']]
 
 class Login(BaseModel):
     username: str
@@ -92,9 +119,11 @@ class ContestInfo(BaseModel):
 class Contest(ContestInfo):
     judge_mode: str = Field(default='luogu', pattern='^(docker|luogu)$')
     problems: list[Problem] = Field(min_length=1, max_length=50)
+    participant_ids: list[Annotated[StrictInt, Field(ge=1)]] = Field(default_factory=list, max_length=10000)
 class ContestUpdate(ContestInfo):
     judge_mode: str = Field(default='luogu', pattern='^(docker|luogu)$')
     problems: list[Problem] | None = Field(default=None, min_length=1, max_length=50)
+    participant_ids: list[Annotated[StrictInt, Field(ge=1)]] | None = Field(default=None, max_length=10000)
 class Answer(BaseModel):
     transcript: str = Field(max_length=20000)
 class InterviewTitle(BaseModel):
@@ -141,13 +170,13 @@ def luogu_extension():
 @app.post('/api/login')
 def login(payload: Login):
     with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
         user = db.execute('SELECT * FROM users WHERE username=?', (payload.username,)).fetchone()
         if not user or not user['is_active'] or not verify_password(payload.password, user['password']):
             raise HTTPException(401, '用户名或密码错误')
         if not user['password_ciphertext']:
             db.execute('UPDATE users SET password_ciphertext=? WHERE id=?', (encrypt_password(payload.password), user['id']))
-        token = secrets.token_urlsafe(32)
-        db.execute('INSERT INTO sessions VALUES (?,?,?)', (token, user['id'], time.time() + load_config()['app']['session_hours'] * 3600))
+        token = issue_session(db, user['id'])
         return {'token': token, **public_user(user)}
 
 @app.get('/api/me')
@@ -446,21 +475,26 @@ def finish(iid: int, user=Depends(interview_user)):
 
 @app.get('/api/contests')
 def contests(user=Depends(exam_user)):
-    with connect() as db: return [dict(x) for x in db.execute('SELECT * FROM contests ORDER BY id DESC')]
+    with connect() as db:
+        return [{**dict(x), 'can_access': contest_access.can_access(db, x, user)}
+                for x in db.execute('SELECT * FROM contests ORDER BY id DESC')]
 
 
 @app.get('/api/contests/{cid}')
 def contest_overview(cid: int, user=Depends(exam_user)):
     """Return contest metadata and problem titles without revealing future statements."""
     with connect() as db:
-        contest = db.execute('SELECT * FROM contests WHERE id=?', (cid,)).fetchone()
-        if not contest: raise HTTPException(404, '比赛不存在')
+        contest = contest_access.require_access(db, cid, user)
         problems = [dict(row) for row in db.execute('''SELECT problems.id,title,remote_problem_id,points,
             (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
                 WHERE problem_id=problems.id AND users.is_admin=0) AS attempt_count,
             (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
                 WHERE problem_id=problems.id AND status='Accepted' AND users.is_admin=0) AS accepted_count
             FROM problems WHERE contest_id=? ORDER BY id''', (cid,))]
+        if not user['is_admin'] and not contest['show_ranking']:
+            for problem in problems:
+                problem['attempt_count'] = None
+                problem['accepted_count'] = None
         return {**dict(contest), 'problem_count': len(problems), 'problems': problems}
 
 
@@ -468,8 +502,7 @@ def contest_overview(cid: int, user=Depends(exam_user)):
 def contest_ranking(cid: int, user=Depends(exam_user)):
     """Return the configured contest ranking and per-problem attempt counts."""
     with connect() as db:
-        contest = db.execute('SELECT id,show_ranking,ranking_rule FROM contests WHERE id=?', (cid,)).fetchone()
-        if not contest: raise HTTPException(404, '比赛不存在')
+        contest = contest_access.require_access(db, cid, user)
         problems = [dict(row) for row in db.execute('''SELECT problems.id,problems.title,problems.points,
             (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
                 WHERE problem_id=problems.id AND users.is_admin=0) AS attempt_count,
@@ -477,6 +510,10 @@ def contest_ranking(cid: int, user=Depends(exam_user)):
                 WHERE problem_id=problems.id AND status='Accepted' AND users.is_admin=0) AS accepted_count
             FROM problems WHERE contest_id=? ORDER BY id''', (cid,))]
         if not contest['show_ranking']:
+            if not user['is_admin']:
+                for problem in problems:
+                    problem['attempt_count'] = None
+                    problem['accepted_count'] = None
             return {'visible': False, 'ranking_rule': contest['ranking_rule'], 'problems': problems, 'rows': []}
         users = list(db.execute('''SELECT DISTINCT users.id,users.username FROM submissions
             JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
@@ -487,18 +524,24 @@ def contest_ranking(cid: int, user=Depends(exam_user)):
             score = accepted = attempts = 0
             first_accept = None
             for problem in problems:
-                submissions = list(db.execute('''SELECT status,created FROM submissions
+                submissions = list(db.execute('''SELECT status,created,detail FROM submissions
                     WHERE user_id=? AND problem_id=? ORDER BY id''', (candidate['id'], problem['id'])))
                 accepted_rows = [row for row in submissions if row['status'] == 'Accepted']
                 solved = bool(accepted_rows)
+                scored_submissions = [(submission_score(problem['points'], row['status'], row['detail']), row)
+                                      for row in submissions]
+                problem_score, best_submission = max(scored_submissions, key=lambda item: item[0], default=(0, None))
+                testcase_match = re.search(r'通过测试(?:用例|点)数\s*[:：]\s*(\d+)\s*/\s*(\d+)', best_submission['detail']) if best_submission else None
                 attempts += len(submissions)
                 accepted += int(solved)
+                score += problem_score
                 if solved:
-                    score += problem['points']
                     solved_at = accepted_rows[0]['created']
                     first_accept = solved_at if first_accept is None else min(first_accept, solved_at)
                 per_problem.append({'problem_id': problem['id'], 'attempts': len(submissions),
-                    'accepted': len(accepted_rows), 'solved': solved})
+                    'accepted': len(accepted_rows), 'solved': solved, 'score': problem_score,
+                    'passed_cases': int(testcase_match.group(1)) if testcase_match else 0,
+                    'total_cases': int(testcase_match.group(2)) if testcase_match else 0})
             rows.append({'user_id': candidate['id'], 'username': candidate['username'], 'score': score,
                 'accepted_count': accepted, 'attempt_count': attempts, 'first_accepted_at': first_accept,
                 'problems': per_problem})
@@ -529,8 +572,10 @@ def luogu_problem_details(problem_id: str, user=Depends(administrator)):
 def create_contest(payload: Contest, user=Depends(administrator)):
     if payload.ends <= payload.starts: raise HTTPException(400, '结束时间必须晚于开始时间')
     with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
         iid = db.execute('INSERT INTO contests(title,starts,ends,judge_mode,show_ranking,ranking_rule) VALUES (?,?,?,?,?,?)',
             (payload.title, payload.starts, payload.ends,payload.judge_mode,int(payload.show_ranking),payload.ranking_rule)).lastrowid
+        contest_access.set_participants(db, iid, payload.participant_ids)
         problem_ids = []
         seen = set()
         for problem in payload.problems:
@@ -567,6 +612,8 @@ def update_contest(cid: int, payload: ContestUpdate, user=Depends(administrator)
         if not contest: raise HTTPException(404, '比赛不存在')
         if payload.judge_mode != contest['judge_mode']:
             raise HTTPException(400, '已有比赛不能切换评测平台')
+        if payload.participant_ids is not None:
+            contest_access.set_participants(db, cid, payload.participant_ids)
         existing = list(db.execute('SELECT * FROM problems WHERE contest_id=?', (cid,)))
         ids = [row['id'] for row in existing]
         if payload.problems is not None:
@@ -651,15 +698,14 @@ def create_problem(cid: int, payload: Problem, user=Depends(administrator)):
 @app.get('/api/contests/{cid}/problems')
 def problems(cid: int, user=Depends(exam_user)):
     with connect() as db:
-        contest = db.execute('SELECT * FROM contests WHERE id=?', (cid,)).fetchone()
-        if not contest: raise HTTPException(404, '比赛不存在')
+        contest = contest_access.require_access(db, cid, user)
         if time.time() < contest['starts']: raise HTTPException(403, '比赛尚未开始')
         return [{**public_problem(row), 'judge_mode': contest['judge_mode'],
             'points': row['points'],
             'attempt_count': db.execute('''SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
-                WHERE problem_id=? AND users.is_admin=0''', (row['id'],)).fetchone()[0],
+                WHERE problem_id=? AND users.is_admin=0''', (row['id'],)).fetchone()[0] if user['is_admin'] or contest['show_ranking'] else None,
             'accepted_count': db.execute("""SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
-                WHERE problem_id=? AND status='Accepted' AND users.is_admin=0""", (row['id'],)).fetchone()[0]}
+                WHERE problem_id=? AND status='Accepted' AND users.is_admin=0""", (row['id'],)).fetchone()[0] if user['is_admin'] or contest['show_ranking'] else None}
             for row in db.execute('SELECT * FROM problems WHERE contest_id=? ORDER BY id', (cid,))]
 
 @app.post('/api/problems/{pid}/submissions')
@@ -667,6 +713,7 @@ def submit(pid: int, payload: Submission, user=Depends(exam_user)):
     with connect() as db:
         p = db.execute('SELECT problems.*,contests.starts,contests.ends,contests.judge_mode FROM problems JOIN contests ON contests.id=problems.contest_id WHERE problems.id=?', (pid,)).fetchone()
         if not p: raise HTTPException(404, '题目不存在')
+        contest_access.require_access(db, p['contest_id'], user)
         if not p['starts'] <= time.time() <= p['ends']: raise HTTPException(403, '不在比赛时间内')
         if p['judge_mode'] == 'docker' and payload.language != 'python3':
             raise HTTPException(422, '历史本地评测比赛目前仅支持 Python 3')
@@ -680,12 +727,13 @@ def submit(pid: int, payload: Submission, user=Depends(exam_user)):
 @app.post('/api/submissions/{sid}/remote-result')
 def update_remote_submission(sid: int, payload: RemoteSubmissionResult, user=Depends(exam_user)):
     with connect() as db:
-        row = db.execute('''SELECT submissions.status,submissions.remote_submission_id
+        row = db.execute('''SELECT submissions.status,submissions.remote_submission_id,problems.contest_id
             FROM submissions JOIN problems ON problems.id=submissions.problem_id
             JOIN contests ON contests.id=problems.contest_id
             WHERE submissions.id=? AND submissions.user_id=? AND contests.judge_mode='luogu' ''',
             (sid,user['id'])).fetchone()
         if not row: raise HTTPException(404, '提交记录不存在')
+        contest_access.require_access(db, row['contest_id'], user)
         if row['remote_submission_id'] and row['remote_submission_id'] != payload.remote_submission_id:
             raise HTTPException(409, '远端提交编号与本地记录不一致')
         terminal = {'Accepted','Wrong Answer','Output Limit Exceeded','Time Limit Exceeded','Memory Limit Exceeded','Runtime Error','Compile Error','System Error','Submission Failed'}
@@ -703,13 +751,17 @@ def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(defau
     with connect() as db:
         where = 'submissions.user_id=?'
         params: list[object] = [user['id']]
+        if not user['is_admin']:
+            where += " AND (problems.contest_id IN (SELECT id FROM contests WHERE access_mode='all') OR problems.contest_id IN (SELECT contest_id FROM contest_participants WHERE user_id=?))"
+            params.append(user['id'])
         if contest_id is not None:
+            contest_access.require_access(db, contest_id, user)
             where += ' AND problems.contest_id=?'
             params.append(contest_id)
         joins = 'JOIN problems ON problems.id=submissions.problem_id'
         total = db.execute(f'SELECT COUNT(*) FROM submissions {joins} WHERE {where}', params).fetchone()[0]
         rows = [dict(row) for row in db.execute(f'''SELECT submissions.id,username,problem_id,problems.title AS problem_title,
-            language,status,created,remote_submission_id,detail FROM submissions JOIN users ON users.id=submissions.user_id
+            language,status,created,detail FROM submissions JOIN users ON users.id=submissions.user_id
             {joins} WHERE {where} ORDER BY submissions.id DESC LIMIT ? OFFSET ?''', (*params,page_size,(page-1)*page_size))]
         pages = (total + page_size - 1) // page_size
         stats = db.execute(f'''SELECT SUM(CASE WHEN status='Accepted' THEN 1 ELSE 0 END) AS accepted,
@@ -723,10 +775,11 @@ def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(defau
 def submission_detail(sid: int, user=Depends(exam_user)):
     """Return source and judge details only to the submission owner."""
     with connect() as db:
-        row = db.execute('''SELECT submissions.id,submissions.user_id,submissions.problem_id,problems.title AS problem_title,
+        row = db.execute('''SELECT submissions.id,submissions.user_id,submissions.problem_id,problems.contest_id,problems.title AS problem_title,
             contests.title AS contest_title,submissions.language,submissions.source,submissions.status,submissions.created,
-            submissions.remote_submission_id,submissions.detail FROM submissions
+            submissions.detail FROM submissions
             JOIN problems ON problems.id=submissions.problem_id JOIN contests ON contests.id=problems.contest_id
             WHERE submissions.id=? AND submissions.user_id=?''', (sid,user['id'])).fetchone()
         if not row: raise HTTPException(404, '提交记录不存在')
+        contest_access.require_access(db, row['contest_id'], user)
         return dict(row)

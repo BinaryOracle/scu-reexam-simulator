@@ -1,6 +1,6 @@
 /** Account management UI. Backend APIs remain the source of authorization. */
 import { api, state } from "./api.js?v=20261114-ui-v17";
-import { readCreditSettings } from "./credits.js?v=20261114-training-v9";
+import { readCreditSettings } from "./credits.js?v=20261117-package-delete-v2";
 import {
   $,
   el,
@@ -20,9 +20,17 @@ let savingPassword = false;
 let bankQuestions = [];
 let bankPage = 1;
 let bankFilterKey = "";
+let questionEditorBaseline = null;
 const visiblePasswords = new Set();
+let usersRevision = 0;
 export function clearVisiblePasswords() {
   for (const hide of visiblePasswords) hide();
+}
+function accountCell(label, className = "") {
+  const cell = el("td", "", className);
+  cell.dataset.label = label;
+  cell.append(el("span", label, "account-cell-label"));
+  return cell;
 }
 function passwordControl(user) {
   let timeout;
@@ -33,14 +41,14 @@ function passwordControl(user) {
     group.title = "邮箱注册账号尚未设置可查看密码；旧账号可重置密码或使用密码登录一次后查看";
     return group;
   }
-  const field = el("input"); field.type = "password"; field.readOnly = true;
+  const field = el("input"); field.type = "text"; field.readOnly = true;
   field.value = "••••••"; field.setAttribute("aria-label", `${user.username} 的密码`);
   field.autocomplete = "off"; field.spellcheck = false;
   const control = button("查看", async () => {
     if (shown) { hide(); return; }
     const result = await api(`/admin/users/${user.id}/reveal-password`, { method: "POST" });
     if (!control.isConnected || document.hidden || $("users").hidden) return;
-    field.type = "text"; field.value = result.password;
+    field.value = result.password;
     control.textContent = "隐藏";
     shown = true;
     control.classList.add("revealed-password");
@@ -52,7 +60,7 @@ function passwordControl(user) {
   function hide() {
     clearTimeout(timeout);
     shown = false;
-    field.type = "password"; field.value = "••••••";
+    field.value = "••••••";
     control.textContent = "查看";
     control.classList.remove("revealed-password");
     control.title = "点击查看密码原文";
@@ -67,7 +75,10 @@ const categoryNames = { professional: "专业课", translation: "英文段落翻
 const subjectNames = { data_structures: "数据结构", operating_systems: "操作系统", computer_networks: "计算机网络" };
 
 export async function refreshUsers() {
-  accounts = await api("/admin/users");
+  const revision = ++usersRevision;
+  const refreshed = await api("/admin/users");
+  if (revision !== usersRevision) return;
+  accounts = refreshed;
   $("userTotal").textContent = accounts.length;
   $("userActive").textContent = accounts.filter(
     (user) => user.is_active,
@@ -78,13 +89,105 @@ export async function refreshUsers() {
   $("userExam").textContent = accounts.filter((user) => user.is_admin).length;
   renderUsers();
 }
+async function saveUserFields(user, fields, successMessage) {
+  await api(`/admin/users/${user.id}`, {
+    method: "PATCH",
+    body: JSON.stringify(fields),
+  });
+  Object.assign(accounts.find((account) => account.id === user.id) || user, fields);
+  renderUsers();
+  try {
+    await refreshUsers();
+  } catch {
+    notify(`${successMessage} 用户列表暂时未能刷新，当前状态已更新。请点击“刷新用户列表”重新读取。`, "info");
+    return;
+  }
+  notify(successMessage);
+}
 export async function refreshQuestionBank() {
   bankQuestions = await api("/admin/question-bank");
   renderQuestionBank();
 }
+let luoguSettingsRevision = 0;
+const modelServiceMeta = {
+  interview: { title: '面试多模态模型', description: '用于专家提问与整场面试点评，可结合 PPT、回答文本和录音。', tag: '面试' },
+  asr: { title: '语音识别（ASR）', description: '将面试录音转写为文字，供面试记录与点评使用。', tag: '语音输入' },
+  tts: { title: '语音合成（TTS）', description: '播报专家问答环节生成的问题。', tag: '语音输出' },
+  trends: { title: '热点趋势分析', description: '根据公开来源生成 AI 技术趋势内容，可单独配置模型。', tag: '内容生成' },
+};
+let modelSettingsSnapshot = null;
+let activeModelService = null;
 export async function refreshLuoguSettings() {
+  const revision = ++luoguSettingsRevision;
   const settings = await api('/admin/luogu-settings');
+  if (revision !== luoguSettingsRevision || $('luoguAppOrigin').readOnly) return;
   $('luoguAppOrigin').value = `${settings.app_origin}/`;
+  $('luoguSettingsStatus').hidden = true;
+}
+let modelSettingsRevision = 0;
+function renderModelSettings(settings) {
+  modelSettingsSnapshot = settings;
+  const list = $('modelServiceList');
+  const rows = Object.entries(modelServiceMeta).map(([id, meta]) => {
+    const service = settings.services[id];
+    const row = el('button', '', 'model-service-row');
+    row.type = 'button';
+    row.setAttribute('aria-haspopup', 'dialog');
+    row.setAttribute('aria-label', '编辑' + meta.title);
+    const main = el('span', '', 'model-service-main');
+    const heading = el('span', '', 'model-service-heading');
+    heading.append(el('strong', meta.title), el('span', meta.tag, 'model-service-tag'));
+    main.append(heading, el('span', meta.description, 'model-service-description'));
+    const details = el('span', '', 'model-service-details');
+    details.append(el('strong', service.model || '未设置模型'), el('span', service.base_url || '未设置接口地址'));
+    const aside = el('span', '', 'model-service-aside');
+    aside.append(el('span', service.api_key_configured ? '密钥已配置 · ' + service.api_key_source : '尚未配置密钥', service.api_key_configured ? 'model-service-status configured' : 'model-service-status missing'), el('span', '›', 'model-service-arrow'));
+    row.append(main, details, aside);
+    row.addEventListener('click', () => openModelService(id));
+    return row;
+  });
+  list.replaceChildren(...rows);
+}
+function openModelService(serviceName) {
+  const service = modelSettingsSnapshot?.services[serviceName];
+  if (!service) return;
+  activeModelService = serviceName;
+  const meta = modelServiceMeta[serviceName];
+  const form = $('modelSettingsForm');
+  form.reset();
+  $('modelServiceDialogTitle').textContent = meta.title;
+  $('modelServiceDialogDescription').textContent = meta.description;
+  for (const field of ['base_url', 'model', 'provider', 'protocol', 'voice']) {
+    const input = form.querySelector('[name="' + field + '"]');
+    if (input) input.value = service[field] || '';
+  }
+  $('modelTtsFields').hidden = serviceName !== 'tts';
+  form.querySelector('[name="voice"]').required = serviceName === 'tts';
+  const keyInput = form.querySelector('[name="api_key"]');
+  keyInput.value = '';
+  keyInput.placeholder = service.api_key_configured ? '••••••••••••••••' : '请输入 API Key';
+  $('modelServiceKeyStatus').textContent = service.api_key_configured
+    ? '当前使用：' + service.api_key_source + ' · 输入新密钥可替换'
+    : '尚未配置 API Key';
+  const status = $('modelSettingsStatus');
+  status.hidden = true;
+  status.classList.remove('form-error');
+  $('modelServiceDialog').showModal();
+}
+export async function refreshModelSettings() {
+  const revision = ++modelSettingsRevision;
+  const settings = await api('/admin/model-settings');
+  if (revision !== modelSettingsRevision || $('modelSettingsForm').dataset.saving === 'true') return;
+  renderModelSettings(settings);
+}
+function questionEditorState() {
+  return JSON.stringify([$("questionCategory").value, $("questionSubject").value, $("questionContent").value, $("questionActive").checked]);
+}
+function questionEditorDirty() {
+  return questionEditorBaseline !== null && questionEditorState() !== questionEditorBaseline;
+}
+async function discardQuestionChanges() {
+  return !questionEditorDirty() || await confirmAction("未保存的题目修改将丢失。", { title: "放弃未保存的修改？", confirmText: "放弃修改", danger: true });
 }
 function resetQuestionEditor() {
   $("questionBankForm").reset();
@@ -92,16 +195,20 @@ function resetQuestionEditor() {
   $("questionActive").checked = true;
   $("cancelQuestionEdit").hidden = true;
   syncQuestionCategory();
+  $("questionEditorTitle").textContent = "新增题目";
+  $("questionBankForm").querySelector('[type="submit"]').textContent = "添加题目";
+  questionEditorBaseline = questionEditorState();
 }
 function syncQuestionCategory() {
   $("questionSubjectField").hidden = $("questionCategory").value !== "professional";
 }
 function renderQuestionBank() {
   const filter = $("questionBankFilter").value;
+  const [category, subject] = filter.includes(":") ? filter.split(":", 2) : [filter, ""];
   const query = $("questionBankSearch").value.trim().toLowerCase();
   const filterKey = JSON.stringify([filter, query]);
   if (filterKey !== bankFilterKey) { bankPage = 1; bankFilterKey = filterKey; }
-  const rows = bankQuestions.filter((row) => (!filter || row.category === filter) && row.content.toLowerCase().includes(query));
+  const rows = bankQuestions.filter((row) => (!category || (row.category === category && (!subject || row.subject === subject))) && row.content.toLowerCase().includes(query));
   const pages = Math.max(1, Math.ceil(rows.length / 10));
   bankPage = Math.min(bankPage, pages);
   $("questionBankCount").textContent = `${rows.length} 道题目`;
@@ -119,7 +226,8 @@ function renderQuestionBank() {
     const content = el("p", row.content);
     content.lang = row.category === "professional" ? "zh" : "en";
     const actions = el("div", "", "table-actions");
-    actions.append(button("编辑", () => {
+    actions.append(button("编辑", async () => {
+      if (!await discardQuestionChanges()) return;
       $("questionBankId").value = row.id;
       $("questionCategory").value = row.category;
       $("questionSubject").value = row.subject || "data_structures";
@@ -127,13 +235,18 @@ function renderQuestionBank() {
       $("questionActive").checked = !!row.active;
       $("cancelQuestionEdit").hidden = false;
       syncQuestionCategory();
+      $("questionEditorTitle").textContent = "编辑题目";
+      $("questionBankForm").querySelector('[type="submit"]').textContent = "保存修改";
+      questionEditorBaseline = questionEditorState();
       $("questionBankForm").scrollIntoView({ behavior: "smooth", block: "start" });
       $("questionContent").focus();
     }, "text-button"), button("删除", async () => {
       if (!await confirmAction("已抽取到面试记录中的题目不会受影响。此操作无法撤销。", { title: "删除这道题目？", confirmText: "删除题目", danger: true })) return;
       await api(`/admin/question-bank/${row.id}`, { method: "DELETE" });
-      await refreshQuestionBank();
+      if ($("questionBankId").value === String(row.id)) resetQuestionEditor();
       notify("题目已删除。");
+      try { await refreshQuestionBank(); }
+      catch { notify("题目已删除，但列表刷新失败。请点击刷新列表；不要重复删除。", "error"); }
     }, "text-button"));
     item.append(meta, content, actions);
     list.append(item);
@@ -171,8 +284,9 @@ async function submitQuestion(event) {
     body: JSON.stringify(payload),
   });
   resetQuestionEditor();
-  await refreshQuestionBank();
   notify(id ? "题目已更新。" : "题目已添加。");
+  try { await refreshQuestionBank(); }
+  catch { notify("题目已保存，但列表刷新失败。请点击刷新列表；不要重复提交。", "error"); }
   } finally { control.disabled = false; }
 }
 async function exportQuestionBank() {
@@ -203,18 +317,17 @@ function renderUsers() {
     );
     return;
   }
-  const wrap = el("div", "", "table-scroll");
+  const wrap = el("div", "", "account-table-wrap");
   const table = document.createElement("table");
   table.className = "account-table";
   table.append(el("caption", "账号、邮箱、面试次数与状态", "sr-only"));
   const head = document.createElement("thead");
   const tr = document.createElement("tr");
   for (const text of [
-    "用户",
+    "用户信息",
     "密码",
-    "邮箱",
     "面试次数",
-    "管理权限",
+    "功能权限",
     "账号状态",
     "操作",
   ]) {
@@ -227,16 +340,19 @@ function renderUsers() {
   for (const user of visible) {
     const row = document.createElement("tr");
     if (!user.is_active) row.className = "account-disabled";
-    const name = el("td");
+    const name = accountCell("用户", "account-identity-cell");
     const cell = el("div", "", "account-name");
-    const text = el("div");
+    const text = el("div", "", "account-identity-copy");
     text.append(
-      el("strong", user.username),
+      el("strong", user.username, "account-username"),
       el(
         "small",
         `ID ${String(user.id).padStart(3, "0")}${user.id === state.user.id ? " · 当前账号" : ""}`,
       ),
     );
+    text.firstChild.title = user.username;
+    const role = el("span", user.is_superadmin ? "超级管理员" : user.is_admin ? "管理员" : "普通用户", `account-role${user.is_admin ? " account-role-admin" : ""}`);
+    text.append(role);
     cell.append(
       el(
         "span",
@@ -246,11 +362,12 @@ function renderUsers() {
       text,
     );
     name.append(cell);
-    const password = el("td", "", "account-password-cell");
+    const password = accountCell("密码", "account-password-cell");
     password.append(passwordControl(user));
-    const email = el("td", "", "account-email-cell");
-    email.append(el("span", user.email || "未绑定", "account-email-address"));
-    const credits = el("td", "", "account-credits-cell");
+    const email = el("span", user.email || "未绑定邮箱", "account-email-address");
+    email.title = user.email || "未绑定邮箱";
+    text.append(email);
+    const credits = accountCell("面试次数", "account-credits-cell");
     if (user.is_admin) credits.append(el("span", "已开通", "muted"));
     else {
       const form = el("form", "", "inline-credit-form");
@@ -273,24 +390,12 @@ function renderUsers() {
       });
       form.append(input, el("span", "次"), save); credits.append(form);
     }
-    const admin = el("td");
-    admin.append(
-      badge(
-        user.is_superadmin ? "超级管理员" : user.is_admin ? "管理员" : "普通用户",
-        user.is_admin ? "orange" : "gray",
-      ),
-    );
-    const active = el("td");
+    const active = accountCell("账号状态");
     const statusControl = button(
       user.is_active ? "已启用" : "已停用",
       async () => {
         const next = !user.is_active;
-        await api(`/admin/users/${user.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({ is_active: next }),
-        });
-        await refreshUsers();
-        notify(`${user.username} 已${next ? "启用" : "停用"}。`);
+        await saveUserFields(user, { is_active: next }, `${user.username} 已${next ? "启用" : "停用"}。`);
       },
       `account-status-button ${user.is_active ? "active" : "inactive"}`,
     );
@@ -304,7 +409,7 @@ function renderUsers() {
       ? "不能停用当前登录账号"
       : `点击${user.is_active ? "停用" : "启用"}账号`;
     active.append(statusControl);
-    const actions = el("td");
+    const actions = accountCell("操作", "account-actions-cell");
     const group = el("div", "", "table-actions");
     group.append(
       button("重置用户名", () => openUsername(user), "text-button"),
@@ -313,22 +418,54 @@ function renderUsers() {
     if (!user.is_superadmin && user.id !== state.user.id) group.append(button("删除用户", async () => {
       if (!await confirmAction(`将删除「${user.username}」的账号、面试记录、录音、PPT 和提交记录，已兑换卡密不会恢复。此操作无法撤销。`, { title: "删除这个用户？", confirmText: "删除用户", danger: true })) return;
       await api(`/admin/users/${user.id}`, { method: "DELETE" });
-      await refreshUsers(); notify("用户及其记录已删除。");
+      notify("用户及其记录已删除。");
+      try { await refreshUsers(); }
+      catch { notify("用户已删除，但列表刷新失败。请点击刷新用户列表；不要重复删除。", "error"); }
     }, "text-button danger"));
     actions.append(group);
-    row.append(name, password, email, credits, admin, active, actions);
+    const permissionCell = (key, label, shortLabel) => {
+      const cell = el("div", "", "account-permission-item");
+      const enabled = Boolean(user[key]);
+      if (user.is_admin) cell.append(el("span", shortLabel, "account-permission-default"));
+      else {
+        const control = button(shortLabel, async () => {
+          const next = !Boolean(user[key]);
+          await saveUserFields(user, { [key]: next }, `${user.username} 的${label}已${next ? "开启" : "关闭"}。`);
+        }, `account-status-button ${enabled ? "active" : "inactive"}`);
+        control.setAttribute("aria-label", `${enabled ? "关闭" : "开通"} ${user.username} 的${label}`);
+        control.title = `${label}：${enabled ? "已开通，点击关闭" : "未开通，点击开通"}`;
+        control.setAttribute("aria-pressed", String(enabled)); cell.append(control);
+      }
+      return cell;
+    };
+    const permissions = accountCell("功能权限", "account-permissions-cell");
+    const permissionGroup = el("div", "", "account-permission-grid");
+    permissionGroup.append(
+      permissionCell("can_training", "每日训练权限", "每日训练"),
+      permissionCell("can_coding", "算法题带刷权限", "算法带刷"),
+      permissionCell("can_interview", "模拟面试权限", "模拟面试"),
+      permissionCell("can_exam", "上机考试权限", "上机考试"),
+    );
+    permissions.append(permissionGroup);
+    if (user.is_admin) permissions.append(el("small", "全部功能已开通", "account-permission-note"));
+    row.append(name, password, credits, permissions, active, actions);
     body.append(row);
   }
   table.append(head, body);
   wrap.append(table);
-  wrap.tabIndex = 0;
-  wrap.setAttribute("aria-label", "账号列表，可左右滑动查看全部信息和操作");
-  $("userList").replaceChildren(el("p", "左右滑动表格，查看全部信息与账号操作 →", "mobile-table-hint"), wrap);
+  wrap.setAttribute("aria-label", "用户账号列表");
+  $("userList").replaceChildren(wrap);
 }
 function syncAccountType() {
   const admin = $("accountTypeAdmin").checked;
+  $("accountPermissions").hidden = admin;
+  $("accountAdminNote").hidden = !admin;
   $("initialCreditsField").hidden = admin;
   $("accountCredits").disabled = admin;
+  $("trainingPermissionField").hidden = admin;
+  $("codingPermissionField").hidden = admin;
+  $("interviewPermissionField").hidden = admin;
+  $("examPermissionField").hidden = admin;
 }
 async function openAccount() {
   const settings = await readCreditSettings();
@@ -355,12 +492,14 @@ async function submitUsername(event) {
   const control = $("usernameForm").querySelector('[type="submit"]');
   control.disabled = true;
   $("usernameFormError").hidden = true;
+  let saved = false;
   try {
     const username = $("resetUsername").value;
     const result = await api(`/admin/users/${usernameTarget.id}/username`, {
       method: "POST",
       body: JSON.stringify({ username }),
     });
+    saved = true;
     $("usernameDialog").close();
     if ($("userSearch").value.trim() === usernameTarget.username)
       $("userSearch").value = username;
@@ -371,6 +510,10 @@ async function submitUsername(event) {
     await refreshUsers();
     notify("用户名已更新，后续请使用新用户名登录。密码和历史记录保持不变。");
   } catch (error) {
+    if (saved) {
+      notify("用户名已更新，但用户列表未能刷新。请点击刷新列表；不要重复提交。", "error");
+      return;
+    }
     $("usernameFormError").textContent = error.message;
     $("usernameFormError").hidden = false;
   } finally {
@@ -391,6 +534,7 @@ async function submitAccount(event) {
   savingAccount = true;
   $("saveUser").disabled = true;
   $("userFormError").hidden = true;
+  let saved = false;
   try {
     const payload = {
       username: $("accountUsername").value,
@@ -398,11 +542,16 @@ async function submitAccount(event) {
       is_admin: $("accountTypeAdmin").checked,
       email: $("accountEmail").value.trim() || null,
       interview_credits: Number($("accountCredits").value),
+      can_training: $("accountTraining").checked,
+      can_coding: $("accountCoding").checked,
+      can_interview: $("accountInterview").checked,
+      can_exam: $("accountExam").checked,
     };
     await api("/admin/users", {
       method: "POST",
       body: JSON.stringify(payload),
     });
+    saved = true;
     $("userDialog").close();
     $("accountPassword").value = "";
     await refreshUsers();
@@ -410,6 +559,10 @@ async function submitAccount(event) {
       `${payload.is_admin ? "管理员" : "普通用户"}已创建，请将账号信息告知使用者。`,
     );
   } catch (error) {
+    if (saved) {
+      notify("用户已创建，但列表未能刷新。请点击刷新列表；不要重复创建。", "error");
+      return;
+    }
     $("userFormError").textContent = error.message;
     $("userFormError").hidden = false;
   } finally {
@@ -430,11 +583,13 @@ async function submitPassword(event) {
   savingPassword = true;
   const control = $("passwordForm").querySelector('[type="submit"]');
   control.disabled = true;
+  let saved = false;
   try {
     await api(`/admin/users/${passwordTarget.id}/password`, {
       method: "POST",
       body: JSON.stringify({ password }),
     });
+    saved = true;
     $("passwordDialog").close();
     $("passwordForm").reset();
     if (passwordTarget.id === state.user.id) {
@@ -445,6 +600,10 @@ async function submitPassword(event) {
     await refreshUsers();
     notify("密码已重置，该用户需要重新登录。");
   } catch (error) {
+    if (saved) {
+      notify("密码已重置，但用户列表未能刷新。请点击刷新列表；用户需要使用新密码登录。", "error");
+      return;
+    }
     $("passwordFormError").textContent = error.message;
     $("passwordFormError").hidden = false;
   } finally {
@@ -455,12 +614,16 @@ async function submitPassword(event) {
 export function setupAdmin() {
   document.addEventListener("visibilitychange", () => { if (document.hidden) clearVisiblePasswords(); });
   $("newUser").addEventListener("click", () => void openAccount().catch(error => notify(error.message, "error")));
+  $("luoguAppOrigin").addEventListener("input", () => { luoguSettingsRevision++; $("luoguSettingsStatus").hidden = true; });
   $("luoguSettingsForm").addEventListener("submit", (event) => {
     event.preventDefault();
+    luoguSettingsRevision++;
     const form = event.currentTarget;
     const save = form.querySelector('[type="submit"]');
     const status = $("luoguSettingsStatus");
     save.disabled = true;
+    const origin = $("luoguAppOrigin");
+    origin.readOnly = true;
     status.hidden = true;
     void api('/admin/luogu-settings', {
       method: 'PATCH',
@@ -472,17 +635,69 @@ export function setupAdmin() {
       status.classList.remove('form-error');
       notify('洛谷插件网站来源已更新。');
     }).catch(error => {
-      status.textContent = error.message;
+      status.textContent = error.status === 422
+        ? '请输入仅包含协议、域名和端口的地址，不要填写路径或参数。正式网站须使用 HTTPS。'
+        : error.message;
       status.hidden = false;
       status.classList.add('form-error');
-    }).finally(() => { save.disabled = false; });
+    }).finally(() => { save.disabled = false; origin.readOnly = false; });
+  });
+  $('closeModelServiceDialog').addEventListener('click', () => {
+    if ($('modelSettingsForm').dataset.saving !== 'true') $('modelServiceDialog').close();
+  });
+  $('cancelModelServiceEdit').addEventListener('click', () => {
+    if ($('modelSettingsForm').dataset.saving !== 'true') $('modelServiceDialog').close();
+  });
+  $('modelServiceDialog').addEventListener('cancel', event => {
+    if ($('modelSettingsForm').dataset.saving === 'true') event.preventDefault();
+  });
+  $("modelSettingsForm").addEventListener("submit", event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const save = form.querySelector('[type="submit"]');
+    const status = $("modelSettingsStatus");
+    if (!activeModelService) return;
+    const service = {};
+    const fields = ['base_url', 'model'];
+    if (activeModelService === 'tts') fields.push('provider', 'protocol', 'voice');
+    for (const field of fields) {
+      service[field] = form.querySelector('[name="' + field + '"]').value;
+    }
+    const key = form.querySelector('[name="api_key"]').value;
+    if (key) service.api_key = key;
+    const changes = { [activeModelService]: service };
+    form.dataset.saving = 'true'; save.disabled = true; $('cancelModelServiceEdit').disabled = true;
+    $('closeModelServiceDialog').disabled = true; status.hidden = true;
+    void api('/admin/model-settings', { method: 'PATCH', body: JSON.stringify(changes) })
+      .then(settings => {
+        renderModelSettings(settings);
+        const updated = settings.services[activeModelService];
+        const keyInput = form.querySelector('[name="api_key"]');
+        keyInput.value = '';
+        keyInput.placeholder = updated.api_key_configured ? '••••••••••••••••' : '请输入 API Key';
+        $('modelServiceKeyStatus').textContent = updated.api_key_configured
+          ? '当前使用：' + updated.api_key_source + ' · 输入新密钥可替换'
+          : '尚未配置 API Key';
+        status.textContent = '设置已保存，后续请求将使用新配置。';
+        status.hidden = false; status.classList.remove('form-error');
+        notify('AI 服务设置已保存。');
+      }).catch(error => {
+        status.textContent = error.message;
+        status.hidden = false; status.classList.add('form-error');
+      }).finally(() => {
+        form.dataset.saving = 'false'; save.disabled = false;
+        $('cancelModelServiceEdit').disabled = false; $('closeModelServiceDialog').disabled = false;
+      });
   });
   $("questionBankForm").addEventListener("submit", (event) => void submitQuestion(event).catch((error) => notify(error.message, "error")));
   $("questionCategory").addEventListener("change", syncQuestionCategory);
   $("questionBankFilter").addEventListener("change", renderQuestionBank);
   $("questionBankSearch").addEventListener("input", renderQuestionBank);
   $("exportQuestionBank").addEventListener("click", () => void exportQuestionBank().catch(error => notify(error.message, "error")));
-  $("cancelQuestionEdit").addEventListener("click", resetQuestionEditor);
+  $("cancelQuestionEdit").addEventListener("click", async () => {
+    if (await discardQuestionChanges()) resetQuestionEditor();
+  });
+  questionEditorBaseline = questionEditorState();
   $("userSearch").addEventListener("input", renderUsers);
   $("userStatus").addEventListener("change", renderUsers);
   $("userForm").addEventListener("submit", submitAccount);
