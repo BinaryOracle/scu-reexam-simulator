@@ -32,7 +32,7 @@ def test_software_section_training_and_admin_editing(client):
 
 
 def test_version21_upgrade_preserves_legacy_c_records_and_no_reseed(client):
-    from app.db import SCHEMA_VERSION, connect, initialize
+    from app.db import connect, initialize
     a, manager = login(client, 'alice'), login(client, 'manager')
     old = post(client, '/training/questions', a, {'collection_id': 'c_programming', 'question': '旧C语言私人题', 'answer': '历史答案'}).json()
     official = post(client, '/admin/training/questions', manager, {'collection_id': 'c_programming', 'question': '旧公开题'}).json()
@@ -47,6 +47,7 @@ def test_version21_upgrade_preserves_legacy_c_records_and_no_reseed(client):
         db.execute('PRAGMA user_version=21')
     initialize()
     with connect() as db:
+        from app.db import SCHEMA_VERSION
         assert db.execute('PRAGMA user_version').fetchone()[0] == SCHEMA_VERSION
         assert db.execute("SELECT name FROM training_collections WHERE id='c_programming'").fetchone()[0] == '综合与历年题'
         assert db.execute('SELECT answer FROM training_questions WHERE id=?', (old['id'],)).fetchone()[0] == '历史答案'

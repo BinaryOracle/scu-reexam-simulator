@@ -35,7 +35,7 @@ def test_approved_contributions_grant_once_at_configured_threshold(client):
     assert progress['credits_earned'] == 1
     from app.db import connect
     with connect() as db:
-        assert db.execute("SELECT COUNT(*) FROM points_ledger WHERE user_id=(SELECT id FROM users WHERE username='alice') AND kind='question_contribution'").fetchone()[0] == 1
+        assert db.execute("SELECT COUNT(*) FROM credit_ledger WHERE user_id=(SELECT id FROM users WHERE username='alice') AND kind='question_contribution'").fetchone()[0] == 1
 
 
 def test_rejected_or_withdrawn_questions_do_not_earn_contribution_credit(client):

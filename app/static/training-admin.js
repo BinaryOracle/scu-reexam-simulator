@@ -1,7 +1,7 @@
 /** Training-only administration; submission review never lists private drafts. */
 import { api, state } from './api.js?v=20261114-ui-v17';
-import { $, el, button, emptyState, notify, badge, requestText } from './ui.js?v=20261114-ui-v17';
-import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
+import { $, el, button, notify, badge, requestText } from './ui.js?v=20261114-ui-v17';
+import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261114-ui-v18';
 let listRequest=0;
 let generation=0, settings=null, tab='pending', page=1, query='', collection='', section='';
 function live(key,token) { return key===generation && token===state.token && !$('trainingAdmin').hidden; }
@@ -15,8 +15,7 @@ function render() {
   listRequest++;
   const root=$('trainingAdminContent');root.replaceChildren();
   const head=el('div','','page-heading');const title=el('div');title.append(el('span','DAILY PRACTICE','eyebrow'),el('h1','训练题库'),el('p','维护参考答案，认真对待每一份分享。','muted'));
-  if(tab==='public')head.append(button('新增公开题',()=>questionEditor(settings.collections,null,async data=>{await api('/admin/training/questions',{method:'POST',body:JSON.stringify(data)});await refreshSavedQuestions('公开训练题已保存');},true,section||'interview',collection),'button primary'));
-  root.append(head);
+  head.append(title,button('新增公开题',()=>questionEditor(settings.collections,null,async data=>{await api('/admin/training/questions',{method:'POST',body:JSON.stringify(data)});notify('公开训练题已保存');await list();},true,section||'interview',collection),'button primary'));root.append(head);
   const tabs=el('div','','learning-tabs');
   for(const [value,label] of [['pending','投稿审核'],['public','公开题库'],['rewards','打卡奖励'],['contribution','投稿奖励'],['settings','训练设置']]) {
     const control=button(label,async()=>{tab=value;page=1;render();await list();},`button ${tab===value?'primary':'quiet'}`);control.setAttribute('aria-pressed',String(tab===value));tabs.append(control);
@@ -36,11 +35,6 @@ function render() {
   }
   const listNode=el('div','','learning-list');listNode.id='trainingAdminList';root.append(listNode);
 }
-async function refreshSavedQuestions(message) {
-  notify(message);
-  try { await list(); }
-  catch (error) { notify(`题目已保存，但列表刷新失败：${error.message}。请刷新列表查看。`, 'error'); }
-}
 async function list() {
   if(tab==='settings'||tab==='contribution'||$('trainingAdmin').hidden||!state.user?.is_admin)return;
   const request=++listRequest;
@@ -50,18 +44,11 @@ async function list() {
   if(!live(key,token)||current!==tab||request!==listRequest)return;
   const root=$('trainingAdminList');if(!root)return;root.replaceChildren();
   root.append(el('p',`共 ${result.total} 条`,'muted'));
-  if(!result.items.length){
-    const empty=tab==='pending'
-      ?emptyState('当前没有待审核投稿','用户提交题目后会显示在这里；审核通过的题目会进入公开题库。','◇')
-      :tab==='rewards'
-        ?emptyState('暂无打卡奖励记录','用户达到奖励条件后，发放记录会显示在这里。','◇')
-        :emptyState('没有找到匹配的题目','调整篇章、题目集合或搜索词，也可以新增公开题目。','◇');
-    root.append(empty);
-  }
+  if(!result.items.length)root.append(el('div',tab==='pending'?'目前没有待审核投稿。':tab==='rewards'?'还没有打卡奖励发放记录。':'没有匹配的题目。','empty-state'));
   for(const item of result.items){
     const row=el('article','','learning-list-item');const info=el('div'),actions=el('div','','learning-list-actions');
     if(tab==='rewards'){
-      info.append(el('h3',item.username),el('p',`${item.date} · 连续打卡 ${item.streak} 天`,'muted'));actions.append(badge(`+${item.credits} 积分`,'green'));
+      info.append(el('h3',item.username),el('p',`${item.date} · 连续打卡 ${item.streak} 天`,'muted'));actions.append(badge(`+${item.credits} 次`,'green'));
     }else{
       info.append(badge(item.collection_name),button(item.question,()=>questionPreview(item),`learning-question-link ${item.category === 'translation' ? 'learning-passage-link' : ''}`),el('p',`贡献者：${item.owner_name} · ${item.active?'启用':'已停用'}`,'muted'));
       if(item.category==='translation')info.append(el('p','点击原文查看完整内容与参考译文','muted'));
@@ -72,7 +59,7 @@ async function list() {
           await api(`/admin/training/questions/${item.id}/review`,{method:'POST',body:JSON.stringify({version:item.version,approve:false,reason})});notify('已反馈审核意见');await list();
         },'button quiet'));
       }else{
-        if(item.official)actions.append(button(item.category==='translation'?'编辑译文':'编辑答案',()=>questionEditor(settings.collections,item,async data=>{await api(`/admin/training/questions/${item.id}`,{method:'PATCH',body:JSON.stringify({...data,version:item.version,active:item.active})});await refreshSavedQuestions('题目与答案已更新');},true,section||'interview')));
+        if(item.official)actions.append(button(item.category==='translation'?'编辑译文':'编辑答案',()=>questionEditor(settings.collections,item,async data=>{await api(`/admin/training/questions/${item.id}`,{method:'PATCH',body:JSON.stringify({...data,version:item.version,active:item.active})});notify('题目与答案已更新');await list();},true,section||'interview')));
         actions.append(button(item.active?'停用题目':'启用题目',async()=>{await api(`/admin/training/questions/${item.id}/active`,{method:'POST',body:JSON.stringify({version:item.version,active:!item.active})});await list();},'button secondary'));
       }
     }row.append(info,actions);root.append(row);
@@ -86,14 +73,14 @@ async function renderContribution(root) {
   const form=el('form','','contribution-policy-form');
   const questions=el('input');questions.type='number';questions.min='1';questions.max='10000';questions.required=true;questions.value=String(value.policy.questions_per_reward);
   const credits=el('input');credits.type='number';credits.min='1';credits.max='1000000';credits.required=true;credits.value=String(value.policy.credits_per_reward);
-  for(const [text,input] of [['审核通过题数',questions],['奖励积分',credits]]){const label=el('label',text);label.append(input);form.append(label);}
+  for(const [text,input] of [['审核通过题数',questions],['奖励面试次数',credits]]){const label=el('label',text);label.append(input);form.append(label);}
   form.append(button('保存新规则',async()=>{
     await api('/admin/training/contribution-rewards',{method:'PUT',body:JSON.stringify({questions_per_reward:Number(questions.value),credits_per_reward:Number(credits.value)})});
     notify('投稿奖励新规则已生效');await refreshTrainingAdmin();
   },'button primary'));
   panel.append(heading,form,el('p','当前统计 ' + value.total + ' 个普通用户 · 规则版本 ' + value.policy.id,'muted'));
   const table=el('div','','contribution-admin-list');
-  for(const item of value.items){const row=el('div','','contribution-admin-row');row.append(el('strong',item.username),el('span',item.approved_count+' 道通过'),el('span','累计 +'+item.credits_earned+' 积分'));table.append(row);}
+  for(const item of value.items){const row=el('div','','contribution-admin-row');row.append(el('strong',item.username),el('span',item.approved_count+' 道通过'),el('span','累计 +'+item.credits_earned+' 次'));table.append(row);}
   panel.append(table);root.append(panel);
 }
 function renderSettings(root){

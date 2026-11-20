@@ -15,24 +15,16 @@ test("explains how to recover from a raw Luogu captcha error", () => {
   );
 });
 
-test("shows safe captcha guidance without implying that a problem page opened", () => {
+test("hides bridge internals when the current extension opened the problem page", () => {
   const message = "洛谷返回验证码错误，自动提交未成功。已为你打开洛谷题目页（P1000）。请按页面提示手动完成验证，回到知序重新提交。";
   assert.equal(
     formatLuoguSubmitError(new Error(message)),
-    "洛谷暂时未接受这次提交，需要完成安全验证。请切换到洛谷页面，按页面提示处理后回到知序重试。",
+    "洛谷暂时未接受这次提交，需要完成安全验证。已打开本题的洛谷页面，请按页面提示处理后回到知序重试。",
   );
 });
 
 test("leaves non-captcha failures unchanged", () => {
   assert.equal(formatLuoguSubmitError(new Error("洛谷未返回提交编号。")), "洛谷未返回提交编号。");
-});
-
-test("turns a silent extension timeout into clear recovery steps", () => {
-  assert.equal(
-    formatLuoguSubmitError(new Error("浏览器插件未响应，请检查插件安装和本站地址配置。")),
-    "没有收到洛谷插件响应。请确认扩展已启用且本站来源已配置，再检测洛谷登录状态；仍无法连接时请打开插件配置教程。",
-  );
-  assert.match(contestSource, /showLuoguBridgeHelp\(message\)/);
 });
 
 test("keeps captcha cancellation and retry guidance actionable", () => {
@@ -48,9 +40,7 @@ test("requires an extension version that can guide captcha recovery", () => {
   assert.equal(isLuoguExtensionOutdated("1.1.0"), true);
   assert.equal(isLuoguExtensionOutdated("1.1.1"), true);
   assert.equal(isLuoguExtensionOutdated("1.1.2"), true);
-  assert.equal(isLuoguExtensionOutdated("1.1.3"), true);
-  assert.equal(isLuoguExtensionOutdated("1.1.4"), true);
-  assert.equal(isLuoguExtensionOutdated("1.1.5"), false);
+  assert.equal(isLuoguExtensionOutdated("1.1.3"), false);
   assert.equal(isLuoguExtensionOutdated("unknown"), true);
   assert.match(contestSource, /isLuoguExtensionOutdated\(.*extension_version/);
 });

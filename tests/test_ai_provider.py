@@ -49,36 +49,6 @@ def test_chat_preserves_plain_text_api_and_uses_configured_secret(monkeypatch):
     assert ai.chat('问题') == '回答'
 
 
-def test_chat_can_select_a_separate_configured_feature_model(monkeypatch):
-    config(monkeypatch, ai={'api_key': 'secret', 'api_key_env': 'UNUSED',
-        'base_url': 'https://provider.test/v1', 'model': 'qwen3.8-omni-flash', 'request_timeout_seconds': 90})
-    captured = {}
-    def post(url, **kwargs):
-        captured.update(kwargs)
-        assert kwargs['json']['model'] == 'qwen3.8-flash'
-        assert 'modalities' not in kwargs['json']
-        return httpx.Response(200, request=httpx.Request('POST', url),
-            json={'choices': [{'message': {'content': '趋势'}}]})
-    monkeypatch.setattr(ai.httpx, 'post', post)
-    assert ai.chat('汇总来源', model='qwen3.8-flash', request_timeout_seconds=45) == '趋势'
-    assert captured['timeout'] == 45
-
-
-def test_chat_reports_provider_read_timeouts_as_gateway_timeout(monkeypatch):
-    config(monkeypatch, ai={'api_key': 'secret', 'api_key_env': 'UNUSED',
-        'base_url': 'https://provider.test/v1', 'model': 'plain-model', 'request_timeout_seconds': 90})
-
-    def post(url, **kwargs):
-        raise httpx.ReadTimeout('provider response timed out', request=httpx.Request('POST', url))
-
-    monkeypatch.setattr(ai.httpx, 'post', post)
-    with pytest.raises(HTTPException) as error:
-        ai.chat('汇总趋势')
-
-    assert error.value.status_code == 504
-    assert '费用以阿里云用量记录为准' in error.value.detail
-
-
 def tts_config(monkeypatch, **overrides):
     cfg = {'enabled': True, 'provider': 'dashscope', 'api_key': 'secret', 'api_key_env': 'UNUSED',
         'base_url': 'https://provider.test/api/v1', 'model': 'qwen-audio-3.1-tts-plus',

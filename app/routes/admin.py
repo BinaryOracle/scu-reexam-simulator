@@ -2,21 +2,18 @@
 import sqlite3
 import time
 import re
-from typing import Annotated, Literal
+from typing import Annotated
 from pathlib import Path
 from urllib.parse import urlsplit
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
-from app.config import load_config
 from app.db import allocate_user_id, connect
 from app.services.auth import PUBLIC_USER_FIELDS, administrator, public_user, managed_user, reviewable_interview
 from app.services.interviews import details, summary
 from app.services.security import hash_password
 from app.services.password_vault import decrypt_password, encrypt_password
-from app.services.password_vault import PasswordVaultError
-from app.services import model_settings
-from app.services import credits, points
+from app.services import credits
 from app.services.account_deletion import delete_account, remove_account_files
 from app.services.problem_content import public_problem
 
@@ -31,13 +28,7 @@ class AccountCreate(BaseModel):
     is_admin: StrictBool = False
     email: str | None = None
     is_active: StrictBool = True
-    can_training: StrictBool = False
-    can_coding: StrictBool = False
-    can_interview: StrictBool = True
-    can_exam: StrictBool = True
-    can_practice: StrictBool | None = None
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
-    points: Annotated[StrictInt, Field(ge=0, le=1000000000)] | None = None
 
     @field_validator('email')
     @classmethod
@@ -53,14 +44,7 @@ class AccountUpdate(BaseModel):
     model_config = ConfigDict(extra='forbid')
     is_admin: StrictBool | None = None
     is_active: StrictBool | None = None
-    can_training: StrictBool | None = None
-    can_coding: StrictBool | None = None
-    can_interview: StrictBool | None = None
-    can_exam: StrictBool | None = None
-    # Kept for one release so older clients can update the former combined grant.
-    can_practice: StrictBool | None = None
     interview_credits: Annotated[StrictInt, Field(ge=0, le=1000000)] | None = None
-    points: Annotated[StrictInt, Field(ge=0, le=1000000000)] | None = None
 
 
 class PasswordReset(BaseModel):
@@ -132,49 +116,6 @@ class LuoguSettings(BaseModel):
         return f'{parsed.scheme}://{netloc}'
 
 
-class ModelServiceUpdate(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    base_url: str | None = Field(default=None, max_length=500)
-    model: str | None = Field(default=None, max_length=200)
-    api_key: str | None = None
-    clear_api_key: StrictBool = False
-    provider: Literal['dashscope', 'openai'] | None = None
-    protocol: Literal['dashscope_audio', 'dashscope_native'] | None = None
-    voice: str | None = Field(default=None, max_length=120)
-
-    @field_validator('base_url')
-    @classmethod
-    def validate_base_url(cls, value):
-        if value is None:
-            return value
-        parsed = urlsplit(value.strip())
-        try:
-            parsed.port
-        except ValueError as error:
-            raise ValueError('请输入有效的模型服务地址') from error
-        if (parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username or parsed.password
-                or parsed.query or parsed.fragment or any(ord(char) < 32 for char in value)):
-            raise ValueError('模型服务地址必须是有效的 HTTP/HTTPS 地址，不含账号、参数或片段')
-        return value.strip().rstrip('/')
-
-    @field_validator('model', 'voice')
-    @classmethod
-    def validate_name(cls, value):
-        if value is None:
-            return value
-        value = value.strip()
-        if not value or any(ord(char) < 32 for char in value):
-            raise ValueError('模型名称和音色不能为空，且不能包含控制字符')
-        return value
-
-class ModelSettingsUpdate(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    interview: ModelServiceUpdate | None = None
-    asr: ModelServiceUpdate | None = None
-    tts: ModelServiceUpdate | None = None
-    trends: ModelServiceUpdate | None = None
-
-
 def find_user(db, uid):
     row = db.execute(f'SELECT {PUBLIC_USER_FIELDS} FROM users WHERE id=?', (uid,)).fetchone()
     if row is None:
@@ -196,68 +137,12 @@ def update_luogu_settings(payload: LuoguSettings):
     return {'app_origin': payload.app_origin}
 
 
-@router.get('/model-settings')
-def get_model_settings():
-    config = load_config()
-    with connect() as db:
-        overrides = model_settings.read(db)
-    try:
-        return model_settings.public_settings(config, overrides)
-    except PasswordVaultError as error:
-        raise HTTPException(503, '密钥加密服务不可用，请管理员检查密钥文件') from error
-
-
-@router.patch('/model-settings')
-def update_model_settings(payload: ModelSettingsUpdate):
-    changes = payload.model_dump(exclude_unset=True)
-    allowed = {
-        'interview': {'base_url', 'model', 'api_key', 'clear_api_key'},
-        'asr': {'base_url', 'model', 'api_key', 'clear_api_key'},
-        'tts': {'base_url', 'model', 'api_key', 'clear_api_key', 'provider', 'protocol', 'voice'},
-        'trends': {'base_url', 'model', 'api_key', 'clear_api_key'},
-    }
-    for service, fields in changes.items():
-        unsupported = set(fields) - allowed[service]
-        if unsupported:
-            raise HTTPException(422, f'{service} 不支持配置字段：{", ".join(sorted(unsupported))}')
-        api_key = fields.get('api_key')
-        if api_key is not None and (len(api_key) > 4096 or any(char in api_key for char in ('\r', '\n', '\x00'))):
-            raise HTTPException(422, f'{service} API Key 格式无效')
-        if fields.get('clear_api_key') and api_key:
-            raise HTTPException(422, f'{service} 不能同时设置和清除 API Key')
-    config = load_config()
-    try:
-        with connect() as db:
-            overrides = model_settings.apply_update(db, model_settings.read(db), changes)
-    except PasswordVaultError as error:
-        raise HTTPException(503, '密钥加密服务不可用，请管理员检查密钥文件') from error
-    return model_settings.public_settings(config, overrides)
-
-
 @router.get('/users')
 def users(actor=Depends(administrator)):
     with connect() as db:
         return [{**public_user(row, admin_view=True), 'password_available': bool(row['password_ciphertext'])}
                 for row in db.execute(f'SELECT {PUBLIC_USER_FIELDS},password_ciphertext FROM users WHERE (? OR is_admin=0) ORDER BY id DESC',
                                       (actor['is_superadmin'],))]
-
-
-@router.get('/contest-participants')
-def eligible_contest_users():
-    with connect() as db:
-        return [dict(row) for row in db.execute('SELECT id,username,email,is_active FROM users WHERE is_admin=0 ORDER BY username COLLATE NOCASE,id')]
-
-
-@router.get('/contests/{cid}/participants')
-def contest_roster(cid: int):
-    with connect() as db:
-        contest = db.execute('SELECT access_mode FROM contests WHERE id=?', (cid,)).fetchone()
-        if not contest:
-            raise HTTPException(404, '比赛不存在')
-        ids = [row[0] for row in db.execute('SELECT user_id FROM contest_participants WHERE contest_id=? ORDER BY user_id', (cid,))]
-        if contest['access_mode'] == 'all':
-            ids = [row[0] for row in db.execute('SELECT id FROM users WHERE is_admin=0')]
-        return {'participant_ids': ids, 'legacy_open': contest['access_mode'] == 'all'}
 
 
 @router.post('/users/{uid}/reveal-password')
@@ -323,17 +208,12 @@ def create_user(payload: AccountCreate, actor=Depends(administrator)):
         db.execute('BEGIN IMMEDIATE')
         initial = credits.ADMIN_CREDITS if payload.is_admin else payload.interview_credits if payload.interview_credits is not None else credits.default_credits(db)
         try:
-            legacy_grant = payload.can_practice
-            training = payload.can_training if legacy_grant is None else legacy_grant
-            coding = payload.can_coding if legacy_grant is None else legacy_grant
-            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits,can_interview,can_exam,can_practice,can_training,can_coding)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
-                payload.email, payload.is_active, 0, payload.can_interview, payload.can_exam, int(training and coding), training, coding)).lastrowid
+            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits)
+                VALUES (?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
+                payload.email, payload.is_active, 0)).lastrowid
         except sqlite3.IntegrityError as error:
             raise HTTPException(409, '用户名或邮箱已存在，请使用其他用户名或邮箱') from error
         credits.adjust(db, uid, initial, kind='initial')
-        if payload.points:
-            points.adjust(db, uid, payload.points, kind='admin_adjust')
         return public_user(find_user(db, uid), admin_view=True)
 
 
@@ -353,22 +233,10 @@ def update_user(uid: int, payload: AccountUpdate, actor=Depends(administrator)):
             count = db.execute('SELECT COUNT(*) FROM users WHERE is_admin=1 AND is_active=1').fetchone()[0]
             if count <= 1:
                 raise HTTPException(409, '至少保留一个启用的管理员账号')
-        legacy_grant = bool(old['can_practice'] and not old['can_training'] and not old['can_coding'])
-        current_training = bool(old['can_training'] or legacy_grant)
-        current_coding = bool(old['can_coding'] or legacy_grant)
-        if 'can_practice' in changes:
-            current_training = current_coding = changes.pop('can_practice')
-        current_training = changes.get('can_training', current_training)
-        current_coding = changes.get('can_coding', current_coding)
-        if 'can_training' in changes or 'can_coding' in changes or 'can_practice' in payload.model_fields_set:
-            changes['can_practice'] = int(current_training and current_coding)
         if changes.get('is_admin', old['is_admin']):
             changes['interview_credits'] = credits.ADMIN_CREDITS
-            changes['can_interview'] = changes['can_exam'] = 1
         if 'interview_credits' in changes:
             credits.adjust(db, uid, changes.pop('interview_credits'))
-        if 'points' in changes:
-            points.adjust(db, uid, changes.pop('points') - old['points'], kind='admin_adjust')
         # Field names are drawn only from the closed AccountUpdate model.
         assignments = ','.join(f'{key}=?' for key in changes)
         if changes:
@@ -475,62 +343,16 @@ def problems(cid: int):
             for row in db.execute('SELECT * FROM problems WHERE contest_id=? ORDER BY id', (cid,))]
 
 
-@router.get('/submissions/users')
-def submission_users(page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
-                    actor=Depends(administrator)):
-    with connect() as db:
-        visibility = '' if actor['is_superadmin'] else ' AND users.is_admin=0'
-        total = db.execute(f'''SELECT COUNT(*) FROM (
-            SELECT submissions.user_id FROM submissions JOIN users ON users.id=submissions.user_id
-            WHERE 1=1{visibility} GROUP BY submissions.user_id
-        )''').fetchone()[0]
-        users = [dict(row) for row in db.execute(f'''SELECT users.id AS user_id,users.username,COUNT(submissions.id) AS submission_count
-            FROM users JOIN submissions ON submissions.user_id=users.id
-            WHERE 1=1{visibility} GROUP BY users.id,users.username
-            ORDER BY users.username COLLATE NOCASE LIMIT ? OFFSET ?''', (page_size,(page-1)*page_size))]
-        stats = db.execute(f'''SELECT COUNT(*) AS total,
-            SUM(CASE WHEN status='Accepted' THEN 1 ELSE 0 END) AS accepted,
-            SUM(CASE WHEN status IN ('Waiting for browser extension','Submitted','Judging') THEN 1 ELSE 0 END) AS judging
-            FROM submissions JOIN users ON users.id=submissions.user_id WHERE 1=1{visibility}''').fetchone()
-        return {'items':users,'total':total,'page':page,'page_size':page_size,
-            'pages':(total+page_size-1)//page_size,
-            'stats':{'total':stats['total'] or 0,'accepted':stats['accepted'] or 0,'judging':stats['judging'] or 0}}
-
-
-@router.get('/submissions/users/{user_id}')
-def user_submissions(user_id: int, page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
-                     actor=Depends(administrator)):
-    with connect() as db:
-        user = db.execute('SELECT id,username FROM users WHERE id=? AND (? OR is_admin=0)',
-                          (user_id,actor['is_superadmin'])).fetchone()
-        if not user: raise HTTPException(404, '用户不存在')
-        total = db.execute('SELECT COUNT(*) FROM submissions WHERE user_id=?', (user_id,)).fetchone()[0]
-        rows = [dict(row) for row in db.execute('''SELECT submissions.id,users.username,problem_id,problems.title AS problem_title,
-            language,status,created,remote_submission_id,detail FROM submissions
-            JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
-            WHERE submissions.user_id=? ORDER BY submissions.id DESC LIMIT ? OFFSET ?''',
-            (user_id,page_size,(page-1)*page_size))]
-        return {'items':rows,'total':total,'page':page,'page_size':page_size,
-            'pages':(total+page_size-1)//page_size}
-
-
 @router.get('/submissions')
 def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
-                contest_id: int | None = Query(default=None, ge=1),
-                user_id: int | None = Query(default=None, ge=1),
-                problem_id: int | None = Query(default=None, ge=1),
-                status: Literal['Accepted'] | None = None,
-                participants_only: bool = False, actor=Depends(administrator)):
-    """Filter records within an administrator's visibility, including participant-only contest metrics."""
+                contest_id: int | None = Query(default=None, ge=1), actor=Depends(administrator)):
     with connect() as db:
         clauses = []
         params: list[object] = []
-        if not actor['is_superadmin'] or participants_only: clauses.append('users.is_admin=0')
-        for column, value in [('problems.contest_id', contest_id), ('submissions.user_id', user_id),
-                              ('submissions.problem_id', problem_id), ('submissions.status', status)]:
-            if value is not None:
-                clauses.append(f'{column}=?')
-                params.append(value)
+        if not actor['is_superadmin']: clauses.append('users.is_admin=0')
+        if contest_id is not None:
+            clauses.append('problems.contest_id=?')
+            params.append(contest_id)
         where = 'WHERE ' + ' AND '.join(clauses) if clauses else ''
         total = db.execute(f'''SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
             JOIN problems ON problems.id=submissions.problem_id {where}''', params).fetchone()[0]

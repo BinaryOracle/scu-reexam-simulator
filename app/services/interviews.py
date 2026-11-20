@@ -6,7 +6,6 @@ from app.config import load_config
 from app.services.presentation_template import metadata as template_metadata
 from app.services.interview_clock import timing, require_running
 from app.services.feedback import render_feedback
-from app.services import model_settings
 
 
 def seed_answers(db, iid):
@@ -31,7 +30,7 @@ def details(db, iid):
     result['presentation'] = dict(presentation) if presentation else None
     result['intro_completed'] = bool(result['intro_completed'])
     result['recording_options'] = load_config()['recording']
-    asr = model_settings.resolve('asr', load_config())
+    asr = load_config()['asr']
     result['server_asr_available'] = bool(asr['base_url'] and (asr.get('api_key') or os.getenv(asr['api_key_env'])))
     result['recordings'] = [dict(x) for x in db.execute('''SELECT id,created,
         audio_path IS NOT NULL AS has_audio,finalized,transcript FROM interview_recordings

@@ -7,13 +7,12 @@ from fastapi import HTTPException
 from app.config import load_config
 from app.db import connect
 from app.services import ai
-from app.services import model_settings
 
 
 def cached(text, *, interview_id=None):
     """Reuse audio across restarts; serialize concurrent misses without holding a database transaction."""
     config = load_config()
-    tts = model_settings.resolve('tts', config)
+    tts = config['tts']
     if not tts['enabled']:
         raise HTTPException(503, '语音播报暂未启用，可直接阅读题目')
     settings = {key: tts[key] for key in

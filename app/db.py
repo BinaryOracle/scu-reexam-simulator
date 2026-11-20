@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 36
+SCHEMA_VERSION = 27
 
 
 @contextmanager
@@ -83,34 +83,6 @@ def initialize():
             if field not in fields:
                 db.execute(f'ALTER TABLE {table} ADD COLUMN {field} {declaration}')
         columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
-        if 'can_practice' not in columns:
-            db.execute('ALTER TABLE users ADD COLUMN can_practice INTEGER NOT NULL DEFAULT 0 CHECK(can_practice IN (0,1))')
-            db.execute('UPDATE users SET can_practice=1')
-        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
-        for field in ('can_training', 'can_coding'):
-            if field not in columns:
-                db.execute(f'ALTER TABLE users ADD COLUMN {field} INTEGER NOT NULL DEFAULT 0 CHECK({field} IN (0,1))')
-                db.execute(f'UPDATE users SET {field}=can_practice')
-        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
-        if 'is_active' not in columns:
-            db.execute('ALTER TABLE users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1 CHECK(is_active IN (0,1))')
-        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
-        for field in ('can_interview', 'can_exam'):
-            if field not in columns:
-                db.execute(f'ALTER TABLE users ADD COLUMN {field} INTEGER NOT NULL DEFAULT 0 CHECK({field} IN (0,1))')
-        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
-        if version < 31:
-            # Prior releases allowed every active account into both main modules.
-            db.execute('UPDATE users SET can_interview=1,can_exam=1 WHERE is_active=1')
-        contest_columns = {row['name'] for row in db.execute('PRAGMA table_info(contests)')}
-        if 'access_mode' not in contest_columns:
-            db.execute("ALTER TABLE contests ADD COLUMN access_mode TEXT NOT NULL DEFAULT 'selected' CHECK(access_mode IN ('all','selected'))")
-            db.execute("UPDATE contests SET access_mode='all'")
-        db.execute('''CREATE TABLE IF NOT EXISTS contest_participants(
-            contest_id INTEGER NOT NULL REFERENCES contests(id) ON DELETE CASCADE,
-            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            PRIMARY KEY(contest_id,user_id))''')
-        db.execute('CREATE INDEX IF NOT EXISTS participants_by_user ON contest_participants(user_id,contest_id)')
         if 'email' not in columns:
             db.execute('ALTER TABLE users ADD COLUMN email TEXT')
         db.execute('CREATE UNIQUE INDEX IF NOT EXISTS users_email ON users(email COLLATE NOCASE)')
@@ -138,17 +110,10 @@ def initialize():
         if 'interview_credits' not in columns:
             db.execute('ALTER TABLE users ADD COLUMN interview_credits INTEGER NOT NULL DEFAULT 1 CHECK(interview_credits>=0)')
             db.execute('UPDATE users SET interview_credits=?', (initial_credits,))
-        columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
-        if 'points' not in columns:
-            # Existing interview allowances remain usable and are never duplicated
-            # into the new wallet.
-            db.execute('ALTER TABLE users ADD COLUMN points INTEGER NOT NULL DEFAULT 0 CHECK(points>=0)')
         db.execute('CREATE TABLE IF NOT EXISTS app_settings(key TEXT PRIMARY KEY,value TEXT NOT NULL)')
         db.execute("""INSERT INTO app_settings(key,value) VALUES ('user_id_highwater',?)
             ON CONFLICT(key) DO UPDATE SET value=excluded.value""", (str(_user_id_highwater(db)),))
         db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('default_interview_credits',?)", (str(initial_credits),))
-        db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('default_points','0')")
-        db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('interview_points_cost','1')")
         db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('luogu_app_origin',?)", ('http://127.0.0.1:8000',))
         db.execute('''CREATE TABLE IF NOT EXISTS vouchers(
             id INTEGER PRIMARY KEY,code TEXT NOT NULL UNIQUE,package TEXT NOT NULL CHECK(package IN ('three','ten')),
@@ -162,16 +127,9 @@ def initialize():
             balance_after INTEGER NOT NULL CHECK(balance_after>=0),kind TEXT NOT NULL,
             amount_fen INTEGER NOT NULL DEFAULT 0,reference TEXT NOT NULL DEFAULT '',created REAL NOT NULL)''')
         db.execute('CREATE INDEX IF NOT EXISTS ledger_by_user ON credit_ledger(user_id,created)')
-        db.execute('''CREATE TABLE IF NOT EXISTS points_ledger(
-            id INTEGER PRIMARY KEY,user_id INTEGER NOT NULL REFERENCES users(id),delta INTEGER NOT NULL,
-            balance_after INTEGER NOT NULL CHECK(balance_after>=0),kind TEXT NOT NULL,
-            reference TEXT NOT NULL DEFAULT '',created REAL NOT NULL)''')
-        db.execute('CREATE INDEX IF NOT EXISTS points_ledger_by_user ON points_ledger(user_id,created)')
         if 'role' in columns:
             # The old teacher account managed exams; it becomes the administrator.
-            for field, default in [('is_admin', 0), ('is_active', 1)]:
-                if field in columns:
-                    continue
+            for field, default in [('is_admin', 0), ('can_interview', 0), ('can_exam', 0), ('is_active', 1)]:
                 db.execute(f'ALTER TABLE users ADD COLUMN {field} INTEGER NOT NULL DEFAULT {default} CHECK({field} IN (0,1))')
             db.execute("UPDATE users SET is_admin=(role='teacher'),can_interview=(role='student'),can_exam=(role='student')")
             db.execute('ALTER TABLE users DROP COLUMN role')
@@ -202,11 +160,6 @@ def initialize():
         db.execute('''CREATE TABLE IF NOT EXISTS presentations(
             interview_id INTEGER PRIMARY KEY REFERENCES interviews(id),
             directory TEXT NOT NULL, name TEXT NOT NULL, pages INTEGER NOT NULL)''')
-        db.execute('''CREATE TABLE IF NOT EXISTS interview_start_requests(
-            user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-            request_key TEXT NOT NULL, digest TEXT NOT NULL,
-            interview_id INTEGER NOT NULL UNIQUE REFERENCES interviews(id) ON DELETE CASCADE,
-            PRIMARY KEY(user_id,request_key))''')
         db.execute("""CREATE TABLE IF NOT EXISTS interview_recordings(
             id TEXT PRIMARY KEY, interview_id INTEGER NOT NULL REFERENCES interviews(id),
             created REAL NOT NULL, audio_path TEXT, mime_type TEXT NOT NULL DEFAULT 'audio/webm',
@@ -275,16 +228,6 @@ def initialize():
         initialize_contribution_rewards(db)
         from .services.announcements import initialize as initialize_announcements
         initialize_announcements(db)
-        from .services.coding_schema import initialize_coding
-        initialize_coding(db)
-        from .services.home_layout import initialize as initialize_home_layout
-        initialize_home_layout(db)
-        from .services.live_schema import initialize_live
-        initialize_live(db)
-        from .services.course_schema import initialize_course_learning
-        initialize_course_learning(db)
-        from .services.trends import initialize as initialize_trends
-        initialize_trends(db)
-        from .services.points import initialize as initialize_points
-        initialize_points(db)
+        from .services.courses import initialize as initialize_courses
+        initialize_courses(db)
         db.execute(f'PRAGMA user_version={SCHEMA_VERSION}')

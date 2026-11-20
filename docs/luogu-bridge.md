@@ -22,8 +22,8 @@
 
 ## 升级和复测
 
-扩展最低版本为 1.1.5。更新已解压目录后，在扩展管理页点击重新加载，再刷新知序页面，清除旧内容脚本的失效上下文。下载接口 `/api/luogu-extension` 会按当前文件实时生成 ZIP，不需要手动重新打包。新版本复用已登录洛谷标签页，不会为提交自动打开或激活原题页。
+扩展最低版本为 1.1.3。更新已解压目录后，在扩展管理页点击重新加载，再刷新知序页面，清除旧内容脚本的失效上下文。下载接口 `/api/luogu-extension` 会按当前文件实时生成 ZIP，不需要手动重新打包。
 
-本地回归：`node --test tests/luogu_extension_bridge.test.mjs tests/luogu_submit_error.test.mjs tests/luogu_submit_flow.test.mjs`；服务端桥接与压缩包：`.venv/bin/python -m pytest -q tests/test_system.py -k 'luogu or remote_result'`。这些测试覆盖请求、语言、验证码分流、取消、重试、编号解析、逐测试点结果回传和不自动导航，不替代真实平台评测。
+本地回归：`node --test tests/luogu_extension_bridge.test.mjs tests/luogu_submit_error.test.mjs tests/luogu_submit_flow.test.mjs`；服务端桥接与压缩包：`.venv/bin/python -m pytest -q tests/test_system.py -k 'luogu or remote_result'`。这些测试覆盖请求、语言、验证码分流、取消、重试、编号解析和结果回传，不替代真实平台评测。
 
 2026-11-14 通过实际安装的 1.1.3 扩展提交 P1001，洛谷记录 `309950285` 显示 C++11、Accepted、100 分。该次未要求验证码，不能据此保证之后每次都免验证，也不能据此声称人工验证码重试已在真实平台通过。

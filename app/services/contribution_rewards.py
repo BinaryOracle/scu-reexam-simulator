@@ -1,7 +1,7 @@
 """Versioned, approval-based rewards for user-contributed training questions."""
 import time
 from fastapi import HTTPException
-from app.services import points
+from app.services import credits
 
 
 DEFAULT_QUESTIONS = 5
@@ -74,9 +74,10 @@ def approve_question(db, question, now=None):
         if db.execute('SELECT 1 FROM contribution_reward_grants WHERE user_id=? AND policy_id=? AND milestone=?',
                       (question['owner_user_id'], policy['id'], milestone)).fetchone():
             return {'approved_count': approved, 'credits_granted': 0}
-        points.adjust(db, question['owner_user_id'], policy['credits_per_reward'],
+        balance = db.execute('SELECT interview_credits FROM users WHERE id=?', (question['owner_user_id'],)).fetchone()[0]
+        credits.adjust(db, question['owner_user_id'], balance + policy['credits_per_reward'],
                        kind='question_contribution', reference=f"{policy['id']}:{milestone}")
-        ledger_id = None
+        ledger_id = db.execute('SELECT last_insert_rowid()').fetchone()[0]
         db.execute('''INSERT INTO contribution_reward_grants(user_id,policy_id,milestone,credits,ledger_id,created)
             VALUES (?,?,?,?,?,?)''', (question['owner_user_id'], policy['id'], milestone,
                                       policy['credits_per_reward'], ledger_id, now))

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from fastapi import HTTPException
 from app.config import load_config
-from app.services import points
+from app.services import credits
 from app.services.training_schema import SECTIONS
 from app.services import training_catalog as catalog
 from app.services import training_mastery as mastery
@@ -44,7 +44,7 @@ def home(db, user, section_id='interview'):
     checked = bool(last and last['date'] == date)
     streak = last['streak'] if last and last['date'] in (date, (today() - timedelta(days=1)).isoformat()) else 0
     milestone = (streak // 7 + 1) * 7
-    account = db.execute('SELECT is_admin,interview_credits,points FROM users WHERE id=?', (uid,)).fetchone()
+    account = db.execute('SELECT is_admin,interview_credits FROM users WHERE id=?', (uid,)).fetchone()
     collections = []
     for item in db.execute('SELECT * FROM training_collections WHERE active=1 ORDER BY position'):
         count = db.execute("""SELECT COUNT(*) FROM training_questions WHERE collection_id=? AND deleted=0 AND active=1
@@ -62,8 +62,6 @@ def home(db, user, section_id='interview'):
     recent = [(today() - timedelta(days=n)).isoformat() for n in reversed(range(7))]
     rewards = [dict(row) for row in db.execute('SELECT date,streak,credits FROM training_reward_grants WHERE user_id=? ORDER BY date DESC LIMIT 12', (uid,))]
     return dict(date=date, goal=goal, completed=completed, checked_in=checked, streak=streak,
-                can_training=user.get('can_training', user.get('can_practice', user['is_admin'])),
-                can_practice=user.get('can_practice', user['is_admin']),
                 default_round_size=settings(db)['round_size'], max_round_questions=load_config()['training']['max_round_questions'],
                 mastery={status: db.execute('''SELECT COUNT(*) FROM training_mastery m
                     JOIN training_questions q ON q.id=m.question_id JOIN training_collections c ON c.id=q.collection_id
@@ -71,7 +69,7 @@ def home(db, user, section_id='interview'):
                     AND (q.visibility='public' OR q.owner_user_id=?)''', (uid,status,section_id,uid)).fetchone()[0]
                     for status in ('again','known')},
                 next_milestone=milestone, next_reward=milestone // 7,
-                remaining=None if account['is_admin'] else account['interview_credits'], points=account['points'], is_admin=bool(account['is_admin']),
+                remaining=None if account['is_admin'] else account['interview_credits'], is_admin=bool(account['is_admin']),
                 recent_days=[dict(date=d, checked_in=d in dates) for d in recent],
                 sections=[{'id': sid, 'name': name, 'count': sum(c['count'] for c in collections if c['section_id'] == sid)} for sid, name in SECTIONS],
                 section_id=section_id, collections=collections, active_session=active_info, rewards=rewards)
@@ -84,7 +82,7 @@ def checkin(db, user):
     previous = db.execute('SELECT * FROM training_checkins WHERE user_id=? AND date=?', (uid, date)).fetchone()
     if previous:
         reward = db.execute('SELECT credits FROM training_reward_grants WHERE checkin_id=?', (previous['id'],)).fetchone()
-        return dict(already_checked=True, credits=reward[0] if reward else 0, points=reward[0] if reward else 0, home=home(db, user))
+        return dict(already_checked=True, credits=reward[0] if reward else 0, home=home(db, user))
     if count < goal:
         raise HTTPException(409, f'今天已完成 {count}/{goal} 道不同题，完成每日目标后即可签到')
     yesterday = (today() - timedelta(days=1)).isoformat()
@@ -95,11 +93,11 @@ def checkin(db, user):
     account = db.execute('SELECT * FROM users WHERE id=?', (uid,)).fetchone()
     amount = streak // 7 if streak % 7 == 0 and not account['is_admin'] else 0
     if amount:
-        points.adjust(db, uid, amount, kind='checkin_reward', reference=str(cid))
-        ledger_id = None
+        credits.adjust(db, uid, account['interview_credits'] + amount, kind='checkin_reward', reference=str(cid))
+        ledger_id = db.execute('SELECT last_insert_rowid()').fetchone()[0]
         db.execute('INSERT INTO training_reward_grants(checkin_id,user_id,date,streak,credits,ledger_id) VALUES (?,?,?,?,?,?)',
                    (cid, uid, date, streak, amount, ledger_id))
-    return dict(already_checked=False, credits=amount, points=amount, home=home(db, user))
+    return dict(already_checked=False, credits=amount, home=home(db, user))
 
 
 def sort_key(row):

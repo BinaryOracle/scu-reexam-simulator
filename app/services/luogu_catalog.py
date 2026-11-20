@@ -134,13 +134,10 @@ def _format_limit(values, unit, scale=1):
     if not isinstance(values, list) or not values:
         return ''
     formatted = []
-    seen = set()
     for value in values:
         if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
             return ''
         scaled = value / scale
         text = str(int(scaled)) if scaled.is_integer() else f'{scaled:g}'
-        if text not in seen:
-            seen.add(text)
-            formatted.append(text)
+        formatted.append(text)
     return f'{"-".join(formatted)} {unit}'

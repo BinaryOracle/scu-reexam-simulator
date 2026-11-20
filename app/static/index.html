@@ -7,24 +7,10 @@
     <title>知序 · 复试模拟系统</title>
     <link rel="icon" href="/static/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=0.19.1" />
-    <link rel="stylesheet" href="/static/style.css?v=20261117-accounts-v1" />
-    <link rel="stylesheet" href="/static/workspace.css?v=20261115-workspace-v8" />
-    <link rel="stylesheet" href="/static/contest-focus.css?v=20261115-contest-records-v2" />
-    <link rel="stylesheet" href="/static/live.css?v=20261118-course-v9" />
-    <link rel="stylesheet" href="/static/course-learning.css?v=20261118-course-v23" />
-    <link rel="stylesheet" href="/static/coding.css?v=20261117-filters-v1" />
-    <link rel="stylesheet" href="/static/home-layout.css?v=20261115-layout-v1" />
-    <link rel="stylesheet" href="/static/training.css?v=20261118-empty-error-hidden-v1" />
-    <link rel="stylesheet" href="/static/leaderboard.css?v=20261117-weekly-leaderboard-v3" />
-    <link rel="stylesheet" href="/static/credits.css?v=20261117-points-v1" />
-    <link rel="stylesheet" href="/static/select-controls.css?v=20261116-v2" />
-    <script>
-      try {
-        if (sessionStorage.getItem("token")) document.documentElement.classList.add("session-restoring");
-      } catch (error) {
-        // The app will show login if session storage is unavailable.
-      }
-    </script>
+    <link rel="stylesheet" href="/static/style.css?v=20261115-ui-audit-v3" />
+    <link rel="stylesheet" href="/static/training.css?v=20261114-training-v11" />
+    <link rel="stylesheet" href="/static/credits.css?v=20261114-ui-v18" />
+    <link rel="stylesheet" href="/static/courses.css?v=3" />
   </head>
   <body>
     <a class="skip-link" href="#mainContent">跳至主要内容</a>
@@ -157,13 +143,10 @@
         <nav aria-label="主要导航">
           <button type="button" class="nav-item" data-view="home" hidden><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label">备考首页</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="training" hidden><span class="nav-icon" aria-hidden="true">◈</span><span class="nav-label">每日训练</span><span class="nav-arrow" aria-hidden="true">›</span></button>
-          <button type="button" class="nav-item" data-view="trends" hidden><span class="nav-icon" aria-hidden="true">⌁</span><span class="nav-label">热点趋势</span><span class="nav-arrow" aria-hidden="true">›</span></button>
-          <button type="button" class="nav-item" data-view="live" hidden><span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label">课程</span><span class="nav-arrow" aria-hidden="true">›</span></button>
-          <button type="button" class="nav-item" data-view="coding" hidden><span class="nav-icon" aria-hidden="true">⌘</span><span class="nav-label">算法带刷</span><span class="nav-arrow" aria-hidden="true">›</span></button>
-          <button type="button" class="nav-item" data-view="codingAdmin" hidden><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">带刷题库</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+          <button type="button" class="nav-item" data-view="courses" hidden><span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label">课程</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+          <button type="button" class="nav-item" data-view="coursesAdmin" hidden><span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label">课程管理</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="trainingAdmin" hidden><span class="nav-icon" aria-hidden="true">▥</span><span class="nav-label">训练题库</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="announcementsAdmin" hidden><span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">公告管理</span><span class="nav-arrow" aria-hidden="true">›</span></button>
-          <button type="button" class="nav-item" data-view="homeLayoutAdmin" hidden><span class="nav-icon" aria-hidden="true">▦</span><span class="nav-label">首页编排</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="users" hidden>
             <span class="nav-icon" aria-hidden="true">◎</span
             ><span class="nav-label">用户管理</span
@@ -175,7 +158,7 @@
             ><span class="nav-arrow" aria-hidden="true">›</span>
           </button>
           <button type="button" class="nav-item" data-view="vouchers" hidden>
-            <span class="nav-icon" aria-hidden="true">◇</span><span class="nav-label">卡密与积分</span><span class="nav-arrow" aria-hidden="true">›</span>
+            <span class="nav-icon" aria-hidden="true">◇</span><span class="nav-label">卡密与次数</span><span class="nav-arrow" aria-hidden="true">›</span>
           </button>
           <button type="button" class="nav-item" data-view="systemSettings" hidden>
             <span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-label">系统设置</span><span class="nav-arrow" aria-hidden="true">›</span>
@@ -192,26 +175,17 @@
               >›</span
             >
           </button>
-          <div id="contestNavGroup" class="sidebar-nav-group">
-            <div class="sidebar-nav-parent">
-              <button type="button" class="nav-item" data-view="contest">
-                <span class="nav-icon code-icon" aria-hidden="true">&lt;/&gt;</span
-                ><span class="nav-label">上机考试</span><span class="nav-arrow" aria-hidden="true">›</span>
-              </button>
-              <button id="contestNavToggle" type="button" class="nav-group-toggle" aria-label="展开上机考试菜单" aria-controls="contestSubnav" aria-expanded="false" title="展开上机考试菜单">
-                <span aria-hidden="true">⌄</span>
-              </button>
-            </div>
-            <div id="contestSubnav" class="sidebar-subnav">
-              <button type="button" class="nav-item submission-nav-item" data-view="submissions">
-                <span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">提交记录</span><span
-                  class="nav-arrow"
-                  aria-hidden="true"
-                  >›</span
-                >
-              </button>
-            </div>
-          </div>
+          <button type="button" class="nav-item" data-view="contest">
+            <span class="nav-icon code-icon" aria-hidden="true">&lt;/&gt;</span
+            ><span class="nav-label">上机考试</span><span class="nav-arrow" aria-hidden="true">›</span>
+          </button>
+          <button type="button" class="nav-item" data-view="submissions">
+            <span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">提交记录</span><span
+              class="nav-arrow"
+              aria-hidden="true"
+              >›</span
+            >
+          </button>
         </nav>
         <div class="sidebar-bottom">
           <span class="sidebar-version">知序 REEXAM · V1.0</span>
@@ -250,10 +224,9 @@
         </header>
         <main id="mainContent" class="page-content" tabindex="-1">
           <section id="home" aria-label="备考首页" hidden></section>
-          <section id="trends" aria-label="AI 热点趋势" hidden><div id="trendsContent"></div></section>
-          <section id="live" aria-label="课程" hidden><div id="liveContent"></div></section>
-          <section id="homeLayoutAdmin" aria-label="首页编排" hidden></section>
           <section id="announcementsAdmin" aria-label="公告管理" hidden></section>
+          <section id="courses" aria-label="课程" hidden></section>
+          <section id="coursesAdmin" aria-label="课程管理" hidden></section>
           <section id="users" aria-labelledby="usersTitle" hidden>
             <div class="page-heading">
               <div>
@@ -272,7 +245,7 @@
               <div>
                 <h2>每个用户，各有所需。</h2>
                 <p>
-                  分别管理训练、带刷、面试与上机权限；面试次数按账号额度扣减。
+                  启用的账号均可访问面试与上机系统，模拟面试按剩余次数使用。
                 </p>
               </div>
               <span class="admin-intro-tag">统一管理 · 有序练习</span>
@@ -350,7 +323,7 @@
 
           <section id="vouchers" aria-labelledby="vouchersTitle" hidden>
             <div class="page-heading">
-              <div><div class="eyebrow">VOUCHERS &amp; POINTS</div><h1 id="vouchersTitle">卡密与积分<span class="heading-dot">.</span></h1><p class="muted">分套餐生成卡密、导出上架，独立核对兑换情况。</p></div>
+              <div><div class="eyebrow">VOUCHERS &amp; CREDITS</div><h1 id="vouchersTitle">卡密与次数<span class="heading-dot">.</span></h1><p class="muted">分套餐生成卡密、导出上架，独立核对兑换情况。</p></div>
             </div>
             <div class="credit-admin-grid">
               <form id="defaultCreditsForm" class="panel credit-settings">
@@ -363,17 +336,13 @@
                 <p id="voucherMaxHint" class="field-hint">每张卡密只能兑换一次。</p>
               </form>
             </div>
-            <form id="pointsSettingsForm" class="panel package-create-panel">
-              <div><h2>积分购买规则</h2><p class="muted">设置购买 1 次模拟面试所需的积分，修改后对后续购买立即生效。</p></div>
-              <div class="points-settings-fields"><div><label for="interviewPointsCost">每次面试所需积分</label><input id="interviewPointsCost" type="number" min="1" max="1000000" step="1" value="1" required /></div><button type="submit" class="button secondary">保存规则</button></div>
-            </form>
             <form id="voucherPackageForm" class="panel package-create-panel">
-              <div><h2>新增卡密套餐</h2><p class="muted">填写套餐金额与积分，保存后即可生成卡密；已发行卡密的面值不受后续设置影响。</p></div>
-              <div class="package-create-fields"><div><label for="packagePrice">金额（元）</label><input id="packagePrice" type="number" min="0.01" max="1000000" step="0.01" placeholder="例如 3.50" required /></div><div><label for="packageCredits">积分数量</label><input id="packageCredits" type="number" min="1" max="1000000" step="1" placeholder="例如 6" required /></div><button type="submit" class="button secondary">＋ 新增套餐</button></div>
+              <div><h2>新增卡密套餐</h2><p class="muted">填写套餐金额与面试次数，保存后即可选择生成卡密。</p></div>
+              <div class="package-create-fields"><div><label for="packagePrice">金额（元）</label><input id="packagePrice" type="number" min="0.01" max="1000000" step="0.01" placeholder="例如 3.50" required /></div><div><label for="packageCredits">面试次数</label><input id="packageCredits" type="number" min="1" max="1000000" step="1" placeholder="例如 6" required /></div><button type="submit" class="button secondary">＋ 新增套餐</button></div>
             </form>
             <div class="panel voucher-panel">
-              <div class="voucher-toolbar"><div id="voucherPackageTabs" class="voucher-package-tabs" aria-label="按套餐管理卡密"></div><div class="voucher-toolbar-actions"><button id="deleteVoucherPackage" type="button" class="button secondary danger">删除当前套餐</button><button id="exportVouchers" type="button" class="button secondary">↓ 导出当前筛选结果</button></div></div>
-              <div class="voucher-filter-row"><label for="voucherStatus">兑换状态</label><select id="voucherStatus"><option value="unused" selected>未兑换</option><option value="all">全部状态</option><option value="redeemed">已兑换</option></select><label class="sr-only" for="voucherSearch">搜索卡密或兑换用户</label><input id="voucherSearch" type="search" maxlength="100" placeholder="卡密或兑换用户" /><label class="sr-only" for="voucherBatch">按生成批次筛选</label><input id="voucherBatch" type="search" maxlength="24" placeholder="生成批次（可选）" /><button id="clearVoucherFilters" type="button" class="text-button">清除筛选</button></div>
+              <div class="voucher-toolbar"><div id="voucherPackageTabs" class="voucher-package-tabs" aria-label="按套餐管理卡密"></div><button id="exportVouchers" type="button" class="button secondary">↓ 导出当前套餐与状态</button></div>
+              <div class="voucher-filter-row"><label for="voucherStatus">兑换状态</label><select id="voucherStatus"><option value="all">全部状态</option><option value="unused">未兑换</option><option value="redeemed">已兑换</option></select><label class="sr-only" for="voucherSearch">搜索卡密或兑换用户</label><input id="voucherSearch" type="search" maxlength="100" placeholder="卡密或兑换用户" /><label class="sr-only" for="voucherBatch">按生成批次筛选</label><input id="voucherBatch" type="search" maxlength="24" placeholder="生成批次（可选）" /><button id="clearVoucherFilters" type="button" class="text-button">清除筛选</button></div>
               <div class="voucher-summary"><span>当前筛选 <strong id="voucherTotal">0</strong> 张</span><span>未兑换 <strong id="voucherUnused">0</strong> 张</span><span>已兑换 <strong id="voucherRedeemed">0</strong> 张</span></div>
               <div id="voucherList"></div><div class="voucher-pagination"><button id="voucherPrevious" type="button" class="button secondary">上一页</button><span id="voucherPageLabel">1 / 1</span><button id="voucherNext" type="button" class="button secondary">下一页</button></div>
             </div>
@@ -381,7 +350,7 @@
           </section>
           <section id="systemSettings" aria-labelledby="systemSettingsTitle" hidden>
             <div class="page-heading">
-              <div><div class="eyebrow">PLATFORM SETTINGS</div><h1 id="systemSettingsTitle">系统设置<span class="heading-dot">.</span></h1><p class="muted">管理平台连接地址与各 AI 服务模型。API Key 加密保存且不会回显。</p></div>
+              <div><div class="eyebrow">PLATFORM SETTINGS</div><h1 id="systemSettingsTitle">系统设置<span class="heading-dot">.</span></h1><p class="muted">统一管理浏览器插件连接的知序网站来源。</p></div>
             </div>
             <form id="luoguSettingsForm" class="panel luogu-origin-settings">
               <div><span class="eyebrow">LUOGU BRIDGE</span><h2>洛谷插件网站来源</h2><p class="muted">新下载的插件会自动连接此网站，无需用户在扩展设置中填写地址。</p></div>
@@ -390,29 +359,12 @@
               <p class="field-hint">默认地址为 http://127.0.0.1:8000/。正式部署请填写 HTTPS 网站的来源地址，不包含路径。修改后需要重新下载并加载插件。</p>
               <div class="luogu-origin-actions"><p id="luoguSettingsStatus" role="status" aria-live="polite" hidden></p><button type="submit" class="button primary">保存设置</button></div>
             </form>
-            <div class="model-settings-form">
-              <div class="section-heading"><div><h2>大模型与语音服务</h2><p class="muted">修改后对后续请求立即生效。已配置的密钥以掩码显示；留空保持不变，输入新密钥即可替换。</p></div></div>
-              <div class="model-compat-note"><strong>接口兼容说明</strong><span>面试与趋势分析使用 OpenAI 风格 Chat Completions；语音识别依赖音频输入及服务商参数，语音合成按所选协议调用。切换服务商时请同时确认模型名称和所需能力均受支持。</span></div>
-              <div id="modelServiceList" class="model-service-list" aria-label="已配置的大模型服务"></div>
-            </div>
           </section>
-          <section id="coding" aria-label="算法带刷" hidden><div id="codingContent"></div></section>
-          <section id="codingAdmin" aria-label="带刷题库管理" hidden><div id="codingAdminContent"></div></section>
           <section id="training" aria-label="每日训练" hidden><div id="trainingContent"></div></section>
           <section id="trainingAdmin" aria-label="训练题库管理" hidden><div id="trainingAdminContent"></div></section>
           <section id="profile" aria-labelledby="profileTitle" hidden>
-            <div class="page-heading"><div><div class="eyebrow">YOUR ACCOUNT</div><h1 id="profileTitle">个人主页<span class="heading-dot">.</span></h1><p class="muted">你好，<span id="profileUsername"></span>。在这里管理你的账号、积分与面试次数。</p><p id="profileLoginEmail" class="muted" hidden></p></div><div class="profile-heading-actions"><button id="profileBack" type="button" class="button secondary">← 返回工作台</button><button id="profileLogout" type="button" class="button secondary">退出登录</button></div></div>
-            <div class="profile-stats"><article id="profilePointsStat" class="panel profile-stat profile-points-stat"><span>可用积分</span><strong id="profilePoints">—</strong><small>签到、榜单奖励与卡密兑换均存入积分</small></article><article class="panel profile-stat"><span id="profileAllowanceLabel">剩余模拟面试次数</span><strong id="profileRemaining">—</strong><small id="profileAllowanceHint">正式开始一场面试消耗 1 次</small></article><article id="profileRedemptionStats" class="panel profile-stat"><span>累计兑换套餐金额</span><strong id="profileAmount">¥0.00</strong><small>按兑换卡密标价统计</small></article><article id="profileRedemptionStatsCount" class="panel profile-stat"><span>已兑换卡密</span><strong id="profileRedeemCount">0 张</strong><small>每张卡密仅可使用一次</small></article></div>
-            <section id="profileShopSection" class="panel points-shop" aria-labelledby="pointsShopTitle">
-              <div class="points-shop-heading"><div><span class="eyebrow">POINTS STORE</span><h2 id="pointsShopTitle">积分购买</h2><p class="muted">把每一次坚持，兑换成下一次进步。</p></div><span class="points-shop-mark" aria-hidden="true">◇</span></div>
-              <div class="points-product"><div class="points-product-copy"><span class="points-product-tag">模拟面试</span><h3>再来一场，表现更从容</h3><p>兑换次数可长期保留，正式开始面试时才扣除。</p><strong id="pointsProductPrice">1 积分 / 次</strong></div>
-                <form id="pointsPurchaseForm" class="points-purchase-form"><label for="pointsPurchaseQuantity">购买次数</label><input id="pointsPurchaseQuantity" type="number" min="1" max="10000" step="1" value="1" required /><p id="pointsPurchaseTotal" class="points-purchase-total" aria-live="polite">合计 1 积分</p><button id="pointsPurchaseSubmit" type="submit" class="button primary">确认购买</button><p id="pointsPurchaseError" class="form-error" role="alert" hidden></p></form>
-              </div>
-            </section>
-            <div id="profileVoucherSection" class="panel profile-redeem"><div class="redeem-heading"><span class="redeem-symbol" aria-hidden="true">◇</span><div><h2>卡密兑换</h2><p>在联动小铺购买后，输入兑换码即可增加积分，再用积分购买模拟面试次数。</p></div></div>
-              <a id="voucherShopLink" class="button secondary voucher-shop-link" target="_blank" rel="noopener noreferrer" hidden>前往联动小铺购买 ↗</a>
-              <form id="redeemForm" class="redeem-form"><label for="redeemCode">兑换码</label><div class="redeem-input-wrap"><span aria-hidden="true">◇</span><input id="redeemCode" maxlength="100" autocomplete="off" spellcheck="false" placeholder="请输入兑换码" required /></div><p class="redeem-help">支持直接粘贴完整卡密，不区分大小写。</p><p id="redeemError" class="form-error" role="alert" hidden></p><button type="submit" class="button primary">兑换积分</button></form>
-            </div>
+            <div class="page-heading"><div><div class="eyebrow">YOUR ACCOUNT</div><h1 id="profileTitle">个人主页<span class="heading-dot">.</span></h1><p class="muted">你好，<span id="profileUsername"></span>。在这里管理你的账号与面试次数。</p><p id="profileLoginEmail" class="muted" hidden></p></div><div class="profile-heading-actions"><button id="profileBack" type="button" class="button secondary">← 返回工作台</button><button id="profileLogout" type="button" class="button secondary">退出登录</button></div></div>
+            <div class="profile-stats"><article class="panel profile-stat"><span id="profileAllowanceLabel">剩余模拟面试次数</span><strong id="profileRemaining">—</strong><small id="profileAllowanceHint">正式开始一场面试消耗 1 次</small></article><article class="panel profile-stat"><span>累计兑换套餐金额</span><strong id="profileAmount">¥0.00</strong><small>按兑换卡密标价统计</small></article><article class="panel profile-stat"><span>已兑换卡密</span><strong id="profileRedeemCount">0 张</strong><small>每张卡密仅可使用一次</small></article></div>
             <section id="profileContribution" class="panel contribution-profile"></section>
             <section id="profileTransfers" class="panel profile-account-settings" aria-label="面试次数转赠"></section>
             <section class="panel profile-account-settings" aria-labelledby="profileSettingsTitle">
@@ -422,8 +374,11 @@
               <div class="profile-setting-row"><div><span>登录密码</span><button id="profileRevealPassword" type="button" class="profile-password-toggle" aria-label="查看登录密码" aria-pressed="false"><span id="profilePasswordValue">••••••••</span><span id="profilePasswordToggleLabel">查看</span></button><p>点击密码可查看或隐藏，修改密码后需要重新登录。</p></div><button id="profileEditPassword" type="button" class="button secondary">修改密码</button></div>
               <div class="profile-setting-row profile-delete-row"><div><span>注销账号</span><p id="profileDeleteHint">永久删除账号与练习资料，请谨慎操作。</p></div><button id="profileDeleteAccount" type="button" class="text-button danger">注销当前账号</button></div>
             </section>
-            <section id="profilePointsHistorySection" class="panel points-history" aria-labelledby="pointsHistoryTitle"><div class="points-shop-heading"><div><span class="eyebrow">POINTS ACTIVITY</span><h2 id="pointsHistoryTitle">积分明细</h2></div><span class="muted">最近 50 笔</span></div><div id="pointsHistory"></div></section>
-            <div id="profileRedemptionHistorySection"><div class="section-heading"><h2>卡密兑换记录</h2></div><div id="redemptionHistory" class="panel"></div></div>
+            <div class="panel profile-redeem"><div class="redeem-heading"><span class="redeem-symbol" aria-hidden="true">◇</span><div><h2>卡密兑换</h2><p>在联动小铺购买后，输入兑换码即可增加模拟面试次数。</p></div></div>
+              <a id="voucherShopLink" class="button secondary voucher-shop-link" target="_blank" rel="noopener noreferrer" hidden>前往联动小铺购买 ↗</a>
+              <form id="redeemForm" class="redeem-form"><label for="redeemCode">兑换码</label><div class="redeem-input-wrap"><span aria-hidden="true">◇</span><input id="redeemCode" maxlength="100" autocomplete="off" spellcheck="false" placeholder="请输入兑换码" required /></div><p class="redeem-help">支持直接粘贴完整卡密，不区分大小写。</p><p id="redeemError" class="form-error" role="alert" hidden></p><button type="submit" class="button primary">兑换面试次数</button></form>
+            </div>
+            <div class="section-heading"><h2>卡密兑换记录</h2></div><div id="redemptionHistory" class="panel"></div>
           </section>
           <section id="questionBank" aria-labelledby="questionBankTitle" hidden>
             <div class="page-heading">
@@ -433,8 +388,7 @@
                 <p class="muted">维护专业课、英文翻译和英文口语题目。</p>
               </div>
             </div>
-            <form id="questionBankForm" class="panel form-grid" aria-labelledby="questionEditorTitle">
-              <h2 id="questionEditorTitle" class="full-width">新增题目</h2>
+            <form id="questionBankForm" class="panel form-grid">
               <input id="questionBankId" type="hidden" />
               <div>
                 <label for="questionCategory">题目类别</label>
@@ -460,24 +414,20 @@
                 <label class="permission-switch"><input id="questionActive" type="checkbox" checked /><span class="switch-track" aria-hidden="true"></span><span>启用题目</span></label>
                 <div class="action-group">
                   <button id="cancelQuestionEdit" type="button" class="button secondary" hidden>取消编辑</button>
-                  <button type="submit" class="button primary">添加题目</button>
+                  <button type="submit" class="button primary">保存题目</button>
                 </div>
               </div>
             </form>
             <div class="section-heading question-bank-toolbar">
               <h2>题目列表<span id="questionBankCount" class="section-caption"></span></h2>
-              <div class="question-bank-toolbar-field"><label for="questionBankSearch">搜索题目</label><input id="questionBankSearch" type="search" placeholder="输入题目关键词" /></div>
-              <div class="question-bank-toolbar-field"><label for="questionBankFilter">筛选类别</label>
-                <select id="questionBankFilter">
-                  <option value="">全部题目</option>
-                  <option value="professional">专业课 · 全部</option>
-                  <option value="professional:data_structures">专业课 · 数据结构</option>
-                  <option value="professional:computer_networks">专业课 · 计算机网络</option>
-                  <option value="professional:operating_systems">专业课 · 操作系统</option>
-                  <option value="translation">英文段落翻译</option>
-                  <option value="oral">英文口语</option>
-                </select>
-              </div>
+              <label for="questionBankSearch">搜索题目</label><input id="questionBankSearch" type="search" placeholder="输入题目关键词" />
+              <label for="questionBankFilter">筛选类别</label>
+              <select id="questionBankFilter">
+                <option value="">全部</option>
+                <option value="professional">专业课</option>
+                <option value="translation">英文段落翻译</option>
+                <option value="oral">英文口语</option>
+              </select>
               <button id="exportQuestionBank" type="button" class="button secondary">导出 JSON</button>
             </div>
             <div id="questionBankList"></div>
@@ -540,7 +490,7 @@
                 <div class="stat-card">
                   <span class="stat-icon blue" aria-hidden="true">✓</span>
                   <div>
-                    <span class="stat-label">已结束</span
+                    <span class="stat-label">已完成</span
                     ><strong id="interviewFinished">—</strong>
                   </div>
                   <span class="stat-unit">场</span>
@@ -621,7 +571,6 @@
                   <div class="full-width contest-ranking-toggle-row">
                     <label class="contest-ranking-toggle" for="showRanking"><input id="showRanking" type="checkbox" checked /> <span>向参赛者展示排名</span></label>
                   </div>
-                  <div class="full-width" id="contestParticipants"></div>
                   <div class="full-width">
                     <label for="luoguProblemSearch">选择洛谷题目</label>
                     <div class="luogu-question-search">
@@ -743,20 +692,20 @@
                   value="admin"
                 /><span
                   ><strong>管理员</strong
-                  ><small>可管理后台，前台功能默认全部开放</small></span
+                  ><small>管理后台与全部系统</small></span
                 ></label
               >
             </div>
           </fieldset>
-          <div class="account-form-grid">
-          <div class="account-form-field"><label for="accountUsername">用户名</label
+          <label for="accountUsername">用户名</label
           ><input
             id="accountUsername"
             placeholder="请输入用户名"
             autocomplete="off"
             required
-          /></div>
-          <div id="initialPasswordField" class="account-form-field">
+          />
+          <label for="accountEmail">登录邮箱（可选）</label><input id="accountEmail" type="email" autocomplete="off" maxlength="254" placeholder="填写后可使用邮箱验证码登录" /><p class="field-help">不填写时，用户仍可通过用户名和密码登录。</p>
+          <div id="initialPasswordField">
             <label for="accountPassword">初始密码</label
             ><input
               id="accountPassword"
@@ -766,19 +715,7 @@
               required
             />
           </div>
-          <div class="account-form-field account-form-wide"><label for="accountEmail">登录邮箱 <span class="account-optional">选填</span></label><input id="accountEmail" type="email" autocomplete="off" maxlength="254" placeholder="填写后可使用邮箱验证码登录" /><p class="field-help">未绑定邮箱时，可使用用户名和密码登录。</p></div>
-          <div id="initialCreditsField" class="account-form-field account-form-wide"><label for="accountCredits">初始模拟面试次数</label><div class="account-initial-credits"><input id="accountCredits" type="number" min="0" max="1000000" value="1" required /><span>次</span><p class="field-help">正式开始一场面试后扣减一次。</p></div></div>
-          </div>
-          <fieldset id="accountPermissions" class="account-permissions-editor">
-            <legend>功能访问权限</legend>
-            <div class="account-permissions-options">
-              <label id="trainingPermissionField" class="permission-switch"><input id="accountTraining" type="checkbox" /><span class="switch-track" aria-hidden="true"></span><span>每日训练</span></label>
-              <label id="codingPermissionField" class="permission-switch"><input id="accountCoding" type="checkbox" /><span class="switch-track" aria-hidden="true"></span><span>算法题带刷</span></label>
-              <label id="interviewPermissionField" class="permission-switch"><input id="accountInterview" type="checkbox" checked /><span class="switch-track" aria-hidden="true"></span><span>模拟面试</span></label>
-              <label id="examPermissionField" class="permission-switch"><input id="accountExam" type="checkbox" checked /><span class="switch-track" aria-hidden="true"></span><span>上机考试</span></label>
-            </div>
-          </fieldset>
-          <p id="accountAdminNote" class="account-admin-note" hidden>管理员可访问全部功能，并拥有后台管理权限。</p>
+          <div id="initialCreditsField"><label for="accountCredits">初始模拟面试次数</label><input id="accountCredits" type="number" min="0" max="1000000" value="1" required /><p class="field-help">设置该用户正式开始模拟面试的可用次数。</p></div>
           <p id="userFormError" class="form-error" role="alert" hidden></p>
         </div>
         <div class="dialog-footer">
@@ -884,23 +821,7 @@
       <div id="submissionDetailBody" class="dialog-body"></div>
       <div class="dialog-footer"><button id="closeSubmissionDetailFooter" type="button" class="button secondary">关闭</button></div>
     </dialog>
-    <dialog id="modelServiceDialog" class="account-dialog model-service-dialog" aria-labelledby="modelServiceDialogTitle">
-      <div class="dialog-header"><div><span class="eyebrow">AI SERVICE</span><h2 id="modelServiceDialogTitle">编辑模型服务</h2></div><button id="closeModelServiceDialog" type="button" class="icon-button" aria-label="关闭模型服务设置">×</button></div>
-      <form id="modelSettingsForm" class="model-service-edit-form">
-        <div class="dialog-body model-service-edit-body">
-          <p id="modelServiceDialogDescription" class="muted"></p>
-          <div class="model-setting-fields"><label>接口地址<input name="base_url" type="url" maxlength="500" required /></label><label>模型名称<input name="model" maxlength="200" required /></label></div>
-          <div id="modelTtsFields" class="model-tts-fields" hidden>
-            <div class="model-setting-pair"><label>服务商<select name="provider"><option value="dashscope">阿里云百炼</option><option value="openai">OpenAI 兼容</option></select></label><label>协议<select name="protocol"><option value="dashscope_audio">DashScope Audio</option><option value="dashscope_native">DashScope 原生</option></select></label></div>
-            <label>音色<input name="voice" maxlength="120" required /></label>
-          </div>
-          <label>API Key<input name="api_key" type="password" maxlength="4096" autocomplete="new-password" placeholder="请输入 API Key" /></label>
-          <p id="modelServiceKeyStatus" class="model-service-key-status" role="status"></p>
-        </div>
-        <div class="dialog-footer model-settings-actions"><p id="modelSettingsStatus" class="model-settings-status" role="status" aria-live="polite" hidden></p><button id="cancelModelServiceEdit" type="button" class="button secondary">取消</button><button type="submit" class="button primary">保存设置</button></div>
-      </form>
-    </dialog>
     <dialog id="announcementDialog" class="account-dialog announcement-dialog" aria-labelledby="announcementDialogTitle"><div class="dialog-header"><div><span class="eyebrow">公告</span><h2 id="announcementDialogTitle">公告详情</h2></div><button id="closeAnnouncementDialog" type="button" class="icon-button" aria-label="关闭公告">×</button></div><div id="announcementDialogContent" class="dialog-body announcement-dialog-content"></div></dialog>
-    <script type="module" src="/static/app.js?v=20261118-course-v13"></script>
+    <script type="module" src="/static/app.js?v=20261120-courses-v3"></script>
   </body>
 </html>

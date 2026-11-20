@@ -100,7 +100,7 @@ export class SessionAudio {
   constructor({ changed, text, interrupted }) {
     this.changed = changed; this.text = text; this.interrupted = interrupted;
     this.current = null; this.prepared = null; this.queue = Promise.resolve();
-    this.liveQueue = Promise.resolve(); this.live = null; this.liveError = ""; this.backupError = "";
+    this.liveQueue = Promise.resolve(); this.live = null; this.liveError = "";
   }
   get active() { return !!this.current && !this.current.stopped; }
   get pending() { return !!this.current && !this.active && !this.current.saved; }
@@ -135,7 +135,7 @@ export class SessionAudio {
       }; });
       media.start(1000);
       current.checkpointTimer = setInterval(() => {
-        void this.checkpoint().catch(error => { this.backupError = `录音备份失败：${error.message}。本地录音仍保留，结束时会重试保存。`; this.changed(); });
+        void this.checkpoint().catch(error => { this.liveError = `录音备份失败：${error.message}`; this.changed(); });
       }, item.recording_options.checkpoint_seconds * 1000);
       this.changed();
     } catch (error) { stopTracks(stream); throw error; }
@@ -160,8 +160,6 @@ export class SessionAudio {
     form.append("file", blob, "session.webm"); form.append("final", String(final));
     const item = await api(`/interviews/${c.iid}/recordings/${c.rid}`, { method: "PUT", body: form });
     if (final) c.saved = true;
-    this.backupError = "";
-    this.changed();
     return item;
   }
   checkpoint() {
@@ -248,7 +246,7 @@ export class SessionAudio {
     } else {
       const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!Speech) {
-        this.liveError = "当前浏览器不支持实时转写，且未配置语音识别服务。可继续作答，全程录音仍会保存。";
+        this.liveError = "当前浏览器不支持实时转写，且未配置语音识别服务。本环节暂无实时字幕，全程录音仍会保存。";
         this.changed(); return;
       }
       const speech = new Speech(); live.recognition = speech;
@@ -285,6 +283,5 @@ export class SessionAudio {
     this.stopCapture(); this.cancelPrepared();
     this.current = null;
     this.liveQueue = Promise.resolve();
-    this.liveError = ""; this.backupError = "";
   }
 }

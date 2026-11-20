@@ -1,7 +1,7 @@
 """Atomic peer transfers: one debit, one credit, and one immutable receipt."""
 import time
 from fastapi import HTTPException
-from app.services.points import adjust
+from app.services.credits import adjust
 
 
 def initialize_transfers(db):
@@ -11,8 +11,6 @@ def initialize_transfers(db):
         recipient_name TEXT NOT NULL,credits INTEGER NOT NULL CHECK(credits>0),
         idempotency_key TEXT NOT NULL,created REAL NOT NULL,UNIQUE(sender_id,idempotency_key))''')
     db.execute('CREATE INDEX IF NOT EXISTS transfers_by_recipient ON credit_transfers(recipient_id,id)')
-    if 'currency' not in {row['name'] for row in db.execute('PRAGMA table_info(credit_transfers)')}:
-        db.execute("ALTER TABLE credit_transfers ADD COLUMN currency TEXT NOT NULL DEFAULT 'credits'")
 
 
 def transfer(db, uid, recipient_name, amount, request_key):
@@ -30,24 +28,24 @@ def transfer(db, uid, recipient_name, amount, request_key):
         if not recipient_matches or existing['credits'] != amount:
             raise HTTPException(409, '本次转赠标识已用于其他内容，请重新发起')
         return dict(id=existing['id'], credits=amount, recipient=existing['recipient_name'],
-                    remaining=sender['points'], points=amount, already_transferred=True)
+                    remaining=sender['interview_credits'], already_transferred=True)
     if sender['is_admin']:
-        raise HTTPException(409, '管理员账号请通过后台管理用户积分，无需使用转赠')
+        raise HTTPException(409, '管理员账号请通过后台管理用户次数，无需使用转赠')
     recipient = db.execute('SELECT * FROM users WHERE username=? AND is_active=1 AND is_admin=0', (identifier,)).fetchone()
     if recipient is None:
         recipient = db.execute('SELECT * FROM users WHERE email=? COLLATE NOCASE AND is_active=1 AND is_admin=0', (identifier,)).fetchone()
     if recipient is None:
         raise HTTPException(404, '未找到可接收转赠的普通用户，请核对用户名或邮箱')
     if recipient['id'] == uid:
-        raise HTTPException(422, '不能向自己转赠积分')
-    if sender['points'] < amount:
-        raise HTTPException(409, '积分不足，请调整转赠数量')
+        raise HTTPException(422, '不能向自己转赠面试次数')
+    if sender['interview_credits'] < amount:
+        raise HTTPException(409, '剩余面试次数不足，请调整转赠数量')
     tid = db.execute('''INSERT INTO credit_transfers(sender_id,recipient_id,sender_name,recipient_name,
-        credits,idempotency_key,created,currency) VALUES (?,?,?,?,?,?,?,'points')''',
+        credits,idempotency_key,created) VALUES (?,?,?,?,?,?,?)''',
         (uid, recipient['id'], sender['username'], recipient['username'], amount, request_key, time.time())).lastrowid
-    adjust(db, uid, -amount, kind='transfer_out', reference=str(tid))
-    adjust(db, recipient['id'], amount, kind='transfer_in', reference=str(tid))
-    return dict(id=tid, credits=amount, recipient=recipient['username'], remaining=sender['points'] - amount, points=amount,
+    adjust(db, uid, sender['interview_credits'] - amount, kind='transfer_out', reference=str(tid))
+    adjust(db, recipient['id'], recipient['interview_credits'] + amount, kind='transfer_in', reference=str(tid))
+    return dict(id=tid, credits=amount, recipient=recipient['username'], remaining=sender['interview_credits'] - amount,
                 already_transferred=False)
 
 
@@ -59,5 +57,5 @@ def history(db, uid, page):
                           (uid, uid, page_size, (page - 1) * page_size)):
         outgoing = row['sender_id'] == uid
         items.append(dict(id=row['id'], direction='out' if outgoing else 'in', credits=row['credits'],
-                          other_username=row['recipient_name'] if outgoing else row['sender_name'], created=row['created'], currency=row['currency']))
+                          other_username=row['recipient_name'] if outgoing else row['sender_name'], created=row['created']))
     return dict(items=items, total=total, page=page, page_size=page_size)
