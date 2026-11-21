@@ -7,6 +7,9 @@ def initialize_course_learning(db):
     for name, declaration in [
         ('publication_status', "TEXT NOT NULL DEFAULT 'published' CHECK(publication_status IN ('draft','published','archived'))"),
         ('access_mode', "TEXT NOT NULL DEFAULT 'roster' CHECK(access_mode IN ('public','roster'))"),
+        ('cover_kind', "TEXT CHECK(cover_kind IN ('preset','upload'))"),
+        ('cover_value', 'TEXT'),
+        ('cover_asset_id', 'TEXT'),
     ]:
         if name not in columns:
             db.execute(f'ALTER TABLE live_courses ADD COLUMN {name} {declaration}')
@@ -37,6 +40,26 @@ def initialize_course_learning(db):
         uploaded_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         created REAL NOT NULL DEFAULT (unixepoch())
     )''')
+    image_schema = '''CREATE TABLE IF NOT EXISTS course_markdown_images(
+        id TEXT PRIMARY KEY,
+        course_id INTEGER NOT NULL REFERENCES live_courses(id) ON DELETE CASCADE,
+        lesson_id INTEGER REFERENCES course_lessons(id) ON DELETE CASCADE,
+        storage_name TEXT NOT NULL UNIQUE,
+        mime_type TEXT NOT NULL CHECK(mime_type IN ('image/png','image/jpeg','image/webp')),
+        size INTEGER NOT NULL CHECK(size > 0),
+        uploaded_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created REAL NOT NULL DEFAULT (unixepoch())
+    )'''
+    image_columns = {row['name']: row for row in db.execute('PRAGMA table_info(course_markdown_images)')}
+    if not image_columns:
+        db.execute(image_schema)
+    elif image_columns['lesson_id']['notnull']:
+        db.execute('ALTER TABLE course_markdown_images RENAME TO course_markdown_images_legacy')
+        db.execute(image_schema)
+        db.execute('''INSERT INTO course_markdown_images(id,course_id,lesson_id,storage_name,mime_type,size,uploaded_by,created)
+            SELECT id,course_id,lesson_id,storage_name,mime_type,size,uploaded_by,created
+            FROM course_markdown_images_legacy''')
+        db.execute('DROP TABLE course_markdown_images_legacy')
     db.execute('''CREATE TABLE IF NOT EXISTS course_lesson_items(
         id INTEGER PRIMARY KEY,
         lesson_id INTEGER NOT NULL REFERENCES course_lessons(id) ON DELETE CASCADE,
@@ -50,6 +73,10 @@ def initialize_course_learning(db):
         course_id INTEGER NOT NULL REFERENCES live_courses(id) ON DELETE CASCADE,
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         enrolled_at REAL NOT NULL DEFAULT (unixepoch()),
+        PRIMARY KEY(course_id,user_id))''')
+    db.execute('''CREATE TABLE IF NOT EXISTS course_library_hidden(
+        course_id INTEGER NOT NULL REFERENCES live_courses(id) ON DELETE CASCADE,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         PRIMARY KEY(course_id,user_id))''')
     db.execute('''CREATE TABLE IF NOT EXISTS course_progress(
         lesson_id INTEGER NOT NULL REFERENCES course_lessons(id) ON DELETE CASCADE,

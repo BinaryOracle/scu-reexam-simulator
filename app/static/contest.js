@@ -13,17 +13,19 @@ import {
   renderPagination,
 } from "./ui.js?v=20261114-ui-v18";
 import { appendProblemStatement, normalizeProblemStatementHtml, renderProblemMath } from "./problem-content.js?v=20261115-resource-limits-v1";
-import { formatLuoguSubmitError, isLuoguExtensionOutdated } from "./luogu-errors.mjs?v=20261115-coding-v1";
+import { formatLuoguSubmitError, isJudgeExtensionOutdated } from "./luogu-errors.mjs?v=20261121-judge-platforms-v2";
 import { submitWithLuoguVerification } from "./luogu-submit.mjs?v=20261114-captcha-v2";
 import { requestLuoguCaptcha } from "./luogu-captcha.js?v=20261114-captcha-v2";
-import { canRevealLuoguSource, contestSubmitGuidance, normalizeSubmissionPage, refreshContestProblemStats, submissionPanelMessage } from "./contest-model.mjs?v=20261115-submit-guidance-v1";
+import { canRevealLuoguSource, normalizeSubmissionPage, refreshContestProblemStats, submissionPanelMessage } from "./contest-model.mjs?v=20261121-contest-sample-run-v1";
 import { writeAppRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 import { readLuoguConnection, writeLuoguConnection } from "./luogu-connection.mjs?v=20261115-navigation-v3";
 import { contestTiming, canOpenContestProblems } from "./contest-timing.mjs?v=20261115-contest-focus-v1";
-import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261115-drafts-v3";
-import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261115-workspace-v6";
+import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261121-drafts-v7";
+import { hasCodeDraft } from "./draft-compat.mjs?v=20261121-cache-compat-v2";
+import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261121-workspace-v7";
 import { openContestRecords, closeContestRecords } from "./contest-records.js?v=20261115-contest-records-v1";
 import { loadContestRoster, resetContestRoster, contestParticipantIds, setupContestRoster } from "./contest-roster.js?v=20261115-access-v2";
+import { judgePlatform, judgePlatformOptions, judgeProblemUrl, judgeRecordUrl, judgeSubmitPayload } from "./judge-platforms.mjs?v=20261121-china-judge-v2";
 
 let contests = [];
 let selectedContest = null;
@@ -36,7 +38,7 @@ let luoguConnected = false;
 let luoguConnectionUserId = null;
 let luoguStatusChecked = false;
 let luoguConnectionRequest = null;
-let selectedLuoguProblems = [];
+let selectedContestProblems = [];
 let editingContestId = null;
 let contestEditRevision = 0;
 let contestOverview = null;
@@ -247,13 +249,6 @@ function tick() {
     node.textContent = label;
     node.className = `badge ${color} workspace-status`;
   });
-  const guidance = document.querySelector(".contest-submit-guidance");
-  if (guidance && selectedContest) updateContestSubmitGuidance(guidance, selectedContest);
-}
-function updateContestSubmitGuidance(node, contest) {
-  const message = managementMode() ? "" : contestSubmitGuidance(contest);
-  node.textContent = message;
-  node.hidden = !message;
 }
 export async function refreshContests() {
   contests = await api(contestPath("/contests"));
@@ -427,7 +422,7 @@ async function openContest(contest, { recordHistory = true } = {}) {
     contestOverview = {
       ...contest,
       problem_count: problems.length || null,
-      problems: problems.map(({ id, title, remote_problem_id }) => ({ id, title, remote_problem_id })),
+      problems: problems.map(({ id, title, remote_problem_id, remote_platform }) => ({ id, title, remote_problem_id, remote_platform })),
     };
   }
   if (navigationRevision !== contestNavigationRevision) return;
@@ -482,7 +477,7 @@ function renderContestOverview() {
     const title = el("div", "", "contest-overview-problem-title");
     title.append(el("strong", problem.title));
     if (problem.remote_problem_id && canRevealLuoguSource(contestOverview, Date.now() / 1000, managementMode()))
-      title.append(el("span", problem.remote_problem_id, "muted"));
+      title.append(el("span", `${judgePlatform(problem.remote_platform)?.label || "平台"} · ${problem.remote_problem_id}`, "muted"));
     open.append(title);
     const stats = el("span", "", "contest-problem-stats");
     stats.append(el("strong", `${problem.points ?? 100} 分`));
@@ -728,8 +723,6 @@ function renderWorkspace() {
       ),
     );
     container.replaceChildren(workspace);
-    if (!managementMode() && selectedContest.judge_mode === "luogu" && Date.now() / 1000 <= selectedContest.ends && !luoguStatusChecked)
-      void refreshLuoguBridgeConnection();
     return;
   }
   const workbench = el("div", "", "problem-workbench");
@@ -783,7 +776,7 @@ function renderWorkspace() {
   expandAll.hidden = true;
   restoreBar.append(expandAll);
   const statement = el("article", "", "panel problem-statement");
-  if (showSource) statement.append(el("span", `洛谷题号 · ${problem.remote_problem_id}`, "eyebrow"));
+  if (showSource) statement.append(el("span", `${judgePlatform(problem.remote_platform)?.label || "平台题号"} · ${problem.remote_problem_id}`, "eyebrow"));
   statement.append(el("h3", problem.title));
   if (managementMode() || selectedContest.show_ranking) {
     const problemStats = el("p", `尝试 ${problem.attempt_count || 0} 次 · 通过 ${problem.accepted_count || 0} 次`, "problem-attempt-stats");
@@ -793,20 +786,20 @@ function renderWorkspace() {
   const sourceActions = el("div", "", "problem-source-actions");
   if (showSource) {
     const sourceLinkRow = el("div", "", "problem-source-action-row");
-    const remote = el("a", "在洛谷打开题目 ↗", "text-button problem-source-link");
-    remote.href = `https://www.luogu.com.cn/problem/${encodeURIComponent(problem.remote_problem_id)}`;
+    const remote = el("a", `在${judgePlatform(problem.remote_platform)?.label || "平台"}打开题目 ↗`, "text-button problem-source-link");
+    remote.href = judgeProblemUrl(problem.remote_platform, problem.remote_problem_id);
     remote.target = "_blank";
     remote.rel = "noopener noreferrer";
     sourceLinkRow.append(remote);
     sourceActions.append(sourceLinkRow);
   }
-  if (managementMode() && problem.remote_problem_id) {
+  if (managementMode() && problem.remote_problem_id && problem.remote_platform !== "local") {
     const refreshRow = el("div", "", "problem-source-action-row");
-    refreshRow.append(button("从洛谷更新题面与样例", async () => {
+    refreshRow.append(button(`从${judgePlatform(problem.remote_platform)?.label || "平台"}更新题面与样例`, async () => {
       const refreshed = await api(`/admin/problems/${problem.id}/refresh`, { method: "POST" });
-      currentProblems = currentProblems.map(item => item.id === refreshed.id ? { ...item, ...refreshed, judge_mode: selectedContest.judge_mode } : item);
+      currentProblems = currentProblems.map(item => item.id === refreshed.id ? { ...item, ...refreshed, judge_mode: "luogu" } : item);
       renderWorkspace();
-      notify("题面与全部公开样例已从洛谷更新，提交记录保持不变。");
+      notify("题面、样例和代码模板已更新，提交记录保持不变。");
     }, "text-button problem-refresh"));
     sourceActions.append(refreshRow);
   }
@@ -838,7 +831,7 @@ function renderWorkspace() {
     samplePanel.append(sample);
   }
   if (!samples.length && problem.remote_problem_id) {
-    samplePanel.append(el("p", "洛谷未提供公开样例。请按题面自行构造测试数据验证程序。", "sample-unavailable"));
+    samplePanel.append(el("p", `${judgePlatform(problem.remote_platform)?.label || "平台"}未提供公开样例。请按题面自行构造测试数据验证程序。`, "sample-unavailable"));
   } else if (!samples.length) {
     samplePanel.append(el("p", "此题暂未提供样例。", "muted"));
   }
@@ -870,7 +863,7 @@ function renderWorkspace() {
     verticalSplitter.setAttribute("aria-orientation", "horizontal");
     verticalSplitter.tabIndex = 0;
     const panels = renderEditorPanels(samplePanel);
-    const editor = renderEditor(problem);
+    const editor = renderEditor(problem, resetLayout);
     const closeEditor = button("×", () => {}, "workspace-icon-button workspace-pane-close");
     closeEditor.setAttribute("aria-label", "收起代码区"); closeEditor.title = "收起代码区";
     closeControls.editor = closeEditor;
@@ -911,7 +904,7 @@ function renderWorkspace() {
     else if (tabBounds.left < railBounds.left) tabs.scrollLeft -= railBounds.left - tabBounds.left;
   }
   if (layoutNodes) disposeWorkspaceLayout = mountWorkspaceLayout(layoutNodes);
-  if (!managementMode() && selectedContest.judge_mode === "luogu" && Date.now() / 1000 <= selectedContest.ends && !luoguStatusChecked)
+  if (!managementMode() && problem.remote_platform === "luogu" && Date.now() / 1000 <= selectedContest.ends && !luoguStatusChecked)
     void refreshLuoguBridgeConnection();
   loadContestSubmissions();
   tick();
@@ -999,19 +992,21 @@ function renderMobilePaneSwitcher(columns) {
   enableTabKeyboard(switcher);
   return switcher;
 }
-function renderEditor(problem) {
+function renderEditor(problem, resetLayout) {
   const panel = el("section", "", "panel editor-panel");
   const heading = el("div", "", "editor-heading");
   heading.append(el("h4", "代码工作区"));
   const language = el("select", "", "language-select");
   language.setAttribute("aria-label", "选择编程语言");
-  const availableLanguages = selectedContest?.judge_mode === "docker"
+  const availableLanguages = problem.remote_platform === "local"
     ? LANGUAGES.filter(([value]) => value === "python3")
-    : LANGUAGES;
+    : problem.remote_platform === "leetcode"
+      ? LANGUAGES.filter(([value]) => ["cpp11", "c", "python3"].includes(value))
+      : LANGUAGES;
   for (const [value, label] of availableLanguages) { const option = el("option", label); option.value = value; language.append(option); }
   language.value = availableLanguages[0][0];
   const headingTools = el("div", "", "editor-heading-tools");
-  headingTools.append(language, copyCodeButton(() => input.value));
+  headingTools.append(language);
   heading.append(headingTools);
   const area = el("div", "", "code-area");
   const numbers = el("pre", "", "line-numbers");
@@ -1022,9 +1017,15 @@ function renderEditor(problem) {
   input.autocapitalize = "off";
   input.wrap = "off";
   input.maxLength = 30000;
-  input.placeholder = language.value === "python3" ? "# 在这里编写你的解答\n# 从标准输入读取，向标准输出输出" : "// 在这里编写你的解答\n// 从标准输入读取，向标准输出输出";
+  const loadLanguage = () => {
+    const key = draftKey(problem.id, language.value);
+    input.value = hasCodeDraft(codeDrafts, key, () => window.localStorage) ? codeDrafts.read(key) : problem.starter_codes?.[language.value] || "";
+    input.placeholder = judgePlatform(problem.remote_platform)?.standardInput === false
+      ? "按平台模板编写解答"
+      : "从标准输入读取，向标准输出输出";
+  };
   let previousLanguage = language.value;
-  input.value = codeDrafts.read(draftKey(problem.id, previousLanguage));
+  loadLanguage();
   const saved = el("span", codeDrafts.available()
     ? "草稿自动保存至此浏览器"
     : "浏览器存储不可用，草稿仅在当前页面保留，请自行保存代码");
@@ -1047,9 +1048,8 @@ function renderEditor(problem) {
   language.addEventListener("change", () => {
     saveDraft(previousLanguage);
     previousLanguage = language.value;
-    input.value = codeDrafts.read(draftKey(problem.id, language.value));
+    loadLanguage();
     input.setAttribute("aria-label", `${languageName(language.value)} 代码`);
-    input.placeholder = language.value === "python3" ? "# 在这里编写你的解答\n# 从标准输入读取，向标准输出输出" : "// 在这里编写你的解答\n// 从标准输入读取，向标准输出输出";
     update();
   });
   input.addEventListener("keydown", (event) => {
@@ -1066,6 +1066,35 @@ function renderEditor(problem) {
   area.append(numbers, input);
   const footer = el("div", "", "editor-footer");
   const row = el("div", "", "editor-footer-top");
+  const run = button(
+    "本地运行样例",
+    async () => {
+      if (!input.value.trim()) throw new Error("请先输入代码，再运行样例。");
+      run.disabled = true;
+      run.textContent = "运行中…";
+      runResult.hidden = false;
+      runResult.replaceChildren(el("span", "正在运行公开样例…", "muted"));
+      try {
+        const result = await api(`/problems/${problem.id}/run`, {
+          method: "POST",
+          body: JSON.stringify({ language: language.value, source: input.value }),
+        });
+        runResult.replaceChildren(el("strong", `通过 ${result.passed_cases ?? 0} / ${result.total_cases ?? 0}`, `contest-run-verdict${result.status === "Accepted" ? " accepted" : " failed"}`));
+        if (result.detail) runResult.append(el("pre", result.detail, "contest-run-detail"));
+      } catch (error) {
+        runResult.replaceChildren(el("span", error.message, "contest-run-verdict failed"));
+        throw error;
+      } finally {
+        run.disabled = false;
+        run.textContent = "本地运行样例";
+      }
+    },
+    "button secondary contest-run-button",
+  );
+  const runResult = el("div", "", "contest-run-result");
+  runResult.hidden = true;
+  runResult.setAttribute("role", "status");
+  runResult.setAttribute("aria-live", "polite");
   const submit = button(
     "提交评测 →",
     async () => {
@@ -1079,24 +1108,24 @@ function renderEditor(problem) {
           method: "POST",
           body: JSON.stringify({ source, language: submittedLanguage }),
         });
-        if (response.judge_mode === "luogu") {
+        if (response.remote_platform === "luogu" || response.remote_platform === "leetcode") {
+          const identity = { platform: response.remote_platform, remote_problem_id: response.remote_problem_id };
+          let remote;
           try {
-            const remote = await requestLuoguSubmit({
-              submission_id: response.id,
-              problem_id: response.remote_problem_id,
-              source,
-              language: submittedLanguage,
-            });
+            remote = await requestJudgeSubmit(judgeSubmitPayload(response, "contest", submittedLanguage, source));
             if (!remote?.remote_submission_id || !remote.status)
-              throw new Error("洛谷未返回有效的提交编号和评测状态，请在洛谷页面检查提交记录。");
-            const saved = await updateRemoteResult(response.id, remote);
-            response.status = saved.status;
+              throw new Error(`${judgePlatform(response.remote_platform)?.label || "平台"}未返回有效提交编号，请检查平台提交记录。`);
           } catch (error) {
-            const message = formatLuoguSubmitError(error);
-            showLuoguBridgeHelp(message);
-            await updateRemoteResult(response.id, { remote_submission_id: "", status: "Submission Failed", detail: message });
+            const message = response.remote_platform === "luogu" ? formatLuoguSubmitError(error) : error.message;
+            if (response.remote_platform === "luogu") showLuoguBridgeHelp(message);
+            else showBridgeHelp(response.remote_platform, message);
+            await updateRemoteResult(response.id, { ...identity, status: "Submission Failed", detail: message });
+            void loadContestSubmissions();
             throw new Error(message);
           }
+          const saved = await updateRemoteResult(response.id, { ...remote, ...identity })
+            .catch(() => { throw new Error("平台已受理提交，本站暂未同步。请先查看提交记录，避免重复提交。"); });
+          response.status = saved.status;
         }
         await loadContestSubmissions();
         if (response.status === "Judge Error")
@@ -1109,36 +1138,35 @@ function renderEditor(problem) {
     "button primary",
   );
   submit.id = "submitCode";
-  if (selectedContest.judge_mode === "luogu") row.append(renderLuoguSetup());
-  row.append(saved, submit);
-  const guidance = el("p", "", "contest-submit-guidance");
-  guidance.setAttribute("role", "status");
-  guidance.setAttribute("aria-live", "polite");
-  updateContestSubmitGuidance(guidance, selectedContest);
-  footer.append(row, guidance);
+  if (problem.remote_platform === "luogu" || problem.remote_platform === "leetcode") {
+    row.append(renderRemoteSetup(problem.remote_platform));
+  }
+  run.disabled = !problem.samples?.length;
+  if (run.disabled) run.title = "该题尚无公开样例，请在算法带刷中配置用例后测试";
+  row.append(saved, run, submit);
+  footer.append(row, runResult);
   panel.append(heading, area, footer);
   return panel;
 }
-function renderLuoguSetup() {
-  const panel = el("details", "", "panel luogu-setup");
-  const heading = el("summary", "", "luogu-setup-heading");
-  const status = badge(luoguConnected ? `插件已连接 · ${luoguConnected}` : "需先配置", luoguConnected ? "green" : "orange");
+function renderRemoteSetup(platform) {
+  const config = judgePlatform(platform);
+  const panel = el("div", "", "luogu-setup contest-bridge-tools");
+  const heading = el("div", "", "luogu-setup-heading");
+  panel.dataset.judgePlatform = platform;
+  const account = platform === "luogu" && luoguConnected;
+  const status = badge(`${config.label} 评测`, account ? "green" : "blue");
   status.classList.add("luogu-connection-status");
-  heading.append(el("span", "洛谷桥接", "luogu-setup-title"), status);
-  panel.append(heading,
-    el("p", "通过浏览器中的洛谷登录页提交；请保持插件已安装且洛谷处于登录状态。本站不保存洛谷凭证。"),
-    button("查看插件配置教程", () => $("luoguTutorial")?.showModal(), "text-button"),
-    button("检测洛谷登录状态", async () => {
-      const response = await refreshLuoguBridgeConnection({ force: true });
-      if (!luoguConnected) throw new Error(response.reason || "未找到已登录的洛谷页面，请先登录洛谷后重试。");
-      notify("已连接洛谷登录页面。");
-      renderWorkspace();
-    }, "button secondary"),
+  status.title = account ? `提交桥接已连接：${account}` : `提交时将通过浏览器插件连接${config.label}`;
+  heading.append(status);
+  panel.append(
+    heading,
+    button("插件教程", () => $("luoguTutorial")?.showModal(), "text-button coding-tutorial-button"),
   );
   return panel;
 }
-function showLuoguBridgeHelp(message, { reveal = true } = {}) {
+function showBridgeHelp(platform, message, { reveal = true } = {}) {
   const panel = document.querySelector(".luogu-setup");
+  if (panel?.dataset.judgePlatform !== platform) return;
   if (!panel) return;
   if (reveal) panel.open = true;
   panel.classList.add("has-error");
@@ -1154,6 +1182,9 @@ function showLuoguBridgeHelp(message, { reveal = true } = {}) {
     status.className = "badge orange luogu-connection-status";
   }
 }
+function showLuoguBridgeHelp(message, options = {}) {
+  showBridgeHelp("luogu", message, options);
+}
 function prepareLuoguConnection() {
   const userId = state.user?.id || null;
   if (userId === luoguConnectionUserId) return;
@@ -1166,13 +1197,14 @@ function setLuoguConnection(account) {
   prepareLuoguConnection();
   luoguConnected = account || false;
   writeLuoguConnection(localStorage, luoguConnectionUserId, luoguConnected);
-  const status = document.querySelector(".luogu-connection-status");
+  const status = document.querySelector('.luogu-setup[data-judge-platform="luogu"] .luogu-connection-status');
   if (status) {
-    status.textContent = luoguConnected ? `插件已连接 · ${luoguConnected}` : "需先配置";
+    status.textContent = "洛谷评测";
+    status.title = luoguConnected ? `插件已连接：${luoguConnected}` : "提交时将通过浏览器插件连接洛谷";
     status.className = `badge ${luoguConnected ? "green" : "orange"} luogu-connection-status`;
   }
   if (luoguConnected) {
-    const panel = document.querySelector(".luogu-setup");
+    const panel = document.querySelector('.luogu-setup[data-judge-platform="luogu"]');
     if (panel?.classList.contains("has-error")) {
       panel.classList.remove("has-error");
       panel.querySelector(".luogu-bridge-error")?.remove();
@@ -1186,22 +1218,23 @@ async function refreshLuoguBridgeConnection({ force = false } = {}) {
   if (luoguStatusChecked && !force)
     return { connected: Boolean(luoguConnected), account: luoguConnected };
   luoguStatusChecked = true;
-  const status = document.querySelector(".luogu-connection-status");
+  const status = document.querySelector('.luogu-setup[data-judge-platform="luogu"] .luogu-connection-status');
   if (status) {
-    status.textContent = luoguConnected ? `正在恢复连接 · ${luoguConnected}` : "正在检测洛谷连接";
+    status.textContent = "洛谷评测";
+    status.title = luoguConnected ? `正在恢复连接：${luoguConnected}` : "正在检测洛谷连接";
     status.className = "badge blue luogu-connection-status";
   }
   const request = (async () => {
     try {
       const response = await sendLuoguBridge("PING", {});
-      ensureLuoguExtensionCurrent(response);
+      ensureJudgeExtensionCurrent(response);
       setLuoguConnection(response.connected ? response.account || "已连接" : "");
       return response;
     } catch (error) {
       showLuoguBridgeHelp(error.message || "插件未响应，请检查插件配置后重试。", { reveal: force });
-      const currentStatus = document.querySelector(".luogu-connection-status");
+      const currentStatus = document.querySelector('.luogu-setup[data-judge-platform="luogu"] .luogu-connection-status');
       if (currentStatus)
-        currentStatus.textContent = luoguConnected ? `上次连接 · ${luoguConnected}（等待确认）` : "插件未响应";
+        currentStatus.title = luoguConnected ? `上次连接：${luoguConnected}，等待确认` : "插件未响应，请检查插件配置";
       if (force) throw error;
       return { connected: false, reason: error.message };
     }
@@ -1227,27 +1260,37 @@ window.addEventListener("message", event => {
 });
 window.addEventListener("scu-luogu-status", event => {
   if (event.detail?.context === "coding") return;
-  const { submission_id, remote_submission_id, status, detail = "" } = event.detail || {};
+  const { submission_id, remote_submission_id, remote_problem_id, platform = "luogu", status, detail = "" } = event.detail || {};
   if (!Number.isInteger(submission_id) || !remote_submission_id || !status) return;
-  void updateRemoteResult(submission_id, { remote_submission_id, status, detail })
+  void updateRemoteResult(submission_id, { platform, remote_problem_id, remote_submission_id, status, detail })
     .then(() => {
       if (selectedProblem) void loadContestSubmissions();
     })
-    .catch(error => notify(`洛谷评测状态同步失败：${error.message}`, "error"));
+    .catch(error => notify(`${judgePlatform(platform)?.label || "平台"}评测状态同步失败：${error.message}`, "error"));
 });
-export async function requestLuoguSubmit(payload) {
-  const ping = await refreshLuoguBridgeConnection({ force: true });
-  if (!ping.connected) throw new Error(ping.reason || "请先登录洛谷并检测插件连接。");
+export async function requestJudgeSubmit(payload) {
+  const { platform } = payload;
+  const config = judgePlatform(platform);
+  if (!config) throw new Error("此题未关联支持的评测平台。");
+  const ping = await pingRemotePlatform(platform);
+  if (!ping.connected) throw new Error(ping.reason || `请先登录 ${config.label} 并保持页面打开。`);
+  if (!config.verification) return sendLuoguBridge("SUBMIT", payload, 30000);
   return submitWithLuoguVerification(payload, {
-    send: value => sendLuoguBridge("SUBMIT", value, 30000),
+    send: value => sendLuoguBridge("SUBMIT", { ...value, platform }, 30000),
     requestCaptcha: requestLuoguCaptcha,
   });
 }
-function ensureLuoguExtensionCurrent(response) {
-  if (!isLuoguExtensionOutdated(response.extension_version)) return;
+async function pingRemotePlatform(platform) {
+  if (platform === "luogu") return refreshLuoguBridgeConnection({ force: true });
+  const response = await sendLuoguBridge("PING", { platform });
+  ensureJudgeExtensionCurrent(response);
+  return response;
+}
+function ensureJudgeExtensionCurrent(response) {
+  if (!isJudgeExtensionOutdated(response.extension_version)) return;
   const tutorial = $("luoguTutorial");
   if (tutorial && !tutorial.open) tutorial.showModal();
-  throw new Error("洛谷提交插件需要更新，已打开安装教程。下载新版并刷新浏览器扩展后即可继续。");
+  throw new Error("多平台评测插件需要更新，已打开安装教程。下载新版并刷新浏览器扩展后即可继续。");
 }
 async function updateRemoteResult(id, payload) {
   return api(`/submissions/${id}/remote-result`, { method: "POST", body: JSON.stringify(payload) });
@@ -1326,7 +1369,7 @@ function submissionTable(rows, { groupedUser = false } = {}) {
     "题目",
     "语言",
     "评测结果",
-    ...(managementMode() ? ["洛谷记录"] : []),
+    ...(managementMode() ? ["平台记录"] : []),
     "提交时间",
   ];
   for (const label of labels) {
@@ -1348,19 +1391,19 @@ function submissionTable(rows, { groupedUser = false } = {}) {
     tr.append(el("td", row.problem_title ? `${row.problem_title} · #${row.problem_id}` : `#${row.problem_id}`), el("td", languageName(row.language)));
     const status = el("td");
     status.append(statusBadge(row.status));
-    if (managementMode() && row.remote_submission_id) status.append(el("span", "洛谷浏览器同步", "remote-result-source"));
+    if (managementMode() && row.remote_submission_id) status.append(el("span", `${judgePlatform(row.remote_platform)?.label || "平台"}浏览器同步`, "remote-result-source"));
     const cells = [status];
     if (managementMode()) {
       const remote = el("td");
       if (row.remote_submission_id) {
         const link = el("a", `#${row.remote_submission_id}`, "text-button");
-        link.href = `https://www.luogu.com.cn/record/${encodeURIComponent(row.remote_submission_id)}`;
+        link.href = judgeRecordUrl(row.remote_platform, row.remote_submission_id);
         link.target = "_blank"; link.rel = "noopener noreferrer"; remote.append(link);
       } else remote.textContent = "—";
       cells.push(remote);
     }
     const statusHint = [
-      managementMode() && row.remote_submission_id ? "洛谷状态由用户浏览器插件读取并同步，请打开洛谷记录复核。" : "",
+      managementMode() && row.remote_submission_id ? `${judgePlatform(row.remote_platform)?.label || "平台"}状态由用户浏览器插件读取并同步，请打开平台记录复核。` : "",
       row.detail,
     ].filter(Boolean).join("\n");
     if (statusHint) {
@@ -1423,8 +1466,9 @@ async function openSubmissionDetail(id) {
     detail.append(el("h3", "评测信息"), el("pre", judgeDetail));
     body.append(detail);
     if (managementMode() && item.remote_submission_id) {
-      const remote = el("a", `打开洛谷记录 #${item.remote_submission_id} ↗`, "text-button");
-      remote.href = `https://www.luogu.com.cn/record/${encodeURIComponent(item.remote_submission_id)}`;
+      const platform = item.remote_platform || "luogu";
+      const remote = el("a", `打开${judgePlatform(platform)?.label || "平台"}记录 #${item.remote_submission_id} ↗`, "text-button");
+      remote.href = judgeRecordUrl(platform, item.remote_submission_id);
       remote.target = "_blank"; remote.rel = "noopener noreferrer"; body.append(remote);
     }
     const source = el("section", "", "submission-detail-source");
@@ -1538,8 +1582,8 @@ async function loadUserSubmissionPage(group, user, page) {
 }
 export async function createContest() {
   if ($("contestForm").inert) throw new Error("比赛信息正在加载，请稍后保存");
-  if (!editingContestId && !selectedLuoguProblems.length)
-    throw new Error("至少添加一道洛谷题目后才能创建比赛。");
+  if ((!editingContestId || editingContestJudgeMode === "luogu") && !selectedContestProblems.length)
+    throw new Error("至少添加一道比赛题目后才能保存。");
   const starts = new Date($("starts").value).getTime() / 1000;
   const ends = new Date($("ends").value).getTime() / 1000;
   if (!Number.isFinite(starts) || !Number.isFinite(ends))
@@ -1551,10 +1595,10 @@ export async function createContest() {
     participant_ids: contestParticipantIds() };
   if (editing) {
     body.judge_mode = editingContestJudgeMode;
-    if (editingContestJudgeMode === "luogu") body.problems = selectedLuoguProblems;
+    if (editingContestJudgeMode === "luogu") body.problems = selectedContestProblems;
   } else {
     body.judge_mode = "luogu";
-    body.problems = selectedLuoguProblems;
+    body.problems = selectedContestProblems;
   }
   const response = await api(editing ? `/admin/contests/${editingContestId}` : "/admin/contests", {
     method: editing ? "PUT" : "POST",
@@ -1563,10 +1607,7 @@ export async function createContest() {
   const finishedId = editingContestId || response.id;
   cancelContestEditing();
   $("contestForm").reset();
-  selectedLuoguProblems = [];
-  renderSelectedLuoguProblems();
-  $("luoguProblemSearch").value = "";
-  $("luoguProblemSuggestions").replaceChildren();
+  selectedContestProblems = [];
   await refreshContests();
   if (selectedContest?.id === finishedId) {
     selectedContest = contests.find(item => item.id === finishedId) || null;
@@ -1605,6 +1646,7 @@ async function beginEditContest(contest) {
     renderContestList();
   }
   editingContestId = contest.id;
+  resetProblemSearch();
   editingContestJudgeMode = contest.judge_mode;
   $("contestTitle").value = contest.title;
   $("starts").value = dateTimeInput(contest.starts);
@@ -1614,21 +1656,22 @@ async function beginEditContest(contest) {
   const questionFields = document.querySelectorAll(".contest-question-fields");
   for (const field of questionFields) field.hidden = contest.judge_mode !== "luogu";
   if (contest.judge_mode === "luogu") {
-    selectedLuoguProblems = problems.map(problem => ({
+    selectedContestProblems = problems.map(problem => ({
       ...problem,
       id: problem.id,
+      remote_platform: problem.remote_platform || "luogu",
       remote_problem_id: problem.remote_problem_id,
       samples: problem.samples || [],
       tests: [],
       points: problem.points ?? 100,
     }));
-    renderSelectedLuoguProblems();
+    renderSelectedContestProblems();
   } else {
-    selectedLuoguProblems = [];
+    selectedContestProblems = [];
     $("contestForm").querySelector('[type="submit"]').disabled = false;
   }
   $("contestDisclosureTitle").textContent = `编辑比赛 · ${contest.title}`;
-  $("luoguProblemHelp").textContent = "可调整题单；已有提交记录的题目不能移除。题面和样例均可从洛谷刷新。";
+  $("contestProblemHelp").textContent = "可调整题单；已有提交记录的题目不能移除。题面与样例按题目来源平台刷新。";
   $("contestFormHelp").textContent = "保存后更新比赛信息和题单；已有提交的题目不能移除。";
   $("contestForm").querySelector('[type="submit"]').textContent = "保存修改";
   $("contestFormCancel").hidden = false;
@@ -1641,43 +1684,59 @@ function cancelContestEditing() {
   resetContestRoster();
   editingContestId = null;
   editingContestJudgeMode = "luogu";
-  selectedLuoguProblems = [];
+  selectedContestProblems = [];
   $("contestDisclosureTitle").textContent = "创建比赛";
-  $("luoguProblemHelp").textContent = "选择候选题目后自动获取题面与全部公开样例，可添加多道题。";
+  $("contestProblemHelp").textContent = "选择候选题目后自动获取题面与公开样例；每题按来源平台提交评测。";
   $("contestFormHelp").textContent = "题目和比赛信息将一并保存；至少选择一道题。";
   $("contestForm").querySelector('[type="submit"]').textContent = "创建比赛";
   $("contestFormCancel").hidden = true;
   for (const field of document.querySelectorAll(".contest-question-fields")) field.hidden = false;
   $("contestForm").reset();
+  resetProblemSearch();
   $("contestForm").closest("details").open = false;
-  renderSelectedLuoguProblems();
+  renderSelectedContestProblems();
+}
+function resetProblemSearch() {
+  clearTimeout(problemSearchTimer);
+  problemSearchRevision++;
+  const input = $("contestProblemSearch");
+  input.value = "";
+  input.placeholder = judgePlatform($("contestProblemPlatform").value)?.hint || "";
+  input.setAttribute("aria-expanded", "false");
+  const results = $("contestProblemSuggestions");
+  results.replaceChildren();
+  results.hidden = true;
 }
 export function setupContestCreation() {
   setupContestRoster();
   $("closeSubmissionDetail").addEventListener("click", () => $("submissionDetailDialog").close());
   $("closeSubmissionDetailFooter").addEventListener("click", () => $("submissionDetailDialog").close());
-  const input = $("luoguProblemSearch");
-  const results = $("luoguProblemSuggestions");
-  const submit = $("contestForm").querySelector('[type="submit"]');
+  const input = $("contestProblemSearch");
+  const results = $("contestProblemSuggestions");
+  const platform = $("contestProblemPlatform");
+  for (const [value, label] of judgePlatformOptions) platform.append(Object.assign(el("option", label), { value }));
+  resetProblemSearch();
   input.addEventListener("input", () => {
     clearTimeout(problemSearchTimer);
     const query = input.value.trim();
     const revision = ++problemSearchRevision;
+    results.replaceChildren();
+    results.hidden = true;
+    input.setAttribute("aria-expanded", "false");
     if (!query) {
-      results.replaceChildren();
-      results.hidden = true;
-      input.setAttribute("aria-expanded", "false");
       return;
     }
+    const currentPlatform = platform.value;
     problemSearchTimer = setTimeout(async () => {
       try {
-        const suggestions = await api(`/admin/luogu/problem-suggestions?q=${encodeURIComponent(query)}`);
-        if (revision === problemSearchRevision && query === input.value.trim()) renderLuoguSuggestions(suggestions, results);
+        const suggestions = await api(`/admin/platforms/${currentPlatform}/problem-suggestions?q=${encodeURIComponent(query)}`);
+        if (revision === problemSearchRevision) renderContestSuggestions(currentPlatform, suggestions);
       } catch (error) {
         if (revision === problemSearchRevision) { results.replaceChildren(el("p", error.message, "luogu-suggestion-error")); results.hidden = false; input.setAttribute("aria-expanded", "true"); }
       }
     }, 300);
   });
+  platform.addEventListener("change", resetProblemSearch);
   input.addEventListener("keydown", event => {
     if (event.key === "Escape") { results.hidden = true; input.setAttribute("aria-expanded", "false"); }
     if (event.key === "ArrowDown" && !results.hidden) {
@@ -1694,47 +1753,50 @@ export function setupContestCreation() {
     options[next]?.focus();
   });
   document.addEventListener("click", event => {
-    if (!event.target.closest(".luogu-question-search")) {
+    if (!event.target.closest(".contest-question-search")) {
       results.hidden = true;
       input.setAttribute("aria-expanded", "false");
     }
   });
-  submit.disabled = true;
-  renderSelectedLuoguProblems();
+  renderSelectedContestProblems();
   $("contestFormCancel").addEventListener("click", cancelContestEditing);
 }
 
-function renderLuoguSuggestions(suggestions, container) {
+function renderContestSuggestions(platform, suggestions) {
+  const container = $("contestProblemSuggestions");
+  const input = $("contestProblemSearch");
   container.replaceChildren();
-  if (!suggestions.length) { container.append(el("p", "没有匹配的题目。", "luogu-suggestion-empty")); container.hidden = false; $("luoguProblemSearch").setAttribute("aria-expanded", "true"); return; }
+  if (!suggestions.length) container.append(el("p", "没有匹配的题目。", "luogu-suggestion-empty"));
   for (const item of suggestions) {
-    const option = button(`${item.problem_id} · ${item.title}`, async () => {
-      if (selectedLuoguProblems.some(problem => problem.remote_problem_id === item.problem_id)) { notify("这道题已加入比赛。"); return; }
-      const problem = await api(`/admin/luogu/problems/${encodeURIComponent(item.problem_id)}`);
-      selectedLuoguProblems.push({ ...problem, remote_problem_id: problem.problem_id, tests: [], points: 100 });
-      $("luoguProblemSearch").value = "";
-      container.replaceChildren(); container.hidden = true;
-      $("luoguProblemSearch").setAttribute("aria-expanded", "false");
-      renderSelectedLuoguProblems();
+    const option = button(`${item.number || item.problem_id} · ${item.title}`, async () => {
+      const revision = problemSearchRevision;
+      const alreadyAdded = () => selectedContestProblems.some(problem => problem.remote_platform === platform && problem.remote_problem_id === item.problem_id);
+      if (alreadyAdded()) { notify("这道题已加入比赛。"); return; }
+      const problem = await api(`/admin/platforms/${platform}/problems/${encodeURIComponent(item.problem_id)}`);
+      if (revision !== problemSearchRevision || alreadyAdded()) return;
+      selectedContestProblems.push({ ...problem, remote_platform: platform, tests: [], points: 100 });
+      resetProblemSearch();
+      renderSelectedContestProblems();
+      input.focus();
     }, "luogu-suggestion-option");
     option.setAttribute("role", "option"); container.append(option);
   }
   container.hidden = false;
-  $("luoguProblemSearch").setAttribute("aria-expanded", "true");
+  input.setAttribute("aria-expanded", "true");
 }
 
-function renderSelectedLuoguProblems() {
-  const container = $("selectedLuoguProblems");
+function renderSelectedContestProblems() {
+  const container = $("selectedContestProblems");
   const submit = $("contestForm").querySelector('[type="submit"]');
-  container.replaceChildren(); submit.disabled = selectedLuoguProblems.length === 0;
-  if (!selectedLuoguProblems.length) { container.append(el("p", editingContestId ? "至少保留一道洛谷题目。" : "至少选择一道洛谷题目后才能创建比赛。", "muted")); return; }
+  container.replaceChildren(); submit.disabled = editingContestId && editingContestJudgeMode === "docker" ? false : selectedContestProblems.length === 0;
+  if (!selectedContestProblems.length) { container.append(el("p", editingContestId ? "至少保留一道题目。" : "至少选择一道题目后才能创建比赛。", "muted")); return; }
   const list = el("div", "", "selected-question-list");
-  selectedLuoguProblems.forEach((problem, index) => {
+  selectedContestProblems.forEach((problem, index) => {
     const item = el("article", "", "selected-question");
     const heading = el("div", "", "selected-question-heading");
     const title = el("div", "", "selected-question-title");
-    title.append(el("span", problem.remote_problem_id, "eyebrow"), el("strong", problem.title));
-    const remove = button("移除", () => { selectedLuoguProblems.splice(index, 1); renderSelectedLuoguProblems(); }, "text-button");
+    title.append(el("span", `${judgePlatform(problem.remote_platform)?.label || "平台"} · ${problem.remote_problem_id}`, "eyebrow"), el("strong", problem.title));
+    const remove = button("移除", () => { selectedContestProblems.splice(index, 1); renderSelectedContestProblems(); }, "text-button");
     remove.setAttribute("aria-label", `移除 ${problem.remote_problem_id} ${problem.title}`);
     heading.append(title, remove);
     const detail = document.createElement("details");
@@ -1747,9 +1809,10 @@ function renderSelectedLuoguProblems() {
     for (const [sampleIndex, example] of examples.entries()) {
       samples.append(el("pre", `样例 ${sampleIndex + 1} · 输入\n${example.input ?? ""}`), el("pre", `样例 ${sampleIndex + 1} · 输出\n${example.output ?? ""}`));
     }
-    if (!examples.length) samples.append(el("p", "洛谷未提供公开样例。", "muted"));
+    if (!examples.length) samples.append(el("p", `${judgePlatform(problem.remote_platform)?.label || "平台"}未提供公开样例。`, "muted"));
     const statement = el("div", "", "imported-question-statement markdown-content");
-    statement.innerHTML = normalizeProblemStatementHtml(problem.statement_html || problem.statement);
+    if (problem.statement_html) statement.innerHTML = normalizeProblemStatementHtml(problem.statement_html);
+    else statement.textContent = problem.statement;
     detail.append(el("summary", "查看自动导入的题面与样例"), statement, samples);
     detail.addEventListener("toggle", () => { if (detail.open) void renderProblemMath(statement); });
     const pointsLabel = el("label", "题目分值"); pointsLabel.className = "selected-question-points";

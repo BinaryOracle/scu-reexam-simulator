@@ -165,10 +165,13 @@ def new_submission(db, qid, user, language, source):
             raise HTTPException(409, '此题尚无公开样例，请先补充样例或打开原题链接')
     status = 'Waiting for browser extension' if question['judge_mode'] == 'luogu' else 'Judging'
     sid = db.execute('''INSERT INTO coding_submissions(user_id,question_id,question_version,question_content_version,question_title,judge_mode,
-        remote_problem_id,language,source,status,created) VALUES (?,?,?,?,?,?,?,?,?,?,?)''',
+        remote_problem_id,remote_platform,language,source,status,created) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)''',
         (user['id'], qid, question['version'], question['content_version'], question['title'], question['judge_mode'], question['remote_problem_id'],
-         language, source, status, time.time())).lastrowid
-    return submission(db, sid, user), json.loads(question['samples'])
+         question['remote_platform'], language, source, status, time.time())).lastrowid
+    result = submission(db, sid, user)
+    if question['judge_mode'] == 'luogu':
+        result['source_info'] = json.loads(question['source_info'])
+    return result, json.loads(question['samples'])
 
 
 def finish_local(db, sid, result):
@@ -183,27 +186,31 @@ def finish_local(db, sid, result):
 def remote_result(db, sid, user, payload):
     row = submission(db, sid, user, owner_only=True)
     if row['judge_mode'] != 'luogu':
-        raise HTTPException(409, '此记录不是洛谷评测')
-    if payload.get('remote_problem_id') and payload['remote_problem_id'].upper() != row['remote_problem_id']:
+        raise HTTPException(409, '此记录不是远程评测')
+    if payload.get('platform', 'luogu') != row['remote_platform']:
+        raise HTTPException(409, '评测平台与提交记录不一致')
+    normalize_problem = str.strip if row['remote_platform'] == 'leetcode' else str.upper
+    if payload.get('remote_problem_id') and normalize_problem(payload['remote_problem_id']) != row['remote_problem_id']:
         raise HTTPException(409, '远端题目编号与提交记录不一致')
     remote_id, status = payload['remote_submission_id'], payload['status']
     if row['remote_submission_id'] and remote_id != row['remote_submission_id']:
         raise HTTPException(409, '远端提交编号与本地记录不一致')
     if status != 'Submission Failed' and not remote_id:
-        raise HTTPException(422, '远端评测状态必须包含洛谷提交编号')
+        raise HTTPException(422, '远端评测状态必须包含提交编号')
     if row['status'] in TERMINAL:
         if status != row['status']:
             raise HTTPException(409, '已完成的评测结果不能被覆盖')
         return row
     if row['status'] == 'Judging' and status == 'Submitted':
         raise HTTPException(409, '评测状态不能退回待提交')
-    if remote_id and db.execute('SELECT 1 FROM coding_submissions WHERE remote_submission_id=? AND id<>?', (remote_id, sid)).fetchone():
-        raise HTTPException(409, '此洛谷提交已关联另一条记录')
+    if remote_id and db.execute('SELECT 1 FROM coding_submissions WHERE remote_platform=? AND remote_submission_id=? AND id<>?',
+                                (row['remote_platform'], remote_id, sid)).fetchone():
+        raise HTTPException(409, '此远程提交已关联另一条记录')
     terminal = status in TERMINAL
     try:
         db.execute('''UPDATE coding_submissions SET remote_submission_id=?,status=?,detail=?,completed=?,completed_date=? WHERE id=?''',
                    (remote_id, status, payload['detail'], time.time() if terminal else None,
                     today().isoformat() if terminal else None, sid))
     except sqlite3.IntegrityError as error:
-        raise HTTPException(409, '此洛谷提交已关联另一条记录') from error
+        raise HTTPException(409, '此远程提交已关联另一条记录') from error
     return submission(db, sid, user)

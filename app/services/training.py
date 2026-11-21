@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from fastapi import HTTPException
 from app.config import load_config
+from app.services.problem_content import render_statement
 from app.services import points
 from app.services.training_schema import SECTIONS
 from app.services import training_catalog as catalog
@@ -123,6 +124,7 @@ def get_session(db, sid, uid):
         if not available:
             snapshot.update(question='此题已撤回或当前不可用', answer='', images=[], source_info={})
         favorite = db.execute('SELECT 1 FROM training_favorites WHERE user_id=? AND question_id=?', (uid, card['question_id'])).fetchone()
+        snapshot.update(question_html=render_statement(snapshot['question']), answer_html=render_statement(snapshot['answer']))
         cards.append(snapshot | dict(id=card['id'], question_id=card['question_id'], completed=card['completed_at'] is not None,
                                      rating=card['rating'], available=available, favorite=bool(favorite),
                                      mastery=mastery.personal_state(db,uid,card['question_id']) if available else None))

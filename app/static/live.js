@@ -2,8 +2,8 @@
 import {api,state} from './api.js?v=20261114-ui-v17';
 import {emptyState} from './ui.js?v=20261114-ui-v17';
 import {el,button,notify,confirmAction,modal,materialList} from './live-ui.js?v=1';
-import {liveRoute,liveDate,recordingText,mayJoin,needsLessonUpdates} from './live-model.mjs?v=2';
-import {configureCourseLearning,renderCoursePage,clearCourseLearning} from './course-learning.js?v=20261118-course-v24';
+import {liveRoute,liveDate,recordingText,mayJoin,needsLessonUpdates} from './live-model.mjs?v=20261121-markdown-v1';
+import {configureCourseLearning,renderCoursePage,clearCourseLearning} from './course-learning.js?v=20261121-question-markdown-v1';
 import {mediaLease} from './live-devices.mjs?v=1';
 import {Classroom} from './live-room.js?v=20261116-frames-v1';
 import {writeAppRoute} from './view-route.mjs?v=20261115-navigation-v3';
@@ -28,10 +28,10 @@ export async function refreshLive(){
     room.dispose();room=null;
   }
   const turn=++revision;clearTimeout(pageTimer);document.body.classList.remove('live-immersive');
-  const target=root();target.setAttribute('aria-busy','true');target.replaceChildren(el('p','正在准备课堂…','live-loading'));
-  const route=liveRoute(location.hash);
+  const target=root();const route=liveRoute(location.hash);target.setAttribute('aria-busy','true');
+  if(route.kind!=='study'){clearCourseLearning();target.replaceChildren(el('p','正在准备课堂…','live-loading'));}
   try{
-    if(['list','public','manage','course','study','preview','editor'].includes(route.kind)){if(valid(turn))await renderCoursePage(route);}
+    if(['list','public','manage','course','study','preview','editor','markdown'].includes(route.kind)){if(valid(turn))await renderCoursePage(route);}
     else {const data=await api(`/live/lessons/${route.id}`);if(valid(turn)){renderLesson(data);if(needsLessonUpdates(data))scheduleLesson(data.id,turn);}}
   }catch(error){if(valid(turn))target.replaceChildren(emptyState('暂时无法打开课堂',error.message),button('返回课程列表',()=>navigate('')));}
   finally{if(valid(turn))target.removeAttribute('aria-busy');}

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { canRevealLuoguSource, contestSubmitGuidance, normalizeSubmissionPage, refreshContestProblemStats, submissionPanelMessage } from "../app/static/contest-model.mjs";
+import { canRevealLuoguSource, normalizeSubmissionPage, refreshContestProblemStats, submissionPanelMessage } from "../app/static/contest-model.mjs";
 
 test("gives contest submission panels explicit loading, empty and retry states", () => {
   assert.deepEqual(submissionPanelMessage("loading"), {
@@ -49,18 +49,21 @@ test("reveals Luogu source IDs to participants only after the contest ends", () 
   assert.equal(canRevealLuoguSource(contest, 150, true), true);
 });
 
-test("explains why submission is unavailable before and after a contest", () => {
-  const contest = { starts: 100, ends: 200 };
-  assert.match(contestSubmitGuidance(contest, 99), /比赛尚未开始/);
-  assert.equal(contestSubmitGuidance(contest, 150), "");
-  assert.match(contestSubmitGuidance(contest, 201), /提交已关闭，不会计入排名/);
+test("keeps contest end-state out of the editor guidance row and provides public sample execution", async () => {
+  const source = await readFile(new URL('../app/static/contest.js', import.meta.url), 'utf8');
+  const render = source.slice(source.indexOf('function renderEditor('), source.indexOf('function renderRemoteSetup('));
+  assert.match(render, /"本地运行样例",\s*async \(\) =>/);
+  assert.match(render, /\/problems\/\$\{problem\.id\}\/run/);
+  assert.match(render, /row\.append\(saved, run, submit\)/);
+  assert.doesNotMatch(render, /contest-submit-guidance/);
+  assert.match(source, /submit\.disabled =\s*submitting \|\| now < selectedContest\.starts \|\| now > selectedContest\.ends/);
 });
 
 test("does not prompt for submissions in the empty standings state after a contest ends", async () => {
   const source = await readFile(new URL('../app/static/contest.js', import.meta.url), 'utf8');
   assert.match(source, /const ended = Date\.now\(\) \/ 1000 > contestOverview\.ends;/);
   assert.match(source, /ended \? "本场比赛尚无成绩记录。" : "暂无成绩。完成首次提交，争取榜上领先。"/);
-  assert.equal(source.match(/Date\.now\(\) \/ 1000 <= selectedContest\.ends && !luoguStatusChecked/g)?.length, 2);
+  assert.equal(source.match(/Date\.now\(\) \/ 1000 <= selectedContest\.ends && !luoguStatusChecked/g)?.length, 1);
 });
 
 test("normalizes legacy submission arrays for the current table and pagination controls", () => {

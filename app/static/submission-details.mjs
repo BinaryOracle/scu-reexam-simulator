@@ -8,9 +8,10 @@ export function renderSubmissionDetails(target, result) {
   summary.append(verdict);
   const metadata = el("dl", "", "submission-metadata");
   const language = ({ cpp11: "C++11", c: "C", python3: "Python 3" })[result.language] || result.language || "—";
+  const remoteLabel = result.remote_submission_id ? "评测平台提交编号" : null;
   for (const [label, value] of [["题目", result.question_title], ["语言", language],
     ["提交时间", result.created ? new Date(result.created * 1000).toLocaleString("zh-CN", { hour12: false }) : null],
-    ["洛谷提交编号", result.remote_submission_id]]) {
+    [remoteLabel, result.remote_submission_id]]) {
     if (!value) continue;
     const item = el("div"); item.append(el("dt", label), el("dd", String(value))); metadata.append(item);
   }

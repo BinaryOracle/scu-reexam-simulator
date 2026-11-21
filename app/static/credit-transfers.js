@@ -1,7 +1,7 @@
 /** Transfer personal interview credits with a stable retry key and private receipts. */
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, confirmAction, notify, dateTime, badge } from './ui.js?v=20261114-ui-v17';
-import { learningDialog, pagination } from './training-ui.js?v=20261115-ui-v19';
+import { learningDialog, pagination } from './training-ui.js?v=20261121-question-markdown-v1';
 let generation=0,page=1;
 export function clearTransfers(){generation++;page=1;for(const d of document.querySelectorAll('dialog.transfer-dialog'))d.close();}
 export async function refreshTransfers(profile,refreshProfile){

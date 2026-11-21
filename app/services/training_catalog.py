@@ -5,6 +5,8 @@ import time
 from fastapi import HTTPException
 from app.config import load_config
 from app.services.training_mastery import personal_state
+from app.services.problem_content import render_statement
+from app.services.question_markdown import bind
 
 PAGE_SIZE = 12
 SELECT = '''SELECT q.*,c.name AS collection_name,c.category,c.section_id,c.active AS collection_active,
@@ -61,6 +63,7 @@ def serialize(db, row, uid):
     favorite = db.execute('SELECT 1 FROM training_favorites WHERE user_id=? AND question_id=?', (uid, row['id'])).fetchone()
     return {key: row[key] for key in ('id', 'collection_id', 'collection_name', 'section_id', 'category', 'question', 'answer',
                                      'visibility', 'review_status', 'review_reason', 'version')} | {
+        'question_html': render_statement(row['question']), 'answer_html': render_statement(row['answer']),
         'active': bool(row['active']), 'favorite': bool(favorite), 'source_info': json.loads(row['source_info']),
         'mastery': personal_state(db, uid, row['id']),
         'images': [f"/api/training/questions/{row['id']}/images/{i}" for i, _ in enumerate(json.loads(row['images']))],
@@ -137,6 +140,7 @@ def create_question(db, user, item, *, official=False):
         visibility,review_status,created,updated) VALUES (?,?,?,?,?,?,?,?,?)''',
         (item['collection_id'], None if official else user['id'], position, item['question'], item['answer'],
          'public' if official else 'private', 'approved' if official else 'draft', now, now))
+    bind(db, user, 'training', cursor.lastrowid, item['question'], item['answer'])
     event(db, cursor.lastrowid, user, 'create_official' if official else 'create_private', 1)
     return serialize(db, get_question(db, cursor.lastrowid), user['id'])
 
@@ -145,6 +149,7 @@ def update_question(db, user, qid, item, version, *, official=False, active=True
     row = editable(db, qid, user, admin=official)
     check_version(row, version)
     item = validate_item(db, item)
+    bind(db, user, 'training', qid, item['question'], item['answer'])
     db.execute('''UPDATE training_questions SET collection_id=?,question=?,answer=?,visibility=?,
         review_status=?,review_reason='',reviewed_by=NULL,reviewed_at=NULL,active=?,version=version+1,updated=? WHERE id=?''',
         (item['collection_id'], item['question'], item['answer'], 'public' if official else 'private',

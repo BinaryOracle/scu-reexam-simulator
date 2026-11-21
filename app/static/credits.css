@@ -123,6 +123,7 @@
 .credit-package strong { display: block; margin: 8px 0; color: #986642; font-size: 28px; font-weight: 500; }
 .credit-package p { color: #a18a74; font-size: 11px; }
 .redemption-record { display: flex; justify-content: space-between; align-items: center; gap: 15px; border-bottom: 1px solid var(--line); padding: 20px 24px; }
+#redemptionHistory { max-height: min(440px, 65vh); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .redemption-record:last-child { border-bottom: 0; }
 .redemption-record strong { font-size: 13px; font-weight: 550; }
 .redemption-record p { font-size: 11px; color: var(--muted); margin-top: 4px; }
@@ -309,6 +310,7 @@
 .points-purchase-total { color: var(--muted); font-size: 12px; line-height: 1.8; }
 .points-purchase-form .button { margin-top: 5px; min-height: 44px; }
 .points-history-list { display: grid; }
+#pointsHistory { max-height: min(440px, 65vh); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .points-history-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 19px 0; border-top: 1px solid var(--line); }
 .points-history-row > div { min-width: 0; }
 .points-history-row strong { font-size: 13px; }

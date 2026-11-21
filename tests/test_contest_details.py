@@ -55,6 +55,46 @@ def test_all_samples_and_rendered_statement_reach_admin_and_candidate(client):
         assert 'tests' not in problem
 
 
+def test_public_sample_run_remains_available_after_contest_ends_without_submission(client, monkeypatch):
+    from app.services import coding_judge
+    manager, alice = login(client, 'manager'), login(client, 'alice')
+    created, payload = make_contest(client, manager)
+    cid, pid = created['id'], created['problem_ids'][0]
+    payload['ends'] = time.time() - 60
+    payload['problems'][0]['id'] = pid
+    assert client.put(f'/api/admin/contests/{cid}', headers=manager, json=payload).status_code == 200
+    observed = []
+    monkeypatch.setattr(coding_judge, 'evaluate', lambda language, source, samples: (
+        observed.extend(samples) or {'status': 'Accepted', 'detail': '通过公开样例', 'passed_cases': 2,
+                                     'total_cases': 2, 'cases': []}))
+    result = client.post(f'/api/problems/{pid}/run', headers=alice, json={
+        'language': 'cpp11', 'source': 'int main() {}'})
+    assert result.status_code == 200, result.text
+    assert result.json()['status'] == 'Accepted'
+    assert observed == [{'input': '4', 'output': '3'}, {'input': '5', 'output': '7'}]
+    assert client.get('/api/submissions', headers=alice).json()['total'] == 0
+    assert client.post(f'/api/problems/{pid}/submissions', headers=alice, json={
+        'language': 'cpp11', 'source': 'int main() {}'}).status_code == 403
+
+
+def test_public_sample_run_requires_contest_start_and_access(client, monkeypatch):
+    from app.services import coding_judge
+    manager, alice, bob = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
+    created, payload = make_contest(client, manager)
+    cid, pid = created['id'], created['problem_ids'][0]
+    payload['starts'] = time.time() + 600
+    payload['problems'][0]['id'] = pid
+    assert client.put(f'/api/admin/contests/{cid}', headers=manager, json=payload).status_code == 200
+    monkeypatch.setattr(coding_judge, 'evaluate', lambda *args: {'status': 'Accepted'})
+    assert client.post(f'/api/problems/{pid}/run', headers=alice, json={
+        'language': 'cpp11', 'source': 'int main() {}'}).status_code == 403
+    payload['starts'] = time.time() - 60
+    payload['participant_ids'] = [3]
+    assert client.put(f'/api/admin/contests/{cid}', headers=manager, json=payload).status_code == 200
+    assert client.post(f'/api/problems/{pid}/run', headers=bob, json={
+        'language': 'cpp11', 'source': 'int main() {}'}).status_code == 403
+
+
 def test_luogu_current_nested_content_and_all_samples(monkeypatch):
     from app.services import luogu_catalog
     monkeypatch.setattr(luogu_catalog, '_page', lambda *args: {'problem': {
@@ -133,3 +173,74 @@ def test_existing_luogu_problem_displays_deduplicated_resource_limits():
     assert '时间限制：1000-2000 ms' in result['statement_html']
     assert '内存限制：128 MiB' in result['statement_html']
     assert row['statement'].endswith('128-128 MiB')
+
+
+def test_one_contest_can_mix_luogu_and_leetcode_problems_and_submission_results(client, monkeypatch):
+    from app.services import leetcode_catalog
+
+    manager, alice = login(client, 'manager'), login(client, 'alice')
+    now = time.time()
+    monkeypatch.setattr(leetcode_catalog, 'problem', lambda slug: {
+        'title': 'Two Sum', 'statement': 'Return indices.', 'samples': [], 'difficulty': 1,
+        'remote_problem_id': slug, 'remote_platform': 'leetcode', 'judge_mode': 'luogu',
+        'source_url': f'https://leetcode.cn/problems/{slug}/',
+        'source_info': {'platform': 'leetcode', 'question_id': '1'},
+    })
+    contest_payload = {
+        'title': '双平台练习', 'starts': now - 10, 'ends': now + 3600,
+        'judge_mode': 'luogu', 'participant_ids': [3, 4],
+        'problems': [
+            {'title': '洛谷 A+B', 'statement': '相加', 'remote_problem_id': 'P1000',
+             'remote_platform': 'luogu', 'samples': [{'input': '1 2', 'output': '3'}]},
+            {'title': 'Two Sum', 'statement': 'Return indices.', 'remote_problem_id': 'two-sum',
+             'remote_platform': 'leetcode', 'source_info': {'platform': 'leetcode', 'question_id': '1'},
+             'samples': []},
+        ],
+    }
+    response = client.post('/api/admin/contests', headers=manager, json=contest_payload)
+    assert response.status_code == 200, response.text
+    cid, luogu_id, leetcode_id = response.json()['id'], *response.json()['problem_ids']
+
+    edited = contest_payload | {
+        'title': '双平台练习（已编辑）',
+        'problems': [
+            contest_payload['problems'][0] | {'id': luogu_id, 'points': 80},
+            contest_payload['problems'][1] | {'id': leetcode_id, 'title': 'Two Sum（已编辑）', 'points': 120},
+        ],
+    }
+    updated = client.put(f'/api/admin/contests/{cid}', headers=manager, json=edited)
+    assert updated.status_code == 200, updated.text
+    assert updated.json()['problem_ids'] == [luogu_id, leetcode_id]
+    problems = client.get(f'/api/contests/{cid}/problems', headers=alice)
+    assert problems.status_code == 200, problems.text
+    assert [item['remote_platform'] for item in problems.json()] == ['luogu', 'leetcode']
+    assert problems.json()[1]['source_info']['question_id'] == '1'
+    assert problems.json()[1]['title'] == 'Two Sum（已编辑）'
+    assert [item['points'] for item in problems.json()] == [80, 120]
+
+    submission = client.post(f'/api/problems/{leetcode_id}/submissions', headers=alice, json={
+        'language': 'cpp11', 'source': 'class Solution {};',
+    })
+    assert submission.status_code == 200, submission.text
+    assert submission.json()['remote_platform'] == 'leetcode'
+    result = client.post(f"/api/submissions/{submission.json()['id']}/remote-result", headers=alice, json={
+        'platform': 'leetcode', 'remote_problem_id': 'two-sum', 'remote_submission_id': '123456789',
+        'status': 'Judging', 'detail': '评测中',
+    })
+    assert result.status_code == 200, result.text
+    assert result.json()['remote_platform'] == 'leetcode'
+    final = client.post(f"/api/submissions/{submission.json()['id']}/remote-result", headers=alice, json={
+        'platform': 'leetcode', 'remote_problem_id': 'two-sum', 'remote_submission_id': '123456789',
+        'status': 'Accepted', 'detail': '18 / 18',
+    })
+    assert final.status_code == 200 and final.json()['status'] == 'Accepted'
+    late_ack = client.post(f"/api/submissions/{submission.json()['id']}/remote-result", headers=alice, json={
+        'platform': 'leetcode', 'remote_problem_id': 'two-sum', 'remote_submission_id': '123456789',
+        'status': 'Submitted', 'detail': '受理中',
+    })
+    assert late_ack.status_code == 200 and late_ack.json()['status'] == 'Accepted'
+    mismatch = client.post(f"/api/submissions/{submission.json()['id']}/remote-result", headers=alice, json={
+        'platform': 'luogu', 'remote_problem_id': 'two-sum', 'remote_submission_id': '123456789',
+        'status': 'Accepted',
+    })
+    assert mismatch.status_code == 409

@@ -2,13 +2,15 @@
 import time
 from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator
+from pydantic import AliasChoices, BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator
 from app.db import connect
 from app.services.auth import administrator, current_user, coding_user, require_coding
 from app.services import coding_catalog as catalog
 from app.services import coding_practice as practice
 from app.services import coding_comments
 from app.services import luogu_catalog
+from app.services import leetcode_catalog
+from app.services import coding_platforms
 
 router = APIRouter(tags=['算法带刷'])
 
@@ -33,8 +35,11 @@ class Question(Payload):
     samples: list[Sample] = Field(default_factory=list, max_length=50)
     reference_code: str = Field(default='', max_length=200000)
     reference_language: Literal['cpp11', 'c', 'python3'] = 'cpp11'
+    starter_codes: dict[str, str] = Field(default_factory=dict)
+    source_info: dict[str, object] = Field(default_factory=dict)
     source_url: str = Field(default='', max_length=2000)
-    remote_problem_id: str = Field(default='', max_length=32)
+    remote_problem_id: str = Field(default='', max_length=100)
+    remote_platform: Literal['luogu', 'leetcode'] = 'luogu'
     judge_mode: Literal['luogu', 'samples'] = 'samples'
     active: StrictBool = True
 
@@ -51,8 +56,11 @@ class QuestionEdit(Payload):
     samples: list[Sample] | None = Field(default=None, max_length=50)
     reference_code: str | None = Field(default=None, max_length=200000)
     reference_language: Literal['cpp11', 'c', 'python3'] | None = None
+    starter_codes: dict[str, str] | None = None
+    source_info: dict[str, object] | None = None
     source_url: str | None = Field(default=None, max_length=2000)
-    remote_problem_id: str | None = Field(default=None, max_length=32)
+    remote_problem_id: str | None = Field(default=None, max_length=100)
+    remote_platform: Literal['luogu', 'leetcode'] | None = None
     judge_mode: Literal['luogu', 'samples'] | None = None
     active: StrictBool | None = None
 
@@ -136,7 +144,8 @@ class Comment(Payload):
 
 class RemoteResult(Payload):
     remote_submission_id: str = Field(default='', max_length=64, pattern=r'^\d*$')
-    remote_problem_id: str = Field(default='', max_length=32)
+    remote_problem_id: str = Field(default='', max_length=100)
+    platform: Literal['luogu', 'leetcode'] = 'luogu'
     status: Literal['Submitted', 'Judging', 'Accepted', 'Wrong Answer', 'Output Limit Exceeded',
                     'Time Limit Exceeded', 'Memory Limit Exceeded', 'Runtime Error', 'Compile Error',
                     'System Error', 'Submission Failed']
@@ -145,6 +154,14 @@ class RemoteResult(Payload):
 
 class LuoguImport(Payload):
     problem_id: str = Field(min_length=1, max_length=32, pattern=r'^[A-Za-z][A-Za-z0-9_-]*$')
+
+
+class LeetCodeImport(Payload):
+    slug: str = Field(min_length=1, max_length=100, pattern=r'^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$')
+
+
+class PlatformImport(Payload):
+    identifier: str = Field(min_length=1, max_length=300, validation_alias=AliasChoices('identifier', 'slug', 'problem_id'))
 
 
 @router.get('/api/coding/home')
@@ -324,12 +341,27 @@ def submission(qid: int, payload: Submission, user=Depends(coding_user)):
 @router.post('/api/coding/questions/{qid}/run')
 def run_code(qid: int, payload: LocalRun, user=Depends(coding_user)):
     from app.services import coding_judge
+    import json
+    from app.services import coding_test_adapters
     with connect() as db:
-        catalog.require_access(db, qid, user['id'], practice=True)
+        question = catalog.require_access(db, qid, user['id'], practice=True)
+        platform = question['remote_platform'] if question['judge_mode'] == 'luogu' else 'samples'
+        info = json.loads(question['source_info'])
+        meta = info.get('leetcode_metadata')
     try:
-        return coding_judge.evaluate(payload.language, payload.source, [case.model_dump() for case in payload.cases])
+        if platform == 'leetcode':
+            meta = coding_test_adapters.resolve_metadata(info, question['remote_problem_id'])
+            if not info.get('leetcode_metadata'):
+                info['leetcode_metadata'] = meta
+                with connect() as db:
+                    db.execute('UPDATE coding_questions SET source_info=? WHERE id=? AND version=?',
+                        (json.dumps(info, ensure_ascii=False), qid, question['version']))
+        return coding_test_adapters.evaluate(platform, payload.language, payload.source,
+            [case.model_dump() for case in payload.cases], meta)
     except coding_judge.JudgeUnavailable as error:
         raise HTTPException(503, str(error)) from error
+    except leetcode_catalog.LeetCodeCatalogError as error:
+        raise HTTPException(502, f'无法获取力扣函数签名：{error}，请稍后重试') from error
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
 
@@ -439,10 +471,45 @@ def change_settings(payload: Settings, user=Depends(administrator)):
 @router.post('/api/admin/coding/import-luogu')
 def import_luogu(payload: LuoguImport, user=Depends(administrator)):
     try:
-        result = luogu_catalog.problem(payload.problem_id)
+        result = coding_platforms.problem('luogu', payload.problem_id)
     except luogu_catalog.LuoguCatalogError as error:
         raise HTTPException(502, str(error)) from error
-    if not result['statement'].strip():
-        raise HTTPException(502, '洛谷没有返回完整题面，请稍后重试或保留原题链接')
-    return result | {'remote_problem_id': result['problem_id'], 'judge_mode': 'luogu',
-                     'source_url': f"https://www.luogu.com.cn/problem/{result['problem_id']}"}
+    return result
+
+
+@router.post('/api/admin/coding/import-leetcode')
+def import_leetcode(payload: LeetCodeImport, user=Depends(administrator)):
+    return load_platform_problem('leetcode', payload.slug)
+
+
+@router.post('/api/coding/import/{platform}')
+def import_personal_problem(platform: Literal['luogu', 'leetcode'], payload: PlatformImport,
+                            user=Depends(current_user)):
+    """Load a remote problem so an authenticated user can save it as a private question."""
+    return load_platform_problem(platform, payload.identifier)
+
+
+@router.get('/api/coding/import/{platform}/suggestions')
+def platform_suggestions(platform: Literal['luogu', 'leetcode'], q: str = Query(min_length=1, max_length=100),
+                         user=Depends(current_user)):
+    query = q.strip()
+    if not query:
+        raise HTTPException(422, '请输入题目编号或名称')
+    if '://' in query:
+        item = load_platform_problem(platform, query)
+        return [{'problem_id': item['remote_problem_id'], 'title': item['title']}]
+    try:
+        return coding_platforms.search(platform, query)
+    except coding_platforms.CATALOG_ERRORS as error:
+        raise HTTPException(502, str(error)) from error
+
+
+def load_platform_problem(platform, identifier):
+    try:
+        normalized = coding_platforms.normalize_identifier(platform, identifier)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+    try:
+        return coding_platforms.problem(platform, normalized)
+    except coding_platforms.CATALOG_ERRORS as error:
+        raise HTTPException(502, str(error)) from error

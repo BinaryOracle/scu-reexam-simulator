@@ -506,7 +506,7 @@ def user_submissions(user_id: int, page: int = Query(default=1, ge=1), page_size
         if not user: raise HTTPException(404, '用户不存在')
         total = db.execute('SELECT COUNT(*) FROM submissions WHERE user_id=?', (user_id,)).fetchone()[0]
         rows = [dict(row) for row in db.execute('''SELECT submissions.id,users.username,problem_id,problems.title AS problem_title,
-            language,status,created,remote_submission_id,detail FROM submissions
+            language,status,created,submissions.remote_platform,remote_submission_id,detail FROM submissions
             JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
             WHERE submissions.user_id=? ORDER BY submissions.id DESC LIMIT ? OFFSET ?''',
             (user_id,page_size,(page-1)*page_size))]
@@ -535,7 +535,7 @@ def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(defau
         total = db.execute(f'''SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
             JOIN problems ON problems.id=submissions.problem_id {where}''', params).fetchone()[0]
         rows = [dict(row) for row in db.execute(f'''SELECT submissions.id,username,problem_id,problems.title AS problem_title,
-            language,status,created,remote_submission_id,detail FROM submissions
+            language,status,created,submissions.remote_platform,remote_submission_id,detail FROM submissions
             JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
             {where} ORDER BY submissions.id DESC LIMIT ? OFFSET ?''', (*params,page_size,(page-1)*page_size))]
         stats = db.execute(f'''SELECT SUM(CASE WHEN status='Accepted' THEN 1 ELSE 0 END) AS accepted,
@@ -551,7 +551,7 @@ def submission_detail(sid: int, actor=Depends(administrator)):
     with connect() as db:
         row = db.execute('''SELECT submissions.id,submissions.user_id,submissions.problem_id,users.username,
             problems.title AS problem_title,contests.title AS contest_title,submissions.language,submissions.source,
-            submissions.status,submissions.created,submissions.remote_submission_id,submissions.detail
+            submissions.status,submissions.created,submissions.remote_platform,submissions.remote_submission_id,submissions.detail
             FROM submissions JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
             JOIN contests ON contests.id=problems.contest_id WHERE submissions.id=? AND (? OR users.is_admin=0)''',
             (sid,actor['is_superadmin'])).fetchone()

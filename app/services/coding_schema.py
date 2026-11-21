@@ -18,8 +18,9 @@ def initialize_coding(db):
             title TEXT NOT NULL,topic TEXT NOT NULL DEFAULT '',difficulty INTEGER NOT NULL CHECK(difficulty BETWEEN 1 AND 5),
             stars INTEGER NOT NULL CHECK(stars BETWEEN 1 AND 5),position INTEGER NOT NULL CHECK(position>=0),
             statement TEXT NOT NULL DEFAULT '',samples TEXT NOT NULL DEFAULT '[]',reference_code TEXT NOT NULL DEFAULT '',
-            reference_language TEXT NOT NULL DEFAULT 'cpp11',source_url TEXT NOT NULL DEFAULT '',
-            remote_problem_id TEXT NOT NULL DEFAULT '',judge_mode TEXT NOT NULL CHECK(judge_mode IN ('luogu','samples')),
+            reference_language TEXT NOT NULL DEFAULT 'cpp11',starter_codes TEXT NOT NULL DEFAULT '{}',source_url TEXT NOT NULL DEFAULT '',
+            remote_problem_id TEXT NOT NULL DEFAULT '',remote_platform TEXT NOT NULL DEFAULT 'luogu' CHECK(remote_platform IN ('luogu','leetcode')),
+            judge_mode TEXT NOT NULL CHECK(judge_mode IN ('luogu','samples')),
             source_info TEXT NOT NULL DEFAULT '{}',visibility TEXT NOT NULL CHECK(visibility IN ('public','private')),
             review_status TEXT NOT NULL CHECK(review_status IN ('draft','pending','approved','rejected')),
             review_reason TEXT NOT NULL DEFAULT '',reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -33,6 +34,7 @@ def initialize_coding(db):
             question_id INTEGER NOT NULL REFERENCES coding_questions(id),question_version INTEGER NOT NULL,
             question_content_version INTEGER NOT NULL DEFAULT 0,
             question_title TEXT NOT NULL,judge_mode TEXT NOT NULL,remote_problem_id TEXT NOT NULL DEFAULT '',
+            remote_platform TEXT NOT NULL DEFAULT 'luogu' CHECK(remote_platform IN ('luogu','leetcode')),
             remote_submission_id TEXT NOT NULL DEFAULT '',language TEXT NOT NULL,source TEXT NOT NULL,status TEXT NOT NULL,
             detail TEXT NOT NULL DEFAULT '',passed_cases INTEGER,total_cases INTEGER,created REAL NOT NULL,
             completed REAL,completed_date TEXT)''',
@@ -54,7 +56,6 @@ def initialize_coding(db):
             user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
             created REAL NOT NULL,PRIMARY KEY(comment_id,user_id))''',
         'CREATE INDEX IF NOT EXISTS coding_comment_likes_by_user ON coding_comment_likes(user_id,comment_id)',
-        "CREATE UNIQUE INDEX IF NOT EXISTS coding_remote_submission ON coding_submissions(remote_submission_id) WHERE remote_submission_id<>''",
         'CREATE INDEX IF NOT EXISTS coding_submissions_progress ON coding_submissions(user_id,question_id,status,completed_date)',
         '''CREATE TABLE IF NOT EXISTS coding_daily(
             user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,date TEXT NOT NULL,
@@ -84,12 +85,21 @@ def initialize_coding(db):
     ]
     for statement in statements:
         db.execute(statement)
-    for table, column, default in (('coding_questions', 'content_version', 1),
-                                   ('coding_submissions', 'question_content_version', 0)):
+    for table, column, declaration in (
+        ('coding_questions', 'content_version', 'INTEGER NOT NULL DEFAULT 1'),
+        ('coding_questions', 'starter_codes', "TEXT NOT NULL DEFAULT '{}'"),
+        ('coding_questions', 'remote_platform', "TEXT NOT NULL DEFAULT 'luogu' CHECK(remote_platform IN ('luogu','leetcode'))"),
+        # Earlier preview submissions do not identify which judge content was run.
+        ('coding_submissions', 'question_content_version', 'INTEGER NOT NULL DEFAULT 0'),
+        ('coding_submissions', 'remote_platform', "TEXT NOT NULL DEFAULT 'luogu' CHECK(remote_platform IN ('luogu','leetcode'))"),
+    ):
         columns = {row['name'] for row in db.execute(f'PRAGMA table_info({table})')}
         if column not in columns:
-            # Earlier preview submissions do not identify which judge content was run.
-            db.execute(f'ALTER TABLE {table} ADD COLUMN {column} INTEGER NOT NULL DEFAULT {default}')
+            db.execute(f'ALTER TABLE {table} ADD COLUMN {column} {declaration}')
+    index_columns = [row['name'] for row in db.execute('PRAGMA index_info(coding_remote_submission)')]
+    if index_columns and index_columns != ['remote_platform', 'remote_submission_id']:
+        db.execute('DROP INDEX coding_remote_submission')
+    db.execute("CREATE UNIQUE INDEX IF NOT EXISTS coding_remote_submission ON coding_submissions(remote_platform,remote_submission_id) WHERE remote_submission_id<>''")
     if not db.execute('SELECT 1 FROM coding_reward_policies LIMIT 1').fetchone():
         db.execute('INSERT INTO coding_reward_policies(questions_per_reward,credits_per_reward,active,created) VALUES (5,1,1,?)', (time.time(),))
     catalog_path = ASSETS / 'catalog.json'
@@ -100,14 +110,16 @@ def initialize_coding(db):
         db.execute('INSERT INTO coding_stages(id,title,description,position,active) VALUES (?,?,?,?,?) ON CONFLICT(id) DO NOTHING',
                    (stage['id'], stage['title'], stage.get('description', ''), stage['position'], stage.get('active', True)))
     fields = ('stage_id', 'title', 'topic', 'difficulty', 'stars', 'position', 'statement', 'samples',
-              'reference_code', 'reference_language', 'source_url', 'remote_problem_id', 'judge_mode', 'source_info')
+              'reference_code', 'reference_language', 'starter_codes', 'source_url', 'remote_problem_id',
+              'remote_platform', 'judge_mode', 'source_info')
     now = time.time()
     for item in catalog['questions']:
         values = {'topic': '', 'difficulty': 1, 'stars': 3, 'position': 0, 'statement': '', 'samples': [],
-                  'reference_code': '', 'reference_language': 'cpp11', 'source_url': '', 'remote_problem_id': '',
+                  'reference_code': '', 'reference_language': 'cpp11', 'starter_codes': {}, 'source_url': '',
+                  'remote_problem_id': '', 'remote_platform': 'luogu',
                   'judge_mode': 'samples', 'source_info': {}, **item, 'stage_id': item['stage_id']}
         values['source_info'] = item.get('source_info', item.get('source', {}))
-        for key in ('samples', 'source_info'):
+        for key in ('samples', 'starter_codes', 'source_info'):
             values[key] = json.dumps(values[key], ensure_ascii=False)
         db.execute(f'''INSERT INTO coding_questions(source_key,{','.join(fields)},visibility,review_status,created,updated)
             VALUES (?,{','.join('?' for _ in fields)},'public','approved',?,?) ON CONFLICT(source_key) DO NOTHING''',

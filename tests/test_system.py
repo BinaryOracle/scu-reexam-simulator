@@ -289,7 +289,10 @@ def test_luogu_plugin_download_is_a_valid_bundle(client):
         assert {'browser-extension/manifest.json','browser-extension/background.js','browser-extension/options.html'} <= set(bundle.namelist())
         manifest = json.loads(bundle.read('browser-extension/manifest.json'))
         assert 'cookies' not in manifest['permissions']
-        assert manifest['host_permissions'] == ['https://www.luogu.com.cn/*', 'http://127.0.0.1:8000/*']
+        assert manifest['host_permissions'] == [
+            'https://www.luogu.com.cn/*', 'https://leetcode.cn/*', 'http://127.0.0.1:8000/*',
+        ]
+        assert manifest['version'] == '1.3.0'
         assert 'browser-extension/extension-config.js' in bundle.namelist()
         assert 'APP_ORIGIN = "http://127.0.0.1:8000"' in bundle.read('browser-extension/extension-config.js').decode()
         assert 'type="url"' not in bundle.read('browser-extension/options.html').decode()
@@ -310,7 +313,9 @@ def test_admin_manages_luogu_extension_origin_and_rejects_unsafe_urls(client):
     import io, zipfile
     with zipfile.ZipFile(io.BytesIO(client.get('/api/luogu-extension').content)) as bundle:
         manifest = json.loads(bundle.read('browser-extension/manifest.json'))
-        assert manifest['host_permissions'] == ['https://www.luogu.com.cn/*', 'https://exam.example.edu/*']
+        assert manifest['host_permissions'] == [
+            'https://www.luogu.com.cn/*', 'https://leetcode.cn/*', 'https://exam.example.edu/*',
+        ]
         config = bundle.read('browser-extension/extension-config.js').decode()
         assert 'APP_ORIGIN = "https://exam.example.edu"' in config
 

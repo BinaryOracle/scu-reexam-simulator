@@ -1,7 +1,7 @@
 /** Daily practice cards, sequential review, favorites and private contributions. */
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, emptyState, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
-import { selectField, pagination, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
+import { selectField, pagination, questionContent, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261121-question-markdown-v1';
 import { mountLeaderboard } from './leaderboard.js?v=20261117-weekly-leaderboard-v3';
 let generation = 0, homeData = null, session = null, reviewingCardId = null, roundReviewMode = false;
 let listRequest = 0;
@@ -271,7 +271,7 @@ function renderSession(root) {
   if (card.available) meta.firstChild.append(el('span', card.mastery.status === 'again' ? ' · 还需巩固' : card.mastery.status === 'known' ? ' · 已掌握' : ' · 未自评'));
   panel.append(bar, meta);
   if (card.category === 'translation') panel.classList.add('learning-translation');
-  const question = el('h2', card.question, `learning-question ${card.category === 'professional' ? '' : 'english'}`); question.tabIndex = -1;
+  const question = questionContent(card); question.tabIndex = -1;
   panel.append(passageContext(card), question);
   const actions = el('div', '', 'learning-card-actions');
   const favorite = button(card.favorite ? '★ 已加入重点回顾' : '☆ 加入重点回顾', async () => {

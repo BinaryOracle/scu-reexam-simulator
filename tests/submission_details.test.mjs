@@ -37,3 +37,10 @@ test('compile errors without testcase details stay fully readable without an inv
   assert.ok(body.find(n => n.textContent === 'main.cpp:2: error: expected ;'));
   assert.equal(body.find(n => n.className === 'submission-pass-count'), undefined);
 });
+
+test('remote submission details use a platform-neutral submission label', () => {
+  const f = fixture(); const body = new Node('div');
+  f.renderSubmissionDetails(body, { id: 10, remote_platform: 'leetcode', remote_submission_id: '98765', status: 'Accepted' });
+  assert.ok(body.find(n => n.textContent === '评测平台提交编号'));
+  assert.ok(body.find(n => n.textContent === '98765'));
+});

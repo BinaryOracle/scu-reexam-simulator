@@ -1,6 +1,7 @@
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, el, button, badge, emptyState, notify, confirmAction, renderPagination } from "./ui.js?v=20261114-ui-v17";
-import { codingField, codingDialog, editCodingQuestion } from "./coding-form.mjs?v=20261115-coding-v1";
+import { codingField, codingDialog, editCodingQuestion } from "./coding-form.mjs?v=20261121-reference-markdown-v1";
+import { judgePlatform } from "./judge-platforms.mjs?v=20261121-china-judge-v2";
 
 let revision = 0;
 let listRevision = 0;
@@ -68,7 +69,7 @@ async function loadQuestions(turn, user) {
     if (!result.items.length) root.append(emptyState(tab === "reviews" ? "没有等待审核的投稿" : "没有符合条件的题目", "调整筛选条件，或新增题目。"));
     for (const question of result.items) {
       const row = el("article", "", "panel coding-admin-question"); const main = el("div");
-      main.append(el("h3", question.title), el("p", `${stages.find(stage => stage.id === question.stage_id)?.title || question.stage_id} · ${question.topic} · 难度 ${question.difficulty}/5 · 顺序 ${question.position}`, "muted"));
+      main.append(el("h3", question.title), el("p", `${stages.find(stage => stage.id === question.stage_id)?.title || question.stage_id} · ${question.topic} · 难度 ${question.difficulty}/5 · 阶段内顺序 ${question.position}`, "muted"));
       const tags = el("div", "", "coding-question-tags"); tags.append(el("span", "★".repeat(question.stars), "coding-stars"), badge(({ draft:"私人草稿",pending:"等待审核",approved:"已公开",rejected:"已拒绝" })[question.review_status] || question.review_status), badge(question.active ? "启用" : "停用", question.active ? "green" : "gray")); main.append(tags);
       if (question.owner_user_id) main.append(el("p", `投稿用户 #${question.owner_user_id}`, "muted"));
       if (question.review_reason) main.append(el("p", `审核意见：${question.review_reason}`, "coding-review-reason"));
@@ -91,14 +92,14 @@ async function editQuestion(question) {
   // Management list entries contain the full editable question, including private submissions.
   const complete = question || {};
   if (!valid(turn, user)) return;
-  editCodingQuestion({ question: complete, stages, admin: true, importLuogu: id => api("/admin/coding/import-luogu", { method: "POST", body: JSON.stringify({ problem_id: id }) }), save: async data => {
+  editCodingQuestion({ question: complete, stages, admin: true, importProblem: (platform, identifier) => api(`/coding/import/${platform}`, { method: "POST", body: JSON.stringify({ identifier }) }), save: async data => {
     await api(question ? `/admin/coding/questions/${question.id}` : "/admin/coding/questions", { method: question ? "PATCH" : "POST", body: JSON.stringify(data) });
     if (valid(turn, user)) { notify("题目已保存。"); await refreshCodingAdmin(); }
   } });
 }
 async function reviewQuestion(question, turn, user) {
   const { dialog, body, footer } = codingDialog(`审核：${question.title}`, "codingAdmin");
-  body.append(el("p", `${question.topic} · ${question.judge_mode === "luogu" ? `洛谷 ${question.remote_problem_id}` : "公开样例练习"}`), el("pre", question.statement, "coding-review-statement"));
+  body.append(el("p", `${question.topic} · ${question.judge_mode === "luogu" ? `${judgePlatform(question.remote_platform)?.label || "在线"} ${question.remote_problem_id}` : "公开样例练习"}`), el("pre", question.statement, "coding-review-statement"));
   for (const [index, sample] of (question.samples || []).entries()) body.append(el("h4", `样例 ${index + 1}`), el("pre", `输入：\n${sample.input}\n期望输出：\n${sample.output}`));
   if (question.reference_code) { const reference = el("details"); reference.append(el("summary", "参考代码"), el("pre", question.reference_code)); body.append(reference); }
   const reason = codingField("审核意见（拒绝时必填）", "reason", "", { type: "textarea", rows: 3 }); body.append(reason.wrap);

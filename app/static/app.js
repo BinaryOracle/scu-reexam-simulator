@@ -1,4 +1,4 @@
-import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261118-course-v13";
+import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261121-question-markdown-v1";
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import {
@@ -17,25 +17,25 @@ import {
   clearContestState,
   suspendContestWorkspace,
   setupContestCreation,
-  requestLuoguSubmit,
-} from "./contest.js?v=20261116-ui-audit-v2";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261117-accounts-v2";
+  requestJudgeSubmit,
+} from "./contest.js?v=20261121-workspace-controls-v7";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261121-china-judge-v2";
 import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261117-package-delete-v2";
 import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
 
-import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261118-review-layout-v1";
-import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261117-points-v1";
+import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261121-question-markdown-v1";
+import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261121-question-markdown-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261117-points-v1";
 import { refreshHome, refreshAnnouncementsAdmin, setupHome, showPendingAnnouncementReminder } from "./home.js?v=20261116-announcement-delete-v1";
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
-import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261117-points-v1";
-import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261117-points-v1";
+import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261121-workspace-controls-v7";
+import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261121-reference-markdown-v1";
 import { refreshTrends } from "./trends.js?v=20261116-trends-admin-v1";
 
-configureCodingBridge(requestLuoguSubmit);
+configureCodingBridge(requestJudgeSubmit);
 
 const views = {
   live: { label: "课程", refresh: refreshLive },
@@ -164,7 +164,7 @@ function configureAccess() {
   configureContestNavigation();
   return allowed;
 }
-async function show(view, force = false, { historyMode = "push" } = {}) {
+async function show(view, force = false, { historyMode = "push", authenticatedUser = null } = {}) {
   if (state.adminMode && view === "submissions") view = "contest";
   if (!force && !allowNavigation()) return;
   if (view !== "live" && liveActive() && !await allowLiveNavigation()) return;
@@ -172,7 +172,7 @@ async function show(view, force = false, { historyMode = "push" } = {}) {
   clearVisiblePasswords();
   clearProfilePassword();
   clearTransfers();
-  const user = await api("/me");
+  const user = authenticatedUser || await api("/me");
   state.user = user;
   const allowed = configureAccess();
   const selected = allowed.includes(view) ? view : allowed[0];
@@ -201,7 +201,17 @@ async function show(view, force = false, { historyMode = "push" } = {}) {
   await views[selected].refresh();
 }
 async function enterWorkspace() {
-  state.user = await api("/me");
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    state.user = await api("/me", { signal: controller.signal });
+  } catch (error) {
+    if (error.name === "AbortError")
+      throw new Error("连接服务超时。请确认服务已启动后刷新页面。");
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
   clearInterviewState();
   clearContestState();
   clearTraining();
@@ -217,9 +227,13 @@ async function enterWorkspace() {
   configureAccess();
   const fallback = state.adminMode ? "users" : "home";
   const route = readAppRoute(location.hash, Object.keys(views), fallback);
-  await show(route, false, { historyMode: "replace" });
-  if (!state.adminMode) void showPendingAnnouncementReminder();
   document.documentElement.classList.remove("session-restoring");
+  try {
+    await show(route, false, { historyMode: "replace", authenticatedUser: state.user });
+  } catch (error) {
+    notify(`工作台已恢复，但首屏内容加载失败：${error.message}。可点击当前栏目重试。`, "error");
+  }
+  if (!state.adminMode) void showPendingAnnouncementReminder();
 }
 function configureShell() {
   document.body.classList.toggle("admin-mode", state.adminMode);

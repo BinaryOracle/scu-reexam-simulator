@@ -63,12 +63,23 @@ def load_config():
         raise ValueError('trends.retry_interval_minutes 必须在 1 到 1440 之间')
     _email_auth_config(config)
     _live_config(config)
+    question_media = config.setdefault('question_media', {})
+    question_media.setdefault('directory', str(Path(config['live']['directory']) / 'question-images'))
+    question_media.setdefault('image_max_mb', 5)
+    if type(question_media['image_max_mb']) is not int or not 1 <= question_media['image_max_mb'] <= 20:
+        raise ValueError('question_media.image_max_mb 必须在 1 到 20 之间')
+    if not isinstance(question_media['directory'], str) or not question_media['directory'] or '\x00' in question_media['directory']:
+        raise ValueError('question_media.directory 必须是有效目录路径')
+    question_directory = Path(question_media['directory'])
+    question_media['directory'] = str(question_directory if question_directory.is_absolute() else ROOT / question_directory)
     course_media = config.setdefault('course_media', {})
     course_media.setdefault('directory', str(Path(config['live']['directory']) / 'courses'))
     course_media.setdefault('document_max_mb', 25)
     course_media.setdefault('video_max_mb', 2048)
+    course_media.setdefault('cover_max_mb', 8)
     course_media.setdefault('playback_seconds', 14400)
     for key, minimum, maximum in [('document_max_mb', 1, 100), ('video_max_mb', 1, 20480),
+                                  ('cover_max_mb', 1, 20),
                                   ('playback_seconds', 60, 86400)]:
         if type(course_media[key]) is not int or not minimum <= course_media[key] <= maximum:
             raise ValueError(f'course_media.{key} 必须在 {minimum} 到 {maximum} 之间')

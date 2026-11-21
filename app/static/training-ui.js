@@ -1,6 +1,8 @@
 /** Shared accessible learning forms and authenticated source images. */
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { el, button, notify, confirmAction } from './ui.js?v=20261114-ui-v17';
+import {questionMarkdownEditor} from './question-markdown-editor.js?v=20261121-v1';
+import {appendProblemStatement} from './problem-content.js?v=20261121-question-images-v1';
 export const chapterNames = { interview: '面试篇', written_c: '笔试-软件工程篇', written_ai: '笔试-人工智能篇' };
 const urls = new Set();
 export function clearLearningMedia() {
@@ -57,7 +59,7 @@ export function learningDialog(title, requestClose) {
 export function questionEditor(collections, item, save, official = false, defaultSection = 'interview', defaultCollectionId = '') {
   let saving = false, confirmingClose = false;
   const requestClose = async () => {
-    if (saving || confirmingClose) return;
+    if (saving || confirmingClose || questionMarkdown.busy || answerMarkdown.busy) return;
     confirmingClose = true;
     try {
       if (values() !== original && !await confirmAction('题目有尚未保存的修改，确定放弃吗？')) return;
@@ -82,7 +84,12 @@ export function questionEditor(collections, item, save, official = false, defaul
   const answerWrap = el('div', '', 'learning-answer-field');
   const answer = el('textarea'); answer.rows = 7; answer.maxLength = 60000; answer.value = item?.answer || ''; answer.id = `${form.id}-answer`;
   const alabel = el('label', '参考答案（可选）'); alabel.htmlFor = answer.id;
-  answerWrap.append(alabel, answer);
+  const editorBusy=()=>{submit.disabled=saving||questionMarkdown.busy||answerMarkdown.busy;};
+  const questionMarkdown=questionMarkdownEditor(question,{onBusy:editorBusy});
+  const answerMarkdown=questionMarkdownEditor(answer,{onBusy:editorBusy});
+  answerWrap.append(alabel, answerMarkdown.node);
+  dialog.classList.add('question-markdown-dialog');
+  dialog.addEventListener('close',()=>{questionMarkdown.dispose();answerMarkdown.dispose();},{once:true});
   const help = el('p', official ? '保存后将进入公开训练题库。' : '仅自己可见。提交审核并通过后，其他用户才可练习。', 'muted');
   const error = el('p', '', 'form-error'); error.setAttribute('role', 'alert');
   const update = () => {
@@ -93,7 +100,7 @@ export function questionEditor(collections, item, save, official = false, defaul
     alabel.textContent = category === 'translation' ? '参考译文（可选）' : '参考答案（可选）';
   };
   collection.input.addEventListener('change', update); update();
-  form.append(help, chapter.wrap, collection.wrap, qlabel, question, answerWrap, error); body.append(form);
+  form.append(help, chapter.wrap, collection.wrap, qlabel, questionMarkdown.node, answerWrap, error); body.append(form);
   const submit = el('button', '保存题目', 'button primary'); submit.type = 'submit'; submit.setAttribute('form', form.id);
   const values = () => JSON.stringify([chapter.input.value, collection.input.value, question.value, answer.value]);
   const original = values();
@@ -101,6 +108,7 @@ export function questionEditor(collections, item, save, official = false, defaul
   const token = state.token;
   form.addEventListener('submit', async event => {
     event.preventDefault(); if (submit.disabled) return;
+    if(!question.value.trim()){error.textContent='请填写题目内容';question.focus();return;}
     saving = true; submit.disabled = true; error.textContent = '';
     try {
       await save({ collection_id: collection.input.value, question: question.value.trim(), answer: answerWrap.hidden ? '' : answer.value.trim() });
@@ -119,6 +127,8 @@ export function passageContext(item) {
 export function referenceAnswer(item) {
   const node = el('div', '', 'learning-reference');
   const content = el('div', '', 'learning-answer-text');
+  if(item.answer_html){appendProblemStatement(content,item.answer_html);}
+  else {
   let list;
   for (const paragraph of (item.answer || '这道私人题尚未填写参考答案，可在“我的题目”中补充。').trim().split(/\n\s*\n/)) {
     if (/^[•●▪]\s*/.test(paragraph)) {
@@ -128,6 +138,7 @@ export function referenceAnswer(item) {
       list = undefined;
       content.append(el('p', paragraph));
     }
+  }
   }
   node.append(el('h3', item.category === 'translation' ? '参考译文' : '参考答案'), content);
   if (item.source_info?.kind === 'translation' && item.source_info.editorial_note) {
@@ -190,9 +201,14 @@ export function referenceAnswer(item) {
   }
   return node;
 }
+export function questionContent(item,tag='div'){
+  const node=el(tag,'',`learning-question ${item.category==='professional'?'':'english'}`);
+  if(item.question_html)appendProblemStatement(node,item.question_html);else node.textContent=item.question;
+  return node;
+}
 export function questionPreview(item) {
   const { body } = learningDialog(item.collection_name || '题目预览');
-  body.append(passageContext(item), el('p', item.question, `learning-question ${item.category === 'professional' ? '' : 'english'}`));
+  body.append(passageContext(item), questionContent(item));
   if (item.category !== 'oral') body.append(referenceAnswer(item));
 }
 export function downloadTemplate() {

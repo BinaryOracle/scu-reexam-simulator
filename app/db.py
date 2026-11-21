@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 36
+SCHEMA_VERSION = 38
 
 
 @contextmanager
@@ -45,7 +45,8 @@ def allocate_user_id(db):
 
 def initialize():
     """Migrate stored data and seed root/root only when no accounts exist."""
-    with connect() as db:
+    from .services.default_courses import initialize_default_courses, seed_files
+    with seed_files() as imported_files, connect() as db:
         db.execute('BEGIN IMMEDIATE')
         version = db.execute('PRAGMA user_version').fetchone()[0]
         if version > SCHEMA_VERSION:
@@ -76,12 +77,23 @@ def initialize():
             ('problems', 'remote_problem_id', "TEXT NOT NULL DEFAULT ''"),
             ('problems', 'samples', "TEXT NOT NULL DEFAULT '[]'"),
             ('problems', 'points', 'INTEGER NOT NULL DEFAULT 100'),
+            ('problems', 'remote_platform', "TEXT NOT NULL DEFAULT 'local' CHECK(remote_platform IN ('local','luogu','leetcode'))"),
+            ('problems', 'source_info', "TEXT NOT NULL DEFAULT '{}'"),
+            ('problems', 'starter_codes', "TEXT NOT NULL DEFAULT '{}'"),
             ('submissions', 'remote_submission_id', "TEXT NOT NULL DEFAULT ''"),
             ('submissions', 'detail', "TEXT NOT NULL DEFAULT ''"),
+            ('submissions', 'remote_problem_id', "TEXT NOT NULL DEFAULT ''"),
+            ('submissions', 'remote_platform', "TEXT NOT NULL DEFAULT 'local' CHECK(remote_platform IN ('local','luogu','leetcode'))"),
         ]:
             fields = {row['name'] for row in db.execute(f'PRAGMA table_info({table})')}
             if field not in fields:
                 db.execute(f'ALTER TABLE {table} ADD COLUMN {field} {declaration}')
+        if version < 38:
+            db.execute("""UPDATE problems SET remote_platform='luogu'
+                WHERE contest_id IN (SELECT id FROM contests WHERE judge_mode='luogu')""")
+            db.execute('''UPDATE submissions SET remote_platform=(SELECT problems.remote_platform FROM problems
+                WHERE problems.id=submissions.problem_id),remote_problem_id=(SELECT problems.remote_problem_id FROM problems
+                WHERE problems.id=submissions.problem_id) WHERE EXISTS (SELECT 1 FROM problems WHERE problems.id=submissions.problem_id)''')
         columns = {row['name'] for row in db.execute('PRAGMA table_info(users)')}
         if 'can_practice' not in columns:
             db.execute('ALTER TABLE users ADD COLUMN can_practice INTEGER NOT NULL DEFAULT 0 CHECK(can_practice IN (0,1))')
@@ -277,6 +289,8 @@ def initialize():
         initialize_announcements(db)
         from .services.coding_schema import initialize_coding
         initialize_coding(db)
+        from .services.question_markdown import initialize as initialize_question_markdown
+        initialize_question_markdown(db)
         from .services.home_layout import initialize as initialize_home_layout
         initialize_home_layout(db)
         from .services.live_schema import initialize_live
@@ -287,4 +301,5 @@ def initialize():
         initialize_trends(db)
         from .services.points import initialize as initialize_points
         initialize_points(db)
+        initialize_default_courses(db, imported_files)
         db.execute(f'PRAGMA user_version={SCHEMA_VERSION}')

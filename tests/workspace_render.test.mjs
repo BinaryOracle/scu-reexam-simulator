@@ -30,9 +30,11 @@ function fixture() {
     el: (tag, text, classes) => new Node(tag, text, classes),
     $: id => { if (!roots.has(id)) roots.set(id, new Node()); return roots.get(id); },
     document: { body: { classList: { contains: () => true } } },
-    currentProblems: [{id:1,title:'区间查询',statement:'完整题面',statement_html:'<p>完整题面</p>',samples:[{input:'1',output:'2'}]}],
+    currentProblems: [{id:1,title:'区间查询',statement:'完整题面',statement_html:'<p>完整题面</p>',samples:[{input:'1',output:'2'}],remote_platform:'luogu'}],
     selectedProblem:1,selectedContest:{id:1,title:'模拟赛',judge_mode:'luogu'}, mobilePane:'statement',
     luoguStatusChecked:true,
+    judgePlatform: platform => platform === 'luogu' ? { label: '洛谷' } : null,
+    judgeProblemUrl: (platform, id) => `https://${platform}.example/problem/${id}`,
     managementMode:()=>false, suspendContestWorkspace(){}, prepareLuoguConnection(){},
     renderContestTimeline:()=>new Node(), button:(label,action,classes)=>{const n=new Node('button',label,classes);n.action=action;return n;},
     contestStatus:()=>['进行中','green'],badge:()=>new Node(), deadline:()=>'', canRevealLuoguSource:()=>false,
@@ -89,7 +91,7 @@ test('labels a visible external problem number with its platform', () => {
   f.context.canRevealLuoguSource = () => true;
   f.context.renderWorkspace();
   const content = f.roots.get('problemList').childNodes[0].querySelector('.workspace-statement-content');
-  assert.deepEqual(content.childNodes.slice(0, 2).map(node => node.textContent), ['洛谷题号 · P1000', '区间查询']);
+  assert.deepEqual(content.childNodes.slice(0, 2).map(node => node.textContent), ['洛谷 · P1000', '区间查询']);
 });
 
 test('groups Luogu source and refresh actions with clear spacing when they wrap', () => {

@@ -5,13 +5,16 @@ import secrets
 import time
 from urllib.parse import urlsplit
 from fastapi import HTTPException
+from app.services import coding_platforms
 from app.services.problem_content import render_statement
+from app.services.question_markdown import bind
 
 SELECT = '''SELECT q.*,s.title AS stage_title,s.active AS stage_active,s.position AS stage_position,
     u.username AS owner_name,u.is_admin AS owner_admin FROM coding_questions q
     JOIN coding_stages s ON s.id=q.stage_id LEFT JOIN users u ON u.id=q.owner_user_id'''
 EDIT_FIELDS = ('stage_id', 'title', 'topic', 'difficulty', 'stars', 'position', 'statement', 'samples',
-               'reference_code', 'reference_language', 'source_url', 'remote_problem_id', 'judge_mode')
+               'reference_code', 'reference_language', 'starter_codes', 'source_url', 'remote_problem_id',
+               'remote_platform', 'judge_mode', 'source_info')
 
 
 def get_question(db, qid):
@@ -50,19 +53,50 @@ def check_version(row, version):
         raise HTTPException(409, '题目已被修改，请刷新后重试')
 
 
+def _shift_for_insert(db, stage_id, position, *, exclude_id=None):
+    """Make room for a question at a stage-local position before writing it."""
+    params = [stage_id, position]
+    condition = 'stage_id=? AND deleted=0 AND position>=?'
+    if exclude_id is not None:
+        condition += ' AND id<>?'
+        params.append(exclude_id)
+    db.execute(f'UPDATE coding_questions SET position=position+1 WHERE {condition}', params)
+
+
+def _move_position(db, row, item, qid):
+    """Keep stage-local positions ordered when an existing question is moved."""
+    old_stage, old_position = row['stage_id'], row['position']
+    new_stage, new_position = item['stage_id'], item['position']
+    if old_stage == new_stage:
+        if new_position < old_position:
+            db.execute('''UPDATE coding_questions SET position=position+1
+                WHERE stage_id=? AND deleted=0 AND id<>? AND position>=? AND position<?''',
+                       (old_stage, qid, new_position, old_position))
+        elif new_position > old_position:
+            db.execute('''UPDATE coding_questions SET position=position-1
+                WHERE stage_id=? AND deleted=0 AND id<>? AND position>? AND position<=?''',
+                       (old_stage, qid, old_position, new_position))
+        return
+    db.execute('''UPDATE coding_questions SET position=position-1
+        WHERE stage_id=? AND deleted=0 AND position>?''', (old_stage, old_position))
+    _shift_for_insert(db, new_stage, new_position, exclude_id=qid)
+
+
 def serialize(db, row, uid):
     result = {key: row[key] for key in (*EDIT_FIELDS, 'id', 'version', 'owner_user_id', 'visibility',
               'review_status', 'review_reason', 'stage_title')}
     result['samples'] = json.loads(row['samples'])
+    result['starter_codes'] = json.loads(row['starter_codes'])
     result['source_info'] = json.loads(row['source_info'])
     result['statement_html'] = render_statement(row['statement'])
+    result['reference_code_html'] = render_statement(row['reference_code']) if row['reference_code'].strip() else ''
     result['active'] = bool(row['active'])
     result['solved'] = bool(db.execute("""SELECT 1 FROM coding_submissions WHERE user_id=? AND question_id=?
         AND question_content_version=? AND status='Accepted' LIMIT 1""", (uid, row['id'], row['content_version'])).fetchone())
     result['favorited'] = bool(db.execute('SELECT 1 FROM coding_favorites WHERE user_id=? AND question_id=?',
                                           (uid, row['id'])).fetchone())
     result['content_available'] = bool(row['statement'].strip())
-    result['content_notice'] = '' if result['content_available'] else '尚未缓存完整题面，请打开原题链接；管理员可重新导入洛谷题面。'
+    result['content_notice'] = '' if result['content_available'] else '尚未缓存完整题面，请打开原题链接或联系管理员重新导入。'
     return result
 
 
@@ -121,14 +155,46 @@ def validate_item(db, data, *, admin=False):
             raise HTTPException(422, '来源地址须为有效的 HTTP/HTTPS 网页链接') from error
         if url.scheme not in ('http', 'https') or not url.hostname or url.username or url.password:
             raise HTTPException(422, '来源地址须为 HTTP/HTTPS 网页链接')
-    item['remote_problem_id'] = item['remote_problem_id'].strip().upper()
-    if item['judge_mode'] == 'luogu' and not re.fullmatch(r'[A-Z][A-Z0-9_-]{0,31}', item['remote_problem_id']):
-        raise HTTPException(422, '洛谷评测须填写有效题目编号')
+    if item['remote_platform'] not in ('luogu', 'leetcode'):
+        raise HTTPException(422, '远程评测平台无效')
+    if item['judge_mode'] == 'luogu' and item['remote_platform'] == 'luogu':
+        item['remote_problem_id'] = item['remote_problem_id'].strip().upper()
+        if not re.fullmatch(r'[A-Z][A-Z0-9_-]{0,31}', item['remote_problem_id']):
+            raise HTTPException(422, '洛谷评测须填写有效题目编号')
+    elif item['judge_mode'] == 'luogu' and item['remote_platform'] == 'leetcode':
+        item['remote_problem_id'] = item['remote_problem_id'].strip()
+        try:
+            slug = coding_platforms.normalize_identifier('leetcode', item['source_url'])
+        except ValueError as error:
+            raise HTTPException(422, '请填写力扣中国区原题链接（leetcode.cn）') from error
+        if slug != item['remote_problem_id']:
+            raise HTTPException(422, 'LeetCode 题目标识与原题链接不一致')
+        if (item['source_info'].get('platform') != 'leetcode'
+                or not re.fullmatch(r'[1-9]\d{0,8}', str(item['source_info'].get('question_id', '')))):
+            raise HTTPException(422, '请使用 LeetCode 官方导入功能填写题目编号与代码模板')
     if item['judge_mode'] == 'samples':
         if not item['samples']:
             raise HTTPException(422, '样例评测题至少需要一组公开输入/输出样例')
         item['remote_problem_id'] = ''
+        item['remote_platform'] = 'luogu'
+    if not isinstance(item['starter_codes'], dict) or any(
+            language not in ('cpp11', 'c', 'python3') or not isinstance(code, str) or len(code) > 100000
+            for language, code in item['starter_codes'].items()):
+        raise HTTPException(422, '代码模板格式无效')
+    if not isinstance(item['source_info'], dict) or len(json.dumps(item['source_info'], ensure_ascii=False)) > 250000:
+        raise HTTPException(422, '题目来源信息格式无效')
+    if item['judge_mode'] == 'luogu' and item['remote_platform'] == 'leetcode' and item['source_info'].get('leetcode_metadata'):
+        from app.services.coding_test_adapters import validate_cases, UnsupportedCase
+        try:
+            validate_cases(item['samples'], item['source_info']['leetcode_metadata'])
+        except UnsupportedCase:
+            # These questions remain available for the platform's full judge.
+            pass
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
     item['samples'] = json.dumps(item['samples'], ensure_ascii=False)
+    item['starter_codes'] = json.dumps(item['starter_codes'], ensure_ascii=False)
+    item['source_info'] = json.dumps(item['source_info'], ensure_ascii=False)
     return item
 
 
@@ -140,10 +206,12 @@ def event(db, qid, actor, name, version, reason=''):
 def create_question(db, user, data, *, admin=False):
     item = validate_item(db, data, admin=admin)
     now = time.time()
+    _shift_for_insert(db, item['stage_id'], item['position'])
     cursor = db.execute(f'''INSERT INTO coding_questions({','.join(EDIT_FIELDS)},owner_user_id,visibility,review_status,active,created,updated)
         VALUES ({','.join('?' for _ in EDIT_FIELDS)},?,?,?,?,?,?)''',
         (*(item[key] for key in EDIT_FIELDS), None if admin else user['id'], 'public' if admin else 'private',
          'approved' if admin else 'draft', data.get('active', True), now, now))
+    bind(db, user, 'coding', cursor.lastrowid, item['statement'], item['reference_code'])
     event(db, cursor.lastrowid, user, 'create', 1)
     return serialize(db, get_question(db, cursor.lastrowid), user['id'])
 
@@ -152,12 +220,15 @@ def update_question(db, user, qid, data, *, admin=False):
     row = editable(db, qid, user, admin=admin)
     check_version(row, data['version'])
     merged = {key: row[key] for key in EDIT_FIELDS}
-    merged['samples'] = json.loads(row['samples'])
+    for key in ('samples', 'starter_codes', 'source_info'):
+        merged[key] = json.loads(row[key])
     merged.update({key: value for key, value in data.items() if key in EDIT_FIELDS})
     item = validate_item(db, merged, admin=admin)
+    _move_position(db, row, item, qid)
+    bind(db, user, 'coding', qid, item['statement'], item['reference_code'])
     public = admin and row['visibility'] == 'public'
     review_status = row['review_status'] if admin else 'draft'
-    content_changed = any(item[key] != row[key] for key in ('statement', 'samples', 'judge_mode', 'remote_problem_id'))
+    content_changed = any(item[key] != row[key] for key in ('statement', 'samples', 'starter_codes', 'reference_code', 'source_info', 'judge_mode', 'remote_platform', 'remote_problem_id'))
     db.execute(f'''UPDATE coding_questions SET {','.join(key+'=?' for key in EDIT_FIELDS)},visibility=?,review_status=?,
         review_reason='',reviewed_by=NULL,reviewed_at=NULL,active=?,version=version+1,
         content_version=content_version+?,updated=? WHERE id=?''',

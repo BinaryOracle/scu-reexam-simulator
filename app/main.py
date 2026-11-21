@@ -25,6 +25,7 @@ from app.services.contest_scoring import submission_score
 from app.services.interview_clock import require_running, timing, timestamp
 from app.services import question_bank
 from app.services import luogu_catalog
+from app.services import leetcode_catalog, coding_platforms
 from app.services import contest_access, home_layout
 from app.routes.live import router as live_router
 from app.routes.home_layout import router as home_layout_router
@@ -40,6 +41,7 @@ from app.routes.credit_transfers import router as credit_transfers_router
 from app.routes.announcements import router as announcements_router
 from app.routes.coding import router as coding_router
 from app.routes.trends import router as trends_router
+from app.routes.question_markdown import router as question_markdown_router
 from app.routes.courses import router as courses_router
 
 initialize()
@@ -77,6 +79,7 @@ app.include_router(announcements_router)
 app.include_router(coding_router)
 app.include_router(trends_router)
 app.include_router(home_layout_router)
+app.include_router(question_markdown_router)
 app.include_router(courses_router)
 app.include_router(live_router)
 app.mount('/static', StaticFiles(directory=ROOT / 'app/static'), name='static')
@@ -101,7 +104,10 @@ class Problem(BaseModel):
     sample_output: str = ''
     samples: list[PublicSample] = Field(default_factory=list, max_length=100)
     tests: list[dict[str, str]] = Field(default_factory=list, max_length=50)
-    remote_problem_id: str = Field(default='', max_length=32)
+    remote_problem_id: str = Field(default='', max_length=100)
+    remote_platform: str | None = Field(default=None, pattern='^(local|luogu|leetcode)$')
+    source_info: dict[str, object] = Field(default_factory=dict)
+    starter_codes: dict[str, str] = Field(default_factory=dict)
     points: int = Field(default=100, ge=0, le=100000)
 class ContestInfo(BaseModel):
     model_config = ConfigDict(allow_inf_nan=False)
@@ -135,6 +141,8 @@ class Submission(BaseModel):
     source: str = Field(min_length=1, max_length=30000)
 class RemoteSubmissionResult(BaseModel):
     remote_submission_id: str = Field(default='', max_length=64)
+    remote_problem_id: str = Field(default='', max_length=100)
+    platform: str = Field(default='luogu', pattern='^(luogu|leetcode)$')
     status: str = Field(pattern='^(Submitted|Judging|Accepted|Wrong Answer|Output Limit Exceeded|Time Limit Exceeded|Memory Limit Exceeded|Runtime Error|Compile Error|System Error|Submission Failed)$')
     detail: str = Field(default='', max_length=10000)
 
@@ -154,16 +162,16 @@ def luogu_extension():
         manifest_path = extension / 'manifest.json'
         if not manifest_path.is_file(): raise HTTPException(503, '浏览器插件文件不完整')
         manifest = json.loads(manifest_path.read_text())
-        manifest['host_permissions'] = ['https://www.luogu.com.cn/*', f'{app_origin}/*']
+        manifest['host_permissions'] = [*manifest['host_permissions'][:-1], f'{app_origin}/*']
         bundle.writestr('browser-extension/manifest.json', json.dumps(manifest, ensure_ascii=False, indent=2))
         bundle.writestr('browser-extension/extension-config.js', f'export const APP_ORIGIN = {json.dumps(app_origin)};\n')
-        for name in ('background.js', 'app-content.js', 'options.html', 'options.js', 'README.md'):
+        for name in ('background.js', 'app-content.js', 'options.html', 'options.js', 'luogu-content.js', 'README.md'):
             path = extension / name
             if not path.is_file(): raise HTTPException(503, '浏览器插件文件不完整')
             bundle.write(path, f'browser-extension/{name}')
     archive.seek(0)
     return StreamingResponse(archive, media_type='application/zip', headers={
-        'Content-Disposition': 'attachment; filename="scu-luogu-bridge.zip"',
+        'Content-Disposition': 'attachment; filename="scu-submission-bridge.zip"',
         'Cache-Control': 'no-store',
     })
 
@@ -485,7 +493,7 @@ def contest_overview(cid: int, user=Depends(exam_user)):
     """Return contest metadata and problem titles without revealing future statements."""
     with connect() as db:
         contest = contest_access.require_access(db, cid, user)
-        problems = [dict(row) for row in db.execute('''SELECT problems.id,title,remote_problem_id,points,
+        problems = [dict(row) for row in db.execute('''SELECT problems.id,title,remote_problem_id,remote_platform,points,
             (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
                 WHERE problem_id=problems.id AND users.is_admin=0) AS attempt_count,
             (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
@@ -561,11 +569,44 @@ def luogu_problem_suggestions(q: str = Query(min_length=1, max_length=64), user=
     except luogu_catalog.LuoguCatalogError as error:
         raise HTTPException(502, str(error)) from error
 
+@app.get('/api/admin/leetcode/problem-suggestions')
+def leetcode_problem_suggestions(q: str = Query(min_length=1, max_length=100), user=Depends(administrator)):
+    query = q.strip()
+    if not query: raise HTTPException(422, '请输入 LeetCode 题号或名称')
+    try:
+        return coding_platforms.search('leetcode', query)
+    except leetcode_catalog.LeetCodeCatalogError as error:
+        raise HTTPException(502, str(error)) from error
+
+@app.get('/api/admin/platforms/{platform}/problem-suggestions')
+def platform_problem_suggestions(platform: str, q: str = Query(min_length=1, max_length=100), user=Depends(administrator)):
+    if platform not in coding_platforms.ADAPTERS:
+        raise HTTPException(404, '不支持的评测平台')
+    if not q.strip():
+        raise HTTPException(422, '请输入题目编号或名称')
+    try:
+        return coding_platforms.search(platform, q.strip())
+    except coding_platforms.CATALOG_ERRORS as error:
+        raise HTTPException(502, str(error)) from error
+
 @app.get('/api/admin/luogu/problems/{problem_id}')
 def luogu_problem_details(problem_id: str, user=Depends(administrator)):
     try:
         return luogu_catalog.problem(problem_id)
     except luogu_catalog.LuoguCatalogError as error:
+        raise HTTPException(502, str(error)) from error
+
+@app.get('/api/admin/platforms/{platform}/problems/{identifier}')
+def platform_problem_details(platform: str, identifier: str, user=Depends(administrator)):
+    """Load a public contest problem through its registered judge adapter."""
+    if platform not in coding_platforms.ADAPTERS:
+        raise HTTPException(404, '不支持的评测平台')
+    try:
+        normalized = coding_platforms.normalize_identifier(platform, identifier)
+        return coding_platforms.problem(platform, normalized)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+    except coding_platforms.CATALOG_ERRORS as error:
         raise HTTPException(502, str(error)) from error
 
 @app.post('/api/admin/contests')
@@ -579,18 +620,43 @@ def create_contest(payload: Contest, user=Depends(administrator)):
         problem_ids = []
         seen = set()
         for problem in payload.problems:
-            if payload.judge_mode == 'luogu':
-                if not re.fullmatch(r'[A-Z]{1,4}[0-9]{1,8}', problem.remote_problem_id):
-                    raise HTTPException(400, '洛谷题目编号格式无效，例如 P1000')
-                if problem.remote_problem_id in seen:
-                    raise HTTPException(400, '比赛中不能重复添加同一道洛谷题目')
-                seen.add(problem.remote_problem_id)
-            elif not problem.tests or any(set(case) != {'input', 'output'} for case in problem.tests):
-                raise HTTPException(400, '本地评测需要至少一组 input/output 测试用例')
-            pid = db.execute('''INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,remote_problem_id,samples,points)
-                VALUES (?,?,?,?,?,?,?,?,?)''', (iid, *problem_values(problem), problem.points)).lastrowid
+            platform = problem.remote_platform or ('luogu' if payload.judge_mode == 'luogu' else 'local')
+            validate_contest_problem(problem, platform, seen)
+            values = problem_values(problem)
+            pid = db.execute('''INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,
+                remote_problem_id,samples,source_info,starter_codes,points,remote_platform)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)''',
+                (iid, *values, problem.points, platform)).lastrowid
             problem_ids.append(pid)
         return {'id': iid, 'problem_ids': problem_ids}
+
+
+def validate_contest_problem(problem, platform, seen):
+    """Validate one mixed-judge contest problem before it is stored."""
+    if platform == 'luogu':
+        remote_id = problem.remote_problem_id.strip().upper()
+        if not luogu_catalog.PROBLEM_ID.fullmatch(remote_id):
+            raise HTTPException(400, '洛谷题目编号格式无效，例如 P1000')
+    elif platform == 'leetcode':
+        remote_id = problem.remote_problem_id.strip()
+        if not leetcode_catalog.PROBLEM_SLUG.fullmatch(remote_id):
+            raise HTTPException(400, 'LeetCode 题目 slug 格式无效，例如 two-sum')
+        question_id = problem.source_info.get('question_id')
+        if not re.fullmatch(r'[1-9][0-9]{0,8}', str(question_id or '')):
+            raise HTTPException(400, 'LeetCode 题目缺少官方题目编号，请重新导入')
+    else:
+        remote_id = ''
+        if not problem.tests or any(set(case) != {'input', 'output'} for case in problem.tests):
+            raise HTTPException(400, '本站评测需要至少一组 input/output 测试用例')
+    key = (platform, remote_id) if remote_id else None
+    if key and key in seen:
+        raise HTTPException(400, '比赛中不能重复添加同一道题目')
+    if key:
+        seen.add(key)
+    if any(len(code) > 30000 for code in problem.starter_codes.values()):
+        raise HTTPException(422, '代码模板过长')
+    problem.remote_platform = platform
+    problem.remote_problem_id = remote_id
 
 
 def problem_values(problem):
@@ -599,7 +665,9 @@ def problem_values(problem):
     first = samples[0] if samples else {'input': problem.sample_input, 'output': problem.sample_output}
     return (problem.title, problem.statement, first['input'], first['output'],
             json.dumps(problem.tests, ensure_ascii=False), problem.remote_problem_id,
-            json.dumps(samples, ensure_ascii=False))
+            json.dumps(samples, ensure_ascii=False),
+            json.dumps(problem.source_info, ensure_ascii=False),
+            json.dumps(problem.starter_codes, ensure_ascii=False))
 
 
 @app.put('/api/admin/contests/{cid}')
@@ -611,34 +679,35 @@ def update_contest(cid: int, payload: ContestUpdate, user=Depends(administrator)
         contest = db.execute('SELECT * FROM contests WHERE id=?', (cid,)).fetchone()
         if not contest: raise HTTPException(404, '比赛不存在')
         if payload.judge_mode != contest['judge_mode']:
-            raise HTTPException(400, '已有比赛不能切换评测平台')
+            raise HTTPException(400, '不能切换历史比赛的评测模式')
         if payload.participant_ids is not None:
             contest_access.set_participants(db, cid, payload.participant_ids)
         existing = list(db.execute('SELECT * FROM problems WHERE contest_id=?', (cid,)))
         ids = [row['id'] for row in existing]
         if payload.problems is not None:
-            if contest['judge_mode'] != 'luogu':
-                raise HTTPException(400, '历史本地评测比赛只支持修改名称和起止时间')
-            by_remote = {row['remote_problem_id']: row for row in existing}
+            if contest['judge_mode'] == 'docker':
+                raise HTTPException(400, '历史本地评测比赛只支持修改比赛信息')
+            by_remote = {(row['remote_platform'], row['remote_problem_id']): row for row in existing if row['remote_problem_id']}
             by_id = {row['id']: row for row in existing}
             seen = set()
             keep = []
             for problem in payload.problems:
-                if not re.fullmatch(r'[A-Z]{1,4}[0-9]{1,8}', problem.remote_problem_id):
-                    raise HTTPException(400, '洛谷题目编号格式无效，例如 P1000')
-                if problem.remote_problem_id in seen:
-                    raise HTTPException(400, '比赛中不能重复添加同一道洛谷题目')
-                seen.add(problem.remote_problem_id)
-                old = by_id.get(problem.id) if problem.id is not None else by_remote.get(problem.remote_problem_id)
-                if problem.id is not None and (not old or old['remote_problem_id'] != problem.remote_problem_id):
+                platform = problem.remote_platform or ('luogu' if contest['judge_mode'] == 'luogu' else 'local')
+                validate_contest_problem(problem, platform, seen)
+                key = (platform, problem.remote_problem_id)
+                old = by_id.get(problem.id) if problem.id is not None else by_remote.get(key)
+                if problem.id is not None and (not old or old['remote_problem_id'] != problem.remote_problem_id
+                                                or old['remote_platform'] != platform):
                     raise HTTPException(400, '题目不属于本比赛或题号发生变化，请重新打开编辑页')
                 if old:
-                    db.execute('''UPDATE problems SET title=?,statement=?,sample_input=?,sample_output=?,tests=?,remote_problem_id=?,samples=?,points=?
+                    db.execute('''UPDATE problems SET title=?,statement=?,sample_input=?,sample_output=?,tests=?,
+                        remote_problem_id=?,samples=?,source_info=?,starter_codes=?,points=?
                         WHERE id=?''', (*problem_values(problem), problem.points, old['id']))
                     keep.append(old['id'])
                 else:
-                    pid = db.execute('''INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,remote_problem_id,samples,points)
-                        VALUES (?,?,?,?,?,?,?,?,?)''', (cid, *problem_values(problem), problem.points)).lastrowid
+                    pid = db.execute('''INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,
+                        remote_problem_id,samples,source_info,starter_codes,points,remote_platform)
+                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?)''', (cid, *problem_values(problem), problem.points, platform)).lastrowid
                     keep.append(pid)
             for old in existing:
                 if old['id'] in keep: continue
@@ -658,15 +727,17 @@ def refresh_problem(pid: int, user=Depends(administrator)):
         old = db.execute('SELECT * FROM problems WHERE id=?', (pid,)).fetchone()
         if not old: raise HTTPException(404, '题目不存在')
         remote_id = old['remote_problem_id']
-        if not remote_id: raise HTTPException(400, '此题不是洛谷导入题目')
+        platform = old['remote_platform']
+        if platform not in ('luogu', 'leetcode') or not remote_id: raise HTTPException(400, '此题不是在线评测平台题目')
     try:
-        imported = luogu_catalog.problem(remote_id)
-    except luogu_catalog.LuoguCatalogError as error:
+        imported = coding_platforms.problem(platform, remote_id)
+    except (luogu_catalog.LuoguCatalogError, leetcode_catalog.LeetCodeCatalogError) as error:
         raise HTTPException(502, str(error)) from error
     problem = Problem(**{**imported, 'remote_problem_id': remote_id})
     with connect() as db:
-        cursor = db.execute('''UPDATE problems SET title=?,statement=?,sample_input=?,sample_output=?,tests=?,remote_problem_id=?,samples=?
-            WHERE id=? AND remote_problem_id=?''', (*problem_values(problem), pid, remote_id))
+        cursor = db.execute('''UPDATE problems SET title=?,statement=?,sample_input=?,sample_output=?,tests=?,
+            remote_problem_id=?,samples=?,source_info=?,starter_codes=?
+            WHERE id=? AND remote_problem_id=? AND remote_platform=?''', (*problem_values(problem), pid, remote_id, platform))
         if not cursor.rowcount: raise HTTPException(409, '题目已发生变化，请刷新比赛信息')
         return public_problem(db.execute('SELECT * FROM problems WHERE id=?', (pid,)).fetchone())
 
@@ -686,13 +757,15 @@ def delete_contest(cid: int, user=Depends(administrator)):
 @app.post('/api/admin/contests/{cid}/problems')
 def create_problem(cid: int, payload: Problem, user=Depends(administrator)):
     with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
         contest = db.execute('SELECT judge_mode FROM contests WHERE id=?', (cid,)).fetchone()
         if not contest: raise HTTPException(404, '比赛不存在')
-        if contest['judge_mode'] == 'luogu':
-            if not re.fullmatch(r'[A-Z]{1,4}[0-9]{1,8}', payload.remote_problem_id): raise HTTPException(400, '洛谷题目编号格式无效，例如 P1000')
-        elif not payload.tests or any(set(case) != {'input', 'output'} for case in payload.tests):
-            raise HTTPException(400, '本地评测需要至少一组 input/output 测试用例')
-        pid = db.execute('INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,remote_problem_id,samples,points) VALUES (?,?,?,?,?,?,?,?,?)', (cid, *problem_values(payload), payload.points)).lastrowid
+        platform = payload.remote_platform or ('luogu' if contest['judge_mode'] == 'luogu' else 'local')
+        existing = db.execute('SELECT remote_platform,remote_problem_id FROM problems WHERE contest_id=?', (cid,))
+        validate_contest_problem(payload, platform, {tuple(row) for row in existing})
+        pid = db.execute('''INSERT INTO problems(contest_id,title,statement,sample_input,sample_output,tests,
+            remote_problem_id,samples,source_info,starter_codes,points,remote_platform)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)''', (cid, *problem_values(payload), payload.points, platform)).lastrowid
         return {'id': pid}
 
 @app.get('/api/contests/{cid}/problems')
@@ -700,7 +773,7 @@ def problems(cid: int, user=Depends(exam_user)):
     with connect() as db:
         contest = contest_access.require_access(db, cid, user)
         if time.time() < contest['starts']: raise HTTPException(403, '比赛尚未开始')
-        return [{**public_problem(row), 'judge_mode': contest['judge_mode'],
+        return [{**public_problem(row), 'judge_mode': 'luogu' if row['remote_platform'] in ('luogu','leetcode') else 'samples',
             'points': row['points'],
             'attempt_count': db.execute('''SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
                 WHERE problem_id=? AND users.is_admin=0''', (row['id'],)).fetchone()[0] if user['is_admin'] or contest['show_ranking'] else None,
@@ -711,39 +784,92 @@ def problems(cid: int, user=Depends(exam_user)):
 @app.post('/api/problems/{pid}/submissions')
 def submit(pid: int, payload: Submission, user=Depends(exam_user)):
     with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
         p = db.execute('SELECT problems.*,contests.starts,contests.ends,contests.judge_mode FROM problems JOIN contests ON contests.id=problems.contest_id WHERE problems.id=?', (pid,)).fetchone()
         if not p: raise HTTPException(404, '题目不存在')
         contest_access.require_access(db, p['contest_id'], user)
         if not p['starts'] <= time.time() <= p['ends']: raise HTTPException(403, '不在比赛时间内')
-        if p['judge_mode'] == 'docker' and payload.language != 'python3':
-            raise HTTPException(422, '历史本地评测比赛目前仅支持 Python 3')
-        initial = 'Waiting for browser extension' if p['judge_mode'] == 'luogu' else 'Judging'
-        sid = db.execute('INSERT INTO submissions(user_id,problem_id,language,source,status,created) VALUES (?,?,?,?,?,?)', (user['id'],pid,payload.language,payload.source,initial,time.time())).lastrowid
-    if p['judge_mode'] == 'luogu': return {'id': sid, 'status': initial, 'judge_mode': 'luogu', 'remote_problem_id': p['remote_problem_id']}
+        if p['remote_platform'] == 'local' and payload.language != 'python3':
+            raise HTTPException(422, '本站比赛评测仅支持 Python 3')
+        if p['remote_platform'] == 'leetcode' and payload.language not in ('cpp11', 'c', 'python3'):
+            raise HTTPException(422, 'LeetCode 中国区评测支持 C++、C 和 Python 3')
+        if not payload.source.strip():
+            raise HTTPException(422, '请先输入代码')
+        remote = p['remote_platform'] in ('luogu','leetcode')
+        initial = 'Waiting for browser extension' if remote else 'Judging'
+        sid = db.execute('''INSERT INTO submissions(user_id,problem_id,language,source,status,created,
+            remote_platform,remote_problem_id) VALUES (?,?,?,?,?,?,?,?)''',
+            (user['id'],pid,payload.language,payload.source,initial,time.time(),p['remote_platform'],p['remote_problem_id'])).lastrowid
+    if remote: return {'id': sid, 'status': initial, 'judge_mode': 'luogu', 'remote_platform': p['remote_platform'],
+                       'remote_problem_id': p['remote_problem_id'], 'source_info': json.loads(p['source_info'])}
     status = judge.judge(payload.language, payload.source, p['tests'])
     with connect() as db: db.execute('UPDATE submissions SET status=? WHERE id=?', (status, sid))
     return {'id': sid, 'status': status}
 
+@app.post('/api/problems/{pid}/run')
+def run_contest_samples(pid: int, payload: Submission, user=Depends(exam_user)):
+    """Run public samples without creating a contest submission or affecting ranking."""
+    with connect() as db:
+        problem = db.execute('''SELECT problems.id,problems.samples,problems.source_info,problems.remote_problem_id,
+            problems.remote_platform,contests.id AS contest_id,contests.starts
+            FROM problems JOIN contests ON contests.id=problems.contest_id WHERE problems.id=?''', (pid,)).fetchone()
+        if not problem:
+            raise HTTPException(404, '题目不存在')
+        contest_access.require_access(db, problem['contest_id'], user)
+        if time.time() < problem['starts']:
+            raise HTTPException(403, '比赛尚未开始')
+        samples = json.loads(problem['samples'] or '[]')
+    if not samples:
+        raise HTTPException(422, '该题没有公开样例，无法运行样例测试')
+    from app.services import coding_judge, coding_test_adapters
+    try:
+        meta = None
+        if problem['remote_platform'] == 'leetcode':
+            meta = coding_test_adapters.resolve_metadata(json.loads(problem['source_info'] or '{}'), problem['remote_problem_id'])
+        return coding_test_adapters.evaluate(problem['remote_platform'], payload.language, payload.source, samples, meta)
+    except coding_judge.JudgeUnavailable as error:
+        raise HTTPException(503, str(error)) from error
+    except leetcode_catalog.LeetCodeCatalogError as error:
+        raise HTTPException(502, f'无法获取力扣函数签名：{error}，请稍后重试') from error
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+
 @app.post('/api/submissions/{sid}/remote-result')
 def update_remote_submission(sid: int, payload: RemoteSubmissionResult, user=Depends(exam_user)):
     with connect() as db:
-        row = db.execute('''SELECT submissions.status,submissions.remote_submission_id,problems.contest_id
+        db.execute('BEGIN IMMEDIATE')
+        row = db.execute('''SELECT submissions.status,submissions.remote_submission_id,submissions.remote_platform,
+            submissions.remote_problem_id,problems.contest_id
             FROM submissions JOIN problems ON problems.id=submissions.problem_id
             JOIN contests ON contests.id=problems.contest_id
-            WHERE submissions.id=? AND submissions.user_id=? AND contests.judge_mode='luogu' ''',
+            WHERE submissions.id=? AND submissions.user_id=? AND submissions.remote_platform IN ('luogu','leetcode') ''',
             (sid,user['id'])).fetchone()
         if not row: raise HTTPException(404, '提交记录不存在')
         contest_access.require_access(db, row['contest_id'], user)
+        if row['remote_platform'] != payload.platform:
+            raise HTTPException(409, '评测平台与提交记录不一致')
+        remote_problem_id = payload.remote_problem_id.upper() if payload.platform == 'luogu' else payload.remote_problem_id
+        if (remote_problem_id or payload.platform == 'leetcode') and remote_problem_id != row['remote_problem_id']:
+            raise HTTPException(409, '远端题目编号与提交记录不一致')
         if row['remote_submission_id'] and row['remote_submission_id'] != payload.remote_submission_id:
             raise HTTPException(409, '远端提交编号与本地记录不一致')
+        if payload.remote_submission_id and not re.fullmatch(r'[1-9][0-9]*', payload.remote_submission_id):
+            raise HTTPException(422, '远端提交编号格式无效')
         terminal = {'Accepted','Wrong Answer','Output Limit Exceeded','Time Limit Exceeded','Memory Limit Exceeded','Runtime Error','Compile Error','System Error','Submission Failed'}
-        if row['status'] in terminal and row['status'] != payload.status:
+        if row['status'] in terminal and row['status'] != payload.status and payload.status != 'Submitted':
             raise HTTPException(409, '已完成的评测结果不能被覆盖')
         if payload.status != 'Submission Failed' and not (row['remote_submission_id'] or payload.remote_submission_id):
-            raise HTTPException(422, '远端评测状态必须包含洛谷提交编号')
-        db.execute('UPDATE submissions SET remote_submission_id=?,status=?,detail=? WHERE id=?',
-                   (payload.remote_submission_id,payload.status,payload.detail,sid))
-        return {'id':sid,'remote_submission_id':payload.remote_submission_id,'status':payload.status}
+            raise HTTPException(422, '远端评测状态必须包含提交编号')
+        status = row['status'] if row['status'] in terminal or (row['status'] == 'Judging' and payload.status == 'Submitted') else payload.status
+        if row['status'] not in terminal and not (row['status'] == 'Judging' and payload.status == 'Submitted'):
+            if payload.remote_submission_id and db.execute('''SELECT 1 FROM submissions
+                WHERE remote_platform=? AND remote_submission_id=? AND id<>?''',
+                (payload.platform, payload.remote_submission_id, sid)).fetchone():
+                raise HTTPException(409, '此远程提交已关联另一条记录')
+            db.execute('UPDATE submissions SET remote_submission_id=?,status=?,detail=? WHERE id=?',
+                       (payload.remote_submission_id,status,payload.detail,sid))
+        return {'id':sid,'remote_submission_id':payload.remote_submission_id,'status':status,
+                'remote_platform':row['remote_platform']}
 
 @app.get('/api/submissions')
 def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
@@ -761,7 +887,7 @@ def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(defau
         joins = 'JOIN problems ON problems.id=submissions.problem_id'
         total = db.execute(f'SELECT COUNT(*) FROM submissions {joins} WHERE {where}', params).fetchone()[0]
         rows = [dict(row) for row in db.execute(f'''SELECT submissions.id,username,problem_id,problems.title AS problem_title,
-            language,status,created,detail FROM submissions JOIN users ON users.id=submissions.user_id
+            language,status,created,submissions.remote_platform,detail FROM submissions JOIN users ON users.id=submissions.user_id
             {joins} WHERE {where} ORDER BY submissions.id DESC LIMIT ? OFFSET ?''', (*params,page_size,(page-1)*page_size))]
         pages = (total + page_size - 1) // page_size
         stats = db.execute(f'''SELECT SUM(CASE WHEN status='Accepted' THEN 1 ELSE 0 END) AS accepted,
@@ -777,7 +903,7 @@ def submission_detail(sid: int, user=Depends(exam_user)):
     with connect() as db:
         row = db.execute('''SELECT submissions.id,submissions.user_id,submissions.problem_id,problems.contest_id,problems.title AS problem_title,
             contests.title AS contest_title,submissions.language,submissions.source,submissions.status,submissions.created,
-            submissions.detail FROM submissions
+            submissions.remote_platform,submissions.detail FROM submissions
             JOIN problems ON problems.id=submissions.problem_id JOIN contests ON contests.id=problems.contest_id
             WHERE submissions.id=? AND submissions.user_id=?''', (sid,user['id'])).fetchone()
         if not row: raise HTTPException(404, '提交记录不存在')

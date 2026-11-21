@@ -44,6 +44,19 @@ def _judge(monkeypatch):
         'status': 'Accepted', 'detail': '全部公开样例通过', 'passed_cases': len(samples), 'total_cases': len(samples)})
 
 
+def test_reference_code_is_exposed_as_safe_markdown_html(client):
+    alice, admin = login(client, 'alice'), login(client, 'manager')
+    stage = _stage(client, admin)
+    item = _question(client, admin, stage, official=True,
+                     reference_code='# 参考实现\n\n```cpp\nint main() {}\n```\n\n$x^2$')
+    assert '<h1>参考实现</h1>' in item['reference_code_html']
+    assert '<code class="language-cpp">int main() {}' in item['reference_code_html']
+    assert '<script>' not in item['reference_code_html']
+    detail = client.get(f"/api/coding/questions/{item['id']}", headers=alice)
+    assert detail.status_code == 200, detail.text
+    assert detail.json()['reference_code_html'] == item['reference_code_html']
+
+
 def _solve(client, actor, qid):
     result = client.post(f'/api/coding/questions/{qid}/submissions', headers=actor,
                          json={'language': 'python3', 'source': 'print(sum(map(int,input().split())))'})
@@ -157,6 +170,16 @@ def test_stage_order_stars_pagination_disable_and_delete_protection(client):
     assert client.patch(f"/api/admin/coding/stages/{first['id']}", headers=admin, json={'active': False}).status_code == 200
     assert client.get(f"/api/coding/questions?stage_id={first['id']}", headers=alice).json()['total'] == 0
     assert client.delete(f"/api/admin/coding/stages/{second['id']}", headers=admin).status_code == 204
+
+
+def test_position_zero_inserts_before_existing_questions_in_the_stage(client):
+    alice, admin = login(client, 'alice'), login(client, 'manager')
+    stage = _stage(client, admin)
+    existing = _question(client, admin, stage, official=True, position=0, title='原有第一题')
+    inserted = _question(client, admin, stage, official=True, position=0, title='插入第一题')
+    result = client.get(f"/api/coding/questions?stage_id={stage['id']}", headers=alice)
+    assert [item['id'] for item in result.json()['items'][:2]] == [inserted['id'], existing['id']]
+    assert result.json()['items'][1]['position'] == 1
 
 
 def test_solved_failed_and_favorite_views_are_user_scoped_and_persist(client, monkeypatch):
@@ -330,6 +353,105 @@ def test_remote_result_owner_problem_id_terminal_and_replay_guards(client):
     assert client.post(path, headers=alice, json=payload | {'remote_submission_id': '998878', 'status': 'Accepted'}).status_code == 409
     assert client.post(f"/api/coding/submissions/{second['id']}/remote-result", headers=alice,
                        json=payload | {'status': 'Accepted'}).status_code == 409
+
+
+def test_leetcode_questions_submit_through_the_bridge_and_store_platform_results(client):
+    alice, admin = login(client, 'alice'), login(client, 'manager')
+    stage = _stage(client, admin)
+    item = _question(client, admin, stage, official=True, judge_mode='luogu', remote_platform='leetcode', remote_problem_id='two-sum',
+                     source_url='https://leetcode.cn/problems/two-sum/', samples=[],
+                     source_info={'platform': 'leetcode', 'question_id': '1'},
+                     reference_code='class Solution { /* book solution */ };')
+    assert item['judge_mode'] == 'luogu'
+    assert item['remote_platform'] == 'leetcode'
+    assert item['remote_problem_id'] == 'two-sum'
+
+    submission = client.post(f"/api/coding/questions/{item['id']}/submissions", headers=alice,
+                             json={'language': 'cpp11', 'source': 'class Solution {};'}).json()
+    assert submission['status'] == 'Waiting for browser extension'
+    result_path = f"/api/coding/submissions/{submission['id']}/remote-result"
+    result = {'remote_submission_id': '123456789', 'remote_problem_id': 'two-sum',
+              'platform': 'leetcode', 'status': 'Judging', 'detail': '评测中'}
+    assert client.post(result_path, headers=alice, json=result).status_code == 200
+    accepted = client.post(result_path, headers=alice, json=result | {'status': 'Accepted', 'detail': '通过 74 / 74'} )
+    assert accepted.status_code == 200, accepted.text
+    assert accepted.json()['status'] == 'Accepted'
+    assert accepted.json()['remote_platform'] == 'leetcode'
+
+
+def test_leetcode_bridge_rejects_a_mismatched_problem_slug(client):
+    alice, admin = login(client, 'alice'), login(client, 'manager')
+    stage = _stage(client, admin)
+    item = _question(client, admin, stage, official=True, judge_mode='luogu', remote_platform='leetcode', remote_problem_id='two-sum',
+                     source_url='https://leetcode.cn/problems/two-sum/', samples=[],
+                     source_info={'platform': 'leetcode', 'question_id': '1'})
+    submission = client.post(f"/api/coding/questions/{item['id']}/submissions", headers=alice,
+                             json={'language': 'cpp11', 'source': 'class Solution {};'}).json()
+    result = {'remote_submission_id': '123456790', 'remote_problem_id': 'three-sum',
+              'platform': 'leetcode', 'status': 'Accepted'}
+    assert client.post(f"/api/coding/submissions/{submission['id']}/remote-result", headers=alice,
+                       json=result).status_code == 409
+
+
+def test_admin_can_import_leetcode_problem_with_official_templates(client, monkeypatch):
+    import app.routes.coding as coding
+
+    admin = login(client, 'manager')
+    expected = {
+        'title': '两数之和', 'statement': '给定数组。', 'samples': [], 'difficulty': 1,
+        'remote_problem_id': 'two-sum', 'remote_platform': 'leetcode', 'judge_mode': 'luogu',
+        'source_url': 'https://leetcode.cn/problems/two-sum/',
+        'starter_codes': {'cpp11': 'class Solution {};'},
+        'source_info': {'platform': 'leetcode', 'question_id': '1', 'sample_test_case': '2'},
+    }
+    monkeypatch.setattr(coding.leetcode_catalog, 'problem', lambda slug: expected | {'remote_problem_id': slug})
+    response = client.post('/api/admin/coding/import-leetcode', headers=admin, json={'slug': 'two-sum'})
+    assert response.status_code == 200, response.text
+    assert response.json()['source_info']['question_id'] == '1'
+    assert client.post('/api/coding/import/leetcode', headers=admin, json={'slug': 'two-sum'}).status_code == 200
+
+
+def test_contest_and_personal_question_search_dispatch_to_leetcode_cn_adapter(client, monkeypatch):
+    from app.services import leetcode_catalog
+
+    admin, alice = login(client, 'manager'), login(client, 'alice')
+    observed = []
+    monkeypatch.setattr(leetcode_catalog, 'search', lambda query: (
+        observed.append(query) or [{'problem_id': 'two-sum', 'number': '1', 'title': '两数之和'}]
+    ))
+
+    contest = client.get('/api/admin/platforms/leetcode/problem-suggestions?q=两数之和', headers=admin)
+    personal = client.get('/api/coding/import/leetcode/suggestions?q=两数之和', headers=alice)
+    assert contest.status_code == 200 and contest.json()[0]['title'] == '两数之和'
+    assert personal.status_code == 200 and personal.json()[0]['problem_id'] == 'two-sum'
+    assert observed == ['两数之和', '两数之和']
+
+
+def test_regular_user_can_import_leetcode_problem_for_a_private_question(client, monkeypatch):
+    import app.routes.coding as coding
+
+    alice, bob = login(client, 'alice'), login(client, 'bob')
+    stage = _stage(client, login(client, 'manager'))
+    expected = {
+        'title': '两数之和', 'statement': '给定数组。', 'samples': [], 'difficulty': 1,
+        'remote_problem_id': 'two-sum', 'remote_platform': 'leetcode', 'judge_mode': 'luogu',
+        'source_url': 'https://leetcode.cn/problems/two-sum/',
+        'starter_codes': {'cpp11': 'class Solution {};'},
+        'source_info': {'platform': 'leetcode', 'question_id': '1'},
+    }
+    monkeypatch.setattr(coding.leetcode_catalog, 'problem', lambda slug: expected | {'remote_problem_id': slug})
+    imported = client.post('/api/coding/import/leetcode', headers=alice, json={'slug': 'two-sum'})
+    assert imported.status_code == 200, imported.text
+    question = client.post('/api/coding/questions', headers=alice, json={
+        'stage_id': stage['id'], 'title': imported.json()['title'], 'statement': imported.json()['statement'],
+        'remote_platform': imported.json()['remote_platform'], 'remote_problem_id': imported.json()['remote_problem_id'],
+        'source_url': imported.json()['source_url'], 'source_info': imported.json()['source_info'],
+        'starter_codes': imported.json()['starter_codes'], 'judge_mode': 'luogu', 'samples': [],
+    })
+    assert question.status_code == 201, question.text
+    assert question.json()['remote_platform'] == 'leetcode'
+    assert client.get(f"/api/coding/questions/{question.json()['id']}", headers=bob).status_code == 404
+    assert client.post('/api/coding/import/leetcode', headers=alice, json={'slug': '../bad'}).status_code == 422
 
 
 def test_import_is_explicit_safe_and_reports_upstream_failure(client, monkeypatch):
@@ -561,3 +683,90 @@ def test_content_revision_upgrade_does_not_assume_unknown_preview_results_are_cu
         assert db.execute('SELECT question_content_version FROM coding_submissions WHERE id=?', (record['id'],)).fetchone()[0] == 0
     assert client.get(f"/api/coding/questions/{item['id']}", headers=alice).json()['solved'] is False
     assert client.get(f"/api/coding/submissions/{record['id']}", headers=alice).json()['status'] == 'Accepted'
+
+
+def test_legacy_remote_platform_upgrade_preserves_submissions_and_scopes_remote_ids(client, monkeypatch):
+    import sqlite3
+    import pytest
+    from app.db import connect, initialize
+
+    _judge(monkeypatch)
+    alice, admin = login(client, 'alice'), login(client, 'manager')
+    stage = _stage(client, admin)
+    item = _question(client, admin, stage, official=True)
+    first = _solve(client, alice, item['id'])
+    second = _solve(client, alice, item['id'])
+    with connect() as db:
+        db.execute('DROP INDEX coding_remote_submission')
+        db.execute('ALTER TABLE coding_questions DROP COLUMN remote_platform')
+        db.execute('ALTER TABLE coding_questions DROP COLUMN starter_codes')
+        db.execute('ALTER TABLE coding_submissions DROP COLUMN remote_platform')
+        db.execute("CREATE UNIQUE INDEX coding_remote_submission ON coding_submissions(remote_submission_id) WHERE remote_submission_id<>''")
+        db.execute("UPDATE coding_submissions SET remote_submission_id='legacy-42' WHERE id=?", (first['id'],))
+        original = dict(db.execute('SELECT * FROM coding_submissions WHERE id=?', (first['id'],)).fetchone())
+        count = db.execute('SELECT COUNT(*) FROM coding_submissions').fetchone()[0]
+
+    initialize()
+    initialize()
+
+    with connect() as db:
+        migrated = dict(db.execute('SELECT * FROM coding_submissions WHERE id=?', (first['id'],)).fetchone())
+        assert migrated.pop('remote_platform') == 'luogu'
+        assert migrated == original
+        assert db.execute('SELECT COUNT(*) FROM coding_submissions').fetchone()[0] == count
+        question = db.execute('SELECT remote_platform,starter_codes FROM coding_questions WHERE id=?', (item['id'],)).fetchone()
+        assert tuple(question) == ('luogu', '{}')
+        for table, field in [('coding_questions', 'remote_platform'), ('coding_questions', 'starter_codes'),
+                             ('coding_submissions', 'remote_platform')]:
+            columns = {row['name']: row['type'] for row in db.execute(f'PRAGMA table_info({table})')}
+            assert columns[field] == 'TEXT'
+        db.execute("UPDATE coding_submissions SET remote_platform='leetcode',remote_submission_id='legacy-42' WHERE id=?", (second['id'],))
+        with pytest.raises(sqlite3.IntegrityError):
+            db.execute("UPDATE coding_submissions SET remote_platform='luogu' WHERE id=?", (second['id'],))
+        for table, row_id in [('coding_questions', item['id']), ('coding_submissions', first['id'])]:
+            with pytest.raises(sqlite3.IntegrityError):
+                db.execute(f"UPDATE {table} SET remote_platform='unsupported' WHERE id=?", (row_id,))
+
+
+def test_leetcode_custom_run_uses_function_adapter_and_preserves_submission_history(client, monkeypatch):
+    from app.services import coding_judge, leetcode_catalog
+    alice, admin = login(client, 'alice'), login(client, 'manager')
+    stage = _stage(client, admin)
+    item = _question(client, admin, stage, official=True, judge_mode='luogu', remote_platform='leetcode',
+        remote_problem_id='two-sum', source_url='https://leetcode.cn/problems/two-sum/',
+        source_info={'platform': 'leetcode', 'question_id': '1'}, samples=[])
+    meta = {'name': 'twoSum', 'params': [{'name': 'nums', 'type': 'integer[]'}, {'name': 'target', 'type': 'integer'}], 'return': {'type': 'integer[]'}}
+    fetched, observed = [], []
+    monkeypatch.setattr(leetcode_catalog, 'problem', lambda slug: fetched.append(slug) or {'source_info': {'leetcode_metadata': meta}})
+    def evaluate(language, source, cases, **kwargs):
+        observed.append((source, cases, kwargs))
+        return {'status': 'Accepted', 'passed_cases': 1, 'total_cases': 1, 'cases': [{'input': '0', 'expected_output': '[0,1]', 'actual_output': '[0,1]', 'status': 'Accepted'}]}
+    monkeypatch.setattr(coding_judge, 'evaluate', evaluate)
+    payload = {'language': 'cpp11', 'source': 'class Solution {};', 'cases': [{'input': 'nums=[2,7], target=9', 'output': '[0,1]'}]}
+    response = client.post(f"/api/coding/questions/{item['id']}/run", headers=alice, json=payload)
+    assert response.status_code == 200, response.text
+    assert response.json()['cases'][0]['input'] == payload['cases'][0]['input']
+    assert observed[0][2] == {'structured': True}
+    assert 'Solution().twoSum' in observed[0][0]
+    assert fetched == ['two-sum']
+    response = client.post(f"/api/coding/questions/{item['id']}/run", headers=alice, json=payload)
+    assert response.status_code == 200
+    assert fetched == ['two-sum']
+    assert client.get(f"/api/coding/questions/{item['id']}/submissions", headers=alice).json()['items'] == []
+    payload['cases'][0]['input'] = 'nums=[2,7]'
+    response = client.post(f"/api/coding/questions/{item['id']}/run", headers=alice, json=payload)
+    assert response.status_code == 422 and '参数' in response.json()['detail']
+    assert len(observed) == 2
+
+
+def test_leetcode_authoring_rejects_stdin_style_cases(client):
+    admin = login(client, 'manager')
+    stage = _stage(client, admin)
+    result = client.post('/api/admin/coding/questions', headers=admin, json={
+        'stage_id': stage['id'], 'title': '两数之和', 'statement': '函数题', 'judge_mode': 'luogu',
+        'remote_platform': 'leetcode', 'remote_problem_id': 'two-sum', 'source_url': 'https://leetcode.cn/problems/two-sum/',
+        'source_info': {'platform': 'leetcode', 'question_id': '1', 'leetcode_metadata': {
+            'name': 'twoSum', 'params': [{'name': 'nums', 'type': 'integer[]'}, {'name': 'target', 'type': 'integer'}], 'return': {'type': 'integer[]'}}},
+        'samples': [{'input': '2 7\n9', 'output': '0 1'}]})
+    assert result.status_code == 422, result.text
+    assert '用例 1' in result.json()['detail']

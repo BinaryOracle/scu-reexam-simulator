@@ -41,6 +41,14 @@ test("does not flash the login screen while restoring an authenticated session",
   assert.match(appSource, /session-restoring/);
 });
 
+test("releases the restore screen after authentication and bounds session validation", () => {
+  const restore = appSource.slice(appSource.indexOf("async function enterWorkspace()"), appSource.indexOf("function configureShell()"));
+  assert.match(restore, /setTimeout\(\(\) => controller\.abort\(\), 15000\)/);
+  assert.match(restore, /api\("\/me", \{ signal: controller\.signal \}\)/);
+  assert.match(restore, /classList\.remove\("session-restoring"\)[\s\S]*?await show\(route[\s\S]*?catch \(error\) \{[\s\S]*?首屏内容加载失败/);
+  assert.match(restore, /authenticatedUser: state\.user/);
+});
+
 test("contest list actions are hidden in contest details and the workspace", () => {
   const overviewRenderer = contestSource.slice(contestSource.indexOf("function renderContestOverview()"), contestSource.indexOf("function showContestRanking()"));
   const listRenderer = contestSource.slice(contestSource.indexOf("function renderContestList()"), contestSource.indexOf("$(\"contestSearch\").addEventListener"));

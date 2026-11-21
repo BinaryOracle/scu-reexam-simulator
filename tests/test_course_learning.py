@@ -63,6 +63,94 @@ def test_existing_live_lessons_migrate_to_courses_idempotently(client):
     assert client.get(f'/api/live/courses/{course_id}', headers=alice).status_code == 200
 
 
+def test_course_and_lesson_descriptions_render_safe_markdown(client):
+    admin, learner = login(client, 'manager'), login(client, 'alice')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': 'Markdown 课程', 'description': '# 课程简介\n\n**重点** [安全链接](https://example.com) [危险](javascript:alert(1)) <script>alert(1)</script>',
+        'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    lesson = client.post(f"/api/courses/sections/{course['sections'][0]['id']}/lessons", headers=admin,
+                         json={'title': 'Markdown 课时', 'description': '## 课时说明\n\n- 第一项', 'position': 0}).json()
+    detail = client.get(f"/api/courses/{course['id']}", headers=admin).json()
+    assert '<h1>课程简介</h1>' in detail['description_html']
+    assert '<strong>重点</strong>' in detail['description_html']
+    assert '<script>' not in detail['description_html']
+    assert 'href="javascript:' not in detail['description_html']
+    assert detail['description_summary'].startswith('课程简介 重点 安全链接')
+    assert '<h2>课时说明</h2>' in detail['sections'][0]['lessons'][0]['description_html']
+    assert client.get(f"/api/courses/lessons/{lesson['id']}", headers=learner).status_code == 404
+
+
+def test_course_cover_upload_is_private_validated_and_persisted(client):
+    import io
+    from PIL import Image
+
+    admin, learner = login(client, 'manager'), login(client, 'alice')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': '封面课程', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    output = io.BytesIO()
+    Image.new('RGB', (12, 8), '#9c4a3b').save(output, format='PNG')
+    uploaded = client.post(f"/api/courses/{course['id']}/cover", headers=admin,
+                           files={'file': ('cover.png', output.getvalue(), 'image/png')})
+    assert uploaded.status_code == 200, uploaded.text
+    assert uploaded.json()['cover_kind'] == 'upload'
+    assert uploaded.json()['cover_url'] == f"/api/courses/{course['id']}/cover"
+    assert 'cover_asset_id' not in uploaded.json()
+    stored = client.get(f"/api/courses/{course['id']}", headers=admin).json()
+    assert stored['cover_kind'] == 'upload'
+    assert client.get(f"/api/courses/{course['id']}/cover", headers=admin).headers['content-type'] == 'image/png'
+    assert client.get(f"/api/courses/{course['id']}/cover", headers=learner).status_code == 404
+    assert client.post(f"/api/courses/{course['id']}/cover", headers=learner,
+                       files={'file': ('cover.png', output.getvalue(), 'image/png')}).status_code == 403
+    invalid = client.post(f"/api/courses/{course['id']}/cover", headers=admin,
+                          files={'file': ('fake.png', b'not an image', 'image/png')})
+    assert invalid.status_code == 422
+
+
+def test_course_cover_preset_can_be_selected_without_upload(client):
+    admin = login(client, 'manager')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': '预设封面课程', 'cover_kind': 'preset', 'cover_value': 'forest',
+        'publication_status': 'draft', 'access_mode': 'public'
+    })
+    assert course.status_code == 201, course.text
+    assert course.json()['cover_kind'] == 'preset'
+    assert course.json()['cover_value'] == 'forest'
+
+
+def test_public_course_cover_is_visible_before_enrollment_and_update_preserves_it(client):
+    import io
+    from PIL import Image
+
+    admin, learner = login(client, 'manager'), login(client, 'alice')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': '公开封面课程', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    lesson = client.post(f"/api/courses/sections/{course['sections'][0]['id']}/lessons", headers=admin,
+                         json={'title': '第一课', 'position': 0}).json()
+    assert client.post(f"/api/courses/lessons/{lesson['id']}/assets?kind=document", headers=admin,
+                       files={'file': ('lesson.pdf', b'%PDF-test', 'application/pdf')}).status_code == 201
+    output = io.BytesIO()
+    Image.new('RGB', (8, 8), '#547d67').save(output, format='PNG')
+    assert client.post(f"/api/courses/{course['id']}/cover", headers=admin,
+                       files={'file': ('cover.png', output.getvalue(), 'image/png')}).status_code == 200
+    assert client.get(f"/api/courses/{course['id']}/cover", headers=learner).status_code == 404
+    assert client.patch(f"/api/courses/{course['id']}", headers=admin, json={
+        'title': '公开封面课程', 'publication_status': 'published', 'access_mode': 'public'
+    }).status_code == 200
+    assert client.get(f"/api/courses/{course['id']}/cover", headers=learner).status_code == 200
+    assert client.patch(f"/api/courses/{course['id']}", headers=admin, json={
+        'title': '更新简介', 'description': '**课程介绍**', 'publication_status': 'published', 'access_mode': 'public'
+    }).status_code == 200
+    detail = client.get(f"/api/courses/{course['id']}", headers=admin).json()
+    assert detail['cover_kind'] == 'upload'
+    assert detail['description_summary'] == '课程介绍'
+    preview = client.get(f"/api/courses/public/{course['id']}", headers=learner).json()
+    assert preview['cover_url'] == f"/api/courses/{course['id']}/cover"
+    assert 'cover_asset_id' not in preview
+
+
 def test_public_enrollment_draft_visibility_and_course_history(client):
     admin, alice, bob = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
     alice_id = client.get('/api/me', headers=alice).json()['id']
@@ -77,7 +165,8 @@ def test_public_enrollment_draft_visibility_and_course_history(client):
     created = create_ready_course(client, admin, '公开课程', host_id=alice_id)
     course_id = created['id']
     public_items = client.get('/api/courses?scope=public', headers=bob).json()['items']
-    assert [item['id'] for item in public_items] == [course_id]
+    assert course_id in [item['id'] for item in public_items]
+    assert draft_id not in [item['id'] for item in public_items]
     assert client.get(f'/api/courses/{course_id}', headers=bob).status_code == 404
     enrolled = client.post(f'/api/courses/{course_id}/enroll', headers=bob)
     assert enrolled.status_code == 200
@@ -139,6 +228,70 @@ def test_course_management_access_does_not_appear_as_learner_enrollment(client):
     assert preview['is_enrolled'] is True
     assert client.get(f"/api/courses/public/{published['id']}", headers=admin).json()['can_manage'] is True
     assert published['id'] in [item['id'] for item in client.get('/api/courses?scope=mine', headers=learner).json()['items']]
+
+
+def test_public_outline_retains_chapter_ids_and_only_the_members_own_progress(client):
+    admin, alice, bob = (login(client, name) for name in ('manager', 'alice', 'bob'))
+    course = create_ready_course(client, admin, '统一课程目录')
+    cid = course['id']
+    section = course['sections'][0]
+    lid = section['lessons'][0]['id']
+    preview = client.get(f'/api/courses/public/{cid}', headers=alice).json()
+    assert preview['sections'][0]['id'] == section['id']
+    assert 'progress' not in preview['sections'][0]['lessons'][0]
+    assert 'items' not in preview['sections'][0]['lessons'][0]
+    assert client.get(f'/api/courses/lessons/{lid}', headers=alice).status_code == 404
+    assert client.post(f'/api/courses/{cid}/enroll', headers=alice).status_code == 200
+    assert client.put(f'/api/courses/lessons/{lid}/progress', headers=alice,
+                      json={'position_seconds': 0, 'completed': True}).status_code == 200
+    enrolled = client.get(f'/api/courses/public/{cid}', headers=alice).json()
+    assert enrolled['sections'][0]['lessons'][0]['progress']['completed'] == 1
+    assert enrolled['progress_summary']['completed'] == 1
+    assert client.post(f'/api/courses/{cid}/enroll', headers=bob).status_code == 200
+    other = client.get(f'/api/courses/public/{cid}', headers=bob).json()
+    assert other['sections'][0]['lessons'][0]['progress']['completed'] == 0
+    assert other['progress_summary']['completed'] == 0
+
+
+def test_removing_a_course_only_changes_the_current_users_library(client):
+    admin, alice, bob = (login(client, name) for name in ('manager', 'alice', 'bob'))
+    course = create_ready_course(client, admin, '可移除课程')
+    cid, lid = course['id'], course['sections'][0]['lessons'][0]['id']
+    for learner in (alice, bob):
+        assert client.post(f'/api/courses/{cid}/enroll', headers=learner).status_code == 200
+    assert client.put(f'/api/courses/lessons/{lid}/progress', headers=alice,
+                      json={'position_seconds': 0, 'completed': True}).status_code == 200
+    for _ in range(2):
+        assert client.delete(f'/api/courses/{cid}/library', headers=alice).status_code == 200
+    assert cid not in [row['id'] for row in client.get('/api/courses?scope=mine', headers=alice).json()['items']]
+    assert cid in [row['id'] for row in client.get('/api/courses?scope=mine&removed=true', headers=alice).json()['items']]
+    assert cid in [row['id'] for row in client.get('/api/courses?scope=mine', headers=bob).json()['items']]
+    detail = client.get(f'/api/courses/{cid}', headers=alice).json()
+    assert detail['is_removed_from_library'] is True and detail['progress_summary']['completed'] == 1
+    assert client.get(f'/api/courses/lessons/{lid}', headers=alice).json()['progress']['completed'] == 1
+    for _ in range(2):
+        assert client.post(f'/api/courses/{cid}/library', headers=alice).status_code == 200
+    assert cid in [row['id'] for row in client.get('/api/courses?scope=mine', headers=alice).json()['items']]
+    assert not client.get('/api/courses?scope=mine&removed=true', headers=alice).json()['items']
+
+
+def test_assigned_course_can_be_removed_and_restored_without_altering_roster(client):
+    from app.db import connect, initialize
+
+    admin, alice, bob = (login(client, name) for name in ('manager', 'alice', 'bob'))
+    uid = client.get('/api/me', headers=alice).json()['id']
+    course = create_ready_course(client, admin, '名单课程', access_mode='roster', member_ids=[uid])
+    cid = course['id']
+    assert client.delete(f'/api/courses/{cid}/library', headers=bob).status_code == 404
+    assert client.post(f'/api/courses/{cid}/library', headers=bob).status_code == 404
+    assert client.delete(f'/api/courses/{cid}/library', headers=alice).status_code == 200
+    initialize()
+    with connect() as db:
+        assert db.execute('SELECT 1 FROM live_members WHERE course_id=? AND user_id=?', (cid, uid)).fetchone()
+    assert cid not in [row['id'] for row in client.get('/api/courses?scope=mine', headers=alice).json()['items']]
+    assert client.post(f'/api/courses/{cid}/library', headers=alice).status_code == 200
+    assert cid in [row['id'] for row in client.get('/api/courses?scope=mine', headers=alice).json()['items']]
+    assert client.delete(f'/api/courses/{cid}/library').status_code == 401
 
 
 def test_learner_can_complete_an_ended_live_only_course_lesson(client):
@@ -268,6 +421,27 @@ def test_course_lesson_includes_safe_recording_status_for_its_live_item(client):
     assert client.post(f'/api/live/recordings/{pending_id}/playback', headers=learner).status_code == 409
 
 
+def test_markdown_live_preview_matches_lesson_rendering_and_requires_admin(client):
+    from app.db import connect
+    from app.services.course_learning import render_lesson_markdown
+
+    admin, learner = login(client, 'manager'), login(client, 'alice')
+    markdown = '# 标题\n\n**重点**\n\n| A | B |\n|---|---|\n| 1 | 2 |\n\n公式：$x^2$\n\n<script>alert(1)</script>\n\n[危险](javascript:alert(1))'
+    with connect() as db:
+        before = db.execute('SELECT COUNT(*) FROM course_assets').fetchone()[0]
+    response = client.post('/api/courses/markdown/preview', headers=admin, json={'markdown': markdown})
+    assert response.status_code == 200
+    assert response.text == render_lesson_markdown(markdown)
+    assert '<h1>标题</h1>' in response.text and '<table>' in response.text
+    assert 'class="math inline"' in response.text
+    assert '<script>' not in response.text and 'href="javascript:' not in response.text
+    assert response.headers['cache-control'] == 'no-store'
+    assert client.post('/api/courses/markdown/preview', headers=learner, json={'markdown': markdown}).status_code == 403
+    assert client.post('/api/courses/markdown/preview', json={'markdown': markdown}).status_code == 401
+    with connect() as db:
+        assert db.execute('SELECT COUNT(*) FROM course_assets').fetchone()[0] == before
+
+
 def test_course_markdown_document_renders_safe_html_for_enrolled_learners(client):
     admin, learner, outsider = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
     course = client.post('/api/courses', headers=admin, json={
@@ -293,6 +467,113 @@ def test_course_markdown_document_renders_safe_html_for_enrolled_learners(client
     assert '<img' not in response.text
     assert 'href="javascript:' not in response.text
     assert client.get(f"/api/courses/assets/{uploaded.json()['id']}/markdown", headers=outsider).status_code == 404
+
+
+def test_course_markdown_document_can_be_edited_by_course_managers(client):
+    admin, learner = login(client, 'manager'), login(client, 'alice')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': '可编辑 Markdown', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    lesson = client.post(f"/api/courses/sections/{course['sections'][0]['id']}/lessons", headers=admin,
+                         json={'title': '正文课时', 'position': 0}).json()
+    asset = client.post(f"/api/courses/lessons/{lesson['id']}/assets?kind=document", headers=admin,
+                        files={'file': ('lesson.md', b'# Before', 'text/markdown')}).json()
+
+    updated = client.put(f"/api/courses/assets/{asset['id']}/markdown", headers=admin,
+                         json={'markdown': '# Updated\n\nNew lesson text.', 'name': '更新后的课程正文'})
+    assert updated.status_code == 200, updated.text
+    assert updated.json() == {'ok': True, 'size': len('# Updated\n\nNew lesson text.'.encode())}
+    assert client.get(f"/api/courses/assets/{asset['id']}/markdown", headers=admin).status_code == 200
+    assert client.get(f"/api/courses/assets/{asset['id']}/markdown", headers=admin).text.startswith('<h1>Updated</h1>')
+    assert client.get(f"/api/courses/lessons/{lesson['id']}", headers=admin).json()['items'][0]['asset']['original_name'] == '更新后的课程正文.md'
+    empty = client.put(f"/api/courses/assets/{asset['id']}/markdown", headers=admin,
+                       json={'markdown': '  \n'})
+    assert empty.status_code == 422
+    assert client.get(f"/api/courses/assets/{asset['id']}/markdown", headers=admin).text.startswith('<h1>Updated</h1>')
+    assert client.put(f"/api/courses/assets/{asset['id']}/markdown", headers=learner,
+                      json={'markdown': 'not allowed'}).status_code == 403
+
+
+def test_course_markdown_supports_private_pasted_images(client):
+    import io
+    from PIL import Image
+
+    admin, learner, outsider = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': '图片正文课程', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    lesson = client.post(f"/api/courses/sections/{course['sections'][0]['id']}/lessons", headers=admin,
+                         json={'title': '图片课时', 'position': 0}).json()
+    image = io.BytesIO()
+    Image.new('RGB', (24, 16), '#456b58').save(image, format='PNG')
+
+    uploaded = client.post(f"/api/courses/lessons/{lesson['id']}/markdown-images", headers=admin,
+                           files={'file': ('pasted.png', image.getvalue(), 'image/png')})
+    assert uploaded.status_code == 201, uploaded.text
+    image_id = uploaded.json()['id']
+    assert uploaded.json()['url'] == f'/api/courses/markdown-images/{image_id}'
+    assert client.get(uploaded.json()['url'], headers=outsider).status_code == 404
+    assert client.get(uploaded.json()['url'], headers=admin).status_code == 200
+
+    markdown = f'# 图文课时\n\n![流程图]({uploaded.json()["url"]})'
+    saved = client.post(f"/api/courses/lessons/{lesson['id']}/markdown", headers=admin,
+                        json={'markdown': markdown, 'name': '图文正文'})
+    assert saved.status_code == 201, saved.text
+    assert saved.json()['kind'] == 'document'
+    rendered = client.get(f"/api/courses/assets/{saved.json()['id']}/markdown", headers=admin)
+    assert '<img src="/api/courses/markdown-images/' in rendered.text
+    assert 'img-src \'self\'' in rendered.headers['content-security-policy']
+
+    wrong_lesson = client.post(f"/api/courses/sections/{course['sections'][0]['id']}/lessons", headers=admin,
+                               json={'title': '另一课时', 'position': 1}).json()
+    rejected = client.post(f"/api/courses/lessons/{wrong_lesson['id']}/markdown", headers=admin,
+                           json={'markdown': f'![越权图片]({uploaded.json()["url"]})', 'name': '越权'})
+    assert rejected.status_code == 422
+    external = client.post(f"/api/courses/lessons/{lesson['id']}/markdown", headers=admin,
+                           json={'markdown': '![外链](https://example.com/image.png)', 'name': '外链'})
+    assert external.status_code == 422
+
+
+def test_course_intro_markdown_supports_course_scoped_pasted_images(client):
+    import io
+    from PIL import Image
+
+    admin, learner, outsider = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': '图文简介课程', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    image = io.BytesIO()
+    Image.new('RGB', (24, 16), '#456b58').save(image, format='PNG')
+
+    uploaded = client.post(f"/api/courses/{course['id']}/markdown-images", headers=admin,
+                           files={'file': ('pasted.png', image.getvalue(), 'image/png')})
+    assert uploaded.status_code == 201, uploaded.text
+    image_id = uploaded.json()['id']
+    assert uploaded.json()['url'] == f'/api/courses/markdown-images/{image_id}'
+    assert client.get(uploaded.json()['url'], headers=outsider).status_code == 404
+    lesson = client.post(f"/api/courses/sections/{course['sections'][0]['id']}/lessons", headers=admin,
+                         json={'title': '简介中的示例课时', 'position': 0}).json()
+    material = client.post(f"/api/courses/lessons/{lesson['id']}/markdown", headers=admin,
+                           json={'markdown': '# 课程内容\n\n正文。'})
+    assert material.status_code == 201, material.text
+    updated = client.patch(f"/api/courses/{course['id']}", headers=admin, json={
+        'title': course['title'], 'description': f"# 课程简介\n\n![架构图]({uploaded.json()['url']})",
+        'publication_status': 'published', 'access_mode': 'public', 'host_id': course['host_id'], 'member_ids': []
+    })
+    assert updated.status_code == 200, updated.text
+    assert '<img src="/api/courses/markdown-images/' in updated.json()['description_html']
+    assert client.post(f"/api/courses/{course['id']}/enroll", headers=learner).status_code == 200
+    assert client.get(uploaded.json()['url'], headers=learner).status_code == 200
+    assert client.get(uploaded.json()['url'], headers=outsider).status_code == 200
+
+    other = client.post('/api/courses', headers=admin, json={
+        'title': '另一门课程', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    rejected = client.patch(f"/api/courses/{other['id']}", headers=admin, json={
+        'title': other['title'], 'description': f"![越权图片]({uploaded.json()['url']})",
+        'publication_status': 'draft', 'access_mode': 'public', 'host_id': other['host_id'], 'member_ids': []
+    })
+    assert rejected.status_code == 422
 
 
 def test_course_deletion_requires_admin_and_removes_course_and_live_files(client):

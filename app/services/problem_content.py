@@ -26,7 +26,11 @@ def _normalize_luogu_limits(statement):
 def public_problem(row):
     """Expose statement and public examples without leaking hidden judge test cases."""
     result = {key: row[key] for key in ('id', 'title', 'statement', 'sample_input', 'sample_output', 'remote_problem_id')}
-    if result['remote_problem_id']:
+    keys = row.keys()
+    result['remote_platform'] = row['remote_platform'] if 'remote_platform' in keys else 'luogu'
+    result['source_info'] = json.loads(row['source_info']) if 'source_info' in keys else {}
+    result['starter_codes'] = json.loads(row['starter_codes']) if 'starter_codes' in keys else {}
+    if result['remote_problem_id'] and result['remote_platform'] == 'luogu':
         result['statement'] = _normalize_luogu_limits(result['statement'])
     result['samples'] = json.loads(row['samples'])
     if not result['samples'] and (row['sample_input'] or row['sample_output']):

@@ -407,7 +407,7 @@ test("submits through an existing Luogu tab without opening or activating a prob
 test("reports the installed extension version during connection checks", async () => {
   const source = await readFile(new URL("../browser-extension/background.js", import.meta.url), "utf8");
   const manifest = JSON.parse(await readFile(new URL("../browser-extension/manifest.json", import.meta.url), "utf8"));
-  assert.equal(manifest.version, "1.1.5");
+  assert.equal(manifest.version, "1.3.0");
   const chrome = {
     runtime: {
       getManifest() { return manifest; },
@@ -428,7 +428,7 @@ test("reports the installed extension version during connection checks", async (
   assert.deepEqual(JSON.parse(JSON.stringify(response)), {
     connected: true,
     account: "candidate",
-    extension_version: "1.1.5",
+    extension_version: "1.3.0",
   });
 });
 
@@ -437,7 +437,7 @@ async function runInjectedSubmit(fetchResponse) {
   const requests = [];
   const activated = [];
   const chrome = {
-    runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} }, onMessage: { addListener() {} } },
+    runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} }, onMessage: { addListener() {} }, getManifest() { return { version: "1.3.0" }; } },
     storage: { local: { async get() { return {}; }, async set() {}, async remove() {} } },
     tabs: {
       async query() { return [{ id: 8, status: "complete" }]; },
@@ -526,4 +526,122 @@ test("keeps coding callbacks isolated from contest submissions", async () => {
   const delivered = [];
   await runResultTracker([{status: "Accepted"}], delivered, "coding");
   assert.equal(delivered[0].context, "coding");
+});
+
+test("uses only leetcode.cn and forwards final results with the original coding context", async () => {
+  const source = await readFile(new URL("../browser-extension/background.js", import.meta.url), "utf8");
+  const queried = [];
+  const delivered = [];
+  const executedTabs = [];
+  const submittedTabs = [];
+  let poll = 0;
+  let activeTabId;
+  const tabs = [
+    { id: 12, status: "complete", url: "https://leetcode.cn/problems/two-sum/" },
+    { id: 15, status: "complete", url: "https://leetcode.cn/problems/two-sum/" },
+  ];
+  const page = {
+    location: { origin: "https://leetcode.cn" },
+    document: { cookie: "csrftoken=csrf-token-value" },
+    async fetch(url, options = {}) {
+      if (url === "/graphql/") {
+        const request = JSON.parse(options.body);
+        if (request.query.includes("userStatus"))
+          return { ok: true, async json() { return { data: { userStatus: {
+            isSignedIn: activeTabId === 15, username: activeTabId === 15 ? "candidate" : null,
+          } } }; } };
+      }
+      if (url === "/problems/two-sum/submit/") {
+        submittedTabs.push(activeTabId);
+        assert.equal(options.credentials, "same-origin");
+        assert.equal(options.headers["X-CSRFToken"], "csrf");
+        assert.deepEqual(JSON.parse(options.body), {
+          question_id: "1", lang: "cpp", typed_code: "class Solution {};",
+        });
+        return { ok: true, async json() { return { submission_id: 98765 }; } };
+      }
+      if (url === "/submissions/detail/98765/v2/check/") {
+        poll++;
+        return { ok: true, async json() { return poll === 1
+          ? { state: "STARTED", ai_state: "PENDING" }
+          : { state: "SUCCESS", status_code: 10, total_correct: 18, total_testcases: 18, status_msg: "Accepted" }; } };
+      }
+      throw new Error(`Unexpected leetcode.cn request: ${url}`);
+    },
+  };
+  const chrome = {
+    runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} }, onMessage: { addListener() {} }, getManifest() { return { version: "1.3.0" }; } },
+    storage: { local: { async get() { return {}; }, async set() {}, async remove() {} } },
+    tabs: {
+      async query({ url }) { queried.push(url); return tabs; },
+      async sendMessage(_tabId, message) { delivered.push(message.payload); },
+    },
+    scripting: { async executeScript({ target, args = [], func }) {
+      executedTabs.push(target.tabId);
+      activeTabId = target.tabId;
+      const injected = runInNewContext(`(${func.toString()})`, page);
+      return [{ result: await injected(...args) }];
+    } },
+  };
+  const context = { chrome, setTimeout(callback) { callback(); return 0; } };
+  const executable = source.replace('import { APP_ORIGIN } from "./extension-config.js";',
+    'const APP_ORIGIN = "http://127.0.0.1:8000";');
+  runInNewContext(`${executable}\nglobalThis.handleRequestForTest = handleRequest;`, context);
+  const ping = await context.handleRequestForTest("PING", { platform: "leetcode" }, 4);
+  assert.equal(ping.connected, true);
+  assert.equal(ping.account, "candidate");
+
+  const submitted = await context.handleRequestForTest("SUBMIT", {
+    platform: "leetcode", context: "coding", submission_id: 40, problem_id: "two-sum",
+    question_id: "1", language: "cpp11", source: "class Solution {};",
+  }, 4);
+  assert.equal(submitted.remote_submission_id, "98765");
+  assert.equal(submitted.status, "Submitted");
+  for (let attempt = 0; attempt < 10 && delivered.at(-1)?.status !== "Accepted"; attempt++)
+    await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(delivered.map(item => item.status), ["Judging", "Accepted"]);
+  assert.ok(delivered.every(item => item.context === "coding" && item.platform === "leetcode"));
+  assert.ok(delivered.every(item => item.remote_problem_id === "two-sum" && item.submission_id === 40));
+  assert.ok(queried.every(patterns => JSON.stringify(patterns) === JSON.stringify(["https://leetcode.cn/*"])));
+  assert.deepEqual(submittedTabs, [15], "the extension must submit in the signed-in China-site tab");
+  assert.ok(executedTabs.every(tabId => tabId === 12 || tabId === 15));
+});
+
+test("routes LeetCode contest submissions independently from practice callbacks", async () => {
+  const source = await readFile(new URL("../browser-extension/background.js", import.meta.url), "utf8");
+  const delivered = [];
+  const chrome = {
+    runtime: { onInstalled: { addListener() {} }, onStartup: { addListener() {} }, onMessage: { addListener() {} }, getManifest() { return { version: "1.3.0" }; } },
+    storage: { local: { async get() { return {}; }, async set() {}, async remove() {} } },
+    tabs: {
+      async query() { return [{ id: 15, status: "complete", url: "https://leetcode.cn/problems/two-sum/" }]; },
+      async sendMessage(_tabId, message) { delivered.push(message.payload); },
+    },
+    scripting: { async executeScript({ args = [], func }) {
+      const injected = runInNewContext(`(${func.toString()})`, {
+        location: { origin: "https://leetcode.cn" }, document: { cookie: "csrftoken=x" },
+        async fetch(url) {
+          if (url === "/graphql/") return { ok: true, async json() { return { data: { userStatus: { isSignedIn: true, username: "candidate" } } }; } };
+          if (url.endsWith("/submit/")) return { ok: true, async json() { return { submission_id: 98766 }; } };
+          return { ok: true, async json() { return { state: "SUCCESS", status_code: 11, total_correct: 0, total_testcases: 18, status_msg: "Wrong Answer" }; } };
+        },
+      });
+      return [{ result: await injected(...args) }];
+    } },
+  };
+  const context = { chrome, setTimeout(callback) { callback(); return 0; } };
+  const executable = source.replace('import { APP_ORIGIN } from "./extension-config.js";',
+    'const APP_ORIGIN = "http://127.0.0.1:8000";');
+  runInNewContext(`${executable}\nglobalThis.handleRequestForTest = handleRequest;`, context);
+  const submitted = await context.handleRequestForTest("SUBMIT", {
+    platform: "leetcode", context: "contest", submission_id: 41, problem_id: "two-sum",
+    question_id: "1", language: "python3", source: "class Solution: pass",
+  }, 4);
+  assert.equal(submitted.remote_submission_id, "98766");
+  for (let attempt = 0; attempt < 10 && delivered.at(-1)?.status !== "Wrong Answer"; attempt++)
+    await new Promise(resolve => setImmediate(resolve));
+  assert.equal(delivered.at(-1)?.context, "contest");
+  assert.equal(delivered.at(-1)?.platform, "leetcode");
+  assert.equal(delivered.at(-1)?.submission_id, 41);
+  assert.equal(delivered.at(-1)?.status, "Wrong Answer");
 });

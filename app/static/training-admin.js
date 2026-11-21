@@ -1,7 +1,7 @@
 /** Training-only administration; submission review never lists private drafts. */
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, emptyState, notify, badge, requestText } from './ui.js?v=20261114-ui-v17';
-import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261115-ui-v19';
+import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261121-question-markdown-v1';
 let listRequest=0;
 let generation=0, settings=null, tab='pending', page=1, query='', collection='', section='';
 function live(key,token) { return key===generation && token===state.token && !$('trainingAdmin').hidden; }
@@ -24,7 +24,7 @@ function render() {
   if(tab==='settings'){renderSettings(root);return;}
   if(tab==='contribution'){renderContribution(root);return;}
   if(tab!=='rewards'){
-    const filters=el('form','','learning-filters');
+    const filters=el('form','','learning-filters learning-admin-filters');
     const chapter=selectField('篇章筛选',[['','全部篇章'],...Object.entries(chapterNames)],section);
     const c=selectField('题目集合',[['','全部集合'],...settings.collections.filter(c=>!section||c.section_id===section).map(c=>[c.id,`${chapterNames[c.section_id]} · ${c.name}`])],collection);
     chapter.input.addEventListener('change',async()=>{section=chapter.input.value;collection='';page=1;render();await list();});
@@ -98,7 +98,7 @@ async function renderContribution(root) {
 }
 function renderSettings(root){
   const panel=el('section','','learning-setup');panel.append(el('h2','每日目标与练习长度'),el('p','目标修改对下一个自然日或当天尚未开始训练的用户生效，已开始用户保留当日目标。','muted'));
-  const form=el('form','','learning-filters');
+  const form=el('form','','learning-filters learning-settings-form');
   const fields={};
   for(const [key,label,max]of [['daily_goal','每日不同题目标',100],['round_size','默认每轮题数',50]]){
     const wrap=el('label','','learning-field'),input=el('input');input.type='number';input.min='1';input.max=String(max);input.required=true;input.value=String(settings[key]);wrap.append(el('span',label),input);form.append(wrap);fields[key]=input;
@@ -111,6 +111,8 @@ function renderSettings(root){
     try{const result=await api('/admin/training/settings',{method:'PATCH',body:JSON.stringify({daily_goal:Number(fields.daily_goal.value),round_size:Number(fields.round_size.value)})});if(live(key,token)){settings=result;notify('训练设置已保存');}}
     catch(failure){if(form.isConnected)error.textContent=failure.message;}finally{save.disabled=false;}
   });panel.append(form,error);root.append(panel);
-  const collections=el('section','','learning-setup');collections.append(el('h2','训练集合'),el('p',`单批导入上限 ${settings.max_import_items} 道，文件最大 ${Math.round(settings.max_import_bytes/1024)} KB。`,'muted'));
-  for(const item of settings.collections){const row=el('div','','learning-setting-row');row.append(el('span',`${chapterNames[item.section_id]} · ${item.name}`),button(item.active?'已启用 · 点击停用':'已停用 · 点击启用',async()=>{await api(`/admin/training/collections/${item.id}`,{method:'PATCH',body:JSON.stringify({active:!item.active})});item.active=!item.active;render();},'button secondary'));collections.append(row);}root.append(collections);
+  const collections=el('section','','learning-setup learning-collections-panel');collections.append(el('h2','训练集合'),el('p',`单批导入上限 ${settings.max_import_items} 道，文件最大 ${Math.round(settings.max_import_bytes/1024)} KB。`,'muted'));
+  const list=el('div','','learning-collections-list');
+  for(const item of settings.collections){const row=el('div','','learning-setting-row');row.append(el('span',`${chapterNames[item.section_id]} · ${item.name}`),button(item.active?'已启用 · 点击停用':'已停用 · 点击启用',async()=>{await api(`/admin/training/collections/${item.id}`,{method:'PATCH',body:JSON.stringify({active:!item.active})});item.active=!item.active;render();},'button secondary'));list.append(row);}
+  collections.append(list);root.append(collections);
 }

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { formatLuoguSubmitError, isLuoguExtensionOutdated } from "../app/static/luogu-errors.mjs";
+import { formatLuoguSubmitError, isJudgeExtensionOutdated } from "../app/static/luogu-errors.mjs";
 const contestSource = await readFile(new URL("../app/static/contest.js", import.meta.url), "utf8");
 
 test("normalizes raw Luogu captcha failures before displaying them", () => {
@@ -41,16 +41,14 @@ test("keeps captcha cancellation and retry guidance actionable", () => {
 });
 
 test("requires an extension version that can guide captcha recovery", () => {
-  assert.equal(isLuoguExtensionOutdated(undefined), true);
-  assert.equal(isLuoguExtensionOutdated("1.0.0"), true);
-  assert.equal(isLuoguExtensionOutdated("1.0.1"), true);
-  assert.equal(isLuoguExtensionOutdated("1.0.2"), true);
-  assert.equal(isLuoguExtensionOutdated("1.1.0"), true);
-  assert.equal(isLuoguExtensionOutdated("1.1.1"), true);
-  assert.equal(isLuoguExtensionOutdated("1.1.2"), true);
-  assert.equal(isLuoguExtensionOutdated("1.1.3"), true);
-  assert.equal(isLuoguExtensionOutdated("1.1.4"), true);
-  assert.equal(isLuoguExtensionOutdated("1.1.5"), false);
-  assert.equal(isLuoguExtensionOutdated("unknown"), true);
-  assert.match(contestSource, /isLuoguExtensionOutdated\(.*extension_version/);
+  assert.equal(isJudgeExtensionOutdated(undefined), true);
+  assert.equal(isJudgeExtensionOutdated("1.0.0"), true);
+  assert.equal(isJudgeExtensionOutdated("1.0.1"), true);
+  assert.equal(isJudgeExtensionOutdated("1.0.2"), true);
+  assert.equal(isJudgeExtensionOutdated("1.1.0"), true);
+  assert.equal(isJudgeExtensionOutdated("1.1.5"), true);
+  assert.equal(isJudgeExtensionOutdated("1.2.0"), true);
+  assert.equal(isJudgeExtensionOutdated("1.3.0"), false);
+  assert.equal(isJudgeExtensionOutdated("unknown"), true);
+  assert.match(contestSource, /isJudgeExtensionOutdated\(.*extension_version/);
 });

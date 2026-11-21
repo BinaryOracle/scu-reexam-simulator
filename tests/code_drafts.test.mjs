@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createCodeDrafts, saveDraftOnShortcut } from "../app/static/code-drafts.mjs";
+import { hasCodeDraft } from "../app/static/draft-compat.mjs";
 
 test("Ctrl+S saves the focused code draft and prevents the browser save page action", () => {
   let saved = 0;
@@ -64,4 +65,17 @@ test("reads newer shared storage after a successful save", () => {
   assert.equal(drafts.write("p:cpp", "first"), true);
   values.set("p:cpp", "updated in another tab");
   assert.equal(drafts.read("p:cpp"), "updated in another tab");
+});
+
+test("reads draft presence from a cached module that predates has", () => {
+  const storage = new Map([["p:cpp", ""]]);
+  const legacyDrafts = { read: key => storage.get(key) ?? "" };
+  assert.equal(hasCodeDraft(legacyDrafts, "p:cpp", () => ({ getItem: key => storage.get(key) ?? null })), true);
+  assert.equal(hasCodeDraft(legacyDrafts, "missing", () => ({ getItem: key => storage.get(key) ?? null })), false);
+});
+
+test("falls back to the legacy draft reader when browser storage is blocked", () => {
+  const legacyDrafts = { read: key => key === "p:cpp" ? "int main() {}" : "" };
+  assert.equal(hasCodeDraft(legacyDrafts, "p:cpp", () => { throw new Error("blocked"); }), true);
+  assert.equal(hasCodeDraft(legacyDrafts, "missing", () => { throw new Error("blocked"); }), false);
 });

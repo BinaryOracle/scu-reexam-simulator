@@ -1,9 +1,10 @@
 import { APP_ORIGIN } from "./extension-config.js";
 
 const LUOGU_PATTERNS = ["https://www.luogu.com.cn/*"];
+const LEETCODE_PATTERNS = ["https://leetcode.cn/*"];
 // Luogu /_lfe/config CodeLanguage (74d532c6c7861bfe, 2026-11-14).
 const LUOGU_LANGUAGE_IDS = { cpp11: 4, c: 2, python3: 7, java: 8, go: 14 };
-const PENDING_STATUS_PREFIX = "pendingLuoguStatus:";
+const PENDING_STATUS_PREFIX = "pendingRemoteStatus:";
 
 function summarizeLuoguTestcases(detail) {
   if (!detail) return "";
@@ -69,9 +70,9 @@ function evaluationDetail(status, detail) {
 }
 
 async function publishStatus(appTabId, payload) {
-  const key = `${PENDING_STATUS_PREFIX}${payload.remote_submission_id}`;
+  const key = `${PENDING_STATUS_PREFIX}${payload.platform || "luogu"}:${payload.remote_submission_id}`;
   try {
-    await chrome.tabs.sendMessage(appTabId, { type: "SCU_LUOGU_STATUS", payload });
+    await chrome.tabs.sendMessage(appTabId, { type: "SCU_REMOTE_STATUS", payload });
     await chrome.storage.local.remove(key);
   } catch (error) {
     await chrome.storage.local.set({ [key]: payload });
@@ -83,7 +84,7 @@ async function flushPendingStatuses(appTabId) {
   for (const [key, payload] of Object.entries(values)) {
     if (!key.startsWith(PENDING_STATUS_PREFIX)) continue;
     try {
-      await chrome.tabs.sendMessage(appTabId, { type: "SCU_LUOGU_STATUS", payload });
+      await chrome.tabs.sendMessage(appTabId, { type: "SCU_REMOTE_STATUS", payload });
       await chrome.storage.local.remove(key);
     } catch (error) {
       break;
@@ -140,8 +141,11 @@ async function findLoggedInTab() {
 }
 
 async function handleRequest(type, payload = {}, appTabId) {
+  if (type === "PING") await flushPendingStatuses(appTabId);
+  if (type === "PING" && payload.platform === "leetcode") return pingLeetCode();
+  if (payload.platform && !["luogu", "leetcode"].includes(payload.platform)) throw new Error("评测平台不受支持。");
+  if (type === "SUBMIT" && payload.platform === "leetcode") return submitLeetCode(payload, appTabId);
   if (type === "PING") {
-    await flushPendingStatuses(appTabId);
     const found = await findLoggedInTab();
     return found
       ? { connected: true, account: found.account, extension_version: chrome.runtime.getManifest().version }
@@ -228,6 +232,129 @@ async function handleRequest(type, payload = {}, appTabId) {
   if (!remoteId) throw new Error(submitted.result?.error || "洛谷提交失败。");
   void trackResult(signedIn.tab.id, appTabId, { ...payload, remote_submission_id: remoteId });
   return { remote_submission_id: remoteId, status: "Submitted", detail: "评测中" };
+}
+
+async function findLeetCodeTab() {
+  const tabs = await chrome.tabs.query({ url: LEETCODE_PATTERNS });
+  for (const tab of tabs) {
+    if (!tab.id) continue;
+    try {
+      const [response] = await chrome.scripting.executeScript({
+        target: { tabId: tab.id }, world: "MAIN",
+        func: async () => {
+          if (location.origin !== "https://leetcode.cn") return null;
+          const result = await fetch("/graphql/", {
+            method: "POST", credentials: "include",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify({ query: "query globalData { userStatus { isSignedIn username } }" }),
+          });
+          if (!result.ok) return { connected: false };
+          const body = await result.json().catch(() => null);
+          const user = body?.data?.userStatus;
+          return user?.isSignedIn
+            ? { connected: true, account: user.username || "LeetCode 用户" }
+            : { connected: false };
+        },
+      });
+      if (response?.result?.connected) return { tabId: tab.id, account: response.result.account };
+    } catch { /* The tab may close or navigate while login state is checked. */ }
+  }
+  return null;
+}
+
+async function pingLeetCode() {
+  const found = await findLeetCodeTab();
+  const extension_version = chrome.runtime.getManifest().version;
+  return found
+    ? { connected: true, account: found.account, extension_version }
+    : { connected: false, reason: "请在此浏览器打开 leetcode.cn 并登录，再返回此处提交。", extension_version };
+}
+
+async function submitLeetCode(payload, appTabId) {
+  if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(payload.problem_id || "")) throw new Error("LeetCode 题目 slug 无效。");
+  if (!/^[1-9]\d{0,8}$/.test(String(payload.question_id || ""))) throw new Error("缺少有效的 LeetCode 题目编号，请联系管理员重新导入题目。");
+  const languages = { cpp11: "cpp", c: "c", python3: "python3" };
+  if (!Object.hasOwn(languages, payload.language) || typeof payload.source !== "string" || payload.source.length < 1 || payload.source.length > 30000)
+    throw new Error("编程语言不受支持，或代码长度超过 30000 字符。");
+  const signedIn = await findLeetCodeTab();
+  if (!signedIn) throw new Error("请先登录 leetcode.cn，并保持该标签页打开。");
+  const { tabId } = signedIn;
+  const [response] = await chrome.scripting.executeScript({
+    target: { tabId }, world: "MAIN",
+    args: [payload.problem_id, String(payload.question_id), languages[payload.language], payload.source],
+    func: async (slug, expectedQuestionId, language, source) => {
+      if (location.origin !== "https://leetcode.cn") return { error: "请打开 leetcode.cn 并重新登录。" };
+      const path = `/problems/${encodeURIComponent(slug)}/`;
+      // The site's CSRF header stays in this tab. The browser supplies the session itself.
+      const csrf = document.cookie.match(/(?:^|;\s*)csrftoken=([A-Za-z0-9]+)/)?.[1];
+      if (!csrf) return { error: "力扣页面暂未就绪，请刷新 leetcode.cn 后重试。" };
+      const response = await fetch(`${path}submit/`, {
+        method: "POST", credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "Accept": "application/json", "X-CSRFToken": csrf },
+        body: JSON.stringify({ question_id: expectedQuestionId, lang: language, typed_code: source }),
+      });
+      if (response.status === 429) return { error: "力扣提交过于频繁，请稍后重试。" };
+      if ([401, 403].includes(response.status)) return { error: "力扣拒绝提交。请打开 leetcode.cn 检查登录或完成页面提示后再重试。" };
+      const body = await response.json().catch(() => null);
+      if (!response.ok || body?.error)
+        return { error: typeof body?.error === "string" ? body.error.slice(0, 500) : `力扣拒绝提交（HTTP ${response.status}）。` };
+      const id = body?.submission_id;
+      return /^[1-9]\d*$/.test(String(id || ""))
+        ? { remote_submission_id: String(id), status: "Submitted", detail: "LeetCode 正在评测。" }
+        : { error: "LeetCode 没有返回提交编号，请在 LeetCode 提交记录中确认结果。" };
+    },
+  });
+  if (response?.result?.error) throw new Error(response.result.error);
+  const submitted = response?.result;
+  if (!submitted?.remote_submission_id) throw new Error("LeetCode 没有确认本次提交，请检查 LeetCode 提交记录后再操作，避免重复提交。");
+  void trackLeetCodeResult(tabId, appTabId, { ...payload, remote_submission_id: submitted.remote_submission_id });
+  return { ...submitted, platform: "leetcode" };
+}
+
+async function trackLeetCodeResult(leetcodeTabId, appTabId, submission) {
+  let prior = "Submitted";
+  for (let attempt = 0; attempt < 120; attempt++) {
+    await new Promise(resolve => setTimeout(resolve, 2500));
+    try {
+      const [response] = await chrome.scripting.executeScript({
+        target: { tabId: leetcodeTabId }, world: "MAIN", args: [submission.remote_submission_id],
+        func: async submissionId => {
+          if (location.origin !== "https://leetcode.cn") return null;
+          const response = await fetch(`/submissions/detail/${encodeURIComponent(submissionId)}/v2/check/`, {
+            credentials: "same-origin", headers: { "Accept": "application/json" },
+          });
+          if (!response.ok) return null;
+          const detail = await response.json().catch(() => null);
+          if (!detail?.state) return null;
+          if (["FAILURE", "REVOKED"].includes(detail.state)) return { status: "System Error", detail: "力扣评测未完成。" };
+          if (detail.state !== "SUCCESS" || ["PENDING", "STARTED"].includes(detail.ai_state))
+            return { status: "Judging", detail: "LeetCode 正在评测。" };
+          const verdict = { 10: "Accepted", 11: "Wrong Answer", 12: "Memory Limit Exceeded", 13: "Output Limit Exceeded",
+            14: "Time Limit Exceeded", 15: "Runtime Error", 16: "System Error", 20: "Compile Error" };
+          const status = verdict[detail.status_code] || "System Error";
+          const correct = detail.total_correct;
+          const total = detail.total_testcases;
+          const count = Number.isInteger(correct) && Number.isInteger(total) && total > 0 ? `通过测试用例数：${correct} / ${total}` : "";
+          const diagnostics = detail.full_compile_error || detail.compile_error || detail.full_runtime_error || detail.runtime_error;
+          return { status, detail: [count, typeof diagnostics === "string" ? diagnostics.slice(0, 8000) : ""].filter(Boolean).join("\n") || String(detail.status_msg || status).slice(0, 500) };
+        },
+      });
+      const result = response?.result;
+      if (!result || result.status === prior) continue;
+      prior = result.status;
+      await publishStatus(appTabId, {
+        context: submission.context || "coding", platform: "leetcode", submission_id: submission.submission_id,
+        remote_submission_id: submission.remote_submission_id, remote_problem_id: submission.problem_id,
+        ...result,
+      });
+      if (!["Judging", "Submitted"].includes(prior)) return;
+    } catch { /* Preserve the last known result while the LeetCode tab is temporarily unavailable. */ }
+  }
+  await publishStatus(appTabId, {
+    context: submission.context || "coding", platform: "leetcode", submission_id: submission.submission_id,
+    remote_submission_id: submission.remote_submission_id, remote_problem_id: submission.problem_id,
+    status: prior, detail: "暂时无法读取 LeetCode 最终状态；可稍后打开提交记录查看。",
+  });
 }
 
 async function trackResult(luoguTabId, appTabId, submission) {

@@ -1,9 +1,33 @@
 """Course visibility, enrollment, lesson ordering, and learner progress."""
 import time
+import re
+from html.parser import HTMLParser
+from html import unescape
 from fastapi import HTTPException
 from markdown_it import MarkdownIt
+from mdit_py_plugins.container import container_plugin
 from mdit_py_plugins.dollarmath import dollarmath_plugin
 from app.services.live import manage
+
+
+class _TextExtractor(HTMLParser):
+    """Collect rendered text for compact catalog summaries."""
+    def __init__(self):
+        super().__init__()
+        self.parts = []
+
+    def handle_data(self, data):
+        if data.strip():
+            self.parts.append(data.strip())
+
+
+def markdown_summary(text, limit=180):
+    """Return a readable plain-text Markdown summary capped at ``limit`` chars."""
+    parser = _TextExtractor()
+    parser.feed(render_lesson_markdown(text or ''))
+    plain = ' '.join(parser.parts)
+    plain = ' '.join(unescape(plain).split())
+    return plain if len(plain) <= limit else plain[:limit - 1].rstrip() + '…'
 
 
 def can_access_course(db, course_id, user):
@@ -31,6 +55,12 @@ def is_enrolled(db, course_id, user):
         return True
     return bool(course['host_id'] != user['id'] and not manage(course, user) and db.execute(
         'SELECT 1 FROM live_members WHERE course_id=? AND user_id=?', (course_id, user['id'])).fetchone())
+
+
+def is_removed_from_library(db, course_id, user_id):
+    """Whether this learner hid a course without giving up membership or progress."""
+    return bool(db.execute('SELECT 1 FROM course_library_hidden WHERE course_id=? AND user_id=?',
+                           (course_id, user_id)).fetchone())
 
 
 def require_access(db, course_id, user, *, manager=False):
@@ -81,21 +111,59 @@ def lesson_view(db, row, user):
                                (item['asset_id'],)).fetchone()
             value['asset'] = dict(asset) if asset else None
         items.append(value)
-    return {**row, 'items': items, 'progress': dict(progress) if progress else {
+    return {**row, 'description_html': render_lesson_markdown(row.get('description', '')),
+            'description_summary': markdown_summary(row.get('description', '')),
+            'items': items, 'progress': dict(progress) if progress else {
         'position_seconds': 0, 'completed': 0}}
+
+
+MARKDOWN_IMAGE_PATH = re.compile(r'/api/courses/markdown-images/([a-f0-9]{32})')
+COURSE_PRACTICE_PATH = re.compile(r'/#view=coding/question/[1-9][0-9]*')
+
+
+def _lesson_fold(renderer, tokens, idx, _options, _env):
+    token = tokens[idx]
+    if token.nesting == -1:
+        return '</details>\n'
+    kind = token.info.strip()
+    title = {'code': '书中原代码', 'practice': '动手练习'}[kind]
+    return f'<details class="course-fold course-fold-{kind}"><summary>{title}</summary>\n'
+
+
+def _markdown_renderer():
+    renderer = MarkdownIt('commonmark', {'html': False, 'breaks': True})
+    renderer.enable(['table', 'strikethrough'])
+    renderer.use(dollarmath_plugin, allow_digits=True, allow_space=True)
+    for kind in ('code', 'practice'):
+        renderer.use(container_plugin, kind, validate=lambda info, _markup, kind=kind: info.strip() == kind,
+                     render=_lesson_fold)
+    return renderer
+
+
+def markdown_image_links(text):
+    """Yield image destinations parsed with the same rules as the rendered document."""
+    for token in _markdown_renderer().parse(text or ''):
+        for child in token.children or []:
+            if child.type == 'image':
+                yield child.attrGet('src') or ''
 
 
 def render_lesson_markdown(text):
     """Render lesson Markdown without raw HTML or remotely loaded images."""
-    renderer = MarkdownIt('commonmark', {'html': False, 'breaks': True})
-    renderer.enable(['table', 'strikethrough']).disable('image')
-    renderer.use(dollarmath_plugin, allow_digits=True, allow_space=True)
+    renderer = _markdown_renderer()
     tokens = renderer.parse(text or '')
     for token in tokens:
         for child in token.children or []:
             if child.type == 'link_open':
-                child.attrSet('target', '_blank')
-                child.attrSet('rel', 'noopener noreferrer')
+                if COURSE_PRACTICE_PATH.fullmatch(child.attrGet('href') or ''):
+                    child.attrSet('class', 'course-practice-link')
+                else:
+                    child.attrSet('target', '_blank')
+                    child.attrSet('rel', 'noopener noreferrer')
+            elif child.type == 'image' and not MARKDOWN_IMAGE_PATH.fullmatch(child.attrGet('src') or ''):
+                child.type = 'text'
+                child.content = child.content or child.attrGet('alt') or ''
+                child.attrs = None
     return renderer.renderer.render(tokens, renderer.options, {})
 
 
@@ -107,12 +175,18 @@ def course_detail(db, course_id, user):
             'SELECT * FROM course_lessons WHERE section_id=? ORDER BY position,id', (section['id'],))]
         sections.append({**dict(section), 'lessons': lessons})
     host = db.execute('SELECT username FROM users WHERE id=?', (course['host_id'],)).fetchone()
-    detail = {**course, 'host_name': host['username'], 'sections': sections,
+    detail = {key: value for key, value in course.items() if key != 'cover_asset_id'}
+    detail.update({'host_name': host['username'],
+            'description_html': render_lesson_markdown(course.get('description', '')),
+            'description_summary': markdown_summary(course.get('description', '')),
+            'cover_url': f"/api/courses/{course_id}/cover" if course.get('cover_kind') == 'upload' else None,
+            'sections': sections,
             'progress_summary': progress_summary(db, course_id, user['id']),
             'is_enrolled': is_enrolled(db, course_id, user),
+            'is_removed_from_library': is_removed_from_library(db, course_id, user['id']),
             'can_manage': manage(course, user),
             'is_self_enrolled': bool(db.execute('SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?',
-                                                (course_id, user['id'])).fetchone())}
+                                                (course_id, user['id'])).fetchone())})
     if detail['can_manage']:
         detail['member_ids'] = [row[0] for row in db.execute(
             'SELECT user_id FROM live_members WHERE course_id=?', (course_id,))]
@@ -122,7 +196,7 @@ def course_detail(db, course_id, user):
 
 def public_preview(db, course_id):
     """Return published public course metadata without member or lesson resource data."""
-    course = db.execute('''SELECT c.id,c.title,c.description,u.username host_name
+    course = db.execute('''SELECT c.id,c.title,c.description,c.cover_kind,c.cover_value,c.cover_asset_id,u.username host_name
         FROM live_courses c JOIN users u ON u.id=c.host_id
         WHERE c.id=? AND c.publication_status='published' AND c.access_mode='public' ''',
         (course_id,)).fetchone()
@@ -145,15 +219,22 @@ def public_preview(db, course_id):
             live_session = db.execute('''SELECT l.starts_at,l.status FROM course_lesson_items i
                 JOIN live_lessons l ON l.id=i.live_lesson_id WHERE i.lesson_id=? AND i.kind='live'
                 ORDER BY i.position LIMIT 1''', (lesson['id'],)).fetchone()
-            lessons.append({**dict(lesson), 'content_kinds': kinds,
+            lessons.append({**dict(lesson),
+                            'description_html': render_lesson_markdown(lesson['description']),
+                            'description_summary': markdown_summary(lesson['description']),
+                            'content_kinds': kinds,
                             'live_starts_at': live_session['starts_at'] if live_session else None,
                             'live_status': live_session['status'] if live_session else None})
             content_kinds.update(kinds)
             lessons_total += 1
         if lessons:
-            sections.append({'title': section['title'], 'position': section['position'], 'lessons': lessons})
-    return {**dict(course), 'sections': sections, 'lesson_count': lessons_total,
-            'content_kinds': sorted(content_kinds)}
+            sections.append({'id': section['id'], 'title': section['title'], 'position': section['position'], 'lessons': lessons})
+    return {key: value for key, value in {
+            **dict(course), 'description_html': render_lesson_markdown(course['description']),
+            'description_summary': markdown_summary(course['description']),
+            'cover_url': f"/api/courses/{course_id}/cover" if course['cover_kind'] == 'upload' else None,
+            'sections': sections, 'lesson_count': lessons_total,
+            'content_kinds': sorted(content_kinds)}.items() if key != 'cover_asset_id'}
 
 
 def resume_lesson(db, course_id, user_id):

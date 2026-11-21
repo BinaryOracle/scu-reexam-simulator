@@ -1,0 +1,1961 @@
+{
+  "id": "algorithm-beginner",
+  "version": 5,
+  "title": "labuladong 算法小抄 · 第一至第四章",
+  "description": "依据《labuladong 的算法小抄官方完整版》第 117–513 页编排。\n\n四章共 58 节：动态规划、数据结构、算法思维和高频面试题。按章阅读，或直接从课时目录进入所需主题。",
+  "source_file": "labuladong的算法小抄官方完整版.pdf",
+  "cover_value": "forest",
+  "sections": [
+    {
+      "title": "第一章 · 动态规划系列",
+      "pages": [
+        117,
+        214
+      ],
+      "lessons": [
+        {
+          "title": "动态规划答疑篇",
+          "description": "本节围绕两个辨析问题展开：什么是最优子结构，以及状态依赖如何约束 DP 表的遍历顺序。",
+          "pages": [
+            118,
+            118
+          ],
+          "question_ids": [],
+          "legacy_sha256": "19f434340aab89096bce0982f44972456b014ccaee85e5b5c29d16ddc14c0a7f",
+          "document": "pdf-118.md"
+        },
+        {
+          "title": "动态规划和回溯算法谁是谁爹？",
+          "description": "以目标和问题为例，先观察为每个数字加正负号时形成的搜索树，以及回溯框架如何枚举选择。",
+          "pages": [
+            119,
+            121
+          ],
+          "question_ids": [
+            494
+          ],
+          "legacy_sha256": "dc07dd7b341e190089b404dec054946c7c7bda81586fa90c28e0e4ab99436a98",
+          "document": "pdf-119.md"
+        },
+        {
+          "title": "动态规划设计：最长递增子序列",
+          "description": "用「以某位置结尾的子序列」理解如何为最长上升子序列建模，区分子序列和连续片段。",
+          "pages": [
+            122,
+            123
+          ],
+          "question_ids": [
+            300
+          ],
+          "legacy_sha256": "60fc4b1dc4ce54d8548164a5368c1e6337220786c65a8d58870153ca155d254f",
+          "document": "pdf-122.md"
+        },
+        {
+          "title": "经典动态规划：0-1 背包问题",
+          "description": "给定物品重量、价值和背包容量，读懂「每件物品最多选一次」的约束，并手算书中的三件物品示例。",
+          "pages": [
+            124,
+            126
+          ],
+          "question_ids": [],
+          "legacy_sha256": "00ab54a68e2b5a92f489e190b8846a597851660d1bdf715a338ddf2408daa05f",
+          "document": "pdf-124.md"
+        },
+        {
+          "title": "经典动态规划：编辑距离",
+          "description": "以两个字符串前缀为状态，比较插入、删除、替换三种操作。",
+          "pages": [
+            127,
+            139
+          ],
+          "question_ids": [
+            72
+          ],
+          "legacy_sha256": "7f870875b3627b31dcda6800bdd284d4a7e48a02294a1d9c5052270f32c46062",
+          "document": "pdf-127.md"
+        },
+        {
+          "title": "经典动态规划：高楼扔鸡蛋（进阶）",
+          "description": "将鸡蛋与楼层状态转为最少尝试次数，关注二分决策与单调性。",
+          "pages": [
+            140,
+            151
+          ],
+          "question_ids": [
+            887
+          ],
+          "legacy_sha256": "d5518d0410a783ddadf1c7a26ef8295831b52e115da08bdea8cbfd11f1a15c9d",
+          "document": "pdf-140.md"
+        },
+        {
+          "title": "经典动态规划：戳气球",
+          "description": "按最后戳破的气球划分区间子问题，处理两侧边界与乘积收益。",
+          "pages": [
+            152,
+            154
+          ],
+          "question_ids": [
+            312
+          ],
+          "legacy_sha256": "6711c090951dfbf52fe354435fb27b5cfc8298e9fd89c4e927ae4d1b4fde5eec",
+          "document": "pdf-152.md"
+        },
+        {
+          "title": "经典动态规划：最长公共子序列",
+          "description": "用两个字符串前缀定义状态，处理字符相等与不等时的转移。",
+          "pages": [
+            155,
+            161
+          ],
+          "question_ids": [
+            1143
+          ],
+          "legacy_sha256": "cb3e3b3c5d6f50e6b9e591a1b256dd1bb3841be70f038b530f77f109d82ade30",
+          "document": "pdf-155.md"
+        },
+        {
+          "title": "动态规划之子序列问题解题模板",
+          "description": "对照最长回文子序列，区分非连续子序列和连续子数组；先明确子问题覆盖的是哪段区间。",
+          "pages": [
+            162,
+            163
+          ],
+          "question_ids": [
+            516
+          ],
+          "legacy_sha256": "84e19f66a952876413d944e11d620fb91b1cc957d59a7496d4d83ab0c6cb6ab3",
+          "document": "pdf-162.md"
+        },
+        {
+          "title": "动态规划之博弈问题",
+          "description": "从当前玩家视角定义区间收益，使用双方最优策略推导状态转移。",
+          "pages": [
+            164,
+            172
+          ],
+          "question_ids": [
+            877
+          ],
+          "legacy_sha256": "f13851ab73d6af073aaf4c914415bed88f3f87c5f3bae87fcdfa9d03892c9017",
+          "document": "pdf-164.md"
+        },
+        {
+          "title": "动态规划之正则表达",
+          "description": "处理模式串中的普通字符、点号与星号，明确匹配分支和空串边界。",
+          "pages": [
+            173,
+            180
+          ],
+          "question_ids": [
+            10
+          ],
+          "legacy_sha256": "a88532fd1e5f80388e1381c0aa7d9a328e2959bd0efc6c7f7644f91ce83a8970",
+          "document": "pdf-173.md"
+        },
+        {
+          "title": "动态规划之四键键盘",
+          "description": "比较逐次输入与复制粘贴策略，寻找最优断点并压缩状态。",
+          "pages": [
+            181,
+            187
+          ],
+          "question_ids": [
+            651
+          ],
+          "legacy_sha256": "47c0895a5975c85f6ae4b5fd903da0920ac9c33097f71ff9e14d0bb927c8e15a",
+          "document": "pdf-181.md"
+        },
+        {
+          "title": "动态规划之 KMP 字符匹配算法",
+          "description": "用前缀状态保存失配后的回退位置，避免文本指针重复扫描。",
+          "pages": [
+            188,
+            207
+          ],
+          "question_ids": [
+            28
+          ],
+          "legacy_sha256": "8ff1d4c6560a8d2765009d00803b1f64bb7b490606bf1c2c2db2e97f79829641",
+          "document": "pdf-188.md"
+        },
+        {
+          "title": "贪心算法之区间调度问题",
+          "description": "按结束位置排序，使用兼容性条件构造最优区间选择。",
+          "pages": [
+            208,
+            214
+          ],
+          "question_ids": [
+            435,
+            452
+          ],
+          "legacy_sha256": "aeb1e2e46dbb6abe28976086a75510d3a7529e852a3d2c637ea172e2005e31b0",
+          "document": "pdf-208.md"
+        }
+      ]
+    },
+    {
+      "title": "第二章 · 数据结构系列",
+      "pages": [
+        215,
+        302
+      ],
+      "lessons": [
+        {
+          "title": "学习数据结构和算法读什么书",
+          "description": "从原书推荐的教材中，找出适合入门和进一步学习数据结构的阅读材料。",
+          "pages": [
+            216,
+            221
+          ],
+          "question_ids": [],
+          "legacy_sha256": "5058eebb025c5a506b45fbe2994c205bd3034bda23ef59cf81d17f54a299362c",
+          "document": "pdf-216.md"
+        },
+        {
+          "title": "算法学习之路",
+          "description": "整理从基础结构到算法题的学习顺序，建立练习与复盘路径。",
+          "pages": [
+            222,
+            226
+          ],
+          "question_ids": [],
+          "legacy_sha256": "6133b326ea0bdc7036af394a422a9cea1bf5b8a026007294fc6f8dd0dd8b5573",
+          "document": "pdf-222.md"
+        },
+        {
+          "title": "二叉堆详解：实现优先级队列",
+          "description": "用数组保存完全二叉树，理解父子下标的换算，以及上浮和下沉分别在什么时候使用。",
+          "pages": [
+            227,
+            234
+          ],
+          "question_ids": [],
+          "legacy_sha256": "38de87ea05a239816e81e7457bd964c58cd9c684ea9e5ee070103edafa9e156c",
+          "document": "pdf-227.md"
+        },
+        {
+          "title": "LRU 算法详解",
+          "description": "组合哈希表与双向链表，实现常数时间查找、更新与淘汰。",
+          "pages": [
+            235,
+            247
+          ],
+          "question_ids": [
+            146
+          ],
+          "legacy_sha256": "aa120bf4d6d9a1dc6dbada6041c552af55599f4b8e79594a90d08cf82f0428c6",
+          "document": "pdf-235.md"
+        },
+        {
+          "title": "二叉搜索树操作集锦",
+          "description": "围绕 BST 的递归定义完成验证、搜索、插入和删除。",
+          "pages": [
+            248,
+            256
+          ],
+          "question_ids": [
+            98,
+            700,
+            701,
+            450
+          ],
+          "legacy_sha256": "9eecfa29d72444191b404ad7de09fd9160d6ba45da3cc76bec97860219c57b20",
+          "document": "pdf-248.md"
+        },
+        {
+          "title": "如何计算完全二叉树的节点数",
+          "description": "比较普通、完全和满二叉树的形状，辨认节点计数可以省去哪些遍历。",
+          "pages": [
+            257,
+            259
+          ],
+          "question_ids": [
+            222
+          ],
+          "legacy_sha256": "63f9c2c4cd7250769b0285789fb9d505918e692e4b7489f2f9f6e6ce1e624b18",
+          "document": "pdf-257.md"
+        },
+        {
+          "title": "特殊数据结构：单调栈",
+          "description": "维持栈内单调性，处理下一个更大元素与循环数组的边界。",
+          "pages": [
+            260,
+            265
+          ],
+          "question_ids": [
+            496,
+            739,
+            503
+          ],
+          "legacy_sha256": "25954f7cd497cf0207e68798f17a30f30a16893f7e95d5db5fa618ec1b984e83",
+          "document": "pdf-260.md"
+        },
+        {
+          "title": "特殊数据结构：单调队列",
+          "description": "维护滑动窗口候选最大值，分别处理新元素入队与过期元素移除。",
+          "pages": [
+            266,
+            273
+          ],
+          "question_ids": [
+            239
+          ],
+          "legacy_sha256": "296605e4754865ec54d105cbffe7ea0463f8a6b00753fecc878afd2c5112b3e6",
+          "document": "pdf-266.md"
+        },
+        {
+          "title": "设计 Twitter",
+          "description": "组合用户关注关系、推文时间序与多路归并，支持个性化时间线。",
+          "pages": [
+            274,
+            284
+          ],
+          "question_ids": [
+            355
+          ],
+          "legacy_sha256": "1fadca175e21fea694990c1c4f9d95ad7eba08f06f50369f74ff3813ec27409a",
+          "document": "pdf-274.md"
+        },
+        {
+          "title": "递归反转链表的一部分",
+          "description": "用递归返回值连接反转区间，明确前驱、后继与递归终止位置。",
+          "pages": [
+            285,
+            293
+          ],
+          "question_ids": [
+            206,
+            92
+          ],
+          "legacy_sha256": "6e2bd71ecc21fbfe2461fadf183b563d35e37425c61ad2a9b2a6981311bc7228",
+          "document": "pdf-285.md"
+        },
+        {
+          "title": "队列实现栈、栈实现队列",
+          "description": "通过双队列或双栈转移元素，分析操作顺序与摊还代价。",
+          "pages": [
+            294,
+            302
+          ],
+          "question_ids": [
+            225,
+            232
+          ],
+          "legacy_sha256": "096204d023505261f1983a0edf8f1868fb58752e6365730085c9325df84a6852",
+          "document": "pdf-294.md"
+        }
+      ]
+    },
+    {
+      "title": "第三章 · 算法思维系列",
+      "pages": [
+        303,
+        392
+      ],
+      "lessons": [
+        {
+          "title": "回溯算法团灭子集、排列、组合问题",
+          "description": "用选择树统一子集、排列与组合，区分起点、访问标记和去重条件。",
+          "pages": [
+            304,
+            304
+          ],
+          "question_ids": [
+            46,
+            77,
+            78
+          ],
+          "legacy_sha256": "5a9d6be00d158e51c7d4bd7363195b247f47e6653bc1733f214413e5124a9511",
+          "document": "pdf-304.md"
+        },
+        {
+          "title": "回溯算法最佳实践：解数独",
+          "description": "将空格与候选数字视为决策树，使用行、列、宫约束剪枝。",
+          "pages": [
+            305,
+            312
+          ],
+          "question_ids": [
+            37
+          ],
+          "legacy_sha256": "5776191c45057414cf48bfb478795c38225297981fe063c408f119a8ac7e0b71",
+          "document": "pdf-305.md"
+        },
+        {
+          "title": "回溯算法最佳实践：括号生成",
+          "description": "通过左右括号数量约束搜索，确保任意前缀都满足合法性。",
+          "pages": [
+            313,
+            317
+          ],
+          "question_ids": [
+            22
+          ],
+          "legacy_sha256": "8fe908fd860258e647d6eee0af04b667bede2815d9a6930134eae2477d194276",
+          "document": "pdf-313.md"
+        },
+        {
+          "title": "双指针技巧总结",
+          "description": "先用快慢指针找链表的环、入环点和中点，再看左右指针在有序数组里的分工。",
+          "pages": [
+            318,
+            325
+          ],
+          "question_ids": [
+            141,
+            142,
+            876,
+            704,
+            167
+          ],
+          "legacy_sha256": "496a2635293ca09f4df6e3a6516c40fc7bfb4abb4ed5291307140255f34e073a",
+          "document": "pdf-318.md"
+        },
+        {
+          "title": "Two Sum 问题的核心思想",
+          "description": "比较无序数组哈希查找、可动态添加数字的设计题，以及有序数组的左右指针解法。",
+          "pages": [
+            326,
+            330
+          ],
+          "question_ids": [
+            1,
+            170,
+            167
+          ],
+          "legacy_sha256": "a77c9104a3f118de630c574606bbdc896ba096fe5634349e217e70d3f724ecf0",
+          "document": "pdf-326.md"
+        },
+        {
+          "title": "常用的位操作",
+          "description": "利用按位与、或、异或与移位表达集合状态和低位性质。",
+          "pages": [
+            331,
+            335
+          ],
+          "question_ids": [
+            191,
+            231
+          ],
+          "legacy_sha256": "e056a2097222404c7ce916492e85a6107914bb7cf92780e74d912f968a4c486e",
+          "document": "pdf-331.md"
+        },
+        {
+          "title": "烧饼排序",
+          "description": "每次定位当前未排序区间的最大值，用前缀翻转逐步固定位置。",
+          "pages": [
+            336,
+            341
+          ],
+          "question_ids": [
+            969
+          ],
+          "legacy_sha256": "8bce7b958f6aee14e5bf7bd85e6700136bdaa9aab836ece2ff232ea240f29c45",
+          "document": "pdf-336.md"
+        },
+        {
+          "title": "前缀和技巧",
+          "description": "用前缀状态将区间和查询化为差值，并结合哈希表计数子数组。",
+          "pages": [
+            342,
+            347
+          ],
+          "question_ids": [
+            560
+          ],
+          "legacy_sha256": "a27f8f18277b1ca263c9e9baf448eda33a9a065cccd904a6f310b4192d21964f",
+          "document": "pdf-342.md"
+        },
+        {
+          "title": "字符串乘法",
+          "description": "模拟竖式乘法，将每位乘积与进位映射到结果数组。",
+          "pages": [
+            348,
+            357
+          ],
+          "question_ids": [
+            43
+          ],
+          "legacy_sha256": "008b888b49fec86a1b676903d854dffc1be2b9c7048029075794aaec36dd0294",
+          "document": "pdf-348.md"
+        },
+        {
+          "title": "Flood Fill 算法详解及应用",
+          "description": "从起点做 DFS/BFS 扩展连通区域，避免重复访问并守住边界。",
+          "pages": [
+            358,
+            368
+          ],
+          "question_ids": [
+            733
+          ],
+          "legacy_sha256": "7ddeb65d5c48d7b8199c2792e702fe3ffc572318c0deb9f946eb4ff2b54ca912",
+          "document": "pdf-358.md"
+        },
+        {
+          "title": "区间调度之区间合并问题",
+          "description": "按起点排序后合并重叠区间，维护当前区间的最大右端点。",
+          "pages": [
+            369,
+            372
+          ],
+          "question_ids": [
+            56
+          ],
+          "legacy_sha256": "8184b661a92c828cf1ad9a1f9434b68da2254077f6f024f2887d222833195dfe",
+          "document": "pdf-369.md"
+        },
+        {
+          "title": "区间调度之区间交集问题",
+          "description": "使用双指针比较两个有序区间集合，推进结束位置较早的一侧。",
+          "pages": [
+            373,
+            378
+          ],
+          "question_ids": [
+            986
+          ],
+          "legacy_sha256": "a40d34d5bf917ecd6375adc059d3ef86fef831e444c166d3f3f6ce51cf69417e",
+          "document": "pdf-373.md"
+        },
+        {
+          "title": "信封嵌套问题",
+          "description": "按宽度排序并处理相同宽度，再将二维嵌套转为 LIS。",
+          "pages": [
+            379,
+            385
+          ],
+          "question_ids": [
+            354
+          ],
+          "legacy_sha256": "e5493009d23fc611ca5fb81541a2bf1535eccaeb0cef749887c4d99997714ab7",
+          "document": "pdf-379.md"
+        },
+        {
+          "title": "几个反直觉的概率问题",
+          "description": "用两个孩子、三门问题和摸球等例子辨认样本空间，理解知道额外条件后为什么要重新计算概率。",
+          "pages": [
+            386,
+            392
+          ],
+          "question_ids": [],
+          "legacy_sha256": "8cc2b354a17e72dc2ad0d578424ce63c21fc9efd84f37a044fb6026454262cc8",
+          "document": "pdf-386.md"
+        }
+      ]
+    },
+    {
+      "title": "第四章 · 高频面试系列",
+      "pages": [
+        393,
+        513
+      ],
+      "lessons": [
+        {
+          "title": "如何用 BFS 算法秒杀各种智力题",
+          "description": "把滑动拼图的棋盘看成状态，把一次合法移动看成边，明确 BFS 要搜索的起点和目标。",
+          "pages": [
+            394,
+            397
+          ],
+          "question_ids": [
+            773
+          ],
+          "legacy_sha256": "f4d9669a6edebb2d0039e39c1193af3c4292ebb29fba9ca62cd79c5afefbca42",
+          "document": "pdf-394.md"
+        },
+        {
+          "title": "如何高效寻找素数",
+          "description": "从试除法推导埃氏筛，优化起始倍数与循环上界。",
+          "pages": [
+            398,
+            402
+          ],
+          "question_ids": [
+            204
+          ],
+          "legacy_sha256": "27e2f1f6c2f46534a74c229950e450291d187b157fc7be7c5a7405b503e95ef2",
+          "document": "pdf-398.md"
+        },
+        {
+          "title": "如何高效进行模幂运算",
+          "description": "拆分十进制数组中的指数，结合分步取模和快速幂计算结果。",
+          "pages": [
+            403,
+            408
+          ],
+          "question_ids": [
+            372
+          ],
+          "legacy_sha256": "99bb1bbfeef2e0647851bd2486b6def2301ed353db0f89ea171176c64271a23b",
+          "document": "pdf-403.md"
+        },
+        {
+          "title": "如何运用二分查找算法",
+          "description": "把吃香蕉的速度和运送包裹的载重看作待求答案，定义可行性判断并找到第一个可行值。",
+          "pages": [
+            409,
+            415
+          ],
+          "question_ids": [
+            875,
+            1011
+          ],
+          "legacy_sha256": "84df312347370302801867048203d1aec3a194aa3bf07e7017c466fbb70bb3d0",
+          "document": "pdf-409.md"
+        },
+        {
+          "title": "如何高效解决接雨水问题",
+          "description": "比较左右边界高度，维护两侧最高值并累计可接水量。",
+          "pages": [
+            416,
+            423
+          ],
+          "question_ids": [
+            42
+          ],
+          "legacy_sha256": "79b0192b6e268267b2130a5e4ee4fac4c735b147876536a4f61a810cd97fd1c0",
+          "document": "pdf-416.md"
+        },
+        {
+          "title": "如何去除有序数组的重复元素",
+          "description": "比较有序数组和有序链表如何原地去除重复值。",
+          "pages": [
+            424,
+            426
+          ],
+          "question_ids": [
+            26,
+            83
+          ],
+          "legacy_sha256": "decc2a8319f742d101747097b891c18ec44b5edeaac97e65e99f3a3bac615eff",
+          "document": "pdf-424.md"
+        },
+        {
+          "title": "如何寻找最长回文子串",
+          "description": "从中心向两侧扩展，同时检查奇数与偶数长度的回文中心。",
+          "pages": [
+            427,
+            428
+          ],
+          "question_ids": [
+            5
+          ],
+          "legacy_sha256": "6a988a608d915c7b298d1e563606d9d4003e36474628a66a7844a719da7d1709",
+          "document": "pdf-427.md"
+        },
+        {
+          "title": "如何运用贪心思想玩跳跃游戏",
+          "description": "维护当前可达边界与下一层最远位置，判断能否到达终点或最少跳数。",
+          "pages": [
+            429,
+            436
+          ],
+          "question_ids": [
+            45,
+            55
+          ],
+          "legacy_sha256": "0402cdcf750fd1d143ab60dfe6fbc1fb16f9918acb5f0573c3c27fea3af6452d",
+          "document": "pdf-429.md"
+        },
+        {
+          "title": "如何 K 个一组反转链表",
+          "description": "先检查分组长度，再反转局部链表并递归连接后续分组。",
+          "pages": [
+            437,
+            444
+          ],
+          "question_ids": [
+            25
+          ],
+          "legacy_sha256": "8ce328a9633e52b4d6fa3d236a4e274b7348c63fe5acbaa4e42332e7caee95d6",
+          "document": "pdf-437.md"
+        },
+        {
+          "title": "如何判定括号合法性",
+          "description": "使用栈匹配括号类型，处理前缀失衡与最终栈非空。",
+          "pages": [
+            445,
+            447
+          ],
+          "question_ids": [
+            20
+          ],
+          "legacy_sha256": "fdadb24fbaa4e53a709cbd430189a42e3da43954c632ca92a647d521f7e9c4cf",
+          "document": "pdf-445.md"
+        },
+        {
+          "title": "如何寻找缺失的元素",
+          "description": "长度为 n 的数组从 0 到 n 少了一个整数。比较异或抵消与求和作差，并留意整数溢出。",
+          "pages": [
+            448,
+            453
+          ],
+          "question_ids": [
+            268
+          ],
+          "legacy_sha256": "edbe2239d2d81e03fceb9dd89acdde817594e1d448e4c2d5a7a7c4028bd826a3",
+          "document": "pdf-448.md"
+        },
+        {
+          "title": "如何同时寻找缺失和重复的元素",
+          "description": "利用数组值域与索引映射，区分缺失位置和重复值。",
+          "pages": [
+            454,
+            458
+          ],
+          "question_ids": [
+            645
+          ],
+          "legacy_sha256": "bab8f50ca9423717c48a0f29dbb27ecfcb6cb306a97c17d094980cdb8a7841d1",
+          "document": "pdf-454.md"
+        },
+        {
+          "title": "如何判断回文链表",
+          "description": "定位链表中点、反转后半段并逐节点比较，最后恢复链表。",
+          "pages": [
+            459,
+            466
+          ],
+          "question_ids": [
+            234
+          ],
+          "legacy_sha256": "4c8db568c889cc42dc16f81ae3b8402d1c0dac58c7824bdad72d7aeb4973b71a",
+          "document": "pdf-459.md"
+        },
+        {
+          "title": "如何在无限序列中随机抽取元素",
+          "description": "使用蓄水池抽样保证流式数据中每个元素等概率入选。",
+          "pages": [
+            467,
+            471
+          ],
+          "question_ids": [
+            382,
+            398
+          ],
+          "legacy_sha256": "ac88c35003fad9420b145d504c9baf0a1c31537226851443d8765888e0c07b76",
+          "document": "pdf-467.md"
+        },
+        {
+          "title": "如何调度考生的座位",
+          "description": "维护相邻座位间距，比较端点与内部空段的候选位置。",
+          "pages": [
+            472,
+            480
+          ],
+          "question_ids": [
+            855
+          ],
+          "legacy_sha256": "556c07b81ab4581e045f6a9a1aa58e83b9bc3fecd3c141bffe02574ea6c03793",
+          "document": "pdf-472.md"
+        },
+        {
+          "title": "Union-Find 算法详解",
+          "description": "理解并查集的连通性查询和合并，再看维护树高度和压缩路径如何降低操作开销。",
+          "pages": [
+            481,
+            493
+          ],
+          "question_ids": [],
+          "legacy_sha256": "0ecb1edad47d21179c765f75f9c006db31793509293d7bfa555234e63dd6ff6a",
+          "document": "pdf-481.md"
+        },
+        {
+          "title": "Union-Find 算法应用",
+          "description": "用虚拟节点保留与边界相连的区域；处理等式时，先合并相等变量，再查找不等约束中的冲突。",
+          "pages": [
+            494,
+            502
+          ],
+          "question_ids": [
+            130,
+            990
+          ],
+          "legacy_sha256": "c3ae1a569d348b36dc1926ec6ab3251cbb2cd8ebd1a7e05c0c5236cb3d4f19a4",
+          "document": "pdf-494.md"
+        },
+        {
+          "title": "一行代码就能解决的算法题",
+          "description": "分别分析取石子的周期、石子堆的先手策略和灯泡的约数个数，看为什么可以用简短代码表达结论。",
+          "pages": [
+            503,
+            507
+          ],
+          "question_ids": [
+            292,
+            877,
+            319
+          ],
+          "legacy_sha256": "12be8f0edfe96b2437378818e35dfa4fd77f8fdc642e3726e8b66338e8a20cce",
+          "document": "pdf-503.md"
+        },
+        {
+          "title": "二分查找高效判定子序列",
+          "description": "先按双指针扫描判断子序列，再为长字符串建立字符位置表，用二分处理重复查询。",
+          "pages": [
+            508,
+            513
+          ],
+          "question_ids": [
+            392
+          ],
+          "legacy_sha256": "4b6742983b9b78e5924e3a0002eef1fe6940fe5501415c3a86e35f41703ffcf4",
+          "document": "pdf-508.md"
+        }
+      ]
+    }
+  ],
+  "leetcode_questions": [
+    {
+      "id": 1,
+      "slug": "two-sum",
+      "title": "两数之和",
+      "paid_only": false,
+      "judge": {
+        "question_id": "1",
+        "difficulty": 1,
+        "metadata": "{\n  \"name\": \"twoSum\",\n  \"params\": [\n    {\n      \"name\": \"nums\",\n      \"type\": \"integer[]\"\n    },\n    {\n      \"name\": \"target\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer[]\",\n    \"size\": 2\n  },\n  \"manual\": false\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        ",
+          "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* twoSum(int* nums, int numsSize, int target, int* returnSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "slug": "longest-palindromic-substring",
+      "title": "最长回文子串",
+      "paid_only": false,
+      "judge": {
+        "question_id": "5",
+        "difficulty": 3,
+        "metadata": "{ \n  \"name\": \"longestPalindrome\",\n  \"params\": [\n    { \n      \"name\": \"s\",\n      \"type\": \"string\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"string\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    string longestPalindrome(string s) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def longestPalindrome(self, s: str) -> str:\n        ",
+          "c": "char* longestPalindrome(char* s) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "slug": "regular-expression-matching",
+      "title": "正则表达式匹配",
+      "paid_only": false,
+      "judge": {
+        "question_id": "10",
+        "difficulty": 5,
+        "metadata": "{ \r\n  \"name\": \"isMatch\",\r\n  \"params\": [\r\n    { \r\n      \"name\": \"s\",\r\n      \"type\": \"string\"\r\n    },\r\n    {\r\n      \"name\": \"p\",\r\n      \"type\": \"string\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    bool isMatch(string s, string p) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def isMatch(self, s: str, p: str) -> bool:\n        ",
+          "c": "bool isMatch(char* s, char* p) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "slug": "valid-parentheses",
+      "title": "有效的括号",
+      "paid_only": false,
+      "judge": {
+        "question_id": "20",
+        "difficulty": 1,
+        "metadata": "{ \r\n  \"name\": \"isValid\",\r\n  \"params\": [\r\n    { \r\n      \"name\": \"s\",\r\n      \"type\": \"string\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    bool isValid(string s) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def isValid(self, s: str) -> bool:\n        ",
+          "c": "bool isValid(char* s) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 22,
+      "slug": "generate-parentheses",
+      "title": "括号生成",
+      "paid_only": false,
+      "judge": {
+        "question_id": "22",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"generateParenthesis\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"n\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"list<string>\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<string> generateParenthesis(int n) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def generateParenthesis(self, n: int) -> list[str]:\n        ",
+          "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nchar** generateParenthesis(int n, int* returnSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 25,
+      "slug": "reverse-nodes-in-k-group",
+      "title": "K 个一组翻转链表",
+      "paid_only": false,
+      "judge": {
+        "question_id": "25",
+        "difficulty": 5,
+        "metadata": "{\r\n  \"name\": \"reverseKGroup\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"head\",\r\n      \"type\": \"ListNode\"\r\n    },\r\n    {\r\n      \"name\": \"k\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"ListNode\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* reverseKGroup(ListNode* head, int k) {\n        \n    }\n};",
+          "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def reverseKGroup(self, head: ListNode | None, k: int) -> ListNode | None:\n        ",
+          "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* reverseKGroup(struct ListNode* head, int k) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 26,
+      "slug": "remove-duplicates-from-sorted-array",
+      "title": "删除排序数组中的重复项",
+      "paid_only": false,
+      "judge": {
+        "question_id": "26",
+        "difficulty": 1,
+        "metadata": "{\n  \"name\": \"removeDuplicates\",\n  \"params\": [\n    {\n      \"name\": \"nums\",\n      \"type\": \"integer[]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  },\n  \"output\": {\n    \"paramindex\": 0,\n    \"size\": \"ret\"\n  },\n  \"languages\": [\n    \"cpp\",\n    \"java\",\n    \"python\",\n    \"c\",\n    \"csharp\",\n    \"javascript\",\n    \"ruby\",\n    \"swift\",\n    \"golang\",\n    \"python3\",\n    \"scala\",\n    \"kotlin\",\n    \"rust\",\n    \"php\",\n    \"typescript\",\n    \"dart\"\n  ]\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int removeDuplicates(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def removeDuplicates(self, nums: list[int]) -> int:\n        ",
+          "c": "int removeDuplicates(int* nums, int numsSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 28,
+      "slug": "find-the-index-of-the-first-occurrence-in-a-string",
+      "title": "实现 strStr()",
+      "paid_only": false,
+      "judge": {
+        "question_id": "28",
+        "difficulty": 1,
+        "metadata": "{ \r\n  \"name\": \"strStr\",\r\n  \"params\": [\r\n    { \r\n      \"name\": \"haystack\",\r\n      \"type\": \"string\"\r\n    },\r\n    {\r\n      \"name\": \"needle\",\r\n      \"type\": \"string\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int strStr(string haystack, string needle) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def strStr(self, haystack: str, needle: str) -> int:\n        ",
+          "c": "int strStr(char* haystack, char* needle) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 37,
+      "slug": "sudoku-solver",
+      "title": "解数独",
+      "paid_only": false,
+      "judge": {
+        "question_id": "37",
+        "difficulty": 5,
+        "metadata": "{\n  \"name\": \"solveSudoku\",\n  \"params\": [\n    {\n      \"name\": \"board\",\n      \"type\": \"character[][]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"void\"\n  },\n  \"output\": {\n    \"paramindex\": 0\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    void solveSudoku(vector<vector<char>>& board) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def solveSudoku(self, board: list[list[str]]) -> None:\n        \"\"\"\n        Do not return anything, modify board in-place instead.\n        \"\"\"\n        ",
+          "c": "void solveSudoku(char** board, int boardSize, int* boardColSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 42,
+      "slug": "trapping-rain-water",
+      "title": "接雨水",
+      "paid_only": false,
+      "judge": {
+        "question_id": "42",
+        "difficulty": 5,
+        "metadata": "{\r\n  \"name\": \"trap\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"height\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int trap(vector<int>& height) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def trap(self, height: list[int]) -> int:\n        ",
+          "c": "int trap(int* height, int heightSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 43,
+      "slug": "multiply-strings",
+      "title": "字符串相乘",
+      "paid_only": false,
+      "judge": {
+        "question_id": "43",
+        "difficulty": 3,
+        "metadata": "{ \r\n  \"name\": \"multiply\",\r\n  \"params\": [\r\n    { \r\n      \"name\": \"num1\",\r\n      \"type\": \"string\"\r\n    },\r\n    { \r\n      \"name\": \"num2\",\r\n      \"type\": \"string\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"string\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    string multiply(string num1, string num2) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def multiply(self, num1: str, num2: str) -> str:\n        ",
+          "c": "char* multiply(char* num1, char* num2) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 45,
+      "slug": "jump-game-ii",
+      "title": "跳跃游戏 II",
+      "paid_only": false,
+      "judge": {
+        "question_id": "45",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"jump\",\n  \"params\": [\n    {\n      \"name\": \"nums\",\n      \"type\": \"integer[]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int jump(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def jump(self, nums: list[int]) -> int:\n        ",
+          "c": "int jump(int* nums, int numsSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 46,
+      "slug": "permutations",
+      "title": "全排列",
+      "paid_only": false,
+      "judge": {
+        "question_id": "46",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"permute\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"nums\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"list<list<integer>>\",\r\n    \"colsize\": \"size_1\",\r\n    \"dealloc\": true\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<vector<int>> permute(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def permute(self, nums: list[int]) -> list[list[int]]:\n        ",
+          "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** permute(int* nums, int numsSize, int* returnSize, int** returnColumnSizes) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 55,
+      "slug": "jump-game",
+      "title": "跳跃游戏",
+      "paid_only": false,
+      "judge": {
+        "question_id": "55",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"canJump\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"nums\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    bool canJump(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def canJump(self, nums: list[int]) -> bool:\n        ",
+          "c": "bool canJump(int* nums, int numsSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 56,
+      "slug": "merge-intervals",
+      "title": "合并区间",
+      "paid_only": false,
+      "judge": {
+        "question_id": "56",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"merge\",\n  \"params\": [\n    {\n      \"name\": \"intervals\",\n      \"type\": \"integer[][]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer[][]\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<vector<int>> merge(vector<vector<int>>& intervals) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def merge(self, intervals: list[list[int]]) -> list[list[int]]:\n        ",
+          "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** merge(int** intervals, int intervalsSize, int* intervalsColSize, int* returnSize, int** returnColumnSizes) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 72,
+      "slug": "edit-distance",
+      "title": "编辑距离",
+      "paid_only": false,
+      "judge": {
+        "question_id": "72",
+        "difficulty": 3,
+        "metadata": "{ \r\n  \"name\": \"minDistance\",\r\n  \"params\": [\r\n    { \r\n      \"name\": \"word1\",\r\n      \"type\": \"string\"\r\n    },\r\n    { \r\n      \"name\": \"word2\",\r\n      \"type\": \"string\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int minDistance(string word1, string word2) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def minDistance(self, word1: str, word2: str) -> int:\n        ",
+          "c": "int minDistance(char* word1, char* word2) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 77,
+      "slug": "combinations",
+      "title": "组合",
+      "paid_only": false,
+      "judge": {
+        "question_id": "77",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"combine\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"n\",\r\n      \"type\": \"integer\"\r\n    },\r\n    {\r\n      \"name\": \"k\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"list<list<integer>>\",\r\n    \"dealloc\": true\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<vector<int>> combine(int n, int k) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def combine(self, n: int, k: int) -> list[list[int]]:\n        ",
+          "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** combine(int n, int k, int* returnSize, int** returnColumnSizes) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 78,
+      "slug": "subsets",
+      "title": "子集",
+      "paid_only": false,
+      "judge": {
+        "question_id": "78",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"subsets\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"nums\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"list<list<integer>>\",\r\n    \"dealloc\": true\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<vector<int>> subsets(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def subsets(self, nums: list[int]) -> list[list[int]]:\n        ",
+          "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** subsets(int* nums, int numsSize, int* returnSize, int** returnColumnSizes) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 83,
+      "slug": "remove-duplicates-from-sorted-list",
+      "title": "删除排序链表中的重复元素",
+      "paid_only": false,
+      "judge": {
+        "question_id": "83",
+        "difficulty": 1,
+        "metadata": "{\r\n  \"name\": \"deleteDuplicates\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"head\",\r\n      \"type\": \"ListNode\",\r\n      \"dealloc\": false\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"ListNode\",\r\n    \"dealloc\": true\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* deleteDuplicates(ListNode* head) {\n        \n    }\n};",
+          "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def deleteDuplicates(self, head: ListNode | None) -> ListNode | None:\n        ",
+          "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* deleteDuplicates(struct ListNode* head) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 92,
+      "slug": "reverse-linked-list-ii",
+      "title": "反转链表 II",
+      "paid_only": false,
+      "judge": {
+        "question_id": "92",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"reverseBetween\",\n  \"params\": [\n    {\n      \"name\": \"head\",\n      \"type\": \"ListNode\",\n      \"dealloc\": false\n    },\n    {\n      \"name\": \"left\",\n      \"type\": \"integer\"\n    },\n    {\n      \"name\": \"right\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"ListNode\",\n    \"dealloc\": true\n  }\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* reverseBetween(ListNode* head, int left, int right) {\n        \n    }\n};",
+          "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def reverseBetween(self, head: ListNode | None, left: int, right: int) -> ListNode | None:\n        ",
+          "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* reverseBetween(struct ListNode* head, int left, int right) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 98,
+      "slug": "validate-binary-search-tree",
+      "title": "验证二叉搜索树",
+      "paid_only": false,
+      "judge": {
+        "question_id": "98",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"isValidBST\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"root\",\r\n      \"type\": \"TreeNode\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    bool isValidBST(TreeNode* root) {\n        \n    }\n};",
+          "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def isValidBST(self, root: TreeNode | None) -> bool:\n        ",
+          "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nbool isValidBST(struct TreeNode* root) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 130,
+      "slug": "surrounded-regions",
+      "title": "被围绕的区域",
+      "paid_only": false,
+      "judge": {
+        "question_id": "130",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"solve\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"board\",\r\n      \"type\": \"character[][]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"void\"\r\n  },\r\n  \"output\": {\r\n    \"paramindex\": 0\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    void solve(vector<vector<char>>& board) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def solve(self, board: list[list[str]]) -> None:\n        \"\"\"\n        Do not return anything, modify board in-place instead.\n        \"\"\"\n        ",
+          "c": "void solve(char** board, int boardSize, int* boardColSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 141,
+      "slug": "linked-list-cycle",
+      "title": "环形链表",
+      "paid_only": false,
+      "judge": {
+        "question_id": "141",
+        "difficulty": 1,
+        "metadata": "{\n  \"name\": \"hasCycle\",\n  \"params\": [\n    {\n      \"name\": \"head\",\n      \"type\": \"ListNode\"\n    },\n    {\n      \"name\": \"pos\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"boolean\"\n  },\n  \"manual\": true,\n  \"languages\": [\n    \"cpp\",\n    \"java\",\n    \"python\",\n    \"c\",\n    \"csharp\",\n    \"javascript\",\n    \"ruby\",\n    \"swift\",\n    \"golang\",\n    \"python3\",\n    \"scala\",\n    \"kotlin\",\n    \"php\",\n    \"typescript\"\n  ]\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode(int x) : val(x), next(NULL) {}\n * };\n */\nclass Solution {\npublic:\n    bool hasCycle(ListNode *head) {\n        \n    }\n};",
+          "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.next = None\n\nclass Solution:\n    def hasCycle(self, head: Optional[ListNode]) -> bool:\n        ",
+          "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nbool hasCycle(struct ListNode *head) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 142,
+      "slug": "linked-list-cycle-ii",
+      "title": "环形链表 II",
+      "paid_only": false,
+      "judge": {
+        "question_id": "142",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"detectCycle\",\n  \"params\": [\n    {\n      \"name\": \"head\",\n      \"type\": \"ListNode\"\n    },\n    {\n      \"name\": \"pos\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"ListNode\"\n  },\n  \"languages\": [\n    \"cpp\",\n    \"java\",\n    \"python\",\n    \"c\",\n    \"csharp\",\n    \"javascript\",\n    \"golang\",\n    \"python3\",\n    \"swift\",\n    \"kotlin\",\n    \"php\",\n    \"ruby\",\n    \"scala\",\n    \"typescript\"\n  ],\n  \"manual\": true\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode(int x) : val(x), next(NULL) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode *detectCycle(ListNode *head) {\n        \n    }\n};",
+          "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, x):\n#         self.val = x\n#         self.next = None\n\nclass Solution:\n    def detectCycle(self, head: Optional[ListNode]) -> Optional[ListNode]:\n        ",
+          "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode *detectCycle(struct ListNode *head) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 146,
+      "slug": "lru-cache",
+      "title": "LRU 缓存机制",
+      "paid_only": false,
+      "judge": {
+        "question_id": "146",
+        "difficulty": 3,
+        "metadata": "{\n    \"classname\": \"LRUCache\",\n    \"maxbytesperline\": 200000,\n    \"constructor\": {\n        \"params\": [\n            {\n                \"type\": \"integer\",\n                \"name\": \"capacity\"\n            }\n        ]\n    },\n    \"methods\": [\n        {\n            \"name\" : \"get\",\n            \"params\": [\n                {\n                    \"type\": \"integer\",\n                    \"name\": \"key\"\n                }\n            ],\n            \"return\": {\n                \"type\": \"integer\"\n            }\n        },\n        {\n            \"name\" : \"put\",\n            \"params\": [\n                {\n                    \"type\": \"integer\",\n                    \"name\": \"key\"\n                },\n                {\n                    \"type\": \"integer\",\n                    \"name\": \"value\"\n                }\n            ],\n            \"return\": {\n                \"type\": \"void\"\n            }\n        }\n    ],\n    \"systemdesign\": true,\n    \"params\": [\n        {\n            \"name\": \"inputs\",\n            \"type\": \"integer[]\"\n        },\n        {\n            \"name\": \"inputs\",\n            \"type\": \"integer[]\"\n        }\n    ],\n    \"return\": {\n        \"type\": \"list<String>\",\n        \"dealloc\": true\n    }\n}",
+        "starter_codes": {
+          "cpp11": "class LRUCache {\npublic:\n    LRUCache(int capacity) {\n        \n    }\n    \n    int get(int key) {\n        \n    }\n    \n    void put(int key, int value) {\n        \n    }\n};\n\n/**\n * Your LRUCache object will be instantiated and called as such:\n * LRUCache* obj = new LRUCache(capacity);\n * int param_1 = obj->get(key);\n * obj->put(key,value);\n */",
+          "python3": "class LRUCache:\n\n    def __init__(self, capacity: int):\n        \n\n    def get(self, key: int) -> int:\n        \n\n    def put(self, key: int, value: int) -> None:\n        \n\n\n# Your LRUCache object will be instantiated and called as such:\n# obj = LRUCache(capacity)\n# param_1 = obj.get(key)\n# obj.put(key,value)",
+          "c": "\n\n\ntypedef struct {\n    \n} LRUCache;\n\n\nLRUCache* lRUCacheCreate(int capacity) {\n    \n}\n\nint lRUCacheGet(LRUCache* obj, int key) {\n    \n}\n\nvoid lRUCachePut(LRUCache* obj, int key, int value) {\n    \n}\n\nvoid lRUCacheFree(LRUCache* obj) {\n    \n}\n\n/**\n * Your LRUCache struct will be instantiated and called as such:\n * LRUCache* obj = lRUCacheCreate(capacity);\n * int param_1 = lRUCacheGet(obj, key);\n \n * lRUCachePut(obj, key, value);\n \n * lRUCacheFree(obj);\n*/"
+        }
+      }
+    },
+    {
+      "id": 167,
+      "slug": "two-sum-ii-input-array-is-sorted",
+      "title": "两数之和 II - 输入有序数组",
+      "paid_only": false,
+      "judge": {
+        "question_id": "167",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"twoSum\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"numbers\",\r\n      \"type\": \"integer[]\"\r\n    },\r\n    {\r\n      \"name\": \"target\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer[]\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<int> twoSum(vector<int>& numbers, int target) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def twoSum(self, numbers: list[int], target: int) -> list[int]:\n        ",
+          "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* twoSum(int* numbers, int numbersSize, int target, int* returnSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 170,
+      "slug": "two-sum-iii-data-structure-design",
+      "title": "两数之和 III：数据结构设计",
+      "paid_only": true
+    },
+    {
+      "id": 191,
+      "slug": "number-of-1-bits",
+      "title": "位 1 的个数",
+      "paid_only": false,
+      "judge": {
+        "question_id": "191",
+        "difficulty": 1,
+        "metadata": "{\n  \"name\": \"hammingWeight\",\n  \"params\": [\n    {\n      \"name\": \"n\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  },\n  \"manual\": false\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int hammingWeight(int n) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def hammingWeight(self, n: int) -> int:\n        ",
+          "c": "int hammingWeight(int n) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 204,
+      "slug": "count-primes",
+      "title": "计数质数",
+      "paid_only": false,
+      "judge": {
+        "question_id": "204",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"countPrimes\",\n  \"params\": [\n    {\n      \"name\": \"n\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int countPrimes(int n) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def countPrimes(self, n: int) -> int:\n        ",
+          "c": "int countPrimes(int n) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 206,
+      "slug": "reverse-linked-list",
+      "title": "反转链表",
+      "paid_only": false,
+      "judge": {
+        "question_id": "206",
+        "difficulty": 1,
+        "metadata": "{\r\n  \"name\": \"reverseList\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"head\",\r\n      \"type\": \"ListNode\",\r\n      \"dealloc\": false\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"ListNode\",\r\n    \"dealloc\": true\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* reverseList(ListNode* head) {\n        \n    }\n};",
+          "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def reverseList(self, head: ListNode | None) -> ListNode | None:\n        ",
+          "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* reverseList(struct ListNode* head) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 222,
+      "slug": "count-complete-tree-nodes",
+      "title": "完全二叉树的节点个数",
+      "paid_only": false,
+      "judge": {
+        "question_id": "222",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"countNodes\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"root\",\r\n      \"type\": \"TreeNode\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    int countNodes(TreeNode* root) {\n        \n    }\n};",
+          "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def countNodes(self, root: Optional[TreeNode]) -> int:\n        ",
+          "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nint countNodes(struct TreeNode* root) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 225,
+      "slug": "implement-stack-using-queues",
+      "title": "用队列实现栈",
+      "paid_only": false,
+      "judge": {
+        "question_id": "225",
+        "difficulty": 1,
+        "metadata": "{\n  \"classname\": \"MyStack\",\n  \"constructor\": {\n    \"params\": []\n  },\n  \"methods\": [\n    {\n      \"params\": [\n        {\n          \"type\": \"integer\",\n          \"name\": \"x\"\n        }\n      ],\n      \"name\": \"push\",\n      \"return\": {\n        \"type\": \"void\"\n      }\n    },\n    {\n      \"params\": [],\n      \"return\": {\n        \"type\": \"integer\"\n      },\n      \"name\": \"pop\"\n    },\n    {\n      \"params\": [],\n      \"name\": \"top\",\n      \"return\": {\n        \"type\": \"integer\"\n      }\n    },\n    {\n      \"params\": [],\n      \"name\": \"empty\",\n      \"return\": {\n        \"type\": \"boolean\"\n      }\n    }\n  ],\n  \"return\": {\n    \"type\": \"boolean\"\n  },\n  \"systemdesign\": true\n}",
+        "starter_codes": {
+          "cpp11": "class MyStack {\npublic:\n    MyStack() {\n        \n    }\n    \n    void push(int x) {\n        \n    }\n    \n    int pop() {\n        \n    }\n    \n    int top() {\n        \n    }\n    \n    bool empty() {\n        \n    }\n};\n\n/**\n * Your MyStack object will be instantiated and called as such:\n * MyStack* obj = new MyStack();\n * obj->push(x);\n * int param_2 = obj->pop();\n * int param_3 = obj->top();\n * bool param_4 = obj->empty();\n */",
+          "python3": "class MyStack:\n\n    def __init__(self):\n        \n\n    def push(self, x: int) -> None:\n        \n\n    def pop(self) -> int:\n        \n\n    def top(self) -> int:\n        \n\n    def empty(self) -> bool:\n        \n\n\n# Your MyStack object will be instantiated and called as such:\n# obj = MyStack()\n# obj.push(x)\n# param_2 = obj.pop()\n# param_3 = obj.top()\n# param_4 = obj.empty()",
+          "c": "\n\n\ntypedef struct {\n    \n} MyStack;\n\n\nMyStack* myStackCreate() {\n    \n}\n\nvoid myStackPush(MyStack* obj, int x) {\n    \n}\n\nint myStackPop(MyStack* obj) {\n    \n}\n\nint myStackTop(MyStack* obj) {\n    \n}\n\nbool myStackEmpty(MyStack* obj) {\n    \n}\n\nvoid myStackFree(MyStack* obj) {\n    \n}\n\n/**\n * Your MyStack struct will be instantiated and called as such:\n * MyStack* obj = myStackCreate();\n * myStackPush(obj, x);\n \n * int param_2 = myStackPop(obj);\n \n * int param_3 = myStackTop(obj);\n \n * bool param_4 = myStackEmpty(obj);\n \n * myStackFree(obj);\n*/"
+        }
+      }
+    },
+    {
+      "id": 231,
+      "slug": "power-of-two",
+      "title": "2 的幂",
+      "paid_only": false,
+      "judge": {
+        "question_id": "231",
+        "difficulty": 1,
+        "metadata": "{ \r\n  \"name\": \"isPowerOfTwo\",\r\n  \"params\": [\r\n    { \r\n      \"name\": \"n\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    bool isPowerOfTwo(int n) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def isPowerOfTwo(self, n: int) -> bool:\n        ",
+          "c": "bool isPowerOfTwo(int n) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 232,
+      "slug": "implement-queue-using-stacks",
+      "title": "用栈实现队列",
+      "paid_only": false,
+      "judge": {
+        "question_id": "232",
+        "difficulty": 1,
+        "metadata": "{\n  \"classname\": \"MyQueue\",\n  \"constructor\": {\n    \"params\": []\n  },\n  \"methods\": [\n    {\n      \"params\": [\n        {\n          \"type\": \"integer\",\n          \"name\": \"x\"\n        }\n      ],\n      \"return\": {\n        \"type\": \"void\"\n      },\n      \"name\": \"push\"\n    },\n    {\n      \"params\": [],\n      \"return\": {\n        \"type\": \"integer\"\n      },\n      \"name\": \"pop\"\n    },\n    {\n      \"params\": [],\n      \"return\": {\n        \"type\": \"integer\"\n      },\n      \"name\": \"peek\"\n    },\n    {\n      \"params\": [],\n      \"return\": {\n        \"type\": \"boolean\"\n      },\n      \"name\": \"empty\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"boolean\"\n  },\n  \"systemdesign\": true\n}",
+        "starter_codes": {
+          "cpp11": "class MyQueue {\npublic:\n    MyQueue() {\n        \n    }\n    \n    void push(int x) {\n        \n    }\n    \n    int pop() {\n        \n    }\n    \n    int peek() {\n        \n    }\n    \n    bool empty() {\n        \n    }\n};\n\n/**\n * Your MyQueue object will be instantiated and called as such:\n * MyQueue* obj = new MyQueue();\n * obj->push(x);\n * int param_2 = obj->pop();\n * int param_3 = obj->peek();\n * bool param_4 = obj->empty();\n */",
+          "python3": "class MyQueue:\n\n    def __init__(self):\n        \n\n    def push(self, x: int) -> None:\n        \n\n    def pop(self) -> int:\n        \n\n    def peek(self) -> int:\n        \n\n    def empty(self) -> bool:\n        \n\n\n# Your MyQueue object will be instantiated and called as such:\n# obj = MyQueue()\n# obj.push(x)\n# param_2 = obj.pop()\n# param_3 = obj.peek()\n# param_4 = obj.empty()",
+          "c": "\n\n\ntypedef struct {\n    \n} MyQueue;\n\n\nMyQueue* myQueueCreate() {\n    \n}\n\nvoid myQueuePush(MyQueue* obj, int x) {\n    \n}\n\nint myQueuePop(MyQueue* obj) {\n    \n}\n\nint myQueuePeek(MyQueue* obj) {\n    \n}\n\nbool myQueueEmpty(MyQueue* obj) {\n    \n}\n\nvoid myQueueFree(MyQueue* obj) {\n    \n}\n\n/**\n * Your MyQueue struct will be instantiated and called as such:\n * MyQueue* obj = myQueueCreate();\n * myQueuePush(obj, x);\n \n * int param_2 = myQueuePop(obj);\n \n * int param_3 = myQueuePeek(obj);\n \n * bool param_4 = myQueueEmpty(obj);\n \n * myQueueFree(obj);\n*/"
+        }
+      }
+    },
+    {
+      "id": 234,
+      "slug": "palindrome-linked-list",
+      "title": "回文链表",
+      "paid_only": false,
+      "judge": {
+        "question_id": "234",
+        "difficulty": 1,
+        "metadata": "{ \r\n  \"name\": \"isPalindrome\",\r\n  \"params\": [\r\n    { \r\n      \"name\": \"head\",\r\n      \"type\": \"ListNode\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    bool isPalindrome(ListNode* head) {\n        \n    }\n};",
+          "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def isPalindrome(self, head: Optional[ListNode]) -> bool:\n        ",
+          "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nbool isPalindrome(struct ListNode* head) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 239,
+      "slug": "sliding-window-maximum",
+      "title": "滑动窗口最大值",
+      "paid_only": false,
+      "judge": {
+        "question_id": "239",
+        "difficulty": 5,
+        "metadata": "{ \n  \"name\": \"maxSlidingWindow\",\n  \"params\": [\n    { \n      \"name\": \"nums\",\n      \"type\": \"integer[]\"\n    },\n    {\n      \"name\": \"k\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer[]\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<int> maxSlidingWindow(vector<int>& nums, int k) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:\n        ",
+          "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* maxSlidingWindow(int* nums, int numsSize, int k, int* returnSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 268,
+      "slug": "missing-number",
+      "title": "丢失的数字",
+      "paid_only": false,
+      "judge": {
+        "question_id": "268",
+        "difficulty": 1,
+        "metadata": "{\r\n  \"name\": \"missingNumber\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"nums\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int missingNumber(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def missingNumber(self, nums: list[int]) -> int:\n        ",
+          "c": "int missingNumber(int* nums, int numsSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 292,
+      "slug": "nim-game",
+      "title": "Nim 游戏",
+      "paid_only": false,
+      "judge": {
+        "question_id": "292",
+        "difficulty": 1,
+        "metadata": "{\r\n  \"name\": \"canWinNim\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"n\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    bool canWinNim(int n) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def canWinNim(self, n: int) -> bool:\n        ",
+          "c": "bool canWinNim(int n) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 300,
+      "slug": "longest-increasing-subsequence",
+      "title": "最长递增子序列",
+      "paid_only": false,
+      "judge": {
+        "question_id": "300",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"lengthOfLIS\",\n  \"params\": [\n    {\n      \"name\": \"nums\",\n      \"type\": \"integer[]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int lengthOfLIS(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def lengthOfLIS(self, nums: list[int]) -> int:\n        ",
+          "c": "int lengthOfLIS(int* nums, int numsSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 312,
+      "slug": "burst-balloons",
+      "title": "戳气球",
+      "paid_only": false,
+      "judge": {
+        "question_id": "312",
+        "difficulty": 5,
+        "metadata": "{\n  \"name\": \"maxCoins\",\n  \"params\": [\n    {\n      \"name\": \"nums\",\n      \"type\": \"integer[]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int maxCoins(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def maxCoins(self, nums: list[int]) -> int:\n        ",
+          "c": "int maxCoins(int* nums, int numsSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 319,
+      "slug": "bulb-switcher",
+      "title": "灯泡开关",
+      "paid_only": false,
+      "judge": {
+        "question_id": "319",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"bulbSwitch\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"n\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int bulbSwitch(int n) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def bulbSwitch(self, n: int) -> int:\n        ",
+          "c": "int bulbSwitch(int n) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 354,
+      "slug": "russian-doll-envelopes",
+      "title": "俄罗斯套娃信封问题",
+      "paid_only": false,
+      "judge": {
+        "question_id": "354",
+        "difficulty": 5,
+        "metadata": "{\r\n  \"name\": \"maxEnvelopes\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"envelopes\",\r\n      \"type\": \"integer[][]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int maxEnvelopes(vector<vector<int>>& envelopes) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def maxEnvelopes(self, envelopes: list[list[int]]) -> int:\n        ",
+          "c": "int maxEnvelopes(int** envelopes, int envelopesSize, int* envelopesColSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 355,
+      "slug": "design-twitter",
+      "title": "设计推特",
+      "paid_only": false,
+      "judge": {
+        "question_id": "355",
+        "difficulty": 3,
+        "metadata": "{\n  \"classname\": \"Twitter\",\n  \"constructor\": {\n    \"params\": []\n  },\n  \"methods\": [\n    {\n      \"params\": [\n        {\n          \"type\": \"integer\",\n          \"name\": \"userId\"\n        },\n        {\n          \"type\": \"integer\",\n          \"name\": \"tweetId\"\n        }\n      ],\n      \"return\": {\n        \"type\": \"void\"\n      },\n      \"name\": \"postTweet\"\n    },\n    {\n      \"params\": [\n        {\n          \"type\": \"integer\",\n          \"name\": \"userId\"\n        }\n      ],\n      \"return\": {\n        \"type\": \"list<integer>\"\n      },\n      \"name\": \"getNewsFeed\"\n    },\n    {\n      \"params\": [\n        {\n          \"type\": \"integer\",\n          \"name\": \"followerId\"\n        },\n        {\n          \"type\": \"integer\",\n          \"name\": \"followeeId\"\n        }\n      ],\n      \"return\": {\n        \"type\": \"void\"\n      },\n      \"name\": \"follow\"\n    },\n    {\n      \"params\": [\n        {\n          \"type\": \"integer\",\n          \"name\": \"followerId\"\n        },\n        {\n          \"type\": \"integer\",\n          \"name\": \"followeeId\"\n        }\n      ],\n      \"return\": {\n        \"type\": \"void\"\n      },\n      \"name\": \"unfollow\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"boolean\"\n  },\n  \"systemdesign\": true\n}",
+        "starter_codes": {
+          "cpp11": "class Twitter {\npublic:\n    Twitter() {\n        \n    }\n    \n    void postTweet(int userId, int tweetId) {\n        \n    }\n    \n    vector<int> getNewsFeed(int userId) {\n        \n    }\n    \n    void follow(int followerId, int followeeId) {\n        \n    }\n    \n    void unfollow(int followerId, int followeeId) {\n        \n    }\n};\n\n/**\n * Your Twitter object will be instantiated and called as such:\n * Twitter* obj = new Twitter();\n * obj->postTweet(userId,tweetId);\n * vector<int> param_2 = obj->getNewsFeed(userId);\n * obj->follow(followerId,followeeId);\n * obj->unfollow(followerId,followeeId);\n */",
+          "python3": "class Twitter:\n\n    def __init__(self):\n        \n\n    def postTweet(self, userId: int, tweetId: int) -> None:\n        \n\n    def getNewsFeed(self, userId: int) -> list[int]:\n        \n\n    def follow(self, followerId: int, followeeId: int) -> None:\n        \n\n    def unfollow(self, followerId: int, followeeId: int) -> None:\n        \n\n\n# Your Twitter object will be instantiated and called as such:\n# obj = Twitter()\n# obj.postTweet(userId,tweetId)\n# param_2 = obj.getNewsFeed(userId)\n# obj.follow(followerId,followeeId)\n# obj.unfollow(followerId,followeeId)",
+          "c": "\n\n\ntypedef struct {\n    \n} Twitter;\n\n\nTwitter* twitterCreate() {\n    \n}\n\nvoid twitterPostTweet(Twitter* obj, int userId, int tweetId) {\n    \n}\n\nint* twitterGetNewsFeed(Twitter* obj, int userId, int* retSize) {\n    \n}\n\nvoid twitterFollow(Twitter* obj, int followerId, int followeeId) {\n    \n}\n\nvoid twitterUnfollow(Twitter* obj, int followerId, int followeeId) {\n    \n}\n\nvoid twitterFree(Twitter* obj) {\n    \n}\n\n/**\n * Your Twitter struct will be instantiated and called as such:\n * Twitter* obj = twitterCreate();\n * twitterPostTweet(obj, userId, tweetId);\n \n * int* param_2 = twitterGetNewsFeed(obj, userId, retSize);\n \n * twitterFollow(obj, followerId, followeeId);\n \n * twitterUnfollow(obj, followerId, followeeId);\n \n * twitterFree(obj);\n*/"
+        }
+      }
+    },
+    {
+      "id": 372,
+      "slug": "super-pow",
+      "title": "超级次方",
+      "paid_only": false,
+      "judge": {
+        "question_id": "372",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"superPow\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"a\",\r\n      \"type\": \"integer\"\r\n    },\r\n    {\r\n      \"name\": \"b\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int superPow(int a, vector<int>& b) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def superPow(self, a: int, b: list[int]) -> int:\n        ",
+          "c": "int superPow(int a, int* b, int bSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 382,
+      "slug": "linked-list-random-node",
+      "title": "链表随机节点",
+      "paid_only": false,
+      "judge": {
+        "question_id": "382",
+        "difficulty": 3,
+        "metadata": "{\n  \"classname\": \"Solution\",\n  \"constructor\": {\n    \"params\": [\n      {\n        \"type\": \"ListNode\",\n        \"name\": \"head\"\n      }\n    ]\n  },\n  \"methods\": [\n    {\n      \"params\": [],\n      \"name\": \"getRandom\",\n      \"return\": {\n        \"type\": \"integer\"\n      }\n    }\n  ],\n  \"return\": {\n    \"type\": \"boolean\"\n  },\n  \"systemdesign\": true\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    Solution(ListNode* head) {\n        \n    }\n    \n    int getRandom() {\n        \n    }\n};\n\n/**\n * Your Solution object will be instantiated and called as such:\n * Solution* obj = new Solution(head);\n * int param_1 = obj->getRandom();\n */",
+          "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n\n    def __init__(self, head: ListNode | None):\n        \n\n    def getRandom(self) -> int:\n        \n\n\n# Your Solution object will be instantiated and called as such:\n# obj = Solution(head)\n# param_1 = obj.getRandom()",
+          "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\n\n\n\ntypedef struct {\n    \n} Solution;\n\n\nSolution* solutionCreate(struct ListNode* head) {\n    \n}\n\nint solutionGetRandom(Solution* obj) {\n    \n}\n\nvoid solutionFree(Solution* obj) {\n    \n}\n\n/**\n * Your Solution struct will be instantiated and called as such:\n * Solution* obj = solutionCreate(head);\n * int param_1 = solutionGetRandom(obj);\n \n * solutionFree(obj);\n*/"
+        }
+      }
+    },
+    {
+      "id": 392,
+      "slug": "is-subsequence",
+      "title": "判断子序列",
+      "paid_only": false,
+      "judge": {
+        "question_id": "392",
+        "difficulty": 1,
+        "metadata": "{ \r\n  \"name\": \"isSubsequence\",\r\n  \"params\": [\r\n    { \r\n      \"name\": \"s\",\r\n      \"type\": \"string\"\r\n    },\r\n    { \r\n      \"name\": \"t\",\r\n      \"type\": \"string\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    bool isSubsequence(string s, string t) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def isSubsequence(self, s: str, t: str) -> bool:\n        ",
+          "c": "bool isSubsequence(char* s, char* t) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 398,
+      "slug": "random-pick-index",
+      "title": "随机数索引",
+      "paid_only": false,
+      "judge": {
+        "question_id": "398",
+        "difficulty": 3,
+        "metadata": "{\r\n    \"classname\": \"Solution\",\r\n    \"constructor\": {\r\n        \"params\": [\r\n            {\r\n                \"name\": \"nums\",\r\n                \"type\": \"integer[]\"\r\n            },\r\n            {\r\n                \"type\": \"integer\",\r\n                \"name\": \"numsSize\",\r\n                \"lang\": \"c\",\r\n                \"value\": \"size_1\"\r\n            }\r\n        ]\r\n    },\r\n    \"methods\": [\r\n        {\r\n            \"name\" : \"pick\",\r\n            \"params\": [\r\n                {\r\n                  \"name\": \"target\",\r\n                  \"type\": \"integer\"\r\n                }\r\n            ],\r\n            \"return\": {\r\n                \"type\": \"integer\"\r\n            }\r\n        }\r\n    ],\r\n    \"systemdesign\": true,\r\n    \"params\": [\r\n        {\r\n            \"name\": \"inputs\",\r\n            \"type\": \"integer[]\"\r\n        },\r\n        {\r\n            \"name\": \"inputs\",\r\n            \"type\": \"integer[]\"\r\n        }\r\n    ],\r\n    \"return\": {\r\n        \"type\": \"list<String>\",\r\n        \"dealloc\": true\r\n    }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    Solution(vector<int>& nums) {\n        \n    }\n    \n    int pick(int target) {\n        \n    }\n};\n\n/**\n * Your Solution object will be instantiated and called as such:\n * Solution* obj = new Solution(nums);\n * int param_1 = obj->pick(target);\n */",
+          "python3": "class Solution:\n\n    def __init__(self, nums: list[int]):\n        \n\n    def pick(self, target: int) -> int:\n        \n\n\n# Your Solution object will be instantiated and called as such:\n# obj = Solution(nums)\n# param_1 = obj.pick(target)",
+          "c": "\n\n\ntypedef struct {\n    \n} Solution;\n\n\nSolution* solutionCreate(int* nums, int numsSize) {\n    \n}\n\nint solutionPick(Solution* obj, int target) {\n    \n}\n\nvoid solutionFree(Solution* obj) {\n    \n}\n\n/**\n * Your Solution struct will be instantiated and called as such:\n * Solution* obj = solutionCreate(nums, numsSize);\n * int param_1 = solutionPick(obj, target);\n \n * solutionFree(obj);\n*/"
+        }
+      }
+    },
+    {
+      "id": 435,
+      "slug": "non-overlapping-intervals",
+      "title": "无重叠区间",
+      "paid_only": false,
+      "judge": {
+        "question_id": "435",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"eraseOverlapIntervals\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"intervals\",\r\n      \"type\": \"integer[][]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int eraseOverlapIntervals(vector<vector<int>>& intervals) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:\n        ",
+          "c": "int eraseOverlapIntervals(int** intervals, int intervalsSize, int* intervalsColSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 450,
+      "slug": "delete-node-in-a-bst",
+      "title": "删除二叉搜索树中的节点",
+      "paid_only": false,
+      "judge": {
+        "question_id": "450",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"deleteNode\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"root\",\r\n      \"type\": \"TreeNode\",\r\n      \"dealloc\": false\r\n    },\r\n    {\r\n      \"name\": \"key\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"TreeNode\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* deleteNode(TreeNode* root, int key) {\n        \n    }\n};",
+          "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def deleteNode(self, root: Optional[TreeNode], key: int) -> Optional[TreeNode]:\n        ",
+          "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nstruct TreeNode* deleteNode(struct TreeNode* root, int key) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 452,
+      "slug": "minimum-number-of-arrows-to-burst-balloons",
+      "title": "用最少数量的箭引爆气球",
+      "paid_only": false,
+      "judge": {
+        "question_id": "452",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"findMinArrowShots\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"points\",\r\n      \"type\": \"integer[][]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int findMinArrowShots(vector<vector<int>>& points) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def findMinArrowShots(self, points: List[List[int]]) -> int:\n        ",
+          "c": "int findMinArrowShots(int** points, int pointsSize, int* pointsColSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 494,
+      "slug": "target-sum",
+      "title": "目标和",
+      "paid_only": false,
+      "judge": {
+        "question_id": "494",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"findTargetSumWays\",\n  \"params\": [\n    {\n      \"name\": \"nums\",\n      \"type\": \"integer[]\"\n    },\n    {\n      \"name\": \"target\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int findTargetSumWays(vector<int>& nums, int target) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def findTargetSumWays(self, nums: list[int], target: int) -> int:\n        ",
+          "c": "int findTargetSumWays(int* nums, int numsSize, int target) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 496,
+      "slug": "next-greater-element-i",
+      "title": "下一个更大元素 I",
+      "paid_only": false,
+      "judge": {
+        "question_id": "496",
+        "difficulty": 1,
+        "metadata": "{\r\n  \"name\": \"nextGreaterElement\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"nums1\",\r\n      \"type\": \"integer[]\"\r\n    },\r\n    {\r\n      \"name\": \"nums2\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer[]\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<int> nextGreaterElement(vector<int>& nums1, vector<int>& nums2) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def nextGreaterElement(self, nums1: list[int], nums2: list[int]) -> list[int]:\n        ",
+          "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* nextGreaterElement(int* nums1, int nums1Size, int* nums2, int nums2Size, int* returnSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 503,
+      "slug": "next-greater-element-ii",
+      "title": "下一个更大元素 II",
+      "paid_only": false,
+      "judge": {
+        "question_id": "503",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"nextGreaterElements\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"nums\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer[]\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<int> nextGreaterElements(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def nextGreaterElements(self, nums: list[int]) -> list[int]:\n        ",
+          "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* nextGreaterElements(int* nums, int numsSize, int* returnSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 516,
+      "slug": "longest-palindromic-subsequence",
+      "title": "最长回文子序列",
+      "paid_only": false,
+      "judge": {
+        "question_id": "516",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"longestPalindromeSubseq\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"s\",\r\n      \"type\": \"string\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int longestPalindromeSubseq(string s) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def longestPalindromeSubseq(self, s: str) -> int:\n        ",
+          "c": "int longestPalindromeSubseq(char* s) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 560,
+      "slug": "subarray-sum-equals-k",
+      "title": "和为 K 的子数组",
+      "paid_only": false,
+      "judge": {
+        "question_id": "560",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"subarraySum\",\n  \"params\": [\n    {\n      \"name\": \"nums\",\n      \"type\": \"integer[]\"\n    },\n    {\n      \"name\": \"k\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}\n",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int subarraySum(vector<int>& nums, int k) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def subarraySum(self, nums: List[int], k: int) -> int:\n        ",
+          "c": "int subarraySum(int* nums, int numsSize, int k) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 645,
+      "slug": "set-mismatch",
+      "title": "错误的集合",
+      "paid_only": false,
+      "judge": {
+        "question_id": "645",
+        "difficulty": 1,
+        "metadata": "{\r\n  \"name\": \"findErrorNums\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"nums\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer[]\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<int> findErrorNums(vector<int>& nums) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def findErrorNums(self, nums: list[int]) -> list[int]:\n        ",
+          "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* findErrorNums(int* nums, int numsSize, int* returnSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 651,
+      "slug": "4-keys-keyboard",
+      "title": "四键键盘",
+      "paid_only": true
+    },
+    {
+      "id": 700,
+      "slug": "search-in-a-binary-search-tree",
+      "title": "二叉搜索树中的搜索",
+      "paid_only": false,
+      "judge": {
+        "question_id": "783",
+        "difficulty": 1,
+        "metadata": "{\r\n  \"name\": \"searchBST\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"root\",\r\n      \"type\": \"TreeNode\"\r\n    },\r\n    {\r\n      \"name\": \"val\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"TreeNode\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* searchBST(TreeNode* root, int val) {\n        \n    }\n};",
+          "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def searchBST(self, root: TreeNode | None, val: int) -> TreeNode | None:\n        ",
+          "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nstruct TreeNode* searchBST(struct TreeNode* root, int val) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 701,
+      "slug": "insert-into-a-binary-search-tree",
+      "title": "二叉搜索树中的插入操作",
+      "paid_only": false,
+      "judge": {
+        "question_id": "784",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"insertIntoBST\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"root\",\r\n      \"type\": \"TreeNode\"\r\n    },\r\n    {\r\n      \"name\": \"val\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"TreeNode\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     TreeNode *left;\n *     TreeNode *right;\n *     TreeNode() : val(0), left(nullptr), right(nullptr) {}\n *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n * };\n */\nclass Solution {\npublic:\n    TreeNode* insertIntoBST(TreeNode* root, int val) {\n        \n    }\n};",
+          "python3": "# Definition for a binary tree node.\n# class TreeNode:\n#     def __init__(self, val=0, left=None, right=None):\n#         self.val = val\n#         self.left = left\n#         self.right = right\nclass Solution:\n    def insertIntoBST(self, root: TreeNode | None, val: int) -> TreeNode | None:\n        ",
+          "c": "/**\n * Definition for a binary tree node.\n * struct TreeNode {\n *     int val;\n *     struct TreeNode *left;\n *     struct TreeNode *right;\n * };\n */\nstruct TreeNode* insertIntoBST(struct TreeNode* root, int val) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 704,
+      "slug": "binary-search",
+      "title": "二分查找",
+      "paid_only": false,
+      "judge": {
+        "question_id": "792",
+        "difficulty": 1,
+        "metadata": "{\r\n  \"name\": \"search\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"nums\",\r\n      \"type\": \"integer[]\"\r\n    },\r\n    {\r\n      \"name\": \"target\",\r\n      \"type\": \"integer\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int search(vector<int>& nums, int target) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def search(self, nums: list[int], target: int) -> int:\n        ",
+          "c": "int search(int* nums, int numsSize, int target) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 733,
+      "slug": "flood-fill",
+      "title": "图像渲染",
+      "paid_only": false,
+      "judge": {
+        "question_id": "733",
+        "difficulty": 1,
+        "metadata": "{\n  \"name\": \"floodFill\",\n  \"params\": [\n    {\n      \"name\": \"image\",\n      \"type\": \"integer[][]\"\n    },\n    {\n      \"name\": \"sr\",\n      \"type\": \"integer\"\n    },\n    {\n      \"name\": \"sc\",\n      \"type\": \"integer\"\n    },\n    {\n      \"name\": \"color\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer[][]\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int color) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def floodFill(self, image: list[list[int]], sr: int, sc: int, color: int) -> list[list[int]]:\n        ",
+          "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** floodFill(int** image, int imageSize, int* imageColSize, int sr, int sc, int color, int* returnSize, int** returnColumnSizes) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 739,
+      "slug": "daily-temperatures",
+      "title": "每日温度",
+      "paid_only": false,
+      "judge": {
+        "question_id": "739",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"dailyTemperatures\",\n  \"params\": [\n    {\n      \"name\": \"temperatures\",\n      \"type\": \"integer[]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer[]\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<int> dailyTemperatures(vector<int>& temperatures) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def dailyTemperatures(self, temperatures: list[int]) -> list[int]:\n        ",
+          "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* dailyTemperatures(int* temperatures, int temperaturesSize, int* returnSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 773,
+      "slug": "sliding-puzzle",
+      "title": "滑动谜题",
+      "paid_only": false,
+      "judge": {
+        "question_id": "787",
+        "difficulty": 5,
+        "metadata": "{\r\n  \"name\": \"slidingPuzzle\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"board\",\r\n      \"type\": \"integer[][]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"integer\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int slidingPuzzle(vector<vector<int>>& board) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def slidingPuzzle(self, board: list[list[int]]) -> int:\n        ",
+          "c": "int slidingPuzzle(int** board, int boardSize, int* boardColSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 855,
+      "slug": "exam-room",
+      "title": "考场就座",
+      "paid_only": false,
+      "judge": {
+        "question_id": "885",
+        "difficulty": 3,
+        "metadata": "{\n  \"classname\": \"ExamRoom\",\n  \"maxbytesperline\": 200000,\n  \"constructor\": {\n    \"params\": [\n      {\n        \"type\": \"integer\",\n        \"name\": \"n\"\n      }\n    ]\n  },\n  \"methods\": [\n    {\n      \"name\": \"seat\",\n      \"params\": [],\n      \"return\": {\n        \"type\": \"integer\"\n      }\n    },\n    {\n      \"name\": \"leave\",\n      \"params\": [\n        {\n          \"type\": \"integer\",\n          \"name\": \"p\"\n        }\n      ],\n      \"return\": {\n        \"type\": \"void\"\n      }\n    }\n  ],\n  \"systemdesign\": true,\n  \"params\": [\n    {\n      \"name\": \"inputs\",\n      \"type\": \"integer[]\"\n    },\n    {\n      \"name\": \"inputs\",\n      \"type\": \"integer[]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"list<String>\",\n    \"dealloc\": true\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class ExamRoom {\npublic:\n    ExamRoom(int n) {\n        \n    }\n    \n    int seat() {\n        \n    }\n    \n    void leave(int p) {\n        \n    }\n};\n\n/**\n * Your ExamRoom object will be instantiated and called as such:\n * ExamRoom* obj = new ExamRoom(n);\n * int param_1 = obj->seat();\n * obj->leave(p);\n */",
+          "python3": "class ExamRoom:\n\n    def __init__(self, n: int):\n        \n\n    def seat(self) -> int:\n        \n\n    def leave(self, p: int) -> None:\n        \n\n\n# Your ExamRoom object will be instantiated and called as such:\n# obj = ExamRoom(n)\n# param_1 = obj.seat()\n# obj.leave(p)",
+          "c": "\n\n\ntypedef struct {\n    \n} ExamRoom;\n\n\nExamRoom* examRoomCreate(int n) {\n    \n}\n\nint examRoomSeat(ExamRoom* obj) {\n    \n}\n\nvoid examRoomLeave(ExamRoom* obj, int p) {\n    \n}\n\nvoid examRoomFree(ExamRoom* obj) {\n    \n}\n\n/**\n * Your ExamRoom struct will be instantiated and called as such:\n * ExamRoom* obj = examRoomCreate(n);\n * int param_1 = examRoomSeat(obj);\n \n * examRoomLeave(obj, p);\n \n * examRoomFree(obj);\n*/"
+        }
+      }
+    },
+    {
+      "id": 875,
+      "slug": "koko-eating-bananas",
+      "title": "爱吃香蕉的珂珂",
+      "paid_only": false,
+      "judge": {
+        "question_id": "907",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"minEatingSpeed\",\n  \"params\": [\n    {\n      \"name\": \"piles\",\n      \"type\": \"integer[]\"\n    },\n    {\n      \"name\": \"h\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int minEatingSpeed(vector<int>& piles, int h) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def minEatingSpeed(self, piles: list[int], h: int) -> int:\n        ",
+          "c": "int minEatingSpeed(int* piles, int pilesSize, int h) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 876,
+      "slug": "middle-of-the-linked-list",
+      "title": "链表的中间结点",
+      "paid_only": false,
+      "judge": {
+        "question_id": "908",
+        "difficulty": 1,
+        "metadata": "{\r\n  \"name\": \"middleNode\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"head\",\r\n      \"type\": \"ListNode\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"ListNode\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     ListNode *next;\n *     ListNode() : val(0), next(nullptr) {}\n *     ListNode(int x) : val(x), next(nullptr) {}\n *     ListNode(int x, ListNode *next) : val(x), next(next) {}\n * };\n */\nclass Solution {\npublic:\n    ListNode* middleNode(ListNode* head) {\n        \n    }\n};",
+          "python3": "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def middleNode(self, head: ListNode | None) -> ListNode | None:\n        ",
+          "c": "/**\n * Definition for singly-linked list.\n * struct ListNode {\n *     int val;\n *     struct ListNode *next;\n * };\n */\nstruct ListNode* middleNode(struct ListNode* head) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 877,
+      "slug": "stone-game",
+      "title": "石子游戏",
+      "paid_only": false,
+      "judge": {
+        "question_id": "909",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"stoneGame\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"piles\",\r\n      \"type\": \"integer[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    bool stoneGame(vector<int>& piles) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def stoneGame(self, piles: list[int]) -> bool:\n        ",
+          "c": "bool stoneGame(int* piles, int pilesSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 887,
+      "slug": "super-egg-drop",
+      "title": "鸡蛋掉落",
+      "paid_only": false,
+      "judge": {
+        "question_id": "923",
+        "difficulty": 5,
+        "metadata": "{\n  \"name\": \"superEggDrop\",\n  \"params\": [\n    {\n      \"name\": \"k\",\n      \"type\": \"integer\"\n    },\n    {\n      \"name\": \"n\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int superEggDrop(int k, int n) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def superEggDrop(self, k: int, n: int) -> int:\n        ",
+          "c": "int superEggDrop(int k, int n) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 969,
+      "slug": "pancake-sorting",
+      "title": "煎饼排序",
+      "paid_only": false,
+      "judge": {
+        "question_id": "1009",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"pancakeSort\",\n  \"params\": [\n    {\n      \"name\": \"arr\",\n      \"type\": \"integer[]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"list<integer>\"\n  },\n  \"manual\": false\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<int> pancakeSort(vector<int>& arr) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def pancakeSort(self, arr: List[int]) -> List[int]:\n        ",
+          "c": "/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* pancakeSort(int* arr, int arrSize, int* returnSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 986,
+      "slug": "interval-list-intersections",
+      "title": "区间列表的交集",
+      "paid_only": false,
+      "judge": {
+        "question_id": "1028",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"intervalIntersection\",\n  \"params\": [\n    {\n      \"name\": \"firstList\",\n      \"type\": \"integer[][]\"\n    },\n    {\n      \"name\": \"secondList\",\n      \"type\": \"integer[][]\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer[][]\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    vector<vector<int>> intervalIntersection(vector<vector<int>>& firstList, vector<vector<int>>& secondList) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:\n        ",
+          "c": "/**\n * Return an array of arrays of size *returnSize.\n * The sizes of the arrays are returned as *returnColumnSizes array.\n * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().\n */\nint** intervalIntersection(int** firstList, int firstListSize, int* firstListColSize, int** secondList, int secondListSize, int* secondListColSize, int* returnSize, int** returnColumnSizes) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 990,
+      "slug": "satisfiability-of-equality-equations",
+      "title": "等式方程的可满足性",
+      "paid_only": false,
+      "judge": {
+        "question_id": "1032",
+        "difficulty": 3,
+        "metadata": "{\r\n  \"name\": \"equationsPossible\",\r\n  \"params\": [\r\n    {\r\n      \"name\": \"equations\",\r\n      \"type\": \"string[]\"\r\n    }\r\n  ],\r\n  \"return\": {\r\n    \"type\": \"boolean\"\r\n  }\r\n}\r\n",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    bool equationsPossible(vector<string>& equations) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def equationsPossible(self, equations: List[str]) -> bool:\n        ",
+          "c": "bool equationsPossible(char** equations, int equationsSize) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 1011,
+      "slug": "capacity-to-ship-packages-within-d-days",
+      "title": "在 D 天内送达包裹的能力",
+      "paid_only": false,
+      "judge": {
+        "question_id": "1056",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"shipWithinDays\",\n  \"params\": [\n    {\n      \"name\": \"weights\",\n      \"type\": \"integer[]\"\n    },\n    {\n      \"name\": \"days\",\n      \"type\": \"integer\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int shipWithinDays(vector<int>& weights, int days) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def shipWithinDays(self, weights: List[int], days: int) -> int:\n        ",
+          "c": "int shipWithinDays(int* weights, int weightsSize, int days) {\n    \n}"
+        }
+      }
+    },
+    {
+      "id": 1143,
+      "slug": "longest-common-subsequence",
+      "title": "最长公共子序列",
+      "paid_only": false,
+      "judge": {
+        "question_id": "1250",
+        "difficulty": 3,
+        "metadata": "{\n  \"name\": \"longestCommonSubsequence\",\n  \"params\": [\n    {\n      \"name\": \"text1\",\n      \"type\": \"string\"\n    },\n    {\n      \"type\": \"string\",\n      \"name\": \"text2\"\n    }\n  ],\n  \"return\": {\n    \"type\": \"integer\"\n  }\n}",
+        "starter_codes": {
+          "cpp11": "class Solution {\npublic:\n    int longestCommonSubsequence(string text1, string text2) {\n        \n    }\n};",
+          "python3": "class Solution:\n    def longestCommonSubsequence(self, text1: str, text2: str) -> int:\n        ",
+          "c": "int longestCommonSubsequence(char* text1, char* text2) {\n    \n}"
+        }
+      }
+    }
+  ],
+  "source_sha256": "f890e2713f39895a1023e9a1f0e95ce7a921e46bf4407ad97139a8d9d7b82a37"
+}

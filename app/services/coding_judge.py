@@ -103,7 +103,7 @@ def _run_container(cfg, mounts, command, stdin, timeout):
     return reason, process.returncode, *(bytes(output[key]).decode('utf-8', errors='replace') for key in (1, 2))
 
 
-def evaluate(language, source, samples):
+def evaluate(language, source, samples, *, structured=False):
     """Compile C/C++ once, then run each sample in a fresh isolated container."""
     cfg = load_config()['judge']
     if language not in LANGUAGES:
@@ -141,15 +141,42 @@ def evaluate(language, source, samples):
                 [(artifacts, '/work', True), (source_file, f'/app/{filename}', True)],
                 command, sample['input'], cfg['timeout_seconds'])
             status = reason or ('System Error' if code == 125 else 'Runtime Error' if code else
-                               'Accepted' if stdout.split() == sample['output'].split() else 'Wrong Answer')
+                               'Accepted' if _matches(stdout, sample['output'], structured) else 'Wrong Answer')
             if status == 'Accepted':
                 passed += 1
             elif overall == 'Accepted':
                 overall = status
             verdicts.append(f'样例 #{index+1}：{status}' + (f'\n{stderr[:2000]}' if stderr else ''))
             test_results.append({'input': sample['input'], 'expected_output': sample['output'],
-                                 'actual_output': stdout[:cfg['output_limit_bytes']], 'status': status})
+                                 'actual_output': _actual(stdout, structured)[:cfg['output_limit_bytes']], 'status': status})
             if status == 'System Error':
                 break
         return {'status': overall, 'detail': f'通过公开样例数：{passed} / {total}\n' + '\n'.join(verdicts),
                 'passed_cases': passed, 'total_cases': total, 'cases': test_results}
+
+
+def _actual(stdout, structured):
+    return stdout.rsplit('\n__SCU_RESULT__', 1)[-1].strip() if structured else stdout
+
+
+def _matches(stdout, expected, structured):
+    if not structured:
+        return stdout.split() == expected.split()
+    if '\n__SCU_RESULT__' not in stdout:
+        return False
+    try:
+        actual, wanted = json.loads(_actual(stdout, True)), json.loads(expected)
+    except (ValueError, RecursionError):
+        return False
+    return _json_equal(actual, wanted)
+
+
+def _json_equal(actual, expected):
+    if isinstance(actual, bool) or isinstance(expected, bool):
+        return type(actual) is type(expected) and actual == expected
+    if isinstance(actual, (int, float)) and isinstance(expected, (int, float)):
+        import math
+        return math.isclose(actual, expected, rel_tol=1e-6, abs_tol=1e-6)
+    if isinstance(actual, list) and isinstance(expected, list):
+        return len(actual) == len(expected) and all(_json_equal(a, b) for a, b in zip(actual, expected))
+    return type(actual) is type(expected) and actual == expected

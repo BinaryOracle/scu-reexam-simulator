@@ -18,7 +18,7 @@
     }
   });
   chrome.runtime.onMessage.addListener(message => {
-    if (message?.type !== "SCU_LUOGU_STATUS") return;
+    if (!["SCU_LUOGU_STATUS", "SCU_REMOTE_STATUS"].includes(message?.type)) return;
     window.dispatchEvent(new CustomEvent("scu-luogu-status", { detail: message.payload }));
   });
 })();

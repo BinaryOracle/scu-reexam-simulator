@@ -7,16 +7,16 @@
     <title>知序 · 复试模拟系统</title>
     <link rel="icon" href="/static/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=0.19.1" />
-    <link rel="stylesheet" href="/static/style.css?v=20261117-accounts-v1" />
-    <link rel="stylesheet" href="/static/workspace.css?v=20261115-workspace-v8" />
+    <link rel="stylesheet" href="/static/style.css?v=20261121-empty-state-v1" />
+    <link rel="stylesheet" href="/static/workspace.css?v=20261121-header-grid-v13" />
     <link rel="stylesheet" href="/static/contest-focus.css?v=20261115-contest-records-v2" />
     <link rel="stylesheet" href="/static/live.css?v=20261118-course-v9" />
-    <link rel="stylesheet" href="/static/course-learning.css?v=20261118-course-v23" />
-    <link rel="stylesheet" href="/static/coding.css?v=20261117-filters-v1" />
+    <link rel="stylesheet" href="/static/course-learning.css?v=20261121-pdf-lessons-v1" />
+    <link rel="stylesheet" href="/static/coding.css?v=20261121-local-cases-v2" />
     <link rel="stylesheet" href="/static/home-layout.css?v=20261115-layout-v1" />
-    <link rel="stylesheet" href="/static/training.css?v=20261118-empty-error-hidden-v1" />
+    <link rel="stylesheet" href="/static/training.css?v=20261121-empty-state-v2" />
     <link rel="stylesheet" href="/static/leaderboard.css?v=20261117-weekly-leaderboard-v3" />
-    <link rel="stylesheet" href="/static/credits.css?v=20261117-points-v1" />
+    <link rel="stylesheet" href="/static/credits.css?v=20261121-points-history-scroll-v1" />
     <link rel="stylesheet" href="/static/select-controls.css?v=20261116-v2" />
     <script>
       try {
@@ -25,6 +25,7 @@
         // The app will show login if session storage is unavailable.
       }
     </script>
+    <link rel="stylesheet" href="/static/question-markdown.css?v=20261121-v1" />
   </head>
   <body>
     <a class="skip-link" href="#mainContent">跳至主要内容</a>
@@ -384,7 +385,7 @@
               <div><div class="eyebrow">PLATFORM SETTINGS</div><h1 id="systemSettingsTitle">系统设置<span class="heading-dot">.</span></h1><p class="muted">管理平台连接地址与各 AI 服务模型。API Key 加密保存且不会回显。</p></div>
             </div>
             <form id="luoguSettingsForm" class="panel luogu-origin-settings">
-              <div><span class="eyebrow">LUOGU BRIDGE</span><h2>洛谷插件网站来源</h2><p class="muted">新下载的插件会自动连接此网站，无需用户在扩展设置中填写地址。</p></div>
+              <div><span class="eyebrow">JUDGE BRIDGE</span><h2>评测插件网站来源</h2><p class="muted">新下载的插件会自动连接此网站，无需用户在扩展设置中填写地址。</p></div>
               <label for="luoguAppOrigin">知序网站来源</label>
               <input id="luoguAppOrigin" type="url" maxlength="300" placeholder="http://127.0.0.1:8000/" required />
               <p class="field-hint">默认地址为 http://127.0.0.1:8000/。正式部署请填写 HTTPS 网站的来源地址，不包含路径。修改后需要重新下载并加载插件。</p>
@@ -597,7 +598,7 @@
                   ><span class="muted">设置名称与起止时间</span>
                 </summary>
                 <form id="contestForm" class="form-grid">
-                  <div class="full-width contest-question-fields">
+                  <div class="full-width">
                     <label for="contestTitle">比赛名称</label
                     ><input
                       id="contestTitle"
@@ -622,15 +623,20 @@
                     <label class="contest-ranking-toggle" for="showRanking"><input id="showRanking" type="checkbox" checked /> <span>向参赛者展示排名</span></label>
                   </div>
                   <div class="full-width" id="contestParticipants"></div>
-                  <div class="full-width">
-                    <label for="luoguProblemSearch">选择洛谷题目</label>
-                    <div class="luogu-question-search">
-                      <input id="luoguProblemSearch" type="search" placeholder="输入题号或题目关键词，例如 1、P1000" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="luoguProblemSuggestions" />
-                      <div id="luoguProblemSuggestions" class="luogu-suggestions" role="listbox" hidden></div>
+                  <div class="full-width contest-question-fields">
+                    <div class="contest-problem-picker">
+                      <div><label for="contestProblemPlatform">题目来源平台</label><select id="contestProblemPlatform"></select></div>
+                      <div>
+                        <label for="contestProblemSearch">搜索平台题目</label>
+                        <div class="contest-question-search">
+                          <input id="contestProblemSearch" type="search" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="contestProblemSuggestions" />
+                          <div id="contestProblemSuggestions" class="luogu-suggestions" role="listbox" hidden></div>
+                        </div>
+                      </div>
                     </div>
-                    <small id="luoguProblemHelp" class="field-help">选择候选题目后自动获取题面与全部公开样例，可添加多道题。</small>
+                    <small id="contestProblemHelp" class="field-help">选择候选题目后自动获取题面、样例和代码模板；每道题按其来源平台提交评测。</small>
                   </div>
-                  <div id="selectedLuoguProblems" class="full-width selected-luogu-problems contest-question-fields" aria-live="polite"></div>
+                  <div id="selectedContestProblems" class="full-width selected-luogu-problems contest-question-fields" aria-live="polite"></div>
                   <div class="form-footer full-width">
                     <span class="muted" id="contestFormHelp">题目和比赛信息将一并保存；至少选择一道题。</span>
                     <div class="form-footer-actions">
@@ -660,16 +666,16 @@
           </section>
 
           <dialog id="luoguTutorial" class="account-dialog luogu-tutorial" aria-labelledby="luoguTutorialTitle">
-            <div class="dialog-header"><div><span class="eyebrow">LUOGU BRIDGE</span><h2 id="luoguTutorialTitle">连接洛谷提交插件</h2></div><button type="button" class="icon-button dialog-close" aria-label="关闭教程">×</button></div>
+            <div class="dialog-header"><div><span class="eyebrow">JUDGE BRIDGE</span><h2 id="luoguTutorialTitle">连接评测提交插件</h2></div><button type="button" class="icon-button dialog-close" aria-label="关闭教程">×</button></div>
             <div class="dialog-body">
               <ol>
                 <li>先下载插件 ZIP 并解压到一个固定目录，之后不要移动或删除该目录。</li>
                 <li>在 Chrome 或 Edge 打开扩展程序管理页，开启开发者模式，选择“加载已解压的扩展程序”，选中解压出的 <code>browser-extension</code> 文件夹。</li>
                 <li>无需填写知序网站来源；插件包已由管理员统一配置本站地址，并会自动连接知序页面。</li>
-                <li>刷新知序页面；在同一浏览器新开洛谷并登录，保持洛谷标签页打开。</li>
-                <li>打开比赛题目工作区，点击“检测洛谷登录状态”。显示已连接后再开始答题。</li>
+                <li>刷新知序页面，在同一浏览器登录当前题目对应的平台：洛谷或力扣中国区（leetcode.cn）。LeetCode 题目搜索、导入和提交都使用中国区站点；保持该站点标签页打开。</li>
+                <li>在题目工作区检测平台登录状态；连接成功后即可提交。</li>
               </ol>
-              <p class="field-hint">代码和验证码答案仅由你的浏览器发往洛谷；本站不读取或保存洛谷密码、Cookie。若洛谷要求验证码，会在知序页面显示输入窗。</p>
+              <p class="field-hint">插件在当前浏览器内提交代码，知序服务器不会收到平台密码或登录 Cookie。若平台要求安全验证，请按页面提示完成。</p>
               <a id="downloadLuoguExtension" class="button primary" href="/api/luogu-extension" download>下载浏览器插件</a>
             </div>
           </dialog>
@@ -901,6 +907,6 @@
       </form>
     </dialog>
     <dialog id="announcementDialog" class="account-dialog announcement-dialog" aria-labelledby="announcementDialogTitle"><div class="dialog-header"><div><span class="eyebrow">公告</span><h2 id="announcementDialogTitle">公告详情</h2></div><button id="closeAnnouncementDialog" type="button" class="icon-button" aria-label="关闭公告">×</button></div><div id="announcementDialogContent" class="dialog-body announcement-dialog-content"></div></dialog>
-    <script type="module" src="/static/app.js?v=20261118-course-v13"></script>
+    <script type="module" src="/static/app.js?v=20261121-workspace-controls-v7"></script>
   </body>
 </html>

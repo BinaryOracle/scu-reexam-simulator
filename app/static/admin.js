@@ -633,7 +633,7 @@ export function setupAdmin() {
       status.textContent = '设置已保存。请重新下载插件 ZIP，并在浏览器扩展管理页重新加载插件。';
       status.hidden = false;
       status.classList.remove('form-error');
-      notify('洛谷插件网站来源已更新。');
+      notify('评测插件网站来源已更新。');
     }).catch(error => {
       status.textContent = error.status === 422
         ? '请输入仅包含协议、域名和端口的地址，不要填写路径或参数。正式网站须使用 HTTPS。'

@@ -36,6 +36,16 @@
   .coding-toolbar input { grid-column: 1 / -1; }
 }
 .coding-question-list { padding: 0 22px; overflow: hidden; }
+/* The list panel already owns the card frame; keep its empty state as a quiet inner surface. */
+.coding-question-list > .empty-state {
+  min-height: 250px;
+  margin: 0 -22px;
+  padding: 64px 24px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
 .coding-pagination { flex-wrap: wrap; gap: 12px 20px; margin: 28px 0 12px; }
 .coding-pagination > span { white-space: nowrap; font-variant-numeric: tabular-nums; }
 .coding-list-heading { display: flex; justify-content: space-between; gap: 12px; padding: 18px 0; font-size: 13px; border-bottom: 1px solid var(--line); }
@@ -113,7 +123,7 @@
 .coding-run-case summary { cursor: pointer; color: #a33f30; font-size: 12px; font-weight: 700; }
 .coding-run-case summary.accepted { color: #2f7950; }
 .coding-run-output { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 10px; align-items: start; margin-top: 8px; color: var(--muted); font-size: 11px; }
-.coding-run-output pre { max-height: 100px; margin: 0; padding: 7px 9px; overflow: auto; border-radius: 5px; background: #f6f6f7; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.coding-run-output pre { box-sizing: border-box; width: 100%; min-width: 0; max-width: 100%; min-height: 72px; max-height: min(45vh, 360px); margin: 0; padding: 7px 9px; overflow: auto; resize: both; border-radius: 5px; background: #f6f6f7; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
 .coding-discussion { margin-top: 22px; padding: 24px 26px; }
 .coding-statement-discussion { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; margin: 0; padding: 15px 18px 22px; border: 0; border-radius: 0; background: transparent; }
 .coding-statement-discussion .coding-discussion-heading { gap: 10px; margin-bottom: 12px; padding-bottom: 10px; }
@@ -173,6 +183,8 @@
 .coding-reference { margin-top: 24px; padding: 13px 0; border-top: 1px solid var(--line); }
 .coding-reference summary { cursor: pointer; color: #935237; font-size: 12px; }
 .coding-reference pre, .coding-source-code { max-height: 500px; overflow: auto; padding: 15px; background: #f6f0e7; border-radius: 7px; font-size: 12px; }
+.coding-book-code { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 7px; background: #fffdfa; }
+.coding-book-code summary { color: #706053; font-weight: 650; }
 .coding-record { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 56px; padding: 12px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; color: var(--ink); text-align: left; font: inherit; font-size: 13px; cursor: pointer; transition: background .15s; }
 .coding-record:hover { background: #f6f0e7; }
 .coding-record:focus-visible { outline: 2px solid var(--accent, #a34334); outline-offset: -2px; border-radius: 6px; }
@@ -259,6 +271,7 @@
   .coding-stage { padding: 15px; }
   .coding-stage p { font-size: 11px; }
   .coding-question-list { padding: 0 15px; }
+  .coding-question-list > .empty-state { min-height: 220px; margin: 0 -15px; padding: 54px 18px; }
   .coding-question-row { grid-template-columns: 27px minmax(0, 1fr) auto; gap: 10px; padding: 15px 0; }
   .coding-question-row > .coding-actions { grid-column: 2 / -1; justify-content: flex-end; }
   .coding-question-row .coding-stars { font-size: 10px; }
@@ -285,3 +298,15 @@
   .coding-settings { padding: 20px; }
 }
 @media (prefers-reduced-motion: reduce) { .coding-stage { transition: none; } }
+
+.coding-title-search { position: relative; gap: 6px; min-width: 0; }
+.coding-title-anchor { position: relative; min-width: 0; }
+.coding-title-anchor > .coding-field { margin: 0; }
+.coding-title-status { display: block; line-height: 1.6; overflow-wrap: anywhere; }
+.coding-title-search .luogu-suggestion-option:focus-visible { outline: 2px solid var(--accent, #a86432); outline-offset: -2px; background: #f5eee5; }
+
+.coding-case-format { margin: 0 0 12px; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.coding-workspace-toolbar > .workspace-layout-reset { flex: none; min-height: 32px; font-size: 12px; }
+
+.coding-case-format > summary { cursor: pointer; color: #80654f; }
+.coding-case-format > p { margin: 8px 0 0; }

@@ -17,6 +17,14 @@ export function createCodeDrafts(getStorage) {
         return "";
       }
     },
+    has(key) {
+      if (memory.has(key)) return true;
+      try {
+        return getStorage().getItem(key) !== null;
+      } catch {
+        return false;
+      }
+    },
     write(key, value) {
       try {
         getStorage().setItem(key, value);

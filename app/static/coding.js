@@ -1,20 +1,23 @@
+import { testCaseFormat } from "./test-case-formats.mjs?v=20261121-local-cases-v1";
 import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, el, button, badge, emptyState, notify, confirmAction, statusBadge, renderPagination } from "./ui.js?v=20261114-ui-v17";
 import { appendProblemStatement } from "./problem-content.js?v=20261115-resource-limits-v1";
 import { writeAppRoute } from "./view-route.mjs?v=20261115-navigation-v3";
-import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261115-drafts-v3";
-import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261115-workspace-v5";
-import { editCodingQuestion, codingDialog } from "./coding-form.mjs?v=20261115-coding-v1";
+import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261121-drafts-v7";
+import { hasCodeDraft } from "./draft-compat.mjs?v=20261121-cache-compat-v2";
+import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261121-workspace-v7";
+import { editCodingQuestion, codingDialog } from "./coding-form.mjs?v=20261121-reference-markdown-v1";
+import { judgePlatform, judgeSubmitPayload } from "./judge-platforms.mjs?v=20261121-china-judge-v2";
 import { codingQuestionId, filterCodingQuestions, codingDraftKey, acceptsCodingStatus } from "./coding-model.mjs?v=20261115-coding-v1";
-import { renderSubmissionDetails } from "./submission-details.mjs?v=20261116-submissions-v1";
+import { renderSubmissionDetails } from "./submission-details.mjs?v=20261121-judge-platforms-v2";
 import { mountLeaderboard } from "./leaderboard.js?v=20261117-weekly-leaderboard-v3";
 
 let revision = 0;
-let requestLuoguSubmit;
+let requestRemoteSubmit;
 
 /** Share one bridge instance even when contest assets receive a new cache version. */
 export function configureCodingBridge(submit) {
-  requestLuoguSubmit = submit;
+  requestRemoteSubmit = submit;
 }
 let listRevision = 0;
 let recordsRevision = 0;
@@ -179,7 +182,7 @@ async function loadQuestions(request, userId) {
         : mode === "failed" ? ["没有待复盘的题目", "完成评测但尚未通过的题目会显示在这里。"]
         : ["这里还没有题目", "试试其他阶段或筛选条件，也可以添加自己的题目。"];
       if (!filtered.length) target.append(emptyState(...emptyCopy));
-      for (const item of filtered.slice(start, start + 15)) target.append(questionRow(item));
+      filtered.slice(start, start + 15).forEach((item, index) => target.append(questionRow(item, start + index + 1)));
       renderPagination($("codingPagination"), page, filtered.length, 15, value => { page = value; render(); });
     };
     page = Math.min(page, Math.max(1, Math.ceil(filtered.length / 15))); render();
@@ -187,12 +190,12 @@ async function loadQuestions(request, userId) {
     if (active(request, userId) && turn === listRevision && target.isConnected) target.replaceChildren(emptyState("题单加载失败", error.message), button("重试", refreshList));
   } finally { if (turn === listRevision) target.removeAttribute("aria-busy"); }
 }
-function questionRow(question) {
+function questionRow(question, ordinal) {
   const row = el("div", "", "coding-question-row");
-  const mark = el("span", question.solved ? "✓" : String(question.position + 1).padStart(2, "0"), `coding-solve-mark ${question.solved ? "solved" : ""}`);
+  const mark = el("span", question.solved ? "✓" : String(ordinal).padStart(2, "0"), `coding-solve-mark ${question.solved ? "solved" : ""}`);
   const main = el("div", "", "coding-question-main");
   main.append(home.can_coding ? button(question.title, () => openQuestion(question.id), "coding-question-title") : el("strong", question.title));
-  const tags = el("div", "", "coding-question-tags"); tags.append(el("span", question.topic), el("span", `难度 ${question.difficulty}/5`), el("span", question.judge_mode === "luogu" ? "洛谷评测" : "公开样例练习"));
+  const tags = el("div", "", "coding-question-tags"); tags.append(el("span", question.topic), el("span", `难度 ${question.difficulty}/5`), el("span", question.judge_mode === "luogu" ? `${judgePlatform(question.remote_platform)?.label || "在线"}评测` : "公开样例练习"));
   if (mode === "mine") tags.append(badge(reviewLabels[question.review_status] || question.review_status, question.review_status === "approved" ? "green" : "gray"));
   main.append(tags);
   if (question.review_reason && mode === "mine") main.append(el("p", `审核意见：${question.review_reason}`, "coding-review-reason"));
@@ -227,7 +230,9 @@ async function editQuestion(question) {
   const owner = state.user.id; const current = revision;
   const complete = question ? await api(`/coding/questions/${question.id}`) : {};
   if (!active(current, owner)) return;
-  editCodingQuestion({ question: complete, stages: home.stages, save: async data => {
+  editCodingQuestion({ question: complete, stages: home.stages,
+    importProblem: (platform, identifier) => api(`/coding/import/${platform}`, { method: "POST", body: JSON.stringify({ identifier }) }),
+    save: async data => {
     await api(question ? `/coding/questions/${question.id}` : "/coding/questions", { method: question ? "PATCH" : "POST", body: JSON.stringify(data) });
     if (active(current, owner)) { notify("题目已保存。"); await refreshList(); }
   } });
@@ -240,7 +245,8 @@ function splitter(className, label, orientation) {
 function renderWorkspace(question, request, userId) {
   const root = $("codingContent"); const workspace = el("div", "", "coding-workspace problem-workspace");
   const navigation = el("div", "", "coding-workspace-toolbar");
-  navigation.append(button("← 返回题单", goHome, "button secondary workspace-back"), el("strong", question.title, "coding-workspace-title"));
+  const reset = button("恢复布局", () => {}, "workspace-layout-reset"); reset.title = "恢复默认分栏比例";
+  navigation.append(button("← 返回题单", goHome, "button secondary workspace-back"), el("strong", question.title, "coding-workspace-title"), reset);
   const favorite = button(question.favorited ? "★ 已收藏" : "☆ 收藏", async () => {
     const favorited = !question.favorited;
     await api(`/coding/questions/${question.id}/favorite`, { method: favorited ? "PUT" : "DELETE" });
@@ -303,7 +309,7 @@ function renderWorkspace(question, request, userId) {
   else if (sourceInfo) {
     for (const source of sourceInfo.occurrences || []) content.append(el("p", `${source.file} · 第 ${source.page} 页${source.section ? ` · ${source.section}` : ""}`, "coding-source-info"));
     if (sourceInfo.pdf_reference_code) {
-      const pdf = el("details", "", "coding-reference"); pdf.append(el("summary", "查看 PDF 原始代码摘录"));
+      const pdf = el("details", "", "coding-reference coding-book-code"); pdf.append(el("summary", "书中原代码 · PDF 摘录"));
       pdf.addEventListener("toggle", () => {
         if (!pdf.open || pdf.querySelector("pre")) return;
         pdf.append(el("p", "PDF 原文摘录，可能缺少上下文或完整输入输出，未经执行验证。", "muted"), el("pre", sourceInfo.pdf_reference_code));
@@ -312,10 +318,12 @@ function renderWorkspace(question, request, userId) {
   }
   if (question.content_notice) content.append(el("p", question.content_notice, "sample-unavailable"));
   if (question.reference_code) {
-    const reference = el("details", "", "coding-reference"); reference.append(el("summary", "查看参考代码（建议独立完成后再看）"));
+    const reference = el("details", "", "coding-reference coding-book-code"); reference.append(el("summary", "书中原代码 · 建议完成后再查看"));
     reference.addEventListener("toggle", () => {
-      if (!reference.open || reference.querySelector("pre")) return;
-      reference.append(el("p", sourceInfo?.reference_note || "来源参考代码可能是算法片段；提交评测前请补齐输入输出和完整程序。", "muted"), el("pre", question.reference_code));
+      if (!reference.open || reference.querySelector(".markdown-content, pre")) return;
+      reference.append(el("p", sourceInfo?.reference_note || "来源参考代码可能是算法片段；提交评测前请补齐输入输出和完整程序。", "muted"));
+      if (question.reference_code_html) appendProblemStatement(reference, question.reference_code_html);
+      else reference.append(el("pre", question.reference_code));
     }); content.append(reference);
   }
   const discussion = renderDiscussion(question, request, userId);
@@ -328,24 +336,27 @@ function renderWorkspace(question, request, userId) {
   const editor = el("section", "", "panel editor-panel"); const editorHead = el("div", "", "editor-heading");
   const language = select("编程语言", languages, "cpp11", () => {}); language.className = "language-select"; const editorControl = paneControl();
   const closeEditor = closePaneControl("代码区"); closeControls.editor = closeEditor;
-  const reset = button("恢复布局", () => {}, "workspace-layout-reset"); reset.title = "恢复默认分栏比例";
-  const judgeBadge = badge(question.judge_mode === "luogu" ? "洛谷评测" : "本地运行", "blue");
-  judgeBadge.title = question.judge_mode === "luogu" ? "不限时练习 · 运行使用自定义用例，提交通过浏览器插件发送至洛谷" : "不限时练习 · 使用本地测试用例运行，不提供远程提交";
+  const platform = question.judge_mode === "luogu" ? judgePlatform(question.remote_platform) : null;
+  const platformLabel = platform?.label || "在线";
+  const caseFormat = testCaseFormat(question.judge_mode === "luogu" ? question.remote_platform : "samples", question.source_info?.leetcode_metadata);
+  const judgeBadge = badge(question.judge_mode === "luogu" ? `${platformLabel} 评测` : "本地运行", "blue");
+  judgeBadge.title = question.judge_mode === "luogu" ? `不限时练习 · 运行使用自定义用例，提交通过浏览器插件发送至${platformLabel}` : "不限时练习 · 使用本地测试用例运行，不提供远程提交";
   editorHead.append(el("h4", "代码工作区"));
   if (!home.judge.available) {
     const judgeWarning = el("span", question.judge_mode === "luogu"
-      ? "本地运行暂不可用，仍可通过插件提交至洛谷。"
+      ? `本地运行暂不可用，仍可通过插件提交至${platformLabel}。`
       : "本地运行暂不可用，请稍后再试或联系管理员。", "coding-form-error");
     judgeWarning.title = judgeWarning.textContent;
     editorHead.append(judgeWarning);
   }
   const editorActions = el("div", "", "workspace-pane-actions"); editorActions.append(editorControl, closeEditor);
-  const headingTools = el("div", "", "editor-heading-tools"); headingTools.append(language, reset, editorActions);
+  const headingTools = el("div", "", "editor-heading-tools"); headingTools.append(language, editorActions);
   editorHead.append(headingTools);
   const area = el("div", "", "code-area"); const numbers = el("pre", "", "line-numbers"); numbers.setAttribute("aria-hidden", "true");
-  const input = el("textarea", "", "code-editor mono"); input.spellcheck = false; input.autocapitalize = "off"; input.wrap = "off"; input.maxLength = 30000; input.setAttribute("aria-label", "练习代码"); input.placeholder = "// 从标准输入读取，向标准输出输出\n// 按自己的节奏完成这道题";
+  const input = el("textarea", "", "code-editor mono"); input.spellcheck = false; input.autocapitalize = "off"; input.wrap = "off"; input.maxLength = 30000; input.setAttribute("aria-label", "练习代码"); input.placeholder = "// 按自己的节奏完成这道题";
   const saved = el("span", "草稿自动保存在此浏览器", "muted"); let previous = language.value;
-  input.value = drafts.read(codingDraftKey(userId, question.id, previous));
+  const draftKey = codingDraftKey(userId, question.id, previous);
+  input.value = hasCodeDraft(drafts, draftKey, () => window.localStorage) ? drafts.read(draftKey) : question.starter_codes?.[previous] || "";
   function update() { numbers.textContent = input.value.split("\n").map((_, index) => index + 1).join("\n"); }
   function save(lang) { saved.textContent = drafts.write(codingDraftKey(userId, question.id, lang), input.value) ? "草稿已保存至此浏览器" : "草稿暂存在当前页面，请自行保存代码"; }
   input.addEventListener("input", () => { save(language.value); update(); });
@@ -354,7 +365,12 @@ function renderWorkspace(question, request, userId) {
     if (saveDraftOnShortcut(event, () => save(language.value))) return;
     if (event.key === "Tab" && !event.shiftKey) { event.preventDefault(); input.setRangeText("    ", input.selectionStart, input.selectionEnd, "end"); input.dispatchEvent(new Event("input")); }
   });
-  language.addEventListener("change", () => { save(previous); previous = language.value; input.value = drafts.read(codingDraftKey(userId, question.id, previous)); update(); }); update(); area.append(numbers, input);
+  language.addEventListener("change", () => {
+    save(previous); previous = language.value;
+    const nextKey = codingDraftKey(userId, question.id, previous);
+    input.value = hasCodeDraft(drafts, nextKey, () => window.localStorage) ? drafts.read(nextKey) : question.starter_codes?.[previous] || "";
+    update();
+  }); update(); area.append(numbers, input);
   const footer = el("div", "", "editor-footer");
   const run = button("运行测试用例", async () => {
     if (!input.value.trim()) { runResult.replaceChildren(el("span", "请先输入代码，再运行。", "coding-form-error")); activateResults(); return; }
@@ -372,7 +388,7 @@ function renderWorkspace(question, request, userId) {
   }, "button secondary coding-run-button");
   const runResult = el("div", "", "submission-result coding-run-result"); runResult.setAttribute("role", "status"); runResult.setAttribute("aria-live", "polite");
   let activateResults = () => {};
-  const submit = button("提交洛谷评测 →", async () => {
+  const submit = button(`提交 ${platformLabel} 评测 →`, async () => {
     if (!input.value.trim()) { notify("请先输入代码，再提交评测。", "error"); return; }
     const source = input.value; const lang = language.value;
     let remotePayload = null; let submissionId = null;
@@ -381,9 +397,10 @@ function renderWorkspace(question, request, userId) {
       if (state.user?.id !== userId) return;
       submissionId = response.id;
       if (response.judge_mode === "luogu") {
-        pending.set(response.id, { userId, questionId: question.id, remoteProblemId: response.remote_problem_id });
+        pending.set(response.id, { userId, questionId: question.id, remoteProblemId: response.remote_problem_id, platform: response.remote_platform });
         try {
-          remotePayload = await requestLuoguSubmit({ context: "coding", submission_id: response.id, problem_id: response.remote_problem_id, source, language: lang });
+          remotePayload = await requestRemoteSubmit(judgeSubmitPayload(response, "coding", lang, source));
+          if (!remotePayload?.remote_submission_id || !remotePayload.status) throw new Error(`${platformLabel}未返回提交编号，请先检查平台提交记录。`);
         } catch (error) {
           if (state.user?.id !== userId) return;
           const current = await api(`/coding/submissions/${response.id}`);
@@ -394,8 +411,8 @@ function renderWorkspace(question, request, userId) {
           throw error;
         }
         if (state.user?.id !== userId) return;
-        if (!remotePayload?.remote_submission_id || !remotePayload.status) throw new Error("洛谷未返回提交编号，请先检查洛谷提交记录。");
         remotePayload.remote_problem_id = response.remote_problem_id;
+        remotePayload.platform = response.remote_platform;
         response = await saveRemote(response.id, remotePayload);
       }
       if (!active(request, userId)) return;
@@ -419,7 +436,9 @@ function renderWorkspace(question, request, userId) {
   if (!home.judge.available) run.disabled = true;
   const submitTools = el("div", "", "coding-submit-tools"); submitTools.append(judgeBadge);
   if (question.judge_mode === "luogu") submitTools.append(button("插件教程", () => $("luoguTutorial")?.showModal(), "text-button coding-tutorial-button"));
-  footer.append(submitTools, saved, run, submit); editor.append(editorHead, area, footer);
+  footer.append(submitTools, saved);
+  footer.append(run);
+  footer.append(submit); editor.append(editorHead, area, footer);
   const panels = el("section", "", "editor-bottom-panel"); const tabs = el("div", "", "workspace-panel-heading auxiliary-panel-heading"); const tabsInner = el("div", "", "editor-bottom-tabs"); const panelControl = paneControl();
   const casePanel = el("div", "", "editor-bottom-content coding-test-case-panel");
   const caseKey = `scu:${userId}:coding-cases:${question.id}`;
@@ -458,22 +477,25 @@ function renderWorkspace(question, request, userId) {
     addCase.disabled = testCases.length >= 50;
     addCase.title = "添加测试用例"; addCase.setAttribute("aria-label", "添加测试用例"); caseTabs.append(addCase);
     const current = testCases[selectedCase];
-    const inputField = el("textarea", current.input, "coding-test-case-value mono"); inputField.maxLength = 100000; inputField.setAttribute("aria-label", `测试用例 ${selectedCase + 1} 输入`); inputField.placeholder = "输入测试数据";
-    const outputField = el("textarea", current.output, "coding-test-case-value mono"); outputField.maxLength = 100000; outputField.setAttribute("aria-label", `测试用例 ${selectedCase + 1} 期望输出`); outputField.placeholder = "输入期望输出";
+    const inputField = el("textarea", current.input, "coding-test-case-value mono"); inputField.maxLength = 100000; inputField.setAttribute("aria-label", `测试用例 ${selectedCase + 1} 输入`); inputField.placeholder = caseFormat.input;
+    const outputField = el("textarea", current.output, "coding-test-case-value mono"); outputField.maxLength = 100000; outputField.setAttribute("aria-label", `测试用例 ${selectedCase + 1} 期望输出`); outputField.placeholder = caseFormat.output;
     inputField.addEventListener("input", () => { current.input = inputField.value; saveCases(); });
     outputField.addEventListener("input", () => { current.output = outputField.value; saveCases(); });
     const inputGroup = el("label", "", "coding-test-case-group"); inputGroup.append(el("span", "输入", "coding-test-case-label"), inputField);
     const outputGroup = el("label", "", "coding-test-case-group"); outputGroup.append(el("span", "期望输出", "coding-test-case-label"), outputField);
     caseFields.replaceChildren(inputGroup, outputGroup);
   };
-  renderCaseEditor(); casePanel.append(caseTabs, caseFields);
+  const formatHelp = el("details", "", "muted coding-case-format");
+  formatHelp.append(el("summary", `${caseFormat.label} · 格式说明`), el("p", caseFormat.hint));
+  renderCaseEditor(); casePanel.append(formatHelp, caseTabs, caseFields);
   const results = el("div", "", "editor-bottom-content coding-test-results"); results.hidden = true; results.append(runResult);
   const tabButtons = [];
   const selectBottomPanel = pane => {
     casePanel.hidden = pane !== casePanel; results.hidden = pane !== results;
     tabButtons.forEach(([control, target]) => { control.classList.toggle("selected", pane === target); control.setAttribute("aria-pressed", String(pane === target)); });
   };
-  for (const [label, pane] of [["测试用例", casePanel], ["运行结果", results]]) {
+  const bottomPanes = [["测试用例", casePanel], ["运行结果", results]];
+  for (const [label, pane] of bottomPanes) {
     const control = button(label, () => selectBottomPanel(pane), `editor-bottom-tab${pane === casePanel ? " selected" : ""}`);
     control.setAttribute("aria-pressed", String(pane === casePanel)); tabButtons.push([control,pane]); tabsInner.append(control);
   }
@@ -607,7 +629,7 @@ async function loadRecords(id, request, userId) {
     target.replaceChildren(button("刷新提交记录", () => loadRecords(id, request, userId), "text-button"));
     if (!result.items.length) target.append(el("p", "完成代码后提交，评测记录会出现在这里。", "muted"));
     for (const record of result.items) {
-      if (record.judge_mode === "luogu" && !terminal.has(record.status)) pending.set(record.id, { userId, questionId: id, remoteProblemId: record.remote_problem_id });
+      if (record.judge_mode === "luogu" && !terminal.has(record.status)) pending.set(record.id, { userId, questionId: id, remoteProblemId: record.remote_problem_id, platform: record.remote_platform });
       const row = button("", async () => {
         const { dialog, body } = codingDialog(`提交 #${record.id}`);
         dialog.classList.add("coding-submission-dialog"); body.replaceChildren(el("p", "正在加载提交详情…", "muted"));
@@ -639,6 +661,7 @@ async function saveRemote(id, payload) {
   const body = {
     remote_submission_id: String(payload.remote_submission_id || ""),
     remote_problem_id: payload.remote_problem_id || payload.problem_id || pending.get(id)?.remoteProblemId || "",
+    platform: payload.platform || pending.get(id)?.platform || "luogu",
     status: payload.status, detail: payload.detail || "",
   };
   try { return await api(`/coding/submissions/${id}/remote-result`, { method: "POST", body: JSON.stringify(body) }); }
@@ -657,8 +680,8 @@ window.addEventListener("scu-luogu-status", event => {
   const sameSession = () => state.user?.id === userId && state.token === token;
   void (async () => {
     const owned = await api(`/coding/submissions/${data.submission_id}`);
-    if (!sameSession() || owned.user_id !== userId || owned.judge_mode !== "luogu") return;
-    pending.set(data.submission_id, { userId, questionId: owned.question_id, remoteProblemId: owned.remote_problem_id });
+    if (!sameSession() || owned.user_id !== userId || owned.judge_mode !== "luogu" || owned.remote_platform !== (data.platform || "luogu")) return;
+    pending.set(data.submission_id, { userId, questionId: owned.question_id, remoteProblemId: owned.remote_problem_id, platform: owned.remote_platform });
     const saved = await saveRemote(data.submission_id, data);
     if (!sameSession()) return;
     if (terminal.has(saved.status)) pending.delete(data.submission_id);

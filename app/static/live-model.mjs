@@ -1,5 +1,10 @@
 /** Parse only supported classroom routes with safe database identifiers. */
 export function liveRoute(hash) {
+  const markdown = /^#view=live\/markdown\/([1-9]\d*)\/(new|[1-9]\d*)$/.exec(hash || '');
+  if (markdown) {
+    const id=Number(markdown[1]),assetId=markdown[2]==='new'?null:Number(markdown[2]);
+    if(Number.isSafeInteger(id)&&(assetId===null||Number.isSafeInteger(assetId)))return {kind:'markdown',id,assetId};
+  }
   const editor = /^#view=live\/editor\/(new|[1-9]\d*)(?:\/(info|content|publish))?$/.exec(hash || '');
   if (editor) {
     const id = editor[1] === 'new' ? null : Number(editor[1]);
@@ -11,6 +16,11 @@ export function liveRoute(hash) {
   const match = /^#view=live\/(course|study|lesson|preview)\/([1-9]\d*)$/.exec(hash || '');
   if (!match || !Number.isSafeInteger(Number(match[2]))) return {kind:'list'};
   return {kind:match[1],id:Number(match[2])};
+}
+/** Keep course-management routes inside the admin course workspace. */
+export function courseCatalogScope(kind, adminMode) {
+  if (adminMode) return 'managed';
+  return kind === 'public' ? 'public' : 'mine';
 }
 /** Format a nonnegative duration for the compact classroom clock. */
 export function elapsed(seconds) {

@@ -46,6 +46,7 @@ price_fen = 500
 directory = "data/live/courses" # 私有媒体目录，不要映射到 /static
 document_max_mb = 25
 video_max_mb = 2048
+cover_max_mb = 8
 playback_seconds = 14400
 
 [ai]
@@ -173,3 +174,7 @@ recording_height = 1080
 recording_frame_rate = 30
 recording_video_bitrate = 4500
 recording_audio_bitrate = 128
+
+[question_media]
+directory = "data/live/question-images"
+image_max_mb = 5

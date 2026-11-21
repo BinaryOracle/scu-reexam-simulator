@@ -27,7 +27,31 @@
 @media(max-width:620px){.learning-chapters{grid-template-columns:1fr;gap:8px}.learning-chapter{flex-direction:row;align-items:center;justify-content:space-between;gap:12px;padding:15px}.learning-chapter span{flex-shrink:0;font-size:11px}.learning-categories-ai{grid-template-columns:1fr}}
 .learning-passage-source{font-size:12px;color:#8b7b6b;line-height:1.8;margin:26px 0 0;overflow-wrap:anywhere}.learning-passage-source+.learning-question{margin-top:12px}.learning-glossary{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 18px;line-height:1.7;overflow-wrap:anywhere}.learning-glossary dt{font-family:Georgia,serif;color:#566344}.learning-glossary dd{margin:0;color:#6d755e}.learning-source-images>p{line-height:1.85;overflow-wrap:anywhere}
 .learning-passage-link{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}.learning-translation .learning-question.english{font-size:22px;line-height:1.8}@media(max-width:620px){.learning-translation .learning-question.english{font-size:18px;line-height:1.85}}
-.learning-list>.empty-state{min-height:132px;padding:26px 20px}
+.learning-list>.empty-state{display:grid;place-content:center;min-height:170px;padding:42px 20px;border:0;box-shadow:none;background:#faf5ee}
+.learning-list>.empty-state .empty-icon{margin-bottom:8px}
+.learning-list>.empty-state h3{margin:0}
+.learning-list>.empty-state p{margin:4px 0 0}
+.learning-admin-filters{display:grid;grid-template-columns:minmax(180px,1fr) minmax(220px,1.2fr) minmax(220px,1fr) auto;align-items:end;gap:12px;margin:18px 0 12px}
+.learning-admin-filters .learning-field{min-width:0}
+.learning-admin-filters>input{min-width:0}
+.learning-admin-filters>.button{min-width:88px}
+.contribution-admin{padding:24px}
+.contribution-admin>div:first-child h2{margin:6px 0 8px;font-size:20px}
+.contribution-admin>div:first-child .muted{max-width:760px;line-height:1.75}
+.contribution-policy-form{gap:12px;margin:18px 0 14px}
+.contribution-policy-form label{min-width:160px;max-width:220px;font-size:13px}
+.contribution-policy-form input{min-height:42px}
+.contribution-admin-list{display:grid;gap:0;max-height:min(460px,65vh);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;border-top:1px solid var(--line)}
+.contribution-admin-row{grid-template-columns:minmax(0,1fr) minmax(100px,150px) minmax(120px,170px);align-items:center;min-height:50px;padding:10px 14px;border-bottom:1px solid var(--line);background:#fffdf9}
+.contribution-admin-row:nth-child(even){background:#faf7f1}
+.contribution-admin-row strong{overflow-wrap:anywhere}
+.learning-setup .form-error:empty{display:none}
+.learning-settings-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) auto;align-items:end;gap:14px;margin-top:16px}
+.learning-settings-form .learning-field{min-width:0}
+.learning-settings-form>.button{min-height:43px}
+.learning-collections-list{max-height:min(360px,55vh);overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+@media(max-width:1000px){.learning-admin-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.learning-admin-filters>input{min-height:43px}.learning-admin-filters>.button{width:100%}}
+@media(max-width:620px){.learning-admin-filters,.learning-settings-form{grid-template-columns:1fr;gap:10px}.learning-admin-filters>.button,.learning-settings-form>.button{width:100%}.contribution-admin{padding:18px}.contribution-policy-form label{max-width:none;width:100%}.contribution-admin-row{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px}.contribution-admin-row span:last-child{grid-column:2}.learning-collections-list{max-height:50vh}}
 .learning-question-dock{left:238px}.sidebar-collapsed .learning-question-dock{left:90px}
 .learning-study-footer.learning-rating-footer{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 16px;width:min(100%,760px);margin-inline:auto;justify-content:initial}
 .learning-study-footer.learning-rating-footer .learning-rating-button{display:flex;align-items:center;justify-content:center;min-width:0;min-height:58px;padding:10px 12px;border-radius:10px;font-size:14px;line-height:1.45;text-align:center;white-space:normal;box-shadow:none}

@@ -1,4 +1,5 @@
 /** Render server-sanitized problem Markdown and its KaTeX math nodes. */
+import {hydrateQuestionImages} from './question-markdown-images.js?v=20261121-v1';
 let katexPromise;
 
 /** Remove repeated numeric values from previously saved Luogu resource limits. */
@@ -29,6 +30,7 @@ export function appendProblemStatement(container, html) {
   const content = document.createElement("div");
   content.className = "problem-statement-content markdown-content";
   content.innerHTML = normalizeProblemStatementHtml(html);
+  hydrateQuestionImages(content);
   container.append(content);
   void renderProblemMath(content).catch(() => {
     content.classList.add("math-render-error");

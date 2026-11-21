@@ -9,11 +9,11 @@ export function formatLuoguSubmitError(error) {
   return "洛谷暂时未接受这次提交，需要完成安全验证。请切换到洛谷页面，按页面提示处理后回到知序重试。";
 }
 
-/** Return whether the installed extension predates guided captcha recovery. */
-export function isLuoguExtensionOutdated(version) {
+/** Return whether the installed shared judge extension predates multi-platform support. */
+export function isJudgeExtensionOutdated(version) {
   if (typeof version !== "string" || !/^\d+\.\d+\.\d+$/.test(version)) return true;
   const current = version.split(".").map(Number);
-  const minimum = [1, 1, 5];
+  const minimum = [1, 3, 0];
   for (let index = 0; index < minimum.length; index++) {
     if (current[index] !== minimum[index]) return current[index] < minimum[index];
   }
