@@ -13,14 +13,25 @@
   min-height: 42px;
   pointer-events: auto;
 }
-.contest-immersive .workspace-header-actions .workspace-countdown {
+.contest-immersive .workspace-header-actions .contest-timeline--compact {
+  grid-column: 2;
+  justify-self: center;
+}
+.contest-immersive .workspace-header-actions .workspace-back {
+  grid-column: auto;
+}
+.contest-immersive .workspace-header-right {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+.contest-immersive .workspace-header-actions .contest-timeline--compact {
   position: static;
   transform: none;
-  padding: 5px 12px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: #fffdfa;
-  font-size: 12px;
+  margin: 0;
 }
 .workspace-layout-reset {
   justify-self: start;
@@ -43,6 +54,15 @@
 .contest-immersive .problem-rail { min-height: 36px; margin-bottom: 6px; border-bottom: 0; }
 .contest-immersive .problem-tab { min-height: 28px; padding: 4px 10px; font-size: 12px; }
 .contest-immersive .problem-rail-remote { font-size: 11px; }
+.contest-immersive .contest-workspace-actions {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 4px 5px;
+}
+.contest-immersive .contest-workspace-actions .workspace-header-right { display: flex; align-items: center; gap: 10px; }
+.contest-immersive .contest-workspace-actions .workspace-back { min-height: 38px; padding: 7px 14px; font-size: 13px; }
 .problem-columns.candidate-workspace {
   gap: 0;
   grid-template-columns: minmax(0, calc(var(--statement-size, .46) * 100% - 4px)) 8px minmax(0, 1fr);
@@ -131,10 +151,17 @@
 .candidate-workspace .editor-heading h4 { font-size: 12px; color: #706053; }
 .candidate-workspace .editor-heading-tools { display: flex; flex: none; align-items: center; gap: 8px; min-width: 0; margin-left: auto; }
 .candidate-workspace .editor-heading-tools .workspace-pane-actions { margin-left: 0; }
+.candidate-workspace .contest-run-button:not(:disabled) {
+  color: #fff;
+  background: #32865d;
+  border-color: #32865d;
+}
+.candidate-workspace .contest-run-button:hover:not(:disabled) { background: #276d4b; }
 .candidate-workspace .language-select { flex: 0 0 140px; width: 140px; min-width: 115px; height: 30px; }
 .candidate-workspace .editor-panel,
 .candidate-workspace .editor-bottom-panel { border-radius: 9px; overflow: hidden; }
 .candidate-workspace .editor-panel { container-type: inline-size; container-name: code-pane; }
+.candidate-workspace .editor-footer { padding: 15px 18px; }
 .candidate-workspace .editor-footer-top { min-width: 0; }
 .candidate-workspace .editor-footer-top > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .candidate-workspace .editor-footer-top > .button { flex: none; }
@@ -201,7 +228,7 @@
 @media (max-width: 620px) {
   .contest-immersive .page-content { padding-inline: 6px; }
   .contest-immersive .workspace-header-actions { gap: 5px; }
-  .contest-immersive .workspace-header-actions .workspace-countdown { padding: 4px 6px; font-size: 10px; }
+  .contest-immersive .workspace-header-actions .contest-timeline--compact { padding: 4px 6px; font-size: 10px; }
   .contest-immersive .workspace-back,
   .workspace-layout-reset { padding: 5px; font-size: 10px; }
   .candidate-workspace .editor-heading { padding-left: 10px; gap: 6px; }

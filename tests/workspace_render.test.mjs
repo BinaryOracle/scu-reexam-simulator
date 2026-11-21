@@ -117,3 +117,18 @@ test('groups Luogu source and refresh actions with clear spacing when they wrap'
 test('removes the empty restore bar so narrow workspaces do not reserve blank space', () => {
   assert.match(layoutStyles, /\.workspace-pane-restores:not\(:has\(> button:not\(\[hidden\]\)\)\)\s*\{\s*display:\s*none;\s*\}/);
 });
+
+test('keeps the compact contest timeline at the top and moves workspace actions below the problem tabs', () => {
+  assert.match(layoutStyles, /\.contest-immersive \.workspace-header-actions \.contest-timeline--compact\s*\{[\s\S]*grid-column:\s*2[\s\S]*position:\s*static/);
+  assert.match(layoutStyles, /\.contest-immersive \.contest-workspace-actions\s*\{[\s\S]*min-height:\s*42px/);
+  const contestSource = readFileSync(new URL('../app/static/contest.js', import.meta.url), 'utf8');
+  const tabRail = contestSource.indexOf('workbench.append(rail);');
+  const workspaceActions = contestSource.indexOf('workbench.append(workspaceActions);');
+  const problemColumns = contestSource.indexOf('const columns = el("div", "", "problem-columns");');
+  assert.ok(tabRail < workspaceActions && workspaceActions < problemColumns);
+});
+
+test('uses the training green for contest sample execution while preserving disabled submit styling', () => {
+  assert.match(layoutStyles, /\.candidate-workspace \.contest-run-button:not\(:disabled\)[\s\S]*background:\s*#32865d/);
+  assert.match(readFileSync(new URL('../app/static/style.css', import.meta.url), 'utf8'), /#submitCode:disabled\s*\{[^}]*background:\s*#e6e8e6/);
+});

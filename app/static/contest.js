@@ -695,24 +695,24 @@ function renderWorkspace() {
   if (managementMode()) heading.append(el("h2", selectedContest.title));
   const headerActions = el("div", "", "workspace-header-actions");
   const countdown = renderContestTimeline(selectedContest, true);
-  headerActions.append(
-    ...(!managementMode() ? [countdown] : []),
-    button("返回比赛信息", () => {
-      writeAppRoute(`contest/${selectedContest.id}`);
-      renderContestOverview();
-    }, "button secondary workspace-back"),
-  );
-  if (managementMode()) header.append(heading);
   const resetLayout = el("button", "恢复布局", "workspace-layout-reset");
   resetLayout.type = "button";
   resetLayout.title = "恢复默认分栏比例，并退出区域放大";
-  if (!managementMode()) headerActions.prepend(resetLayout);
+  const headerRight = el("div", "", "workspace-header-right");
+  if (!managementMode()) headerRight.append(resetLayout);
+  headerActions.append(...(!managementMode() ? [countdown] : []));
+  headerRight.append(button("返回比赛信息", () => {
+      writeAppRoute(`contest/${selectedContest.id}`);
+      renderContestOverview();
+    }, "button secondary workspace-back"));
+  if (managementMode()) headerActions.append(headerRight);
+  if (managementMode()) header.append(heading);
   header.append(headerActions);
   const [statusLabel, statusColor] = contestStatus(selectedContest);
   const livebar = el("div", "", "contest-livebar");
   livebar.append(
     Object.assign(badge(statusLabel, statusColor), { className: `badge ${statusColor} workspace-status` }),
-    el("span", selectedContest.judge_mode === "luogu" ? "洛谷评测" : "本站评测", "workspace-judge-mode"),
+    el("span", judgePlatform(selectedProblem?.remote_platform)?.label || "本站评测", "workspace-judge-mode"),
     el("span", deadline(selectedContest), "workspace-countdown"),
   );
   workspace.append(header);
@@ -750,7 +750,7 @@ function renderWorkspace() {
     tab.append(el("b", String.fromCharCode(65 + index)), el("span", problem.title));
     const showSource = problem.remote_problem_id
       && canRevealLuoguSource(selectedContest, Date.now() / 1000, managementMode());
-    if (showSource) tab.title = `${problem.remote_problem_id} · ${problem.title}`;
+    if (showSource) tab.title = `${judgePlatform(problem.remote_platform)?.label || ""} · ${problem.remote_problem_id} · ${problem.title}`;
     if (problem.id === selectedProblem)
       tab.setAttribute("aria-current", "page");
     tabs.append(tab);
@@ -760,6 +760,11 @@ function renderWorkspace() {
   const showSource = problem.remote_problem_id
     && canRevealLuoguSource(selectedContest, Date.now() / 1000, managementMode());
   workbench.append(rail);
+  if (!managementMode()) {
+    const workspaceActions = el("div", "", "contest-workspace-actions");
+    workspaceActions.append(headerRight);
+    workbench.append(workspaceActions);
+  }
   const columns = el("div", "", "problem-columns");
   columns.dataset.activePane = mobilePane;
   const restoreBar = el("div", "", "workspace-pane-restores");
