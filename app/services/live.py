@@ -12,10 +12,11 @@ def manage(course, user):
 def course(db, cid, user):
     row = db.execute('SELECT * FROM live_courses WHERE id=?', (cid,)).fetchone()
     privileged = row and (manage(row, user) or row['host_id'] == user['id'])
-    enrolled = row and row['publication_status'] == 'published' and db.execute(
+    enrolled = row and row['publication_status'] == 'published' and (row['access_mode'] == 'public' or db.execute(
             '''SELECT 1 FROM live_members WHERE course_id=? AND user_id=? UNION ALL
-            SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=? LIMIT 1''',
-            (cid, user['id'], cid, user['id'])).fetchone()
+            SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=? UNION ALL
+            SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=? LIMIT 1''',
+            (cid, user['id'], cid, user['id'], cid, user['id'])).fetchone())
     if not row or not (privileged or enrolled):
         raise HTTPException(404, '课程不存在或未加入课程')
     return dict(row)
@@ -25,7 +26,11 @@ def lesson(db, lid, user, *, host=False, manager=False):
     row = db.execute('SELECT * FROM live_lessons WHERE id=?', (lid,)).fetchone()
     if not row:
         raise HTTPException(404, '课次不存在')
-    parent = course(db, row['course_id'], user)
+    from app.services.course_learning import can_preview_lesson
+    if not host and not manager and can_preview_lesson(db, row['course_lesson_id']):
+        parent = dict(db.execute('SELECT * FROM live_courses WHERE id=?', (row['course_id'],)).fetchone())
+    else:
+        parent = course(db, row['course_id'], user)
     if host and parent['host_id'] != user['id']:
         raise HTTPException(403, '仅课程主持人可以操作')
     if manager and not manage(parent, user):

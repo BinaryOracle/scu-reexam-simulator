@@ -39,10 +39,13 @@ def can_access_course(db, course_id, user):
         return True
     if row['publication_status'] != 'published':
         return False
+    if row['access_mode'] == 'public':
+        return True
     return bool(db.execute(
         '''SELECT 1 FROM live_members WHERE course_id=? AND user_id=? UNION ALL
-        SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=? LIMIT 1''',
-        (course_id, user['id'], course_id, user['id'])).fetchone())
+        SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=? UNION ALL
+        SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=? LIMIT 1''',
+        (course_id, user['id'], course_id, user['id'], course_id, user['id'])).fetchone())
 
 
 def is_enrolled(db, course_id, user):
@@ -50,8 +53,9 @@ def is_enrolled(db, course_id, user):
     course = db.execute('SELECT * FROM live_courses WHERE id=?', (course_id,)).fetchone()
     if not course:
         return False
-    if db.execute('SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?',
-                  (course_id, user['id'])).fetchone():
+    if db.execute('''SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=? UNION ALL
+        SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?''',
+                  (course_id, user['id'], course_id, user['id'])).fetchone():
         return True
     return bool(course['host_id'] != user['id'] and not manage(course, user) and db.execute(
         'SELECT 1 FROM live_members WHERE course_id=? AND user_id=?', (course_id, user['id'])).fetchone())
@@ -81,8 +85,19 @@ def lesson_row(db, lesson_id):
 
 def require_lesson(db, lesson_id, user, *, manager=False):
     lesson = lesson_row(db, lesson_id)
+    if not manager and can_preview_lesson(db, lesson_id):
+        course = dict(db.execute('SELECT * FROM live_courses WHERE id=?', (lesson['course_id'],)).fetchone())
+        return lesson, course
     course = require_access(db, lesson['course_id'], user, manager=manager)
     return lesson, course
+
+
+def can_preview_lesson(db, lesson_id):
+    """Preview requires a published course and both the chapter and lesson switches."""
+    return bool(db.execute('''SELECT 1 FROM course_lessons l
+        JOIN course_sections s ON s.id=l.section_id JOIN live_courses c ON c.id=l.course_id
+        WHERE l.id=? AND l.preview_enabled=1 AND s.preview_enabled=1
+        AND c.publication_status='published' ''', (lesson_id,)).fetchone())
 
 
 def progress_summary(db, course_id, user_id):
@@ -194,21 +209,24 @@ def course_detail(db, course_id, user):
     return detail
 
 
-def public_preview(db, course_id):
+def public_preview(db, course_id, user=None):
     """Return published public course metadata without member or lesson resource data."""
-    course = db.execute('''SELECT c.id,c.title,c.description,c.cover_kind,c.cover_value,c.cover_asset_id,u.username host_name
+    course = db.execute('''SELECT c.id,c.title,c.description,c.access_mode,c.points_price,c.cover_kind,c.cover_value,c.cover_asset_id,u.username host_name
         FROM live_courses c JOIN users u ON u.id=c.host_id
-        WHERE c.id=? AND c.publication_status='published' AND c.access_mode='public' ''',
+        WHERE c.id=? AND c.publication_status='published' AND (c.access_mode IN ('public','points') OR EXISTS (
+            SELECT 1 FROM course_lessons l JOIN course_sections s ON s.id=l.section_id
+            WHERE l.course_id=c.id AND l.preview_enabled=1 AND s.preview_enabled=1)) ''',
         (course_id,)).fetchone()
     if not course:
         raise HTTPException(404, '公开课程不存在')
     sections = []
     lessons_total = 0
     content_kinds = set()
-    for section in db.execute('SELECT id,title,position FROM course_sections WHERE course_id=? ORDER BY position,id',
+    full_access = user is not None and can_access_course(db, course_id, user)
+    for section in db.execute('SELECT id,title,position,preview_enabled FROM course_sections WHERE course_id=? ORDER BY position,id',
                               (course_id,)):
         lessons = []
-        for lesson in db.execute('''SELECT id,title,description,position FROM course_lessons
+        for lesson in db.execute('''SELECT id,title,description,position,preview_enabled FROM course_lessons
             WHERE section_id=? ORDER BY position,id''', (section['id'],)):
             kinds = [row['kind'] for row in db.execute('''SELECT i.kind FROM course_lesson_items i
                 LEFT JOIN course_assets a ON a.id=i.asset_id
@@ -219,16 +237,20 @@ def public_preview(db, course_id):
             live_session = db.execute('''SELECT l.starts_at,l.status FROM course_lesson_items i
                 JOIN live_lessons l ON l.id=i.live_lesson_id WHERE i.lesson_id=? AND i.kind='live'
                 ORDER BY i.position LIMIT 1''', (lesson['id'],)).fetchone()
-            lessons.append({**dict(lesson),
-                            'description_html': render_lesson_markdown(lesson['description']),
-                            'description_summary': markdown_summary(lesson['description']),
+            previewable = bool(section['preview_enabled'] and lesson['preview_enabled'])
+            readable = full_access or previewable
+            description = lesson['description'] if readable else ''
+            lessons.append({**dict(lesson), 'description': description,
+                            'can_preview': previewable, 'locked': not readable,
+                            'description_html': render_lesson_markdown(description),
+                            'description_summary': markdown_summary(description),
                             'content_kinds': kinds,
                             'live_starts_at': live_session['starts_at'] if live_session else None,
                             'live_status': live_session['status'] if live_session else None})
             content_kinds.update(kinds)
             lessons_total += 1
         if lessons:
-            sections.append({'id': section['id'], 'title': section['title'], 'position': section['position'], 'lessons': lessons})
+            sections.append({**dict(section), 'lessons': lessons})
     return {key: value for key, value in {
             **dict(course), 'description_html': render_lesson_markdown(course['description']),
             'description_summary': markdown_summary(course['description']),

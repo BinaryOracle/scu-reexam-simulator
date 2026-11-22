@@ -6,13 +6,22 @@ def initialize_course_learning(db):
     columns = {row['name'] for row in db.execute('PRAGMA table_info(live_courses)')}
     for name, declaration in [
         ('publication_status', "TEXT NOT NULL DEFAULT 'published' CHECK(publication_status IN ('draft','published','archived'))"),
-        ('access_mode', "TEXT NOT NULL DEFAULT 'roster' CHECK(access_mode IN ('public','roster'))"),
+        ('access_mode', "TEXT NOT NULL DEFAULT 'roster' CHECK(access_mode IN ('public','roster','points'))"),
+        ('points_price', 'INTEGER NOT NULL DEFAULT 0 CHECK(points_price >= 0)'),
         ('cover_kind', "TEXT CHECK(cover_kind IN ('preset','upload'))"),
         ('cover_value', 'TEXT'),
         ('cover_asset_id', 'TEXT'),
     ]:
         if name not in columns:
             db.execute(f'ALTER TABLE live_courses ADD COLUMN {name} {declaration}')
+
+    # Replace only the old column constraint, retaining course IDs and all references.
+    schema = db.execute("SELECT sql FROM sqlite_master WHERE name='live_courses'").fetchone()[0]
+    if "CHECK(access_mode IN ('public','roster'))" in schema:
+        modes = list(db.execute('SELECT id,access_mode FROM live_courses'))
+        db.execute('ALTER TABLE live_courses DROP COLUMN access_mode')
+        db.execute("ALTER TABLE live_courses ADD COLUMN access_mode TEXT NOT NULL DEFAULT 'roster' CHECK(access_mode IN ('public','roster','points'))")
+        db.executemany('UPDATE live_courses SET access_mode=? WHERE id=?', [(row[1], row[0]) for row in modes])
 
     db.execute('''CREATE TABLE IF NOT EXISTS course_sections(
         id INTEGER PRIMARY KEY,
@@ -40,6 +49,15 @@ def initialize_course_learning(db):
         uploaded_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         created REAL NOT NULL DEFAULT (unixepoch())
     )''')
+    for table in ('course_sections', 'course_lessons'):
+        if 'preview_enabled' not in {row['name'] for row in db.execute(f'PRAGMA table_info({table})')}:
+            db.execute(f'ALTER TABLE {table} ADD COLUMN preview_enabled INTEGER NOT NULL DEFAULT 0 CHECK(preview_enabled IN (0,1))')
+    db.execute('''CREATE TABLE IF NOT EXISTS course_purchases(
+        course_id INTEGER NOT NULL REFERENCES live_courses(id) ON DELETE CASCADE,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        points_paid INTEGER NOT NULL CHECK(points_paid > 0),
+        purchased_at REAL NOT NULL,
+        PRIMARY KEY(course_id,user_id))''')
     image_schema = '''CREATE TABLE IF NOT EXISTS course_markdown_images(
         id TEXT PRIMARY KEY,
         course_id INTEGER NOT NULL REFERENCES live_courses(id) ON DELETE CASCADE,

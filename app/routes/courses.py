@@ -13,7 +13,7 @@ from app.db import connect
 from app.config import load_config
 from app.services.auth import current_user, administrator
 from app.services import course_learning as courses
-from app.services import live
+from app.services import live, points
 
 router = APIRouter(prefix='/api/courses', tags=['courses'])
 DOCUMENT_TYPES = {'.pdf': 'application/pdf', '.txt': 'text/plain', '.md': 'text/markdown',
@@ -30,7 +30,8 @@ class CourseWrite(BaseModel):
     title: str = Field(min_length=1, max_length=100)
     description: str = Field(default='', max_length=4000)
     publication_status: str = Field(default='draft', pattern='^(draft|published|archived)$')
-    access_mode: str = Field(default='roster', pattern='^(public|roster)$')
+    access_mode: str = Field(default='roster', pattern='^(public|roster|points)$')
+    points_price: StrictInt | None = Field(default=None, ge=0, le=100000000)
     host_id: StrictInt | None = Field(default=None, gt=0)
     member_ids: list[StrictInt] = Field(default_factory=list, max_length=1000)
     cover_kind: str | None = Field(default=None, pattern='^(preset|upload)$')
@@ -40,6 +41,11 @@ class CourseWrite(BaseModel):
 class NamedPosition(BaseModel):
     title: str = Field(min_length=1, max_length=100)
     position: StrictInt = Field(ge=0, le=10000)
+    preview_enabled: StrictBool | None = None
+
+
+class CoursePurchase(BaseModel):
+    expected_points_price: StrictInt = Field(gt=0, le=100000000)
 
 
 class LessonWrite(NamedPosition):
@@ -156,6 +162,10 @@ def _save_course(db, payload, user, course_id=None):
     if not title:
         raise HTTPException(422, '请输入课程名称')
     host_id = payload.host_id or user['id']
+    previous = db.execute('SELECT points_price FROM live_courses WHERE id=?', (course_id,)).fetchone() if course_id else None
+    price = payload.points_price if payload.points_price is not None else previous['points_price'] if previous else 0
+    if payload.access_mode == 'points' and price <= 0:
+        raise HTTPException(422, '积分购买课程须设置大于 0 的整数价格')
     live.validate_people(db, [host_id, *payload.member_ids], user)
     if course_id is None:
         validate_markdown_images(db, None, None, payload.description)
@@ -180,11 +190,15 @@ def _save_course(db, payload, user, course_id=None):
                 WHERE id=?''', (title, payload.description.strip(), host_id, payload.publication_status,
                                 payload.access_mode, course_id))
         db.execute('DELETE FROM live_members WHERE course_id=?', (course_id,))
-        # Self-enrolled users are never converted into assigned roster members.
-        if payload.access_mode == 'roster':
-            db.execute('''DELETE FROM course_self_enrollments WHERE course_id=?''', (course_id,))
+        # A paid or assigned course no longer honors old public self-enrollments;
+        # purchased entitlements survive either mode change.
+        if payload.access_mode != 'public':
+            db.execute('''DELETE FROM course_self_enrollments WHERE course_id=? AND NOT EXISTS (
+                SELECT 1 FROM course_purchases p WHERE p.course_id=course_self_enrollments.course_id
+                AND p.user_id=course_self_enrollments.user_id)''', (course_id,))
+    db.execute('UPDATE live_courses SET points_price=? WHERE id=?', (price, course_id))
     db.executemany('INSERT INTO live_members(course_id,user_id) VALUES (?,?)',
-                   [(course_id, uid) for uid in set([host_id, *payload.member_ids])])
+                   [(course_id, uid) for uid in set([host_id, *(payload.member_ids if payload.access_mode == 'roster' else [])])])
     return _course_row(db, course_id)
 
 
@@ -215,21 +229,24 @@ def catalog(scope: str = Query(default='mine', pattern='^(mine|public|managed)$'
     with connect() as db:
         if scope == 'public':
             rows = db.execute('''SELECT c.id,c.title,c.description,c.publication_status,c.access_mode,
-                c.cover_kind,c.cover_value,c.cover_asset_id,
+                c.cover_kind,c.cover_value,c.cover_asset_id,c.points_price,
                 u.username host_name FROM live_courses c JOIN users u ON u.id=c.host_id
-                WHERE c.publication_status='published' AND c.access_mode='public'
+                WHERE c.publication_status='published' AND (c.access_mode IN ('public','points') OR EXISTS (
+                    SELECT 1 FROM course_lessons l JOIN course_sections s ON s.id=l.section_id
+                    WHERE l.course_id=c.id AND l.preview_enabled=1 AND s.preview_enabled=1))
                 AND instr(lower(c.title),lower(?))>0 ORDER BY c.id DESC''', (q.strip(),)).fetchall()
         elif scope == 'mine':
             rows = db.execute('''SELECT DISTINCT c.*,u.username host_name FROM live_courses c
                 JOIN users u ON u.id=c.host_id LEFT JOIN live_members m ON m.course_id=c.id
                 LEFT JOIN course_self_enrollments e ON e.course_id=c.id
-                WHERE (e.user_id=? OR (m.user_id=? AND c.host_id<>?
+                LEFT JOIN course_purchases p ON p.course_id=c.id
+                WHERE (e.user_id=? OR p.user_id=? OR (m.user_id=? AND c.host_id<>?
                     AND NOT (?=1 AND (?=1 OR c.owner_id=?))))
                 AND c.publication_status='published'
                 AND instr(lower(c.title),lower(?))>0
                 ORDER BY COALESCE((SELECT MAX(p.updated) FROM course_progress p
                     JOIN course_lessons l ON l.id=p.lesson_id WHERE l.course_id=c.id AND p.user_id=?),0) DESC,c.id DESC''',
-                (user['id'], user['id'], user['id'], user['is_admin'], user['is_superadmin'], user['id'],
+                (user['id'], user['id'], user['id'], user['id'], user['is_admin'], user['is_superadmin'], user['id'],
                  q.strip(), user['id'])).fetchall()
         else:
             rows = db.execute('''SELECT DISTINCT c.*,u.username host_name FROM live_courses c
@@ -275,7 +292,8 @@ def catalog(scope: str = Query(default='mine', pattern='^(mine|public|managed)$'
 @router.get('/public/{course_id}')
 def public_course_preview(course_id: int, user=Depends(current_user)):
     with connect() as db:
-        preview = courses.public_preview(db, course_id)
+        preview = courses.public_preview(db, course_id, user)
+        preview['points_balance'] = db.execute('SELECT points FROM users WHERE id=?', (user['id'],)).fetchone()[0]
         enrolled = courses.is_enrolled(db, course_id, user)
         preview['is_enrolled'] = enrolled
         preview['is_removed_from_library'] = courses.is_removed_from_library(db, course_id, user['id'])
@@ -382,7 +400,9 @@ def course_cover(course_id: int, user=Depends(current_user)):
         if not row:
             raise HTTPException(404, '课程不存在')
         course = dict(row)
-        public_preview_allowed = course['publication_status'] == 'published' and course['access_mode'] == 'public'
+        public_preview_allowed = course['publication_status'] == 'published' and (course['access_mode'] in ('public', 'points') or db.execute('''
+            SELECT 1 FROM course_lessons l JOIN course_sections s ON s.id=l.section_id
+            WHERE l.course_id=? AND l.preview_enabled=1 AND s.preview_enabled=1''', (course_id,)).fetchone())
         if not public_preview_allowed:
             course = courses.require_access(db, course_id, user)
         if course.get('cover_kind') != 'upload' or not course.get('cover_asset_id'):
@@ -444,6 +464,8 @@ def enroll(course_id: int, user=Depends(current_user)):
 def unenroll(course_id: int, user=Depends(current_user)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
+        if db.execute('SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?', (course_id, user['id'])).fetchone():
+            raise HTTPException(409, '已购买课程请使用移除功能，购买资格和学习进度会保留')
         course = db.execute('SELECT access_mode FROM live_courses WHERE id=?', (course_id,)).fetchone()
         enrollment = db.execute('SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?',
                                 (course_id, user['id'])).fetchone()
@@ -451,6 +473,28 @@ def unenroll(course_id: int, user=Depends(current_user)):
             raise HTTPException(404, '自主加入的课程不存在')
         db.execute('DELETE FROM course_self_enrollments WHERE course_id=? AND user_id=?', (course_id, user['id']))
         return {'ok': True}
+
+
+@router.post('/{course_id}/purchase')
+def purchase_course(course_id: int, payload: CoursePurchase, user=Depends(current_user)):
+    """Debit and grant a permanent entitlement in one serialized transaction."""
+    with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
+        course = db.execute('SELECT * FROM live_courses WHERE id=?', (course_id,)).fetchone()
+        if not course or course['publication_status'] != 'published':
+            raise HTTPException(404, '课程不存在或暂未开放购买')
+        if courses.can_access_course(db, course_id, user):
+            return courses.course_detail(db, course_id, user)
+        if course['access_mode'] != 'points':
+            raise HTTPException(409, '该课程不支持积分购买')
+        if payload.expected_points_price != course['points_price']:
+            raise HTTPException(409, '课程价格已更新，请刷新页面后重新确认')
+        points.adjust(db, user['id'], -course['points_price'], kind='course_purchase', reference=f"课程：{course['title']}（{course_id}）")
+        db.execute('INSERT INTO course_purchases(course_id,user_id,points_paid,purchased_at) VALUES (?,?,?,?)',
+                   (course_id, user['id'], course['points_price'], time.time()))
+        db.execute('INSERT OR IGNORE INTO course_self_enrollments(course_id,user_id) VALUES (?,?)', (course_id, user['id']))
+        db.execute('DELETE FROM course_library_hidden WHERE course_id=? AND user_id=?', (course_id, user['id']))
+        return courses.course_detail(db, course_id, user)
 
 
 @router.delete('/{course_id}/library')
@@ -532,6 +576,7 @@ def add_section(course_id: int, payload: NamedPosition, user=Depends(administrat
         db.execute('BEGIN IMMEDIATE')
         cursor = db.execute('INSERT INTO course_sections(course_id,title,position) VALUES (?,?,?)',
                             (course_id, payload.title.strip(), payload.position))
+        db.execute('UPDATE course_sections SET preview_enabled=? WHERE id=?', (bool(payload.preview_enabled), cursor.lastrowid))
         return dict(db.execute('SELECT * FROM course_sections WHERE id=?', (cursor.lastrowid,)).fetchone())
 
 
@@ -544,6 +589,8 @@ def update_section(section_id: int, payload: NamedPosition, user=Depends(adminis
         courses.require_access(db, section['course_id'], user, manager=True)
         db.execute('UPDATE course_sections SET title=?,position=? WHERE id=?',
                    (payload.title.strip(), payload.position, section_id))
+        if payload.preview_enabled is not None:
+            db.execute('UPDATE course_sections SET preview_enabled=? WHERE id=?', (payload.preview_enabled, section_id))
         return dict(db.execute('SELECT * FROM course_sections WHERE id=?', (section_id,)).fetchone())
 
 
@@ -587,6 +634,7 @@ def add_lesson(section_id: int, payload: LessonWrite, user=Depends(administrator
             VALUES (?,?,?,?,?)''', (section['course_id'], section_id, payload.title.strip(),
                                      payload.description.strip(), payload.position))
         validate_markdown_images(db, section['course_id'], cursor.lastrowid, payload.description)
+        db.execute('UPDATE course_lessons SET preview_enabled=? WHERE id=?', (bool(payload.preview_enabled), cursor.lastrowid))
         return courses.lesson_view(db, dict(db.execute('SELECT * FROM course_lessons WHERE id=?',
                                                        (cursor.lastrowid,)).fetchone()), user)
 
@@ -601,6 +649,8 @@ def update_lesson(lesson_id: int, payload: LessonWrite, user=Depends(administrat
         validate_markdown_images(db, lesson['course_id'], lesson_id, payload.description)
         db.execute('UPDATE course_lessons SET title=?,description=?,position=? WHERE id=?',
                    (payload.title.strip(), payload.description.strip(), payload.position, lesson_id))
+        if payload.preview_enabled is not None:
+            db.execute('UPDATE course_lessons SET preview_enabled=? WHERE id=?', (payload.preview_enabled, lesson_id))
         return courses.lesson_view(db, courses.lesson_row(db, lesson_id), user)
 
 
@@ -759,11 +809,14 @@ def markdown_image(image_id: str, user=Depends(current_user)):
         visible_in_plaza = False
         if image['lesson_id'] is None:
             public = db.execute("""SELECT description FROM live_courses WHERE id=?
-                AND publication_status='published' AND access_mode='public'""", (image['course_id'],)).fetchone()
+                AND publication_status='published'""", (image['course_id'],)).fetchone()
             visible_in_plaza = public is not None and f'/api/courses/markdown-images/{image_id}' in (
                 courses.markdown_image_links(public['description']))
         if not visible_in_plaza:
-            courses.require_access(db, image['course_id'], user)
+            if image['lesson_id'] is not None:
+                courses.require_lesson(db, image['lesson_id'], user)
+            else:
+                courses.require_access(db, image['course_id'], user)
         path = asset_path(image['storage_name'])
         if not path.is_file():
             raise HTTPException(404, '课程图片不可用，请联系管理员')
@@ -803,7 +856,7 @@ def asset_file(asset_id: int, user=Depends(current_user)):
         asset = db.execute('SELECT * FROM course_assets WHERE id=?', (asset_id,)).fetchone()
         if not asset:
             raise HTTPException(404, '课程文件不存在')
-        courses.require_access(db, asset['course_id'], user)
+        courses.require_lesson(db, asset['lesson_id'], user)
         if asset['kind'] != 'document':
             raise HTTPException(404, '视频请使用课程播放器')
         path = asset_path(asset['storage_name'])
@@ -819,7 +872,7 @@ def markdown_asset(asset_id: int, user=Depends(current_user)):
         asset = db.execute('SELECT * FROM course_assets WHERE id=?', (asset_id,)).fetchone()
         if not asset:
             raise HTTPException(404, '课程资料不存在')
-        courses.require_access(db, asset['course_id'], user)
+        courses.require_lesson(db, asset['lesson_id'], user)
         if asset['kind'] != 'document' or Path(asset['original_name']).suffix.lower() != '.md':
             raise HTTPException(404, '该课程资料不是 Markdown 文档')
         path = asset_path(asset['storage_name'])
@@ -898,7 +951,7 @@ def create_playback_ticket(asset_id: int, user=Depends(current_user)):
         asset = db.execute('SELECT * FROM course_assets WHERE id=?', (asset_id,)).fetchone()
         if not asset:
             raise HTTPException(404, '课程视频不存在')
-        courses.require_access(db, asset['course_id'], user)
+        courses.require_lesson(db, asset['lesson_id'], user)
         if asset['kind'] != 'video':
             raise HTTPException(404, '该课程内容不是视频')
         path = asset_path(asset['storage_name'])
@@ -923,7 +976,7 @@ def playback_file(token: str):
             raise HTTPException(404, '播放链接已失效，请重新打开课程')
         user = {'id': row['user_id'], 'is_admin': row['is_admin'],
                 'is_superadmin': row['is_superadmin']}
-        if not courses.can_access_course(db, row['course_id'], user):
+        if not (courses.can_access_course(db, row['course_id'], user) or courses.can_preview_lesson(db, row['lesson_id'])):
             raise HTTPException(404, '播放链接已失效，请重新加入课程')
         path = asset_path(row['storage_name'])
         if not path.is_file():

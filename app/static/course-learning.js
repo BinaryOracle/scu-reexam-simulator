@@ -191,7 +191,7 @@ function editorStepNavigation(courseId,current){
 function statusText(course){
   if(course.publication_status==='draft')return '草稿';
   if(course.publication_status==='archived')return '已归档';
-  return course.access_mode==='public'?'公开课程':'名单课程';
+  return {public:'公开课程',roster:'名单课程',points:'积分购买'}[course.access_mode]||'课程';
 }
 function allLessons(course){return (course.sections||[]).flatMap(section=>section.lessons||[]);}
 function setBusy(node,value){node.setAttribute('aria-busy',String(value));}
@@ -251,14 +251,14 @@ async function renderCatalog(turn,initialScope){
   const grid=el('div','','course-card-grid');const pagination=el('nav','','course-pagination');pagination.setAttribute('aria-label','课程分页');
   const paint=()=>{
     if(turn!==generation)return;grid.replaceChildren();pagination.replaceChildren();const query=search.value.trim().toLocaleLowerCase();const filtered=data.filter(course=>[course.title,course.description,course.host_name].some(value=>(value||'').toLocaleLowerCase().includes(query))&&(initialScope!=='managed'||statusFilter.value==='all'||course.publication_status===statusFilter.value));const pageCount=Math.ceil(filtered.length/pageSize);pageIndex=Math.min(pageIndex,Math.max(0,pageCount-1));const start=pageIndex*pageSize;count.textContent=filtered.length?`${start+1}–${Math.min(start+pageSize,filtered.length)} / ${filtered.length} 门课程`:'0 门课程';
-    if(!filtered.length){const empty=el('section','','course-empty');const noMatches=Boolean(data.length);const removed=libraryFilter?.value==='removed';empty.append(el('h2',noMatches?'没有符合条件的课程':initialScope==='public'?'暂时没有公开课程':initialScope==='managed'?'还没有课程':removed?'没有已移除的课程':'还没有加入课程'),el('p',noMatches?'可以更换关键词，或清除筛选条件查看全部课程。':initialScope==='public'?'公开课程会显示在这里，加入后即可开始学习。':initialScope==='managed'?'先创建课程，再逐步添加课时。':removed?'从我的课程移除后，会显示在这里，学习进度始终保留。':'去课程广场挑选一门课程，加入后就能开始学习。'));
+    if(!filtered.length){const empty=el('section','','course-empty');const noMatches=Boolean(data.length);const removed=libraryFilter?.value==='removed';empty.append(el('h2',noMatches?'没有符合条件的课程':initialScope==='public'?'暂时没有公开课程':initialScope==='managed'?'还没有课程':removed?'没有已移除的课程':'还没有加入课程'),el('p',noMatches?'可以更换关键词，或清除筛选条件查看全部课程。':initialScope==='public'?'公开课程可直接阅读，加入后会显示在“我的课程”。':initialScope==='managed'?'先创建课程，再逐步添加课时。':removed?'从我的课程移除后，会显示在这里，学习进度始终保留。':'去课程广场挑选一门课程，加入后就能开始学习。'));
       if(noMatches)empty.append(button('清除搜索',()=>{search.value='';if(statusFilter)statusFilter.value='all';pageIndex=0;paint();},'button secondary'));
       else if(initialScope==='mine'&&!removed)empty.append(button('前往课程广场',()=>route('/plaza'),'button primary'));
       else if(initialScope==='managed')empty.append(button('创建课程',()=>route('/editor/new/info'),'button primary'));
       grid.append(empty);return;}
     for(const course of filtered.slice(start,start+pageSize)){
       const card=el('article','','course-card');card.append(courseCover(course));const body=el('div','','course-card-body');const labels=el('div','','course-card-labels');
-      const status=initialScope==='managed'?statusText(course):course.is_removed_from_library?'已移除':course.is_enrolled?'已加入':course.access_mode==='public'?'公开加入':'名单课程';labels.append(el('span',status,'course-chip'),el('span',`${course.section_count||0} 章 · ${course.lesson_count||0} 课时`,'course-muted'));body.append(labels,el('h3',course.title),el('p',course.description_summary||'按章节学习课程内容。','course-card-description'));
+      const status=initialScope==='managed'?statusText(course):course.is_removed_from_library?'已移除':course.is_enrolled?'已加入':course.access_mode==='public'?'公开阅读':course.access_mode==='points'?`${course.points_price} 积分`:'名单课程';labels.append(el('span',status,'course-chip'),el('span',`${course.section_count||0} 章 · ${course.lesson_count||0} 课时`,'course-muted'));body.append(labels,el('h3',course.title),el('p',course.description_summary||'按章节学习课程内容。','course-card-description'));
       if(course.host_name)body.append(el('p',`主讲 · ${course.host_name}`,'course-card-host'));
       if(initialScope==='mine'&&course.progress_summary?.total){const progress=el('div','','course-card-progress');const track=el('div','','course-progress-track');const bar=el('span');bar.style.width=`${course.progress_summary.percent}%`;track.append(bar);progress.append(track,el('span',`${course.progress_summary.percent}% · ${course.progress_summary.completed}/${course.progress_summary.total} 课时`,'course-muted'));body.append(progress);}
       if(initialScope==='managed'&&course.access_mode==='roster')body.append(el('p','仅指定学员可见','course-muted'));
@@ -320,7 +320,7 @@ function learnerCourseOutline(course,startLesson){
       name.append(el('span',String(lessonIndex+1).padStart(2,'0'),'course-lesson-number'),el('h3',lesson.title));
       if(lesson.progress?.completed)name.append(el('span','已完成','course-complete-chip'));
       details.append(name,el('p',lesson.description_summary||'打开课时，学习本节内容。','course-muted'));
-      const actions=el('div','','course-lesson-actions');const study=button('开始学习 →',()=>startLesson(lesson),'button primary');study.setAttribute('aria-label',`开始学习：${lesson.title}`);actions.append(study);
+      const actions=el('div','','course-lesson-actions');const study=button(lesson.locked?'已锁定':lesson.can_preview&&!course.is_enrolled?'预览小节 →':'开始学习 →',()=>lesson.locked?notify(course.access_mode==='points'?'购买课程后可学习本小节':'本小节仅对指定学员开放'):startLesson(lesson),lesson.locked?'button secondary':'button primary');study.disabled=Boolean(lesson.locked);study.setAttribute('aria-label',`${lesson.locked?'已锁定':lesson.can_preview?'预览小节':'开始学习'}：${lesson.title}`);actions.append(study);
       row.append(details,actions);list.append(row);
     }
     if(!section.lessons.length)list.append(el('p','本章还没有课时。','course-muted'));
@@ -333,12 +333,12 @@ function learnerCourseOutline(course,startLesson){
 async function renderPreview(id,turn){
   const course=await api(`/courses/public/${id}`);if(turn!==generation)return;const target=root();target.replaceChildren();const shell=el('div','','course-page-shell course-preview-shell');
   const back=button('← 返回课程广场',()=>route('/plaza'),'text-button course-back');const header=el('header','','course-preview-header');const media=el('aside','','course-preview-sidebar');media.append(courseCover(course,'course-cover course-preview-cover'));if(course.is_enrolled&&course.progress_summary?.total)media.append(courseProgressPanel(course.progress_summary));header.append(media);const copy=pageTitle(course.title);copy.append(markdownContent(course.description_html,'course-markdown-content course-description-rendered'));header.append(copy);
-  const facts=el('div','','course-preview-facts');if(hostName(course))facts.append(el('span',`主讲 · ${hostName(course)}`));facts.append(el('span',`${course.sections.length} 章 · ${course.lesson_count} 课时`));
-  const actions=el('div','','course-preview-actions');if(!course.is_enrolled&&course.can_manage)actions.append(button('管理课程',()=>route(`/editor/${course.id}/content`),'button secondary'));else if(!course.is_enrolled)actions.append(button('加入课程',async()=>{await api(`/courses/${course.id}/enroll`,{method:'POST'});notify('已加入课程，现在可从下方目录选择课时');await renderCoursePage({kind:'preview',id:course.id});},'button primary'));
+  const facts=el('div','','course-preview-facts');if(hostName(course))facts.append(el('span',`主讲 · ${hostName(course)}`));facts.append(el('span',`${course.sections.length} 章 · ${course.lesson_count} 课时`));if(course.access_mode==='points')facts.append(el('span',`课程价格 · ${course.points_price} 积分`),el('span',`我的积分 · ${course.points_balance}`));
+  const actions=el('div','','course-preview-actions');if(!course.is_enrolled&&course.can_manage)actions.append(button('管理课程',()=>route(`/editor/${course.id}/content`),'button secondary'));else if(!course.is_enrolled&&course.access_mode==='public'){actions.append(el('span','公开课程可直接阅读，加入后会显示在“我的课程”。','course-muted'),button('加入我的课程',async()=>{await api(`/courses/${course.id}/enroll`,{method:'POST'});notify('课程已加入我的课程');await renderCoursePage({kind:'preview',id:course.id});},'button primary'));}else if(!course.is_enrolled&&course.access_mode==='points')actions.append(button(`使用 ${course.points_price} 积分购买`,async()=>{if(course.points_balance<course.points_price){notify('积分不足，无法购买该课程','error');return;}if(!await confirmAction(`购买“${course.title}”将扣除 ${course.points_price} 积分，购买后可永久学习。`,{title:'确认购买课程',confirmText:'确认购买'}))return;await api(`/courses/${course.id}/purchase`,{method:'POST',body:json({expected_points_price:course.points_price})});notify('课程购买成功，已加入我的课程');await renderCoursePage({kind:'preview',id:course.id});},'button primary'));else if(!course.is_enrolled&&course.access_mode==='roster')actions.append(el('span','部分小节可预览，其余内容由课程管理员指定开放。','course-muted'));
   if(course.is_enrolled&&course.is_removed_from_library)actions.append(libraryAction(course,()=>renderCoursePage({kind:'preview',id:course.id}),'button secondary'));
   header.append(facts);if(actions.childElementCount)media.append(actions);
   const outline=learnerCourseOutline(course,async lesson=>{
-    if(!course.is_enrolled&&!course.can_manage){
+    if(!course.is_enrolled&&!course.can_manage&&course.access_mode==='public'){
       await api(`/courses/${course.id}/enroll`,{method:'POST'});
       if(turn!==generation)return;course.is_enrolled=true;notify('已加入课程');
     }
@@ -399,14 +399,15 @@ function renderEditorInfo(courseId,course,target=root()){
   const description=markdownEditor('课程简介',course?.description||'',{imagePath:courseId?`/courses/${courseId}/markdown-images`:null,
     rows:12,maxLength:4000,hint:courseId?'支持 Markdown、公式和直接粘贴图片。':'支持 Markdown 和公式；保存草稿后可回来粘贴图片。'});
   const cover=editorCoverField(course,title);
-  const access=el('select');for(const [value,label]of [['public','公开加入'],['roster','名单学员']]){const option=el('option',label);option.value=value;access.append(option);}access.value=course?.access_mode||'public';
-  const basics=el('div','','course-info-basics');basics.append(field('课程名称',title),field('加入方式',access,'公开课程显示在课程广场；名单课程仅对分配的学员开放。'));
+  const access=el('select');for(const [value,label]of [['public','公开阅读'],['roster','指定成员加入'],['points','积分购买']]){const option=el('option',label);option.value=value;access.append(option);}access.value=course?.access_mode||'public';
+  const price=input(String(course?.points_price||''),'number');price.min='1';price.step='1';price.inputMode='numeric';price.hidden=access.value!=='points';const priceField=field('课程价格',price,'购买后永久解锁；修改价格不影响已购买成员。');priceField.hidden=access.value!=='points';access.addEventListener('change',()=>{priceField.hidden=access.value!=='points';});
+  const basics=el('div','','course-info-basics');basics.append(field('课程名称',title),field('访问方式',access,'公开课程可直接阅读；指定成员由管理员授权；积分课程购买后永久解锁。'),priceField);
   const actions=el('div','','course-editor-actions course-info-actions');
   const cancel=button('取消',()=>route(courseId?`/editor/${courseId}/content`:'/manage'),'button secondary');
   const save=button(courseId?'保存课程信息':'保存草稿并继续',async()=>{
     if(!title.value.trim()){title.focus();throw new Error('请填写课程名称');}
     const file=cover.file;
-    const payload={title:title.value.trim(),description:description.editor.value.trim(),publication_status:course?.publication_status||'draft',access_mode:access.value,host_id:course?.host_id||state.user.id,member_ids:course?.member_ids||[]};
+    const payload={title:title.value.trim(),description:description.editor.value.trim(),publication_status:course?.publication_status||'draft',access_mode:access.value,host_id:course?.host_id||state.user.id,member_ids:course?.member_ids||[]};if(access.value==='points'){if(!Number.isSafeInteger(Number(price.value))||Number(price.value)<=0){price.focus();throw new Error('请输入大于 0 的整数积分价格');}payload.points_price=Number(price.value);}
     if(!file&&cover.preset!=='current'){payload.cover_kind='preset';payload.cover_value=cover.preset;}
     const saved=await api(courseId?`/courses/${courseId}`:'/courses',{method:courseId?'PATCH':'POST',body:json(payload)});
     const editing=!!courseId;courseId=saved.id;
@@ -418,8 +419,8 @@ function renderEditorInfo(courseId,course,target=root()){
 }
 
 async function renderEditorPublish(course,turn,target){
-  const issues=course.publish_issues||[];const hasLive=allLessons(course).some(lesson=>lesson.items.some(item=>item.kind==='live'));const panel=el('section','','course-editor-panel');panel.append(el('h2','发布设置'),el('p',course.access_mode==='public'?'公开课程加入后即可学习；如果包含直播课时，需要指定主持人。':'分配可访问课程的学员；如果包含直播课时，需要指定主持人。','course-muted'));
-  const access=el('div','','course-editor-setting');access.append(el('span','加入方式','course-editor-setting-label'),el('strong',course.access_mode==='public'?'公开加入':'名单学员'));panel.append(access);
+  const issues=course.publish_issues||[];const hasLive=allLessons(course).some(lesson=>lesson.items.some(item=>item.kind==='live'));const accessHelp={public:'公开课程可直接阅读。',roster:'仅分配的成员可学习，预览范围由章节和小节设置决定。',points:'用户支付课程积分后永久解锁，预览范围由章节和小节设置决定。'};const accessLabel={public:'公开阅读',roster:'指定成员加入',points:`积分购买 · ${course.points_price} 积分`};const panel=el('section','','course-editor-panel');panel.append(el('h2','发布设置'),el('p',`${accessHelp[course.access_mode]}${hasLive?' 如果包含直播课时，需要指定主持人。':''}`,'course-muted'));
+  const access=el('div','','course-editor-setting');access.append(el('span','访问方式','course-editor-setting-label'),el('strong',accessLabel[course.access_mode]));panel.append(access);
   let people=[];if(hasLive||course.access_mode==='roster'){try{const result=await api('/live/people');people=Array.isArray(result)?result:result.items||[];}catch(error){if(turn!==generation)return;const actions=el('div','','course-editor-actions');actions.append(button('重试加载',()=>renderCoursePage({kind:'editor',id:course.id,step:'publish'}),'button secondary'),deleteCourseAction(course));target.append(panel,el('p',`暂时无法读取学员和主持人列表：${error.message}`,'course-error-text'),actions);return;}}
   if(turn!==generation)return;
   if(hasLive){const host=el('select');for(const person of people){const option=el('option',person.username);option.value=person.id;host.append(option);}if(!people.some(person=>person.id===course.host_id)){const current=el('option',course.host_name||'当前主持人');current.value=course.host_id;host.append(current);}host.value=String(course.host_id);panel.append(field('课程主持人',host,'主持人可在直播课时中管理课堂。'));}
@@ -493,8 +494,8 @@ function addSection(course,editor=false){
 }
 
 function editSection(course,section,editor=false){
-  const {dialog,body,footer}=modal('编辑章节');const title=input(section.title);title.required=true;body.append(field('章节名称',title));
-  footer.append(button('保存章节',async()=>{if(!title.value.trim())throw new Error('请填写章节名称');await api(`/courses/sections/${section.id}`,{method:'PATCH',body:json({title:title.value.trim(),position:section.position})});dialog.close();await refreshManagedCourse(course.id,editor);},'button primary'));
+  const {dialog,body,footer}=modal('编辑章节');const title=input(section.title);title.required=true;const preview=input('','checkbox');preview.checked=Boolean(section.preview_enabled);body.append(field('章节名称',title),field('允许本章预览',preview,'关闭后，本章内所有小节都不能在购买或加入前预览。'));
+  footer.append(button('保存章节',async()=>{if(!title.value.trim())throw new Error('请填写章节名称');await api(`/courses/sections/${section.id}`,{method:'PATCH',body:json({title:title.value.trim(),position:section.position,preview_enabled:preview.checked})});dialog.close();await refreshManagedCourse(course.id,editor);},'button primary'));
 }
 
 function addLesson(course,section,editor=false){
@@ -555,8 +556,8 @@ async function renderMarkdownWorkspace(lessonId,assetId,turn){
 }
 
 function editLesson(course,lesson,editor=false){
-  const {dialog,body,footer}=modal('编辑课时');const title=input(lesson.title);title.required=true;const description=markdownEditor('课时说明 · Markdown',lesson.description||'',{imagePath:`/courses/lessons/${lesson.id}/markdown-images`,rows:10,hint:'可写简短说明，也支持直接粘贴图片。'});body.append(field('课时名称',title),description.container);
-  const save=button('保存课时',async()=>{if(!title.value.trim())throw new Error('请填写课时名称');await api(`/courses/lessons/${lesson.id}`,{method:'PATCH',body:json({title:title.value.trim(),description:description.editor.value.trim(),position:lesson.position})});dialog.close();await refreshManagedCourse(course.id,editor);},'button primary');description.bindSave(save);footer.append(save);
+  const {dialog,body,footer}=modal('编辑课时');const title=input(lesson.title);title.required=true;const preview=input('','checkbox');preview.checked=Boolean(lesson.preview_enabled);const description=markdownEditor('课时说明 · Markdown',lesson.description||'',{imagePath:`/courses/lessons/${lesson.id}/markdown-images`,rows:10,hint:'可写简短说明，也支持直接粘贴图片。'});body.append(field('课时名称',title),field('允许预览本小节',preview,'还需要同时开启所属章节的预览开关。'),description.container);
+  const save=button('保存课时',async()=>{if(!title.value.trim())throw new Error('请填写课时名称');await api(`/courses/lessons/${lesson.id}`,{method:'PATCH',body:json({title:title.value.trim(),description:description.editor.value.trim(),position:lesson.position,preview_enabled:preview.checked})});dialog.close();await refreshManagedCourse(course.id,editor);},'button primary');description.bindSave(save);footer.append(save);
 }
 
 async function moveItem(course,lesson,index,direction,editor=false){

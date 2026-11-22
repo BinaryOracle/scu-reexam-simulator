@@ -323,7 +323,7 @@ function updatePurchaseTotal() {
 }
 
 function renderPointsHistory(records) {
-  const labels = { redemption: "卡密兑换", checkin_reward: "每日训练连续签到", coding_checkin: "算法带刷连续签到", question_contribution: "题库贡献奖励", coding_contribution: "算法投稿奖励", leaderboard_reward: "周榜奖励", ranking_award: "周榜奖励", purchase_interview: "购买模拟面试次数", admin: "管理员调整" };
+  const labels = { redemption: "卡密兑换", checkin_reward: "每日训练连续签到", coding_checkin: "算法带刷连续签到", question_contribution: "题库贡献奖励", coding_contribution: "算法投稿奖励", leaderboard_reward: "周榜奖励", ranking_award: "周榜奖励", purchase_interview: "购买模拟面试次数", course_purchase: "课程积分购买", admin: "管理员调整" };
   if (!records.length) {
     $("pointsHistory").replaceChildren(emptyState("还没有积分记录", "签到、榜单奖励和卡密兑换获得积分后，可在这里查看收支。", "◇"));
     return;

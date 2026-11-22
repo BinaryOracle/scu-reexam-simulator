@@ -167,7 +167,9 @@ def test_public_enrollment_draft_visibility_and_course_history(client):
     public_items = client.get('/api/courses?scope=public', headers=bob).json()['items']
     assert course_id in [item['id'] for item in public_items]
     assert draft_id not in [item['id'] for item in public_items]
-    assert client.get(f'/api/courses/{course_id}', headers=bob).status_code == 404
+    public_detail = client.get(f'/api/courses/{course_id}', headers=bob)
+    assert public_detail.status_code == 200
+    assert not public_detail.json()['is_enrolled']
     enrolled = client.post(f'/api/courses/{course_id}/enroll', headers=bob)
     assert enrolled.status_code == 200
     assert enrolled.json()['sections'][0]['lessons'][0]['items'][0]['asset']['original_name'] == 'handout.pdf'
@@ -178,7 +180,9 @@ def test_public_enrollment_draft_visibility_and_course_history(client):
     assert 'member_ids' in client.get(f'/api/courses/{course_id}', headers=admin).json()
     assert client.get(f'/api/live/courses/{course_id}', headers=bob).status_code == 200
     assert client.delete(f'/api/courses/{course_id}/enroll', headers=bob).json() == {'ok': True}
-    assert client.get(f'/api/courses/{course_id}', headers=bob).status_code == 404
+    public_after_unenroll = client.get(f'/api/courses/{course_id}', headers=bob)
+    assert public_after_unenroll.status_code == 200
+    assert not public_after_unenroll.json()['is_enrolled']
 
 
 def test_unpublishing_or_archiving_revokes_enrolled_learner_access(client):
@@ -707,7 +711,7 @@ def test_public_preview_is_safe_and_publishing_requires_ready_content(client):
     assert body['sections'][0]['lessons'][0]['title'] == '第一讲：复杂度分析'
     assert body['sections'][0]['lessons'][0]['content_kinds'] == ['document']
     assert 'member_ids' not in body and 'owner_id' not in body and 'items' not in body['sections'][0]['lessons'][0]
-    assert client.get(f"/api/courses/lessons/{lesson['id']}", headers=learner).status_code == 404
+    assert client.get(f"/api/courses/lessons/{lesson['id']}", headers=learner).status_code == 200
 
 
 def test_roster_course_sections_and_lesson_authorization(client):
@@ -820,7 +824,7 @@ def test_private_course_assets_ticket_range_and_revoked_enrollment(client):
     assert client.post(f'/api/courses/{course_id}/enroll', headers=bob).status_code == 200
     file_url = f"/api/courses/assets/{document.json()['id']}/file"
     assert client.get(file_url).status_code == 401
-    assert client.get(file_url, headers=login(client, 'alice')).status_code == 404
+    assert client.get(file_url, headers=login(client, 'alice')).content == b'%PDF-private'
     assert client.get(file_url, headers=bob).content == b'%PDF-private'
 
     video = client.post(url + '?kind=video', headers=admin,
@@ -834,7 +838,8 @@ def test_private_course_assets_ticket_range_and_revoked_enrollment(client):
     assert ranged.content == b'2345'
     assert ranged.headers['content-type'].startswith('video/mp4')
     assert client.get(ticket_url).content == b'0123456789'
-    assert client.delete(f'/api/courses/{course_id}/enroll', headers=bob).status_code == 200
+    publish['publication_status'] = 'archived'
+    assert client.patch(f'/api/courses/{course_id}', headers=admin, json=publish).status_code == 200
     assert client.get(ticket_url).status_code == 404
     with connect() as db:
         bob_id = client.get('/api/me', headers=bob).json()['id']
