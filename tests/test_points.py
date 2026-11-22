@@ -100,6 +100,40 @@ def test_points_migration_preserves_existing_allowances_and_account_deletion(cli
         assert db.execute('PRAGMA foreign_key_check').fetchall() == []
 
 
+def test_admin_can_configure_all_points_reward_sources_in_one_place(client):
+    admin = login(client, 'manager')
+    alice = login(client, 'alice')
+    response = client.patch('/api/admin/credit-settings', headers=admin, json={
+        'invite_signup_points': 5,
+        'training_checkin_points_per_week': 2,
+        'coding_checkin_points_per_week': 4,
+        'training_questions_per_reward': 3,
+        'training_contribution_points': 2,
+        'coding_questions_per_reward': 4,
+        'coding_contribution_points': 3,
+        'leaderboard_rewards': [6, 4, 2],
+    })
+    assert response.status_code == 200, response.text
+    rules = response.json()['reward_rules']
+    assert rules == {
+        'invite_signup_points': 5,
+        'training_checkin_points_per_week': 2,
+        'coding_checkin_points_per_week': 4,
+        'training_questions_per_reward': 3,
+        'training_contribution_points': 2,
+        'coding_questions_per_reward': 4,
+        'coding_contribution_points': 3,
+        'leaderboard_rewards': [6, 4, 2],
+    }
+    training_home = client.get('/api/training/home', headers=alice).json()
+    coding_home = client.get('/api/coding/home', headers=alice).json()
+    assert training_home['checkin_points_per_week'] == 2
+    assert training_home['next_reward'] == 2
+    assert coding_home['daily']['checkin_points_per_week'] == 4
+    assert coding_home['daily']['next_reward'] == 4
+    assert client.get('/api/leaderboard', headers=alice).json()['rewards'] == [6, 4, 2]
+
+
 def _seed_boards(db, username, value, *, day='2026-11-20'):
     uid = db.execute('SELECT id FROM users WHERE username=?', (username,)).fetchone()[0]
     questions = [r[0] for r in db.execute('SELECT id FROM training_questions ORDER BY id LIMIT ?', (value,))]

@@ -1,5 +1,6 @@
 """Atomic points wallet and idempotent purchases, owned by the caller transaction."""
 import time
+import json
 from fastapi import HTTPException
 
 
@@ -17,6 +18,9 @@ def initialize(db):
         UNIQUE(period_end,board,rank))''')
     db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('leaderboard_rewards_started',?)",
                (str(time.time()),))
+    for key, value in (('invite_signup_points', '3'), ('training_checkin_points_per_week', '1'),
+                       ('coding_checkin_points_per_week', '1'), ('leaderboard_rewards', '[3,2,1]')):
+        db.execute('INSERT OR IGNORE INTO app_settings(key,value) VALUES (?,?)', (key, value))
     columns = {row['name'] for row in db.execute('PRAGMA table_info(voucher_packages)')}
     if 'deleted' not in columns:
         db.execute('ALTER TABLE voucher_packages ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0 CHECK(deleted IN (0,1))')
@@ -28,6 +32,27 @@ def initialize(db):
 
 def cost(db):
     return int(db.execute("SELECT value FROM app_settings WHERE key='interview_points_cost'").fetchone()[0])
+
+
+def reward_rules(db):
+    """Read centralized amounts for attendance and weekly leaderboard rewards."""
+    value = lambda key: int(db.execute('SELECT value FROM app_settings WHERE key=?', (key,)).fetchone()[0])
+    from app.services import coding_practice, contribution_rewards
+    training = contribution_rewards.current_policy(db)
+    coding = coding_practice.settings(db)
+    return {'invite_signup_points': value('invite_signup_points'),
+            'training_checkin_points_per_week': value('training_checkin_points_per_week'),
+            'coding_checkin_points_per_week': value('coding_checkin_points_per_week'),
+            'training_questions_per_reward': training['questions_per_reward'],
+            'training_contribution_points': training['credits_per_reward'],
+            'coding_questions_per_reward': coding['questions_per_reward'],
+            'coding_contribution_points': coding['credits_per_reward'],
+            'leaderboard_rewards': json.loads(db.execute("SELECT value FROM app_settings WHERE key='leaderboard_rewards'").fetchone()[0])}
+
+
+def leaderboard_rewards(db):
+    """Return configurable points awarded to first, second, and third place."""
+    return json.loads(db.execute("SELECT value FROM app_settings WHERE key='leaderboard_rewards'").fetchone()[0])
 
 
 def adjust(db, uid, delta, *, kind, reference=''):

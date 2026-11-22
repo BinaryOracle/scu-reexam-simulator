@@ -7,7 +7,7 @@
     <title>知序 · 复试模拟系统</title>
     <link rel="icon" href="/static/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=0.19.1" />
-    <link rel="stylesheet" href="/static/style.css?v=20261121-empty-state-v1" />
+    <link rel="stylesheet" href="/static/style.css?v=20261122-reward-groups-v1" />
     <link rel="stylesheet" href="/static/workspace.css?v=20261121-header-grid-v13" />
     <link rel="stylesheet" href="/static/contest-focus.css?v=20261115-contest-records-v2" />
     <link rel="stylesheet" href="/static/live.css?v=20261118-course-v9" />
@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/static/home-layout.css?v=20261115-layout-v1" />
     <link rel="stylesheet" href="/static/training.css?v=20261121-empty-state-v2" />
     <link rel="stylesheet" href="/static/leaderboard.css?v=20261117-weekly-leaderboard-v3" />
-    <link rel="stylesheet" href="/static/credits.css?v=20261121-points-history-scroll-v1" />
+    <link rel="stylesheet" href="/static/credits.css?v=20261122-voucher-spacing-v1" />
     <link rel="stylesheet" href="/static/select-controls.css?v=20261116-v2" />
     <script>
       try {
@@ -91,6 +91,7 @@
               <div class="input-icon"><span aria-hidden="true">＠</span><input id="loginEmail" name="email" type="email" autocomplete="email" placeholder="请输入你的邮箱" maxlength="254" required /></div>
               <label for="loginCode">验证码</label>
               <div class="email-code-row"><input id="loginCode" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="6 位邮件验证码" required /><button id="sendEmailCode" type="button" class="button secondary">获取验证码</button></div>
+              <details class="email-invite-toggle"><summary>首次注册可填写邀请码</summary><p>仅首次注册创建账号时有效，已有账号登录无需填写。</p><label for="loginInvitationCode">邀请码（选填）</label><input id="loginInvitationCode" name="invitation_code" type="text" maxlength="32" autocomplete="off" placeholder="输入邀请人的邀请码" /></details>
               <p id="emailCodeStatus" class="field-help" role="status" aria-live="polite" hidden></p>
             </fieldset>
             <fieldset id="passwordLoginFields" class="login-fields" hidden disabled>
@@ -193,26 +194,15 @@
               >›</span
             >
           </button>
-          <div id="contestNavGroup" class="sidebar-nav-group">
+          <div class="sidebar-nav-group">
             <div class="sidebar-nav-parent">
               <button type="button" class="nav-item" data-view="contest">
                 <span class="nav-icon code-icon" aria-hidden="true">&lt;/&gt;</span
                 ><span class="nav-label">上机考试</span><span class="nav-arrow" aria-hidden="true">›</span>
               </button>
-              <button id="contestNavToggle" type="button" class="nav-group-toggle" aria-label="展开上机考试菜单" aria-controls="contestSubnav" aria-expanded="false" title="展开上机考试菜单">
-                <span aria-hidden="true">⌄</span>
-              </button>
-            </div>
-            <div id="contestSubnav" class="sidebar-subnav">
-              <button type="button" class="nav-item submission-nav-item" data-view="submissions">
-                <span class="nav-icon" aria-hidden="true">▤</span><span class="nav-label">提交记录</span><span
-                  class="nav-arrow"
-                  aria-hidden="true"
-                  >›</span
-                >
-              </button>
             </div>
           </div>
+          <button type="button" class="nav-item" data-view="referrals" hidden><span class="nav-icon" aria-hidden="true">↗</span><span class="nav-label">邀请返利</span><span class="nav-arrow" aria-hidden="true">›</span></button>
         </nav>
         <div class="sidebar-bottom">
           <span class="sidebar-version">知序 REEXAM · V1.0</span>
@@ -325,7 +315,8 @@
                   ><input
                     id="userSearch"
                     type="search"
-                    placeholder="搜索用户名或邮箱…"
+                    placeholder="按用户名筛选…"
+                  /><input id="userEmailSearch" type="search" placeholder="按邮箱筛选" aria-label="按邮箱筛选用户" /><input id="userReferrerSearch" type="search" placeholder="邀请者邮箱/用户名" aria-label="按邀请者筛选用户" /><select id="userRoleFilter" aria-label="按角色筛选"><option value="all">全部角色</option><option value="user">普通用户</option><option value="admin">管理员</option></select><select id="userRebateFilter" aria-label="按返利状态筛选"><option value="all">全部返利</option><option value="pending">待兑现</option><option value="redeemed">已兑现</option><option value="none">未填写</option></select
                   /><label class="sr-only" for="userStatus">账号状态筛选</label
                   ><select id="userStatus">
                     <option value="all">全部状态</option>
@@ -368,6 +359,42 @@
               <div><h2>积分购买规则</h2><p class="muted">设置购买 1 次模拟面试所需的积分，修改后对后续购买立即生效。</p></div>
               <div class="points-settings-fields"><div><label for="interviewPointsCost">每次面试所需积分</label><input id="interviewPointsCost" type="number" min="1" max="1000000" step="1" value="1" required /></div><button type="submit" class="button secondary">保存规则</button></div>
             </form>
+            <form id="pointsRewardRulesForm" class="panel reward-rules-panel">
+              <div class="section-heading"><div><h2>积分奖励规则</h2><p class="muted">各项积分奖励集中配置；规则修改仅影响后续获得的奖励。连续签到按当前连续天数 ÷ 7 向下取整，再乘每周奖励积分。</p></div></div>
+              <div class="reward-rule-groups">
+                <section class="reward-rule-group" aria-labelledby="rewardInviteTitle">
+                  <div class="reward-rule-heading"><h3 id="rewardInviteTitle">邀请与签到</h3><p>邀请注册和连续练习奖励</p></div>
+                  <div class="reward-rule-fields">
+                    <label>邀请注册奖励<input name="invite_signup_points" type="number" min="0" max="1000000" required /></label>
+                    <label>每日训练连续签到（每满 7 天）<input name="training_checkin_points_per_week" type="number" min="0" max="1000000" required /></label>
+                    <label>算法带刷连续签到（每满 7 天）<input name="coding_checkin_points_per_week" type="number" min="0" max="1000000" required /></label>
+                  </div>
+                </section>
+                <section class="reward-rule-group" aria-labelledby="rewardTrainingTitle">
+                  <div class="reward-rule-heading"><h3 id="rewardTrainingTitle">题库投稿</h3><p>题目审核通过并公开后计入投稿奖励</p></div>
+                  <div class="reward-rule-fields">
+                    <label>每次奖励所需题数<input name="training_questions_per_reward" type="number" min="1" max="10000" required /></label>
+                    <label>达到题数后的奖励积分<input name="training_contribution_points" type="number" min="1" max="1000000" required /></label>
+                  </div>
+                </section>
+                <section class="reward-rule-group" aria-labelledby="rewardCodingTitle">
+                  <div class="reward-rule-heading"><h3 id="rewardCodingTitle">算法投稿</h3><p>算法题通过审核并公开后计入投稿奖励</p></div>
+                  <div class="reward-rule-fields">
+                    <label>每次奖励所需题数<input name="coding_questions_per_reward" type="number" min="1" max="10000" required /></label>
+                    <label>达到题数后的奖励积分<input name="coding_contribution_points" type="number" min="1" max="1000000" required /></label>
+                  </div>
+                </section>
+                <section class="reward-rule-group" aria-labelledby="rewardLeaderboardTitle">
+                  <div class="reward-rule-heading"><h3 id="rewardLeaderboardTitle">周榜奖励</h3><p>每周结算时发放给各榜单前三名</p></div>
+                  <div class="reward-rule-fields">
+                    <label>周榜第 1 名<input name="leaderboard_1" type="number" min="0" max="1000000" required /></label>
+                    <label>周榜第 2 名<input name="leaderboard_2" type="number" min="0" max="1000000" required /></label>
+                    <label>周榜第 3 名<input name="leaderboard_3" type="number" min="0" max="1000000" required /></label>
+                  </div>
+                </section>
+              </div>
+              <div class="form-footer"><span></span><button class="button secondary" type="submit">保存奖励规则</button></div>
+            </form>
             <form id="voucherPackageForm" class="panel package-create-panel">
               <div><h2>新增卡密套餐</h2><p class="muted">填写套餐金额与积分，保存后即可生成卡密；已发行卡密的面值不受后续设置影响。</p></div>
               <div class="package-create-fields"><div><label for="packagePrice">金额（元）</label><input id="packagePrice" type="number" min="0.01" max="1000000" step="0.01" placeholder="例如 3.50" required /></div><div><label for="packageCredits">积分数量</label><input id="packageCredits" type="number" min="1" max="1000000" step="1" placeholder="例如 6" required /></div><button type="submit" class="button secondary">＋ 新增套餐</button></div>
@@ -396,6 +423,24 @@
               <div class="model-compat-note"><strong>接口兼容说明</strong><span>面试与趋势分析使用 OpenAI 风格 Chat Completions；语音识别依赖音频输入及服务商参数，语音合成按所选协议调用。切换服务商时请同时确认模型名称和所需能力均受支持。</span></div>
               <div id="modelServiceList" class="model-service-list" aria-label="已配置的大模型服务"></div>
             </div>
+            <section id="backupPanel" class="panel backup-panel" aria-labelledby="backupTitle" hidden>
+              <div class="backup-heading">
+                <div><span class="eyebrow">BACKUP &amp; RESTORE</span><h2 id="backupTitle">数据备份与恢复</h2><p class="muted">按模块保存系统数据，或加载备份恢复数据。账号模块保留登录密码，恢复后可继续使用原密码登录。</p></div>
+                <span class="backup-mark" aria-hidden="true">↗</span>
+              </div>
+              <p class="backup-security-note">备份包含密码、加密凭据及配套密钥，仅超级管理员可操作。ZIP 文件未额外加密，请妥善保管。</p>
+              <div class="backup-section-heading"><h3>导出备份</h3><div class="backup-selection-actions"><button id="backupSelectAll" type="button" class="text-button">全选</button><button id="backupSelectNone" type="button" class="text-button">清空</button><button id="refreshBackupModules" type="button" class="text-button">刷新统计</button></div></div>
+              <div id="backupModuleList" class="backup-module-grid" aria-label="备份模块列表"></div>
+              <div class="backup-toolbar"><span id="backupStatus" class="backup-status" role="status" aria-live="polite">正在加载模块…</span><button id="exportBackup" type="button" class="button primary" disabled>下载备份 ZIP</button></div>
+              <form id="backupRestoreForm" class="backup-restore-section">
+                <div><h3>加载备份</h3><p class="muted">先选择文件并校验，确认后才会替换备份中所含模块的数据。其他模块保留；课程与直播、账号与积分分别联动备份。</p></div>
+                <label for="backupFile">备份文件（ZIP）</label>
+                <div class="backup-upload-row"><input id="backupFile" type="file" accept=".zip,application/zip" required /><button id="previewBackup" type="submit" class="button secondary">上传并校验</button></div>
+                <div id="backupPreview" class="backup-preview" hidden></div>
+                <p id="backupRestoreStatus" class="backup-status" role="status" aria-live="polite"></p>
+                <div class="backup-restore-footer"><span class="muted">恢复前自动保留安全副本；恢复成功后所有账号需要重新登录。</span><button id="restoreBackup" type="button" class="button secondary danger" disabled>恢复这份备份</button></div>
+              </form>
+            </section>
           </section>
           <section id="coding" aria-label="算法带刷" hidden><div id="codingContent"></div></section>
           <section id="codingAdmin" aria-label="带刷题库管理" hidden><div id="codingAdminContent"></div></section>
@@ -425,6 +470,11 @@
             </section>
             <section id="profilePointsHistorySection" class="panel points-history" aria-labelledby="pointsHistoryTitle"><div class="points-shop-heading"><div><span class="eyebrow">POINTS ACTIVITY</span><h2 id="pointsHistoryTitle">积分明细</h2></div><span class="muted">最近 50 笔</span></div><div id="pointsHistory"></div></section>
             <div id="profileRedemptionHistorySection"><div class="section-heading"><h2>卡密兑换记录</h2></div><div id="redemptionHistory" class="panel"></div></div>
+          </section>
+          <section id="referrals" aria-labelledby="referralsTitle" hidden>
+            <div class="page-heading"><div><div class="eyebrow">INVITE &amp; EARN</div><h1 id="referralsTitle">邀请返利<span class="heading-dot">.</span></h1><p class="muted">邀请同学一起备考，注册奖励与服务返利都在这里查看。</p></div></div>
+            <div id="referralStats" class="referral-overview-grid" aria-live="polite"></div>
+            <section id="referralContent" class="panel referral-profile" aria-label="邀请码与邀请记录"></section>
           </section>
           <section id="questionBank" aria-labelledby="questionBankTitle" hidden>
             <div class="page-heading">
@@ -680,25 +730,6 @@
             </div>
           </dialog>
 
-          <section id="submissions" aria-labelledby="submissionsTitle" hidden>
-            <div class="page-heading">
-              <div>
-                <div class="eyebrow">SUBMISSION HISTORY</div>
-                <h1 id="submissionsTitle">
-                  提交记录<span class="heading-dot">.</span>
-                </h1>
-                <p class="muted">每一次尝试都有记录，回顾你的解题历程。</p>
-              </div>
-              <button
-                id="refreshSubmissions"
-                type="button"
-                class="button secondary"
-              >
-                ↻ 刷新记录
-              </button>
-            </div>
-            <div id="submissionContent"></div>
-          </section>
           <footer class="page-footer">
             <span>知序 · 复试模拟系统</span
             ><span>专注当下的练习，迎接下一次进步。</span>
@@ -907,6 +938,6 @@
       </form>
     </dialog>
     <dialog id="announcementDialog" class="account-dialog announcement-dialog" aria-labelledby="announcementDialogTitle"><div class="dialog-header"><div><span class="eyebrow">公告</span><h2 id="announcementDialogTitle">公告详情</h2></div><button id="closeAnnouncementDialog" type="button" class="icon-button" aria-label="关闭公告">×</button></div><div id="announcementDialogContent" class="dialog-body announcement-dialog-content"></div></dialog>
-    <script type="module" src="/static/app.js?v=20261121-workspace-controls-v7"></script>
+    <script type="module" src="/static/app.js?v=20261122-points-display-v1"></script>
   </body>
 </html>

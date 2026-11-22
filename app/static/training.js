@@ -2,7 +2,7 @@
 import { api, state } from './api.js?v=20261114-ui-v17';
 import { $, el, button, emptyState, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
 import { selectField, pagination, questionContent, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261121-question-markdown-v1';
-import { mountLeaderboard } from './leaderboard.js?v=20261117-weekly-leaderboard-v3';
+import { mountLeaderboard } from './leaderboard.js?v=20261122-points-display-v1';
 let generation = 0, homeData = null, session = null, reviewingCardId = null, roundReviewMode = false;
 let listRequest = 0;
 let section = 'interview';
@@ -119,7 +119,8 @@ function renderHome(root) {
     item.title = day.date; item.append(el('span', day.date.slice(5).replace('-', '/')), el('b', day.checked_in ? '✓' : '·')); days.append(item);
   }
   streak.append(days, el('p', homeData.is_admin ? '持续练习，让表达更从容。管理员无需领取积分。' : `下个节点：连续 ${homeData.next_milestone} 天，再得 ${homeData.next_reward} 积分。`, 'muted'));
-  const rule = el('details', '', 'learning-rules'); rule.append(el('summary', '查看打卡奖励规则'), el('p', '第 7 天获得 1 积分，第 14 天再获得 2 积分，第 21 天再获得 3 积分，依此递增。断签后从第 1 天重新累计，已获积分保留。以北京时间的自然日为准，同题当日仅计一次。'));
+  const weeklyReward = homeData.checkin_points_per_week;
+  const rule = el('details', '', 'learning-rules'); rule.append(el('summary', '查看打卡奖励规则'), el('p', `第 7 天奖励 ${weeklyReward} 积分，第 14 天奖励 ${weeklyReward * 2} 积分，第 21 天奖励 ${weeklyReward * 3} 积分，之后每满 7 天按连续周数递增。断签后从第 1 天重新累计，已获积分保留。以北京时间的自然日为准，同题当日仅计一次。`));
   streak.append(rule); overview.append(goal, streak); root.append(overview);
   if (homeData.active_session) {
     const active = homeData.active_session;

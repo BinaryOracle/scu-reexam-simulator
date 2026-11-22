@@ -15,6 +15,7 @@ class EmailCodeRequest(BaseModel):
 
 class EmailLoginRequest(EmailCodeRequest):
     code: str = Field(pattern=r'^[0-9]{6}$')
+    invitation_code: str | None = Field(default=None, max_length=32)
 
 
 def _ip(request):
@@ -37,7 +38,7 @@ def send_code(payload: EmailCodeRequest, request: Request, response: Response):
 @router.post('/api/auth/email/login')
 def login(payload: EmailLoginRequest, request: Request, response: Response):
     response.headers['Cache-Control'] = 'no-store'
-    return email_auth.login(payload.email, payload.code, _ip(request))
+    return email_auth.login(payload.email, payload.code, _ip(request), payload.invitation_code)
 
 
 class SecurityCodeRequest(BaseModel):

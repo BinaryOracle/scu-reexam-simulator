@@ -83,15 +83,7 @@ async function renderContribution(root) {
   const value=await api('/admin/training/contribution-rewards');
   const panel=el('section','','panel contribution-admin');
   const heading=el('div');heading.append(el('span','CONTRIBUTION REWARDS','eyebrow'),el('h2','题库投稿奖励'),el('p','仅统计规则生效后审核通过并公开的普通用户题目。规则变更不重算历史投稿。','muted'));
-  const form=el('form','','contribution-policy-form');
-  const questions=el('input');questions.type='number';questions.min='1';questions.max='10000';questions.required=true;questions.value=String(value.policy.questions_per_reward);
-  const credits=el('input');credits.type='number';credits.min='1';credits.max='1000000';credits.required=true;credits.value=String(value.policy.credits_per_reward);
-  for(const [text,input] of [['审核通过题数',questions],['奖励积分',credits]]){const label=el('label',text);label.append(input);form.append(label);}
-  form.append(button('保存新规则',async()=>{
-    await api('/admin/training/contribution-rewards',{method:'PUT',body:JSON.stringify({questions_per_reward:Number(questions.value),credits_per_reward:Number(credits.value)})});
-    notify('投稿奖励新规则已生效');await refreshTrainingAdmin();
-  },'button primary'));
-  panel.append(heading,form,el('p','当前统计 ' + value.total + ' 个普通用户 · 规则版本 ' + value.policy.id,'muted'));
+  panel.append(heading,el('p',`当前规则：每 ${value.policy.questions_per_reward} 道审核通过的题目奖励 ${value.policy.credits_per_reward} 积分。请在“卡密与积分 → 积分奖励规则”统一调整。`,'muted'),button('前往积分奖励规则',()=>window.dispatchEvent(new CustomEvent('navigate-view',{detail:{view:'vouchers'}})),'button secondary'),el('p','当前统计 ' + value.total + ' 个普通用户 · 规则版本 ' + value.policy.id,'muted'));
   const table=el('div','','contribution-admin-list');
   for(const item of value.items){const row=el('div','','contribution-admin-row');row.append(el('strong',item.username),el('span',item.approved_count+' 道通过'),el('span','累计 +'+item.credits_earned+' 积分'));table.append(row);}
   panel.append(table);root.append(panel);

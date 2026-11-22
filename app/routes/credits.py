@@ -6,7 +6,7 @@ import time
 from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse, Response
-from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, field_validator
 from app.db import connect
 from app.services.auth import administrator, current_user
 from app.services import credits, points
@@ -26,6 +26,21 @@ class CreditSettings(BaseModel):
     model_config = ConfigDict(extra='forbid')
     default_credits: StrictInt | None = Field(default=None, ge=0, le=1000000)
     interview_points_cost: StrictInt | None = Field(default=None, ge=1, le=1000000)
+    invite_signup_points: StrictInt | None = Field(default=None, ge=0, le=1000000)
+    training_checkin_points_per_week: StrictInt | None = Field(default=None, ge=0, le=1000000)
+    coding_checkin_points_per_week: StrictInt | None = Field(default=None, ge=0, le=1000000)
+    training_questions_per_reward: StrictInt | None = Field(default=None, ge=1, le=10000)
+    training_contribution_points: StrictInt | None = Field(default=None, ge=1, le=1000000)
+    coding_questions_per_reward: StrictInt | None = Field(default=None, ge=1, le=10000)
+    coding_contribution_points: StrictInt | None = Field(default=None, ge=1, le=1000000)
+    leaderboard_rewards: list[StrictInt] | None = Field(default=None, min_length=3, max_length=3)
+
+    @field_validator('leaderboard_rewards')
+    @classmethod
+    def validate_leaderboard_rewards(cls, value):
+        if value is not None and any(item < 0 or item > 1000000 for item in value):
+            raise ValueError('周榜奖励需在 0 到 1000000 积分之间')
+        return value
 
 
 class VoucherPackage(BaseModel):
@@ -98,16 +113,34 @@ def get_settings(user=Depends(administrator)):
     with connect() as db:
         return {'default_credits': credits.default_credits(db), 'packages': credits.packages(db),
                 'interview_points_cost': points.cost(db),
+                'reward_rules': points.reward_rules(db),
                 'max_voucher_batch': load_config()['credits']['max_voucher_batch']}
 
 
 @router.patch('/api/admin/credit-settings')
 def update_settings(payload: CreditSettings, user=Depends(administrator)):
     with connect() as db:
+        changes = payload.model_dump(exclude_none=True)
         if payload.default_credits is not None:
             db.execute("UPDATE app_settings SET value=? WHERE key='default_interview_credits'", (str(payload.default_credits),))
         if payload.interview_points_cost is not None:
             db.execute("UPDATE app_settings SET value=? WHERE key='interview_points_cost'", (str(payload.interview_points_cost),))
+        for key in ('invite_signup_points', 'training_checkin_points_per_week', 'coding_checkin_points_per_week'):
+            if key in changes:
+                db.execute('UPDATE app_settings SET value=? WHERE key=?', (str(changes[key]), key))
+        if 'leaderboard_rewards' in changes:
+            import json
+            db.execute("UPDATE app_settings SET value=? WHERE key='leaderboard_rewards'", (json.dumps(changes['leaderboard_rewards']),))
+        if any(key in changes for key in ('training_questions_per_reward', 'training_contribution_points')):
+            from app.services import contribution_rewards
+            current = contribution_rewards.current_policy(db)
+            contribution_rewards.set_policy(db, user['id'], changes.get('training_questions_per_reward', current['questions_per_reward']),
+                                             changes.get('training_contribution_points', current['credits_per_reward']))
+        if any(key in changes for key in ('coding_questions_per_reward', 'coding_contribution_points')):
+            from app.services import coding_practice
+            current = coding_practice.settings(db)
+            coding_practice.set_settings(db, user, changes.get('coding_questions_per_reward', current['questions_per_reward']),
+                                          changes.get('coding_contribution_points', current['credits_per_reward']))
     return get_settings(user)
 
 

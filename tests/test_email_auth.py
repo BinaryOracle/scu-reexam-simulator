@@ -65,9 +65,11 @@ def email_client(tmp_path, monkeypatch):
     monkeypatch.setattr(email_auth.smtplib, 'SMTP_SSL', FakeSMTP)
     monkeypatch.setattr(email_auth.smtplib, 'SMTP', FakeSMTP)
     from app.routes.email_auth import router
+    from app.routes.referrals import router as referrals_router
     from app.services.auth import current_user
     app = FastAPI()
     app.include_router(router)
+    app.include_router(referrals_router)
 
     @app.get('/me')
     def me(user=Depends(current_user)):
@@ -139,6 +141,55 @@ def test_email_creates_normal_account_with_current_default_and_single_use(email_
     assert again.json()['can_training'] is True and again.json()['can_coding'] is True
     with connect() as db:
         assert db.execute('SELECT COUNT(*) FROM credit_ledger WHERE user_id=?', (body['id'],)).fetchone()[0] == 1
+
+
+def test_invite_registration_rewards_referrer_once_and_keeps_referral_history(email_client):
+    from app.db import connect
+    client, settings, messages, _, clock = email_client
+    from app.services.auth import issue_session
+    with connect() as db:
+        inviter_id = db.execute("SELECT id FROM users WHERE username='root'").fetchone()[0]
+        code_value = db.execute('SELECT invite_code FROM users WHERE id=?', (inviter_id,)).fetchone()[0]
+        inviter_token = issue_session(db, inviter_id)
+    sent = send(client, 'newperson@example.com')
+    created = client.post('/api/auth/email/login', json={
+        'email': 'newperson@example.com', 'code': code(messages[-1]), 'invitation_code': code_value,
+    })
+    assert sent.status_code == 200 and created.status_code == 200
+    assert client.patch('/api/admin/users/' + str(created.json()['id']) + '/purchase-service',
+        headers={'Authorization': 'Bearer ' + created.json()['token']},
+        json={'purchase_service': '套餐服务', 'rebate_redeemed': False}).status_code == 403
+    clock[0] += settings['resend_seconds']
+    assert send(client, 'newperson@example.com').status_code == 200
+    repeated = client.post('/api/auth/email/login', json={
+        'email': 'newperson@example.com', 'code': code(messages[-1]), 'invitation_code': code_value,
+    })
+    assert repeated.status_code == 200
+    with connect() as db:
+        assert db.execute('SELECT referrer_id FROM users WHERE email=?', ('newperson@example.com',)).fetchone()[0] == inviter_id
+        assert db.execute("SELECT SUM(delta) FROM points_ledger WHERE user_id=? AND kind='invite_signup'", (inviter_id,)).fetchone()[0] == 3
+    headers = {'Authorization': f'Bearer {inviter_token}'}
+    referrals = client.get('/api/profile/referrals', headers=headers)
+    assert referrals.status_code == 200 and referrals.json()['total_invited'] == 1
+    assert referrals.json()['items'][0]['username'] == 'newperson@example.com'
+    assert referrals.json()['items'][0]['purchase_service'] == ''
+    changed = client.patch('/api/admin/users/' + str(created.json()['id']) + '/purchase-service', headers=headers,
+                          json={'purchase_service': '套餐服务', 'rebate_redeemed': False})
+    assert changed.status_code == 200
+    assert client.get('/api/profile/referrals', headers=headers).json()['items'][0]['purchase_service'] == '套餐服务'
+    settled = client.patch('/api/admin/users/' + str(created.json()['id']) + '/purchase-service', headers=headers,
+                           json={'purchase_service': '套餐服务', 'rebate_redeemed': True})
+    assert settled.status_code == 200 and settled.json()['rebate_redeemed'] is True
+    assert client.get('/api/profile/referrals', headers=headers).json()['items'][0]['rebate_redeemed'] is True
+
+
+def test_invalid_invitation_code_does_not_prevent_email_registration(email_client):
+    client, _, messages, _, _ = email_client
+    send(client, 'plain@example.com')
+    result = client.post('/api/auth/email/login', json={
+        'email': 'plain@example.com', 'code': code(messages[-1]), 'invitation_code': 'not-a-code',
+    })
+    assert result.status_code == 422
 
 
 def test_new_email_login_replaces_the_previous_session(email_client):

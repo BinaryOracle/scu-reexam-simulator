@@ -15,15 +15,23 @@ test("leaderboard renders four distinct weekly boards with regular-user names", 
   assert.match(leaderboard, /typeof item\.username === "string"/);
   assert.match(leaderboard, /person\.append\(el\("strong", item\.username\)\)/);
   assert.match(leaderboard, /每周六 00:00（北京时间）结算/);
-  assert.match(leaderboard, /\[\[1, 3\], \[2, 2\], \[3, 1\]\]/);
+  assert.match(leaderboard, /payload\.rewards/);
+  assert.doesNotMatch(leaderboard, /\[\[1, 3\], \[2, 2\], \[3, 1\]\]/);
   assert.match(leaderboard, /row\.setAttribute\("aria-current", "true"\)/);
 });
 
 test("daily training and algorithm practice show only their own two boards", () => {
-  assert.match(training, /from '\.\/leaderboard\.js\?v=20261117-weekly-leaderboard-v3'/);
+  assert.match(training, /from '\.\/leaderboard\.js\?v=20261122-points-display-v1'/);
   assert.match(training, /mountLeaderboard\(root, \{ scope: "training", onBack:/);
-  assert.match(coding, /from "\.\/leaderboard\.js\?v=20261117-weekly-leaderboard-v3"/);
+  assert.match(coding, /from "\.\/leaderboard\.js\?v=20261122-points-display-v1"/);
   assert.match(coding, /mountLeaderboard\(root, \{ scope: "coding", onBack:/);
+});
+
+test("practice dashboards read the current attendance reward settings", () => {
+  assert.match(training, /homeData\.checkin_points_per_week/);
+  assert.match(training, /homeData\.next_reward/);
+  assert.match(coding, /home\.daily\.checkin_points_per_week/);
+  assert.match(coding, /home\.daily\.next_reward/);
 });
 
 test("leaderboard errors distinguish auth and missing API and provide retry", () => {
@@ -88,6 +96,7 @@ const codingPayload = {
   },
   me: { coding_checkins: 1, coding_solved: 1 },
   period: { label: "11.14 — 11.20" },
+  rewards: [8, 5, 2],
 };
 
 test("coding leaderboard requests its scope and renders both cards", async () => {
@@ -97,12 +106,15 @@ test("coding leaderboard requests its scope and renders both cards", async () =>
   assert.deepEqual(paths, ["/leaderboard?scope=coding"]);
   assert.equal(fixture.find(node => node.className.includes("leaderboard-card-coding_checkins"))?.text.includes("算法带刷打卡"), true);
   assert.equal(fixture.find(node => node.className.includes("leaderboard-card-coding_solved"))?.text.includes("算法带刷通过"), true);
+  assert.equal(fixture.root.text.includes("第 1 名+8 积分"), true);
+  assert.equal(fixture.root.text.includes("第 2 名+5 积分"), true);
+  assert.equal(fixture.root.text.includes("第 3 名+2 积分"), true);
   assert.equal(fixture.root.text.includes("null"), false);
 });
 
 test("long ranking lists retain every row inside a keyboard-focusable scroll area", async () => {
   const rows = Array.from({ length: 12 }, (_, index) => ({ rank: index + 1, username: `user-${index + 1}`, value: 12 - index }));
-  const payload = { boards: { coding_checkins: rows, coding_solved: rows }, period: { label: "11.14 — 11.20" } };
+  const payload = { boards: { coding_checkins: rows, coding_solved: rows }, period: { label: "11.14 — 11.20" }, rewards: [3, 2, 1] };
   const fixture = leaderboardFixture(async () => payload);
   await fixture.mount({ scope: "coding" });
   const list = fixture.find(node => node.className === "leaderboard-rows");

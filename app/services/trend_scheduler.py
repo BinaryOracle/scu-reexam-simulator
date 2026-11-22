@@ -8,7 +8,7 @@ from app.db import connect
 from app.services import trends
 
 logger = logging.getLogger(__name__)
-PERIODS = ('day', 'week', 'month', 'year')
+PERIODS = ('week', 'month', 'year')
 _stop = threading.Event()
 _thread = None
 

@@ -12,18 +12,17 @@ import {
 } from "./interview.js?v=20261116-interview-search-v1";
 import {
   refreshContests,
-  refreshSubmissions,
   createContest,
   clearContestState,
   suspendContestWorkspace,
   setupContestCreation,
   requestJudgeSubmit,
-} from "./contest.js?v=20261121-workspace-controls-v7";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, setupAdmin } from "./admin.js?v=20261121-china-judge-v2";
-import { refreshProfile, refreshVouchers, setupCredits } from "./credits.js?v=20261117-package-delete-v2";
+} from "./contest.js?v=20261122-contest-record-drilldown-v1";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, refreshBackupModules, setupAdmin } from "./admin.js?v=20261122-referral-rewards-v1";
+import { refreshProfile, refreshReferrals, refreshVouchers, setupCredits } from "./credits.js?v=20261122-referral-rewards-v4";
 import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
 
-import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261121-question-markdown-v1";
+import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261122-points-display-v1";
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261121-question-markdown-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261117-points-v1";
@@ -31,8 +30,8 @@ import { refreshHome, refreshAnnouncementsAdmin, setupHome, showPendingAnnouncem
 import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
-import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261121-workspace-controls-v7";
-import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261121-reference-markdown-v1";
+import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261122-points-display-v1";
+import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261122-points-display-v1";
 import { refreshTrends } from "./trends.js?v=20261116-trends-admin-v1";
 
 configureCodingBridge(requestJudgeSubmit);
@@ -50,8 +49,9 @@ const views = {
   users: { label: "用户管理", refresh: refreshUsers },
   questionBank: { label: "面试题库", refresh: refreshQuestionBank },
   vouchers: { label: "积分与卡密", refresh: refreshVouchers },
-  systemSettings: { label: "系统设置", refresh: async () => { await Promise.all([refreshLuoguSettings(), refreshModelSettings()]); } },
+  systemSettings: { label: "系统设置", refresh: async () => { await Promise.all([refreshLuoguSettings(), refreshModelSettings(), refreshBackupModules()]); } },
   profile: { label: "个人主页", refresh: refreshProfile },
+  referrals: { label: "邀请返利", refresh: refreshReferrals },
   interview: {
     label: state.adminMode ? "面试记录" : "模拟面试",
     refresh: refreshInterviews,
@@ -59,10 +59,6 @@ const views = {
   contest: {
     label: "上机考试",
     refresh: refreshContests,
-  },
-  submissions: {
-    label: "提交记录",
-    refresh: refreshSubmissions,
   },
   adminDenied: { label: "后台管理", refresh: async () => {} },
 };
@@ -108,18 +104,6 @@ function revealActiveNavigation() {
       : 0;
   if (delta) navigation.scrollBy({ left: delta, behavior: "instant" });
 }
-function configureContestNavigation() {
-  const submenu = $("contestSubnav");
-  const toggle = $("contestNavToggle");
-  const admin = state.adminMode && Boolean(state.user?.is_admin);
-  const isExpanded = !admin;
-  submenu.hidden = admin;
-  toggle.hidden = true;
-  toggle.setAttribute("aria-expanded", String(isExpanded));
-  toggle.setAttribute("aria-label", `${isExpanded ? "收起" : "展开"}上机考试菜单`);
-  toggle.title = `${isExpanded ? "收起" : "展开"}上机考试菜单`;
-  toggle.querySelector("span").textContent = isExpanded ? "⌃" : "⌄";
-}
 function syncSidebarToggle() {
   const immersive = document.body.classList.contains("interview-immersive");
   const menuOpen = document.body.classList.contains("interview-shell-open");
@@ -143,9 +127,9 @@ function allowedViews() {
     return state.user.is_admin
       ? ["live", "users", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "homeLayoutAdmin", "vouchers", "systemSettings", "trends", "interview", "contest", "profile"]
       : ["adminDenied"];
-  const views = ["home", "training", "trends", "coding", "live", "profile"];
+  const views = ["home", "referrals", "training", "trends", "coding", "live", "profile"];
   if (state.user.can_interview) views.push("interview");
-  if (state.user.can_exam) views.push("contest", "submissions");
+  if (state.user.can_exam) views.push("contest");
   return views;
 }
 function configureAccess() {
@@ -161,11 +145,9 @@ function configureAccess() {
       ? state.user.is_superadmin ? "超级管理员" : "后台管理员"
       : "普通用户"
     : "用户工作台";
-  configureContestNavigation();
   return allowed;
 }
 async function show(view, force = false, { historyMode = "push", authenticatedUser = null } = {}) {
-  if (state.adminMode && view === "submissions") view = "contest";
   if (!force && !allowNavigation()) return;
   if (view !== "live" && liveActive() && !await allowLiveNavigation()) return;
   if (view !== "contest") suspendContestWorkspace();
@@ -364,6 +346,7 @@ $("loginForm").addEventListener("submit", async (event) => {
       body: JSON.stringify(email ? {
         email: $("loginEmail").value.trim(),
         code: $("loginCode").value,
+        invitation_code: $("loginInvitationCode").value.trim() || null,
       } : {
         username: $("username").value,
         password: $("password").value,
@@ -375,6 +358,7 @@ $("loginForm").addEventListener("submit", async (event) => {
     sessionStorage.setItem("token", state.token);
     $("password").value = "";
     $("loginCode").value = "";
+    $("loginInvitationCode").value = "";
     $("notification").hidden = true;
     await enterWorkspace();
   } catch (error) {
@@ -421,7 +405,6 @@ $("newInterview").addEventListener("click", (event) =>
 for (const [id, action] of [
   ["refreshInterviews", refreshInterviews],
   ["refreshContests", refreshContests],
-  ["refreshSubmissions", refreshSubmissions],
   ["refreshUsers", refreshUsers],
 ]) {
   $(id).addEventListener("click", (event) => run(action, event.currentTarget));
@@ -494,6 +477,7 @@ window.addEventListener("account-session-ended", event => {
   $("loginError").hidden = true;
   $("password").value = "";
   $("loginCode").value = "";
+  $("loginInvitationCode").value = "";
   $("emailCodeStatus").hidden = true;
   document.title = "登录 · 知序";
   notify(event.detail.message);
@@ -513,6 +497,11 @@ configureShell();
 configureSidebar();
 setupAdmin();
 setupCredits();
+const inviteFromLink = new URLSearchParams(location.search).get('invite');
+if (inviteFromLink && $('loginInvitationCode')) {
+  $('loginInvitationCode').value = inviteFromLink.slice(0, 32);
+  $('loginInvitationCode').closest('details').open = true;
+}
 $("avatar").addEventListener("click", () => run(() => show("profile")));
 $("openRedeemProfile").addEventListener("click", () => run(() => show("profile")));
 $("profileBack").addEventListener("click", event => run(() => show(null), event.currentTarget));

@@ -237,8 +237,15 @@ def update_model_settings(payload: ModelSettingsUpdate):
 @router.get('/users')
 def users(actor=Depends(administrator)):
     with connect() as db:
-        return [{**public_user(row, admin_view=True), 'password_available': bool(row['password_ciphertext'])}
-                for row in db.execute(f'SELECT {PUBLIC_USER_FIELDS},password_ciphertext FROM users WHERE (? OR is_admin=0) ORDER BY id DESC',
+        user_fields = ','.join('u.' + field for field in PUBLIC_USER_FIELDS.split(','))
+        return [{**public_user(row, admin_view=True), 'password_available': bool(row['password_ciphertext']),
+                 'referrer_name': row['referrer_name'], 'purchase_service': row['purchase_service'],
+                 'referrer_email': row['referrer_email'],
+                 'rebate_redeemed': bool(row['rebate_redeemed'])}
+                for row in db.execute(f'''SELECT {user_fields},u.password_ciphertext,u.purchase_service,u.rebate_redeemed,
+                    COALESCE(r.username,'') AS referrer_name,COALESCE(r.email,'') AS referrer_email
+                    FROM users u LEFT JOIN users r ON r.id=u.referrer_id
+                    WHERE (? OR u.is_admin=0) ORDER BY u.id DESC''',
                                       (actor['is_superadmin'],))]
 
 
@@ -326,9 +333,10 @@ def create_user(payload: AccountCreate, actor=Depends(administrator)):
             legacy_grant = payload.can_practice
             training = payload.can_training if legacy_grant is None else legacy_grant
             coding = payload.can_coding if legacy_grant is None else legacy_grant
-            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits,can_interview,can_exam,can_practice,can_training,can_coding)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
-                payload.email, payload.is_active, 0, payload.can_interview, payload.can_exam, int(training and coding), training, coding)).lastrowid
+            from app.services import referrals
+            uid = db.execute('''INSERT INTO users(id,username,password,password_ciphertext,is_admin,email,is_active,interview_credits,can_interview,can_exam,can_practice,can_training,can_coding,invite_code)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', (allocate_user_id(db), payload.username, hash_password(payload.password), encrypt_password(payload.password), payload.is_admin,
+                payload.email, payload.is_active, 0, payload.can_interview, payload.can_exam, int(training and coding), training, coding, referrals._code(db))).lastrowid
         except sqlite3.IntegrityError as error:
             raise HTTPException(409, '用户名或邮箱已存在，请使用其他用户名或邮箱') from error
         credits.adjust(db, uid, initial, kind='initial')

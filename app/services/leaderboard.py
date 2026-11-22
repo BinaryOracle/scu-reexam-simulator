@@ -10,7 +10,6 @@ BOARD_LABELS = {
 }
 SCOPES = {'training': ('training_checkins', 'training_questions'),
           'coding': ('coding_checkins', 'coding_solved')}
-REWARDS = (3, 2, 1)
 _LIMIT = 100
 
 
@@ -57,7 +56,7 @@ def snapshot(db, user, scope='training', range='weekly', now=None):
             'metric_labels': {key: BOARD_LABELS[key] for key in boards},
             'period': {'label': f'{start:%m.%d} — {(end - timedelta(days=1)):%m.%d}',
                        'starts_at': start.timestamp(), 'next_settlement_at': end.timestamp(),
-                       'timezone': 'Asia/Shanghai'}, 'rewards': list(REWARDS)}
+                       'timezone': 'Asia/Shanghai'}, 'rewards': points.leaderboard_rewards(db)}
 
 
 def settle_due(db, now=None):
@@ -76,8 +75,9 @@ def settle_due(db, now=None):
         inserted = db.execute('INSERT OR IGNORE INTO leaderboard_settlements(period_end,created) VALUES (?,?)',
                               (end_key, now.timestamp())).rowcount
         if inserted:
+            rewards = points.leaderboard_rewards(db)
             for key in BOARD_LABELS:
-                for row, reward in zip(_ranked(db, key, start, end)[:3], REWARDS):
+                for row, reward in zip(_ranked(db, key, start, end)[:3], rewards):
                     if row['value'] <= 0:
                         continue
                     reference = f'{end_key}/{key}/{row["rank"]}'

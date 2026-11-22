@@ -45,6 +45,8 @@ def home(db, user, section_id='interview'):
     checked = bool(last and last['date'] == date)
     streak = last['streak'] if last and last['date'] in (date, (today() - timedelta(days=1)).isoformat()) else 0
     milestone = (streak // 7 + 1) * 7
+    checkin_points_per_week = int(db.execute(
+        "SELECT value FROM app_settings WHERE key='training_checkin_points_per_week'").fetchone()[0])
     account = db.execute('SELECT is_admin,interview_credits,points FROM users WHERE id=?', (uid,)).fetchone()
     collections = []
     for item in db.execute('SELECT * FROM training_collections WHERE active=1 ORDER BY position'):
@@ -71,7 +73,8 @@ def home(db, user, section_id='interview'):
                     WHERE m.user_id=? AND m.status=? AND q.deleted=0 AND q.active=1 AND c.active=1 AND c.section_id=?
                     AND (q.visibility='public' OR q.owner_user_id=?)''', (uid,status,section_id,uid)).fetchone()[0]
                     for status in ('again','known')},
-                next_milestone=milestone, next_reward=milestone // 7,
+                next_milestone=milestone, next_reward=(milestone // 7) * checkin_points_per_week,
+                checkin_points_per_week=checkin_points_per_week,
                 remaining=None if account['is_admin'] else account['interview_credits'], points=account['points'], is_admin=bool(account['is_admin']),
                 recent_days=[dict(date=d, checked_in=d in dates) for d in recent],
                 sections=[{'id': sid, 'name': name, 'count': sum(c['count'] for c in collections if c['section_id'] == sid)} for sid, name in SECTIONS],
@@ -94,7 +97,8 @@ def checkin(db, user):
     cid = db.execute('INSERT INTO training_checkins(user_id,date,streak,streak_start) VALUES (?,?,?,?)',
                      (uid, date, streak, start)).lastrowid
     account = db.execute('SELECT * FROM users WHERE id=?', (uid,)).fetchone()
-    amount = streak // 7 if streak % 7 == 0 and not account['is_admin'] else 0
+    weekly_reward = int(db.execute("SELECT value FROM app_settings WHERE key='training_checkin_points_per_week'").fetchone()[0])
+    amount = (streak // 7) * weekly_reward if streak % 7 == 0 and not account['is_admin'] else 0
     if amount:
         points.adjust(db, uid, amount, kind='checkin_reward', reference=str(cid))
         ledger_id = None

@@ -23,7 +23,7 @@ import { contestTiming, canOpenContestProblems } from "./contest-timing.mjs?v=20
 import { createCodeDrafts, saveDraftOnShortcut } from "./code-drafts.mjs?v=20261121-drafts-v7";
 import { hasCodeDraft } from "./draft-compat.mjs?v=20261121-cache-compat-v2";
 import { createLayoutStore, mountWorkspaceLayout } from "./workspace-layout.mjs?v=20261121-workspace-v7";
-import { openContestRecords, closeContestRecords } from "./contest-records.js?v=20261115-contest-records-v1";
+import { openContestRecords, closeContestRecords } from "./contest-records.js?v=20261122-contest-record-drilldown-v1";
 import { loadContestRoster, resetContestRoster, contestParticipantIds, setupContestRoster } from "./contest-roster.js?v=20261115-access-v2";
 import { judgePlatform, judgePlatformOptions, judgeProblemUrl, judgeRecordUrl, judgeSubmitPayload } from "./judge-platforms.mjs?v=20261121-china-judge-v2";
 
@@ -90,11 +90,7 @@ let contestPage = 1;
 const contestPageSize = 8;
 const bridgeWaiters = new Map();
 const timerNodes = new Map();
-let submissionHistoryPage = 1;
-let submissionUsersPage = 1;
 let contestSubmissionPage = 1;
-const submissionPageSize = 10;
-const userSubmissionRequestIds = new WeakMap();
 const managementMode = () => state.adminMode;
 const contestPath = (path) => `${managementMode() ? "/admin" : ""}${path}`;
 const LANGUAGES = [["cpp11", "C++11"], ["c", "C"], ["python3", "Python 3"], ["java", "Java"], ["go", "Go"]];
@@ -614,14 +610,16 @@ async function loadContestRanking(panel, contestId, existingSection = null) {
       username.scope = "row";
       const userIdentity = managementMode()
         ? button("", () => showContestRecords({ userId: row.user_id, userName: row.username }), "contest-records-trigger contest-records-user")
-        : el("span");
-      if (managementMode()) {
+        : row.user_id === state.user.id
+          ? button("", () => showContestRecords({ userId: row.user_id, userName: row.username }), "contest-records-trigger contest-records-user")
+          : el("span");
+      if (managementMode() || row.user_id === state.user.id) {
         userIdentity.setAttribute("aria-label", `查看 ${row.username} 在本场比赛的全部提交`);
         userIdentity.title = "查看本场全部提交";
       }
       userIdentity.append(el("strong", row.username));
+      if (row.user_id === state.user.id) userIdentity.append(el("span", "我", "contest-rank-self"));
       username.append(userIdentity);
-      if (row.user_id === state.user.id) username.append(el("span", "我", "contest-rank-self"));
       tr.append(rank, username, el("td", row.score, "contest-rank-score"), el("td", `${row.accepted_count} / ${result.problems.length}`, "contest-rank-solved"));
       for (const item of row.problems) {
         const cell = el("td");
@@ -630,12 +628,13 @@ async function loadContestRanking(panel, contestId, existingSection = null) {
         const verdict = item.solved ? "✓ 通过" : partial ? `部分通过 · ${item.score} / ${result.problems.find(problem => problem.id === item.problem_id)?.points ?? item.score} 分${caseProgress}` : item.attempts ? "未通过" : "—";
         const problemIndex = result.problems.findIndex(problem => problem.id === item.problem_id);
         const problemTitle = `${String.fromCharCode(65 + problemIndex)} · ${result.problems[problemIndex]?.title || "题目"}`;
-        const record = managementMode()
+        const canOpenRecords = managementMode() || row.user_id === state.user.id;
+        const record = canOpenRecords
           ? button("", () => showContestRecords({ userId: row.user_id, userName: row.username, problemId: item.problem_id, problemTitle }), "contest-records-trigger contest-records-verdict")
           : el("span");
-        if (managementMode()) {
+        if (canOpenRecords) {
           record.setAttribute("aria-label", `查看 ${row.username} 的${problemTitle}提交记录，${item.attempts} 条`);
-          record.title = "查看该用户的本题提交";
+          record.title = row.user_id === state.user.id && !managementMode() ? "查看我的本题提交" : "查看该用户的本题提交";
         }
         record.append(el("span", verdict, `contest-rank-verdict${item.solved ? " is-solved" : partial ? " is-partial" : item.attempts ? " is-attempted" : ""}`));
         if (item.attempts) record.append(el("small", `${item.attempts} 次提交`, "contest-rank-attempts"));
@@ -695,12 +694,11 @@ function renderWorkspace() {
   resetLayout.title = "恢复默认分栏比例，并退出区域放大";
   const headerRight = el("div", "", "workspace-header-right");
   if (!managementMode()) headerRight.append(resetLayout);
-  headerActions.append(...(!managementMode() ? [countdown] : []));
+  headerActions.append(...(!managementMode() ? [countdown] : []), headerRight);
   headerRight.append(button("返回比赛信息", () => {
       writeAppRoute(`contest/${selectedContest.id}`);
       renderContestOverview();
     }, "button secondary workspace-back"));
-  if (managementMode()) headerActions.append(headerRight);
   if (managementMode()) header.append(heading);
   header.append(headerActions);
   const [statusLabel, statusColor] = contestStatus(selectedContest);
@@ -753,11 +751,6 @@ function renderWorkspace() {
   const showSource = problem.remote_problem_id
     && canRevealLuoguSource(selectedContest, Date.now() / 1000, managementMode());
   workbench.append(rail);
-  if (!managementMode()) {
-    const workspaceActions = el("div", "", "contest-workspace-actions");
-    workspaceActions.append(headerRight);
-    workbench.append(workspaceActions);
-  }
   const columns = el("div", "", "problem-columns");
   columns.dataset.activePane = mobilePane;
   const restoreBar = el("div", "", "workspace-pane-restores");
@@ -1296,7 +1289,6 @@ async function updateRemoteResult(id, payload) {
   return api(`/submissions/${id}/remote-result`, { method: "POST", body: JSON.stringify(payload) });
 }
 let contestSubmissionsRequest = 0;
-let submissionHistoryRequest = 0;
 let submissionDetailRequest = 0;
 async function loadContestSubmissions() {
   const request = ++contestSubmissionsRequest;
@@ -1478,106 +1470,6 @@ async function openSubmissionDetail(id) {
     const code = el("pre", item.source, "mono"); code.tabIndex = 0; source.append(code); body.append(source);
   } catch (error) {
     if (dialog.open && request === submissionDetailRequest) body.replaceChildren(el("p", error.message, "form-error"));
-  }
-}
-export async function refreshSubmissions() {
-  const request = ++submissionHistoryRequest;
-  const target = $("submissionContent");
-  target.setAttribute("aria-busy", "true");
-  target.querySelector(".submission-loading")?.remove();
-  const loading = el("p", "正在加载提交记录…", "muted submission-loading");
-  loading.setAttribute("role", "status");
-  target.prepend(loading);
-  let result;
-  try {
-    const path = managementMode()
-      ? `/submissions/users?page=${submissionUsersPage}&page_size=${submissionPageSize}`
-      : `/submissions?page=${submissionHistoryPage}&page_size=${submissionPageSize}`;
-    result = await api(contestPath(path));
-    if (!managementMode()) result = normalizeSubmissionPage(result);
-  } catch (error) {
-    if (request === submissionHistoryRequest) {
-      target.removeAttribute("aria-busy");
-      const retry = button("重试", () => { void refreshSubmissions(); }, "button secondary");
-      const message = error instanceof TypeError ? "网络连接失败，请检查网络后重试。" : error.message;
-      target.replaceChildren(el("p", `提交记录加载失败：${message}`, "form-error"), retry);
-    }
-    return;
-  }
-  if (request !== submissionHistoryRequest) return;
-  target.removeAttribute("aria-busy");
-  const summary = el("div", "", "submission-summary");
-  const summaryValues = managementMode()
-    ? [["提交用户", result.total], ["累计提交", result.stats.total], ["通过", result.stats.accepted], ["评测中", result.stats.judging]]
-    : [["累计提交", result.total], ["通过", result.stats.accepted], ["评测中", result.stats.judging]];
-  for (const [name, value] of summaryValues) {
-    const chip = el("div", "", "summary-chip");
-    chip.append(el("span", name), el("strong", value));
-    summary.append(chip);
-  }
-  if (managementMode()) {
-    target.replaceChildren(summary, groupedSubmissionTables(result.items), paginationControls(
-      result,
-      page => { submissionUsersPage = page; void refreshSubmissions(); },
-      "提交用户列表分页",
-    ));
-  } else {
-    const records = submissionTable(result.items);
-    if (!result.total) {
-      records.append(button("查看比赛", () => {
-        document.dispatchEvent(new CustomEvent("navigate-view", { detail: { view: "contest" } }));
-      }, "button secondary"));
-    }
-    target.replaceChildren(summary, records, paginationControls(
-      result,
-      page => { submissionHistoryPage = page; void refreshSubmissions(); },
-    ));
-  }
-}
-function groupedSubmissionTables(users) {
-  if (!users.length) return emptyState("暂无用户提交", "用户提交代码后，会按用户分组显示在这里。", "▤");
-  const root = el("div", "", "submission-user-groups");
-  for (const user of users) {
-    const group = document.createElement("details");
-    group.className = "submission-user-group";
-    const heading = document.createElement("summary");
-    heading.className = "submission-user-heading";
-    heading.append(el("span", user.username, "submission-user-name"), el("span", `${user.submission_count} 条提交`, "submission-user-count"));
-    const records = el("div", "", "submission-user-records");
-    records.dataset.loaded = "false";
-    group.append(heading, records);
-    group.addEventListener("toggle", () => {
-      if (group.open && records.dataset.loaded === "false") void loadUserSubmissionPage(group, user, 1);
-    });
-    root.append(group);
-  }
-  return root;
-}
-async function loadUserSubmissionPage(group, user, page) {
-  const target = group.querySelector(".submission-user-records");
-  const request = (userSubmissionRequestIds.get(group) || 0) + 1;
-  userSubmissionRequestIds.set(group, request);
-  target.dataset.loaded = "loading";
-  target.setAttribute("aria-busy", "true");
-  target.replaceChildren(el("p", "正在加载提交记录…", "muted submission-loading"));
-  try {
-    const result = await api(contestPath(`/submissions/users/${user.user_id}?page=${page}&page_size=${submissionPageSize}`));
-    if (!group.isConnected || userSubmissionRequestIds.get(group) !== request) return;
-    target.dataset.loaded = "true";
-    target.removeAttribute("aria-busy");
-    target.replaceChildren(submissionTable(result.items, { groupedUser: true }), paginationControls(
-      result,
-      nextPage => { void loadUserSubmissionPage(group, user, nextPage); },
-      `${user.username}提交记录分页`,
-    ));
-  } catch (error) {
-    if (!group.isConnected || userSubmissionRequestIds.get(group) !== request) return;
-    target.dataset.loaded = "false";
-    target.removeAttribute("aria-busy");
-    target.replaceChildren(
-      el("p", `提交记录加载失败：${error.message}`, "form-error"),
-      button("重试", () => { void loadUserSubmissionPage(group, user, page); }, "button secondary"),
-    );
   }
 }
 export async function createContest() {

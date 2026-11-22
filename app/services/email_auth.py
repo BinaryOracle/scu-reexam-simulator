@@ -239,21 +239,24 @@ def rebind_email(uid: int, value: str, code: str, token: str):
     return result
 
 
-def _create_user(db, email):
+def _create_user(db, email, invitation_code=None):
     """Create an independent mailbox-named account with an administrator-recoverable random password."""
+    from app.services import referrals
+    referrer_id = referrals.attribute_signup(db, invitation_code)
     if db.execute('SELECT 1 FROM users WHERE username=?', (email,)).fetchone():
         raise HTTPException(409, '该邮箱对应的用户名已存在，请联系管理员处理用户名冲突后重试')
     password = secrets.token_urlsafe(48)
     uid = allocate_user_id(db)
     db.execute("""INSERT INTO users(id,username,password,password_ciphertext,email,interview_credits,
-        is_admin,is_superadmin,is_active,can_interview,can_exam,can_practice,can_training,can_coding)
-        VALUES (?,?,?,?,?,0,0,0,1,1,1,0,0,0)""",
-        (uid, email, hash_password(password), encrypt_password(password), email))
+        is_admin,is_superadmin,is_active,can_interview,can_exam,can_practice,can_training,can_coding,invite_code,referrer_id)
+        VALUES (?,?,?,?,?,0,0,0,1,1,1,0,0,0,?,?)""",
+        (uid, email, hash_password(password), encrypt_password(password), email, referrals._code(db), referrer_id))
     adjust(db, uid, default_credits(db), kind='initial')
+    referrals.record_signup_reward(db, referrer_id, uid)
     return db.execute('SELECT * FROM users WHERE id=?', (uid,)).fetchone()
 
 
-def login(value: str, code: str, ip: str):
+def login(value: str, code: str, ip: str, invitation_code=None):
     """Consume a delivered code, create an account if needed, and issue a session atomically."""
     email = normalize_email(value)
     config = _smtp_config()
@@ -277,7 +280,7 @@ def login(value: str, code: str, ip: str):
             if user and not user['is_active']:
                 failure = HTTPException(403, '账号已停用，请联系管理员')
             else:
-                user = user or _create_user(db, email)
+                user = user or _create_user(db, email, invitation_code)
                 token = issue_session(db, user['id'])
                 result = {'token': token, **public_user(user)}
     # Failed guesses and consumed codes remain committed even when returning an HTTP error.

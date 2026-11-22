@@ -120,14 +120,14 @@ test('removes the empty restore bar so narrow workspaces do not reserve blank sp
   assert.match(layoutStyles, /\.workspace-pane-restores:not\(:has\(> button:not\(\[hidden\]\)\)\)\s*\{\s*display:\s*none;\s*\}/);
 });
 
-test('keeps the compact contest timeline at the top and moves workspace actions below the problem tabs', () => {
+test('keeps contest controls in the header so the problem area retains its viewport height', () => {
   assert.match(layoutStyles, /\.contest-immersive \.workspace-header-actions \.contest-timeline--compact\s*\{[\s\S]*grid-column:\s*2[\s\S]*position:\s*static/);
-  assert.match(layoutStyles, /\.contest-immersive \.contest-workspace-actions\s*\{[\s\S]*min-height:\s*42px/);
-  const contestSource = readFileSync(new URL('../app/static/contest.js', import.meta.url), 'utf8');
-  const tabRail = contestSource.indexOf('workbench.append(rail);');
-  const workspaceActions = contestSource.indexOf('workbench.append(workspaceActions);');
-  const problemColumns = contestSource.indexOf('const columns = el("div", "", "problem-columns");');
-  assert.ok(tabRail < workspaceActions && workspaceActions < problemColumns);
+  const f = fixture();
+  f.context.renderWorkspace();
+  const headerActions = f.roots.get('problemList').querySelector('.workspace-header-actions');
+  const headerRight = headerActions.querySelector('.workspace-header-right');
+  assert.deepEqual(headerRight.childNodes.map(node => node.textContent), ['恢复布局', '返回比赛信息']);
+  assert.equal(f.roots.get('problemList').querySelector('.contest-workspace-actions'), null);
 });
 
 test('uses the training green for contest sample execution while preserving disabled submit styling', () => {

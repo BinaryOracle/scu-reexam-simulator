@@ -116,7 +116,11 @@ async function reviewQuestion(question, turn, user) {
   footer.append(button("拒绝并反馈", () => review(false)), button("通过并公开", () => review(true), "button primary"));
 }
 function renderStages(content, turn, user) {
-  content.append(el("p", "阶段按顺序从小到大展示。停用阶段不进入用户题单和每日抽题；非空阶段不能删除。", "muted"), button("＋ 新增阶段", () => editStage(null, turn, user), "button primary"));
+  const toolbar = el("section", "", "coding-stage-toolbar panel");
+  const intro = el("div", "", "coding-stage-toolbar-copy");
+  intro.append(el("h2", "学习阶段"), el("p", "按顺序组织题目。停用阶段不会出现在用户题单和每日抽题中；删除前需先移走该阶段的题目。", "muted"));
+  toolbar.append(intro, button("＋ 新增阶段", () => editStage(null, turn, user), "button primary coding-stage-add"));
+  content.append(toolbar);
   const list = el("div", "", "coding-admin-list");
   for (const stage of stages) {
     const row = el("article", "", "panel coding-admin-question"); const main = el("div"); main.append(el("h3", stage.title), el("p", stage.description), el("p", `顺序 ${stage.position} · ${stage.active ? "启用" : "停用"}`, "muted"));
@@ -153,5 +157,5 @@ function renderSettings(content, settings, turn, user) {
     try { await api("/admin/coding/settings", { method: "PUT", body: JSON.stringify({ questions_per_reward: Number(count.input.value), credits_per_reward: Number(credits.input.value) }) }); if (valid(turn, user)) notify("奖励规则已保存。"); }
     catch (failure) { if (valid(turn, user)) message.textContent = failure.message; } finally { save.disabled = false; }
   });
-  content.append(panel, el("p", "每日打卡奖励：连续第 7、14、21…天，分别奖励 1、2、3…积分。同一天重复打卡不会重复发奖。", "coding-settings-note"));
+  content.append(panel, el("p", "每日打卡积分由“卡密与积分 → 积分奖励规则”统一设置；每满 7 天按连续周数递增。同一天重复打卡不会重复发奖。", "coding-settings-note"));
 }

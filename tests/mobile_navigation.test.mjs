@@ -35,7 +35,7 @@ test("reveals either clipped edge without moving an already visible navigation i
     document: { querySelector: () => item },
   });
   const start = appSource.indexOf("function revealActiveNavigation()");
-  const end = appSource.indexOf("function configureContestNavigation()", start);
+  const end = appSource.indexOf("function syncSidebarToggle()", start);
   vm.runInContext(appSource.slice(start, end), context);
   context.revealActiveNavigation();
   bounds = { left: 10, right: 82 };

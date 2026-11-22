@@ -31,6 +31,8 @@ from app.routes.live import router as live_router
 from app.routes.home_layout import router as home_layout_router
 from app.routes.presentations import router as presentations_router
 from app.routes.admin import router as admin_router
+from app.routes.backups import router as backups_router
+from app.services.backup_maintenance import BackupMaintenanceMiddleware
 from app.routes.recordings import router as recordings_router
 from app.routes.credits import router as credits_router
 from app.routes.email_auth import router as email_auth_router
@@ -43,6 +45,7 @@ from app.routes.coding import router as coding_router
 from app.routes.trends import router as trends_router
 from app.routes.question_markdown import router as question_markdown_router
 from app.routes.courses import router as courses_router
+from app.routes.referrals import router as referrals_router
 
 initialize()
 
@@ -60,6 +63,7 @@ async def lifespan(app):
 
 
 app = FastAPI(title='复试模拟系统', lifespan=lifespan)
+app.add_middleware(BackupMaintenanceMiddleware)
 
 
 @app.exception_handler(PasswordVaultError)
@@ -68,6 +72,7 @@ async def password_vault_error(request, error):
 
 
 app.include_router(admin_router)
+app.include_router(backups_router)
 app.include_router(recordings_router)
 app.include_router(presentations_router)
 app.include_router(credits_router)
@@ -81,6 +86,7 @@ app.include_router(trends_router)
 app.include_router(home_layout_router)
 app.include_router(question_markdown_router)
 app.include_router(courses_router)
+app.include_router(referrals_router)
 app.include_router(live_router)
 app.mount('/static', StaticFiles(directory=ROOT / 'app/static'), name='static')
 
@@ -873,7 +879,8 @@ def update_remote_submission(sid: int, payload: RemoteSubmissionResult, user=Dep
 
 @app.get('/api/submissions')
 def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(default=10, ge=1, le=100),
-                contest_id: int | None = Query(default=None, ge=1), user=Depends(exam_user)):
+                contest_id: int | None = Query(default=None, ge=1),
+                problem_id: int | None = Query(default=None, ge=1), user=Depends(exam_user)):
     with connect() as db:
         where = 'submissions.user_id=?'
         params: list[object] = [user['id']]
@@ -884,6 +891,9 @@ def submissions(page: int = Query(default=1, ge=1), page_size: int = Query(defau
             contest_access.require_access(db, contest_id, user)
             where += ' AND problems.contest_id=?'
             params.append(contest_id)
+        if problem_id is not None:
+            where += ' AND submissions.problem_id=?'
+            params.append(problem_id)
         joins = 'JOIN problems ON problems.id=submissions.problem_id'
         total = db.execute(f'SELECT COUNT(*) FROM submissions {joins} WHERE {where}', params).fetchone()[0]
         rows = [dict(row) for row in db.execute(f'''SELECT submissions.id,username,problem_id,problems.title AS problem_title,

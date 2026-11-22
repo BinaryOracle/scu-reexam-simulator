@@ -9,7 +9,7 @@ from app.services.auth import administrator, current_user
 from app.services import trends
 
 router = APIRouter(tags=['热点趋势'])
-Period = Literal['day', 'week', 'month', 'year']
+Period = Literal['week', 'month', 'year']
 
 
 class TrendGeneration(BaseModel):
@@ -23,7 +23,7 @@ class TrendEdit(BaseModel):
 
 
 @router.get('/api/trends/current')
-def current_period(period: Period = 'day', user=Depends(current_user)):
+def current_period(period: Period = 'week', user=Depends(current_user)):
     with connect() as db:
         return {'item': trends.current_trend(db, period=period)}
 

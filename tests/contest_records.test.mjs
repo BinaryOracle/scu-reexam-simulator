@@ -7,7 +7,7 @@ const source = (await readFile(new URL('../app/static/contest-records.js', impor
   .replace(/^import .*;\n/gm, '').replace(/\bexport /g, '');
 const settle = async () => { for (let i = 0; i < 20; i++) await Promise.resolve(); };
 
-function fixture(api) {
+function fixture(api, { user = { id: 1, is_admin: true }, adminMode = true } = {}) {
   class Node {
     constructor(tag, text = '', classes = '') { Object.assign(this, { tag, textContent: text, className: classes, children: [], listeners: {}, open: false, dataset: {} }); }
     get isConnected() { return this === body || Boolean(this.parent?.isConnected); }
@@ -24,7 +24,7 @@ function fixture(api) {
     find(text) { return this.children.find(node => node.textContent === text) || this.children.map(node => node.find(text)).find(Boolean); }
   }
   const body = new Node('body'); const document = { body, activeElement: body };
-  const state = { user: { id: 1, is_admin: true }, adminMode: true };
+  const state = { user, adminMode };
   const rendered = [], requests = [];
   const el = (...args) => new Node(...args);
   const context = vm.createContext({ document, state, el, URLSearchParams,
@@ -70,5 +70,25 @@ test('a failed page offers retry without losing its selected filters', async () 
 test('a changed login cannot populate a previous administrator dialog', async () => {
   let resolve; const f = fixture(() => new Promise(yes => { resolve = yes; }));
   f.open(filters); f.state.user = { id: 2, is_admin: false }; resolve(page(1)); await settle();
+  assert.equal(f.rendered.length, 0);
+});
+
+test('regular users load only their own contest problem submissions from the self-scoped endpoint', async () => {
+  const f = fixture(async () => page(1), { user: { id: 7, username: 'alice', is_admin: false }, adminMode: false });
+  f.open({ contestId: 3, contestTitle: '模拟赛', userId: 7, userName: 'alice', problemId: 9, problemTitle: 'A · 加法' });
+  await settle();
+  const query = new URLSearchParams(f.requests[0].split('?')[1]);
+  assert.equal(f.requests[0].split('?')[0], '/submissions');
+  assert.equal(query.get('contest_id'), '3');
+  assert.equal(query.get('problem_id'), '9');
+  assert.equal(query.get('user_id'), null);
+  assert.equal(f.rendered[0].options.groupedUser, true);
+});
+
+test('regular users cannot open another user submission filter', async () => {
+  const f = fixture(async () => page(1), { user: { id: 7, username: 'alice', is_admin: false }, adminMode: false });
+  f.open({ contestId: 3, userId: 8, userName: 'bob' });
+  await settle();
+  assert.deepEqual(f.requests, []);
   assert.equal(f.rendered.length, 0);
 });

@@ -28,9 +28,11 @@ test("persists the Luogu account and rechecks the extension after reload", () =>
   assert.match(contestSource, /refreshLuoguBridgeConnection/);
 });
 
-test("keeps submission history reachable when the desktop sidebar is collapsed", () => {
-  assert.doesNotMatch(styleSource, /\.sidebar-collapsed \.sidebar-subnav,\s*\.sidebar-collapsed \.nav-group-toggle \{ display: none !important;/);
-  assert.match(styleSource, /\.sidebar-collapsed \.sidebar-subnav:not\(\[hidden\]\) \{[^}]*display: grid/s);
+test("removes the standalone submission-history page from the user workspace", () => {
+  assert.doesNotMatch(htmlSource, /class="nav-item submission-nav-item" data-view="submissions"/);
+  assert.doesNotMatch(htmlSource, /<section id="submissions"/);
+  assert.doesNotMatch(appSource, /submissions: \{\s*label: "提交记录"/);
+  assert.doesNotMatch(appSource, /refreshSubmissions/);
 });
 
 test("does not flash the login screen while restoring an authenticated session", () => {

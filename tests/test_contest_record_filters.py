@@ -54,6 +54,19 @@ def test_user_and_problem_drill_downs_are_scoped_and_paginated(client):
     assert problem['total'] == 2
 
 
+def test_regular_user_can_filter_own_contest_submissions_by_problem_only(client):
+    _, alice, _, users, cid, a, _, ids = records(client)
+    response = client.get(
+        f'/api/submissions?contest_id={cid}&problem_id={a}&user_id={users["bob"]}&page_size=10',
+        headers=alice,
+    )
+    assert response.status_code == 200
+    result = response.json()
+    assert result['total'] == 2
+    assert {item['id'] for item in result['items']} == {ids['alice_a_wrong'], ids['alice_a_ac']}
+    assert {item['username'] for item in result['items']} == {'alice'}
+
+
 def test_problem_attempt_and_accepted_lists_match_participant_metrics(client):
     _, _, root, _, cid, a, _, ids = records(client)
     overview = client.get(f'/api/contests/{cid}', headers=root).json()['problems'][0]

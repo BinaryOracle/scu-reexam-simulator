@@ -9,6 +9,14 @@ max_audio_mb = 20
 # 必须连同数据库备份此文件；不要提交到版本库。
 # password_key_file = "/private/path/password-view.key"
 
+[backups]
+# 恢复前的安全副本：留空配置时默认数据库同目录的 backups/，不要挂载到 /static。
+# directory = "data/backups"
+max_upload_mb = 4096
+max_expanded_mb = 16384
+max_entries = 100000
+max_rows_per_table = 1000000
+
 [email_auth]
 enabled = false # 配置 SMTP 后开启；未配置时明确返回不可用，不生成演示验证码
 smtp_host = "smtp.qq.com" # 腾讯企业邮箱可使用 smtp.exmail.qq.com，其他服务商按其文档填写

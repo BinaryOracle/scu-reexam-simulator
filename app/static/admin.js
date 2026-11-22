@@ -1,6 +1,8 @@
+import { refreshBackupModules, setupBackups } from './admin-backups.js?v=20261122-restore-v2';
+export { refreshBackupModules };
 /** Account management UI. Backend APIs remain the source of authorization. */
 import { api, state } from "./api.js?v=20261114-ui-v17";
-import { readCreditSettings } from "./credits.js?v=20261117-package-delete-v2";
+import { readCreditSettings } from "./credits.js?v=20261122-referral-rewards-v2";
 import {
   $,
   el,
@@ -180,6 +182,7 @@ export async function refreshModelSettings() {
   if (revision !== modelSettingsRevision || $('modelSettingsForm').dataset.saving === 'true') return;
   renderModelSettings(settings);
 }
+
 function questionEditorState() {
   return JSON.stringify([$("questionCategory").value, $("questionSubject").value, $("questionContent").value, $("questionActive").checked]);
 }
@@ -299,10 +302,18 @@ async function exportQuestionBank() {
 function renderUsers() {
   clearVisiblePasswords();
   const query = $("userSearch").value.trim().toLocaleLowerCase();
+  const emailQuery = $("userEmailSearch").value.trim().toLocaleLowerCase();
+  const referrerQuery = $("userReferrerSearch").value.trim().toLocaleLowerCase();
   const status = $("userStatus").value;
+  const roleFilter = $("userRoleFilter").value;
+  const rebateFilter = $("userRebateFilter").value;
   const visible = accounts.filter(
     (user) =>
-      (user.username.toLocaleLowerCase().includes(query) || (user.email || "").toLocaleLowerCase().includes(query)) &&
+      user.username.toLocaleLowerCase().includes(query) &&
+      (user.email || "").toLocaleLowerCase().includes(emailQuery) &&
+      (!referrerQuery || `${user.referrer_name || ""} ${user.referrer_email || ""}`.toLocaleLowerCase().includes(referrerQuery)) &&
+      (roleFilter === "all" || (roleFilter === "admin" ? user.is_admin : !user.is_admin)) &&
+      (rebateFilter === "all" || (rebateFilter === "none" ? !user.purchase_service : rebateFilter === "redeemed" ? user.purchase_service && user.rebate_redeemed : user.purchase_service && !user.rebate_redeemed)) &&
       (status === "all" ||
         (status === "active" ? user.is_active : !user.is_active)),
   );
@@ -320,15 +331,17 @@ function renderUsers() {
   const wrap = el("div", "", "account-table-wrap");
   const table = document.createElement("table");
   table.className = "account-table";
-  table.append(el("caption", "账号、邮箱、面试次数与状态", "sr-only"));
+  table.append(el("caption", "账号、邀请者、购买服务、面试次数与状态", "sr-only"));
   const head = document.createElement("thead");
   const tr = document.createElement("tr");
   for (const text of [
     "用户信息",
     "密码",
-    "面试次数",
     "功能权限",
     "账号状态",
+    "邀请者",
+    "购买服务 / 返利",
+    "面试次数",
     "操作",
   ]) {
     const th = el("th", text);
@@ -362,6 +375,44 @@ function renderUsers() {
       text,
     );
     name.append(cell);
+    const referrer = accountCell("邀请者", "account-referrer-cell");
+    referrer.append(el("span", user.referrer_name || "—", user.referrer_name ? "account-referrer-name" : "muted"));
+    if (user.referrer_email) referrer.append(el("small", user.referrer_email, "account-email-address"));
+    const service = accountCell("购买服务 / 返利", "account-purchase-service-cell");
+    const serviceForm = el("form", "", "account-service-form");
+    const serviceInput = el("input", "", "account-service-input");
+    serviceInput.type = "text"; serviceInput.maxLength = 160; serviceInput.value = user.purchase_service || "";
+    serviceInput.placeholder = "输入购买服务";
+    serviceInput.setAttribute("aria-label", `${user.username} 的购买服务`);
+    const serviceSave = el("button", "保存", "text-button account-service-save");
+    serviceSave.type = "submit";
+    serviceSave.disabled = true;
+    serviceInput.addEventListener("input", () => { serviceSave.disabled = serviceInput.value.trim() === (user.purchase_service || ""); });
+    serviceForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const value = serviceInput.value.trim();
+      if (value === (user.purchase_service || "")) return;
+      serviceInput.disabled = true; serviceSave.disabled = true;
+      try {
+        const result = await api(`/admin/users/${user.id}/purchase-service`, { method: "PATCH", body: JSON.stringify({ purchase_service: value, rebate_redeemed: false }) });
+        user.purchase_service = result.purchase_service; user.rebate_redeemed = result.rebate_redeemed;
+        renderUsers(); notify("购买服务信息已更新。");
+      } catch (error) { serviceInput.disabled = false; serviceInput.value = user.purchase_service || ""; notify(error.message, "error"); }
+    });
+    serviceForm.append(serviceInput, serviceSave);
+    const statusButton = button(user.rebate_redeemed ? "已兑现" : user.purchase_service ? "待兑现" : "未填写", async () => {
+      if (!user.purchase_service) return;
+      const next = !user.rebate_redeemed;
+      if (!await confirmAction(`将「${user.username}」的${user.purchase_service}返利标记为${next ? "已兑现" : "待兑现"}。`, { title: "确认更新返利状态？", confirmText: next ? "标记已兑现" : "恢复待兑现" })) return;
+      statusButton.disabled = true;
+      try {
+        const result = await api(`/admin/users/${user.id}/purchase-service`, { method: "PATCH", body: JSON.stringify({ purchase_service: user.purchase_service, rebate_redeemed: next }) });
+        user.rebate_redeemed = result.rebate_redeemed; renderUsers(); notify("返利状态已更新。");
+      } catch (error) { statusButton.disabled = false; notify(error.message, "error"); }
+    }, `account-rebate-state ${user.rebate_redeemed ? "redeemed" : user.purchase_service ? "pending" : "unset"}`);
+    statusButton.disabled = !user.purchase_service;
+    statusButton.setAttribute("aria-pressed", String(user.rebate_redeemed));
+    service.append(serviceForm, statusButton);
     const password = accountCell("密码", "account-password-cell");
     password.append(passwordControl(user));
     const email = el("span", user.email || "未绑定邮箱", "account-email-address");
@@ -448,7 +499,7 @@ function renderUsers() {
     );
     permissions.append(permissionGroup);
     if (user.is_admin) permissions.append(el("small", "全部功能已开通", "account-permission-note"));
-    row.append(name, password, credits, permissions, active, actions);
+    row.append(name, password, permissions, active, referrer, service, credits, actions);
     body.append(row);
   }
   table.append(head, body);
@@ -612,6 +663,7 @@ async function submitPassword(event) {
   }
 }
 export function setupAdmin() {
+  setupBackups();
   document.addEventListener("visibilitychange", () => { if (document.hidden) clearVisiblePasswords(); });
   $("newUser").addEventListener("click", () => void openAccount().catch(error => notify(error.message, "error")));
   $("luoguAppOrigin").addEventListener("input", () => { luoguSettingsRevision++; $("luoguSettingsStatus").hidden = true; });
@@ -699,6 +751,10 @@ export function setupAdmin() {
   });
   questionEditorBaseline = questionEditorState();
   $("userSearch").addEventListener("input", renderUsers);
+  $("userEmailSearch").addEventListener("input", renderUsers);
+  $("userReferrerSearch").addEventListener("input", renderUsers);
+  $("userRoleFilter").addEventListener("change", renderUsers);
+  $("userRebateFilter").addEventListener("change", renderUsers);
   $("userStatus").addEventListener("change", renderUsers);
   $("userForm").addEventListener("submit", submitAccount);
   $("passwordForm").addEventListener("submit", submitPassword);

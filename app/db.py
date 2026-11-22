@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 38
+SCHEMA_VERSION = 39
 
 
 @contextmanager
@@ -301,5 +301,7 @@ def initialize():
         initialize_trends(db)
         from .services.points import initialize as initialize_points
         initialize_points(db)
+        from .services.referrals import initialize as initialize_referrals
+        initialize_referrals(db)
         initialize_default_courses(db, imported_files)
         db.execute(f'PRAGMA user_version={SCHEMA_VERSION}')

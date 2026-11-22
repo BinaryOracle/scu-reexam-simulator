@@ -19,6 +19,7 @@ let purchaseQuantity = null;
 let purchaseToken = null;
 let purchaseBusy = false;
 let profileRequest = 0;
+let referralRequest = 0;
 const money = value => `¥${(value / 100).toFixed(2)}`;
 const download = (text, name) => {
   const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
@@ -49,6 +50,10 @@ export async function refreshVouchers() {
   $("deleteVoucherPackage").disabled = !settings.packages.some(item => item.id === voucherPackage);
   $("exportVouchers").disabled = !voucherPackage;
   if (!pointsSettingsDirty) $("interviewPointsCost").value = settings.interview_points_cost;
+  const rewardForm = $("pointsRewardRulesForm");
+  for (const key of ['invite_signup_points', 'training_checkin_points_per_week', 'coding_checkin_points_per_week', 'training_questions_per_reward', 'training_contribution_points', 'coding_questions_per_reward', 'coding_contribution_points'])
+    rewardForm.elements.namedItem(key).value = settings.reward_rules[key];
+  settings.reward_rules.leaderboard_rewards.forEach((value, index) => { rewardForm.elements.namedItem(`leaderboard_${index + 1}`).value = value; });
   const selected = $("voucherGeneratePackage").value;
   $("voucherGeneratePackage").replaceChildren(...settings.packages.map(item => {
     const option = el("option", `${money(item.price_fen)} / ${item.credits} 积分`); option.value = item.id; return option;
@@ -237,6 +242,77 @@ export async function refreshProfile() {
   }
 }
 
+async function renderReferrals(request, token) {
+  const root = $("referralContent");
+  const data = await api('/profile/referrals');
+  if (request !== referralRequest || token !== state.token) return;
+  const pending = data.items.filter(item => item.purchase_service && !item.rebate_redeemed).length;
+  const redeemed = data.items.filter(item => item.purchase_service && item.rebate_redeemed).length;
+  const stats = $('referralStats');
+  const stat = (label, value, hint, tone = '') => {
+    const card = el('article', '', `panel referral-stat${tone ? ` ${tone}` : ''}`);
+    card.append(el('span', label), el('strong', value), el('small', hint));
+    return card;
+  };
+  stats.replaceChildren(
+    stat('注册奖励', `${data.signup_reward_points} 积分`, '每位新用户首次注册成功'),
+    stat('邀请人数', String(data.total_invited), '已通过邀请码建立关系'),
+    stat('待兑现服务', String(pending), '套餐或项目服务返利', 'pending'),
+    stat('已兑现服务', String(redeemed), '管理员确认完成兑现', 'settled'),
+  );
+  const title = el('div', '', 'referral-content-heading');
+  title.append(el('div', 'YOUR REFERRAL', 'eyebrow'), el('h2', '分享邀请，查看返利'));
+  const intro = el('p', `新用户首次注册并填写邀请码后，你将获得 ${data.signup_reward_points} 积分。`);
+  const details = el('div', '', 'referral-policy');
+  details.append(el('strong', '服务返利说明'), el('p', `邀请成功注册可获得 ${data.signup_reward_points} 积分；被邀请用户购买套餐服务，可获得订单金额 5% 的现金返利；购买项目服务，可获得订单金额 5% 的现金返利。返利兑现请联系微信：ZDH200212zdh。`));
+  const codeField = el('div', '', 'referral-share-field');
+  const code = el('code', data.invite_code);
+  const copyCode = button('复制邀请码', async () => {
+    await navigator.clipboard.writeText(data.invite_code);
+    notify('邀请码已复制。');
+  }, 'button secondary');
+  codeField.append(el('span', '我的邀请码'), code, copyCode);
+  const url = new URL(window.location.href);
+  url.hash = '';
+  url.search = '';
+  url.searchParams.set('invite', data.invite_code);
+  const linkField = el('div', '', 'referral-share-field');
+  const linkValue = el('input'); linkValue.readOnly = true; linkValue.value = url.toString(); linkValue.setAttribute('aria-label', '邀请注册链接');
+  const copyLink = button('复制邀请链接', async () => {
+    await navigator.clipboard.writeText(url.toString());
+    notify('邀请链接已复制。');
+  }, 'button secondary');
+  linkField.append(el('span', '邀请链接'), linkValue, copyLink);
+  const list = el('div', '', 'referral-list');
+  if (!data.items.length) list.append(emptyState('还没有邀请记录', '分享邀请码或邀请链接，新用户首次注册时填写即可建立邀请关系。', '◇'));
+  else for (const item of data.items) {
+    const row = el('article', '', 'referral-row');
+    const identity = el('div', '', 'referral-identity');
+    identity.append(el('strong', item.username), el('small', item.email || '未绑定邮箱'));
+    const serviceLabel = item.purchase_service === '套餐服务' ? '套餐服务 · 5%' : item.purchase_service === '项目服务' ? '项目服务 · 5%' : item.purchase_service || '暂无购买服务';
+    const state = item.purchase_service ? item.rebate_redeemed ? '已兑现' : '待兑现' : '—';
+    row.append(identity, el('span', serviceLabel, 'referral-service'), el('span', state, `referral-rebate-state ${item.rebate_redeemed ? 'redeemed' : item.purchase_service ? 'pending' : 'unset'}`));
+    list.append(row);
+  }
+  const sharing = el('div', '', 'referral-share-grid');
+  sharing.append(codeField, linkField);
+  const recordsHeading = el('div', '', 'referral-records-heading');
+  recordsHeading.append(el('h3', '邀请记录'), el('span', `${data.total_invited} 位用户`));
+  root.replaceChildren(title, intro, sharing, details, recordsHeading, list);
+}
+
+export async function refreshReferrals() {
+  const request = ++referralRequest, token = state.token;
+  $('referralContent').replaceChildren(el('p', '正在加载邀请记录…', 'muted'));
+  try { await renderReferrals(request, token); }
+  catch (error) {
+    if (request !== referralRequest || token !== state.token) return;
+    const message = emptyState('邀请记录暂时无法加载', error.message, '◇');
+    message.append(button('重新加载', () => { void refreshReferrals(); }, 'button secondary'));
+    $('referralContent').replaceChildren(message);
+  }
+}
+
 function updatePurchaseTotal() {
   const quantity = Number($("pointsPurchaseQuantity").value);
   const valid = Number.isInteger(quantity) && quantity > 0 && quantity <= 10000;
@@ -273,6 +349,17 @@ export function setupCredits() {
       await api("/admin/credit-settings", { method: "PATCH", body: JSON.stringify({ interview_points_cost: Number(value) }) });
       pointsSettingsDirty = $("interviewPointsCost").value !== value;
       notify("积分购买规则已更新，后续购买立即生效。");
+    }, event.submitter);
+  });
+  $("pointsRewardRulesForm").addEventListener("submit", event => {
+    event.preventDefault();
+    run(async () => {
+      const form = event.currentTarget;
+      const payload = Object.fromEntries(['invite_signup_points', 'training_checkin_points_per_week', 'coding_checkin_points_per_week', 'training_questions_per_reward', 'training_contribution_points', 'coding_questions_per_reward', 'coding_contribution_points'].map(key => [key, Number(form.elements.namedItem(key).value)]));
+      payload.leaderboard_rewards = [1, 2, 3].map(index => Number(form.elements.namedItem(`leaderboard_${index}`).value));
+      await api('/admin/credit-settings', { method: 'PATCH', body: JSON.stringify(payload) });
+      notify('积分奖励规则已更新，仅影响后续获得的奖励。');
+      await refreshVouchers();
     }, event.submitter);
   });
   $("deleteVoucherPackage").addEventListener("click", event => run(async () => {

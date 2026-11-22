@@ -106,6 +106,17 @@ def load_config():
         raise ValueError('security.password_key_file 必须指定密钥文件路径')
     key_path = Path(key_file)
     security['password_key_file'] = str(key_path if key_path.is_absolute() else ROOT / key_path)
+    backups = config.setdefault('backups', {})
+    backups.setdefault('directory', str(Path(config['app']['database']).parent / 'backups'))
+    for key, default in [('max_upload_mb', 4096), ('max_expanded_mb', 16384),
+                         ('max_entries', 100000), ('max_rows_per_table', 1000000)]:
+        backups.setdefault(key, default)
+        if type(backups[key]) is not int or backups[key] <= 0:
+            raise ValueError(f'backups.{key} 必须是正整数')
+    if not isinstance(backups['directory'], str) or not backups['directory'] or '\x00' in backups['directory']:
+        raise ValueError('backups.directory 必须是有效目录路径')
+    backup_directory = Path(backups['directory'])
+    backups['directory'] = str(backup_directory if backup_directory.is_absolute() else ROOT / backup_directory)
     credits = config.setdefault('credits', {})
     credits.setdefault('shop_url', 'https://wzyp.cn/shop/E1GQFV0P')
     shop_url = credits['shop_url']

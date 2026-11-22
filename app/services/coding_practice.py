@@ -82,11 +82,15 @@ def daily(db, user):
     solved = bool(assignment and db.execute("""SELECT 1 FROM coding_submissions WHERE user_id=?
         AND question_id=? AND question_content_version=? AND status='Accepted' AND completed_date=? LIMIT 1""",
         (uid, assignment['question_id'], question['content_version'], day_string)).fetchone())
+    checkin_points_per_week = int(db.execute(
+        "SELECT value FROM app_settings WHERE key='coding_checkin_points_per_week'").fetchone()[0])
     return {'date': day_string, 'question_id': assignment['question_id'] if assignment else None,
             'question_title': question['title'] if available else ('题目已停用或撤回' if assignment else ''),
             'available': available, 'solved': solved, 'checked_in': checked, 'streak': streak,
             'reward': last['credits'] if checked else 0,
-            'next_milestone': (streak // 7 + 1) * 7, 'next_reward': streak // 7 + 1}
+            'next_milestone': (streak // 7 + 1) * 7,
+            'next_reward': (streak // 7 + 1) * checkin_points_per_week,
+            'checkin_points_per_week': checkin_points_per_week}
 
 
 def home(db, user):
@@ -136,7 +140,8 @@ def checkin(db, user):
         raise HTTPException(409, '请先通过今天的每日一题评测，再打卡')
     streak = status['streak'] + 1
     account = db.execute('SELECT is_admin,interview_credits FROM users WHERE id=?', (user['id'],)).fetchone()
-    amount = streak // 7 if streak % 7 == 0 and not account['is_admin'] else 0
+    weekly_reward = int(db.execute("SELECT value FROM app_settings WHERE key='coding_checkin_points_per_week'").fetchone()[0])
+    amount = (streak // 7) * weekly_reward if streak % 7 == 0 and not account['is_admin'] else 0
     cid = db.execute('INSERT INTO coding_checkins(user_id,date,streak,credits) VALUES (?,?,?,?)',
                      (user['id'], status['date'], streak, amount)).lastrowid
     if amount:

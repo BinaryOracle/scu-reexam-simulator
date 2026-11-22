@@ -3,12 +3,11 @@ import { api, state } from "./api.js?v=20261114-ui-v17";
 import { $, el, button, notify } from "./ui.js?v=20261114-ui-v17";
 
 const periods = [
-  { id: "day", label: "当日趋势" },
   { id: "week", label: "当周趋势" },
   { id: "month", label: "当月趋势" },
   { id: "year", label: "当年趋势" },
 ];
-let selectedPeriod = "day";
+let selectedPeriod = "week";
 let selectedTrend = null;
 let requestRevision = 0;
 let generationPeriodSelect = null;
@@ -142,14 +141,14 @@ function buildPage() {
   const heading = el("header", "", "trend-page-heading");
   const copy = el("div", "", "trend-heading-copy");
   copy.append(el("span", "AI FRONTIER BRIEFING", "eyebrow"), el("h1", "热点趋势"),
-    el("p", "每日更新当日、当周、当月与当年的 AI 技术进展。"));
+    el("p", "按周、月、年整理最具影响力的 AI 前沿科技进展。"));
   heading.append(copy);
 
   const admin = el("section", "", "panel trend-admin-panel"); admin.id = "trendAdminPanel"; admin.hidden = !state.adminMode;
   const adminHeading = el("div", "", "trend-admin-heading");
   const adminCopy = el("div", "", "trend-admin-copy");
   adminCopy.append(el("span", "EDITORIAL DESK", "eyebrow"), el("h2", "趋势内容管理"),
-    el("p", "系统每天早上及每次启动时自动刷新四个周期；也可立即重整所选周期。", "trend-muted"));
+    el("p", "系统每天早上及每次启动时自动刷新周、月、年三个周期；也可立即重整所选周期。", "trend-muted"));
   const form = el("form", "", "trend-generate-form");
   const periodLabel = el("label", "刷新范围"); periodLabel.htmlFor = "trendGeneratePeriod";
   const period = el("select"); period.id = periodLabel.htmlFor;

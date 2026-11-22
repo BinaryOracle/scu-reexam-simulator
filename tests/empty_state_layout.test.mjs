@@ -26,7 +26,7 @@ test('the coding question list keeps a single outer frame on empty pages', () =>
 });
 
 test('bumps static stylesheet versions so browsers receive the layout fix', () => {
-  assert.match(index, /style\.css\?v=20261121-empty-state-v1/);
+  assert.match(index, /style\.css\?v=20261122-backup-restore-v2/);
   assert.match(index, /coding\.css\?v=20261121-local-cases-v2/);
   assert.match(index, /training\.css\?v=20261121-empty-state-v2/);
 });

@@ -72,13 +72,14 @@ function renderData(root, payload, options) {
   const heading = el("div", "", "leaderboard-heading");
   const headingText = el("div", "", "leaderboard-heading-text");
   const title = scope === "training" ? "每日训练排行榜" : scope === "coding" ? "算法带刷排行榜" : "练习排行榜";
-  headingText.append(el("span", "PRACTICE RANKING", "eyebrow"), el("h2", title), el("p", "每周六 00:00（北京时间）结算，本周前三名将获得积分奖励。", "muted"));
+  headingText.append(el("span", "PRACTICE RANKING", "eyebrow"), el("h2", title), el("p", `每周六 00:00（北京时间）结算，本周前三名分别获得 ${payload.rewards[0]}、${payload.rewards[1]}、${payload.rewards[2]} 积分。`, "muted"));
   heading.append(headingText);
   if (options.onBack) heading.append(button("返回练习", options.onBack, "button quiet leaderboard-back"));
   const period = el("div", "", "leaderboard-period");
   period.append(el("span", "本周榜单", "leaderboard-period-label"), el("span", payload?.period?.label || "每周六 00:00 开始新一周", "muted"));
   const rewards = el("div", "", "leaderboard-rewards");
-  for (const [rank, credits] of [[1, 3], [2, 2], [3, 1]]) {
+  for (const [index, credits] of payload.rewards.entries()) {
+    const rank = index + 1;
     const reward = el("span", "", `leaderboard-reward reward-${rank}`);
     reward.append(el("b", `第 ${rank} 名`), el("span", `+${credits} 积分`));
     rewards.append(reward);

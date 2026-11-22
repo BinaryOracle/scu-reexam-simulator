@@ -54,15 +54,6 @@
 .contest-immersive .problem-rail { min-height: 36px; margin-bottom: 6px; border-bottom: 0; }
 .contest-immersive .problem-tab { min-height: 28px; padding: 4px 10px; font-size: 12px; }
 .contest-immersive .problem-rail-remote { font-size: 11px; }
-.contest-immersive .contest-workspace-actions {
-  display: flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0 4px 5px;
-}
-.contest-immersive .contest-workspace-actions .workspace-header-right { display: flex; align-items: center; gap: 10px; }
-.contest-immersive .contest-workspace-actions .workspace-back { min-height: 38px; padding: 7px 14px; font-size: 13px; }
 .problem-columns.candidate-workspace {
   gap: 0;
   grid-template-columns: minmax(0, calc(var(--statement-size, .46) * 100% - 4px)) 8px minmax(0, 1fr);

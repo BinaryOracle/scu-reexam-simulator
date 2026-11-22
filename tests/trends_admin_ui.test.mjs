@@ -8,6 +8,7 @@ const periodControlsSource = source
   .slice(source.indexOf("function periodControls()"), source.indexOf("function sourceList("));
 const buildPageSource = source
   .slice(source.indexOf("function buildPage()"), source.indexOf("export async function refreshTrends()"));
+const periodsSource = source.slice(source.indexOf("const periods ="), source.indexOf("let selectedTrend"));
 
 class Node {
   constructor(tag, text = "", className = "") {
@@ -29,10 +30,6 @@ class Node {
 function buildPage(adminMode) {
   const root = new Node("main");
   const context = vm.createContext({
-    periods: [
-      { id: "day", label: "当日趋势" }, { id: "week", label: "当周趋势" },
-      { id: "month", label: "当月趋势" }, { id: "year", label: "当年趋势" },
-    ],
     $, el: (tag, text, className) => new Node(tag, text, className),
     button: (text, action, className) => {
       const node = new Node("button", text, className);
@@ -44,10 +41,9 @@ function buildPage(adminMode) {
       constructor(text, value) { super("option", text); this.value = value; }
     },
     root,
-    selectedPeriod: "day",
     loadPeriod: async () => {},
   });
-  vm.runInContext(`${periodControlsSource}\n${buildPageSource}\nbuildPage();`, context);
+  vm.runInContext(`${periodsSource}\n${periodControlsSource}\n${buildPageSource}\nbuildPage();`, context);
   return root;
 
   function $(id) {
@@ -64,4 +60,12 @@ test("trend management controls are visible only in admin mode", () => {
 
   assert.equal(adminPanel.hidden, false);
   assert.equal(userPanel.hidden, true);
+});
+
+test("trend tabs offer only current week, month and year with week selected", () => {
+  const page = buildPage(false);
+  const filter = page.children.find(node => node.className === "trend-filter-row");
+  const tabs = filter.children[0].children;
+  assert.deepEqual(tabs.map(node => node.textContent), ["当周趋势", "当月趋势", "当年趋势"]);
+  assert.equal(tabs[0].attributes["aria-selected"], "true");
 });

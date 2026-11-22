@@ -194,6 +194,11 @@
 .coding-record-more { margin-left: auto; color: #8e7869; white-space: nowrap; font-size: 12px; }
 .coding-admin-heading { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin: 20px 0; }
 .coding-admin-heading .section-title { font-size: 25px; font-weight: 650; }
+.coding-stage-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 22px; border-color: #e5d9ca; background: linear-gradient(110deg, #fffdf9, #faf5ed); }
+.coding-stage-toolbar-copy { min-width: 0; }
+.coding-stage-toolbar h2 { margin: 0 0 6px; color: #4e3b2f; font-size: 16px; font-weight: 650; }
+.coding-stage-toolbar p { max-width: 720px; margin: 0; color: #89796d; font-size: 12px; line-height: 1.7; }
+.coding-stage-add { flex: none; min-height: 40px; padding: 9px 16px; border-radius: 7px; font-size: 13px; }
 .coding-admin-list { display: grid; gap: 12px; margin-top: 18px; }
 .coding-admin-question { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px; }
 .coding-admin-question > div:first-child { min-width: 0; }
@@ -280,6 +285,9 @@
   .coding-toolbar select { min-width: 0; max-width: 100%; font-size: 12px; }
   .coding-admin-question { align-items: stretch; flex-direction: column; padding: 18px; }
   .coding-admin-question .coding-actions { justify-content: flex-end; }
+  .coding-stage-toolbar { align-items: flex-start; gap: 16px; padding: 18px; }
+  .coding-stage-toolbar p { font-size: 11px; }
+  .coding-stage-add { align-self: center; }
   .coding-mode-tabs { flex-wrap: nowrap; overflow-x: auto; margin: 18px -4px 14px; padding: 0 4px 8px; scrollbar-width: thin; }
   .coding-mode-tabs .button { flex: 0 0 auto; }
   .coding-workspace-toolbar { gap: 7px; min-height: 40px; }
@@ -296,6 +304,10 @@
   .coding-dialog .dialog-body { padding: 16px; }
   .coding-dialog .dialog-header, .coding-dialog .dialog-footer { padding: 14px 16px; }
   .coding-settings { padding: 20px; }
+}
+@media (max-width: 480px) {
+  .coding-stage-toolbar { flex-direction: column; }
+  .coding-stage-add { align-self: flex-start; }
 }
 @media (prefers-reduced-motion: reduce) { .coding-stage { transition: none; } }
 

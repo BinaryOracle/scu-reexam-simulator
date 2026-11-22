@@ -67,15 +67,8 @@
 .password-control input { width: 108px; min-width: 0; padding: 7px 8px; min-height: 34px; height: 34px; font-size: 12px; font-family: ui-monospace, monospace; background: #faf7f2; }
 .password-control .password-reveal-button { min-width: 50px; padding: 5px; letter-spacing: 0; font-size: 11px; font-family: inherit; }
 .password-control .password-unavailable { font-size: 11px; }
-.account-table { width: 100%; table-layout: fixed; }
-.account-table th, .account-table td { padding: 18px 16px; vertical-align: middle; }
+.account-table th, .account-table td { vertical-align: middle; }
 .account-table th { color: #82766c; font-size: 11px; font-weight: 600; background: #f8f7f4; }
-.account-table th:nth-child(1) { width: 24%; }
-.account-table th:nth-child(2) { width: 16%; }
-.account-table th:nth-child(3) { width: 14%; }
-.account-table th:nth-child(4) { width: 23%; }
-.account-table th:nth-child(5) { width: 10%; }
-.account-table th:nth-child(6) { width: 13%; }
 .account-table tbody tr { background: #fff; }
 .account-table tbody tr:hover { background: #fcfaf7; }
 .account-table tbody tr.account-disabled { background: #f8f8f6; }
@@ -130,7 +123,6 @@
 .redemption-price { color: #a27454; font-size: 17px; }
 .account-credits-cell > strong { display: block; font-size: 12px; white-space: nowrap; font-weight: 500; }
 .account-credits-cell > .text-button { padding: 0; font-size: 10px; }
-.account-table { min-width: 960px; }
 #userDialog { width: min(600px, calc(100vw - 32px)); border-radius: 8px; }
 #userDialog .dialog-header { padding: 22px 28px; }
 #userDialog .account-type-selector { margin-bottom: 24px; }
@@ -188,39 +180,7 @@
   .interview-quota { align-items: flex-start; flex-direction: column; gap: 4px; }
 }
 
-@media (min-width: 621px) {
-  .account-table th:first-child,
-  .account-table td:first-child {
-    position: sticky;
-    left: 0;
-    z-index: 2;
-    background: #fff;
-    box-shadow: 8px 0 12px -12px #51372b80;
-  }
-  .account-table thead th:first-child { z-index: 4; background: #f8f7f4; }
-  .account-table th:last-child,
-  .account-table td:last-child {
-    position: sticky;
-    right: 0;
-    z-index: 2;
-    background: #fff;
-    box-shadow: -8px 0 12px -12px #51372b80;
-  }
-  .account-table thead th:last-child { z-index: 4; background: #f8f7f4; }
-  .account-table tr.account-disabled td:first-child,
-  .account-table tr.account-disabled td:last-child { background: #fdfbf8; }
-}
 @media (max-width: 620px) {
-  .account-table { table-layout: auto; }
-  .account-table td.account-identity-cell, .account-table td.account-permissions-cell, .account-table td.account-actions-cell { grid-column: 1 / -1; }
-  .account-table td:nth-child(3) { grid-column: auto; }
-  .account-table .account-identity-cell > .account-cell-label { display: none; }
-  .account-table .account-name { align-items: center; }
-  .account-table .account-name .avatar { width: 38px; height: 38px; flex-basis: 38px; }
-  .account-table .account-name strong { white-space: normal; }
-  .account-table .account-permission-grid { gap: 8px; }
-  .account-table .account-permission-grid .account-status-button { min-height: 36px; }
-  .account-table .table-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
   #userDialog .dialog-header, #userDialog .dialog-body, #userDialog .dialog-footer { padding: 20px; }
 }
 @media (max-width: 420px) {
@@ -333,4 +293,25 @@
   .profile-stats { grid-template-columns: 1fr; gap: 12px; }
   .points-settings-fields { grid-template-columns: 1fr; }
   .points-history-row { align-items: flex-start; gap: 12px; }
+}
+#voucherPackageForm.package-create-panel { display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; gap: 20px; padding: 28px; margin-bottom: 28px; }
+#voucherPackageForm .package-create-fields { display: grid; grid-template-columns: repeat(2, minmax(170px, 1fr)) minmax(160px, auto); align-items: end; gap: 18px; width: 100%; max-width: 980px; }
+#voucherPackageForm .package-create-fields > div { display: grid; gap: 8px; }
+#voucherPackageForm .package-create-fields input { min-height: 48px; padding-inline: 14px; }
+#voucherPackageForm .package-create-fields > button { min-height: 48px; padding-inline: 20px; }
+.voucher-toolbar { gap: 22px; padding: 25px 28px; }
+.voucher-package-tabs { gap: 8px; padding: 6px; }
+.voucher-package-tabs button { min-height: 44px; padding: 10px 18px; }
+.voucher-toolbar-actions { gap: 12px; }
+@media (max-width: 800px) {
+  #voucherPackageForm .package-create-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #voucherPackageForm .package-create-fields > button { grid-column: 1 / -1; }
+}
+@media (max-width: 620px) {
+  #voucherPackageForm.package-create-panel { gap: 18px; padding: 20px; }
+  #voucherPackageForm .package-create-fields { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  #voucherPackageForm .package-create-fields > button { grid-column: auto; width: 100%; }
+  .voucher-toolbar { padding: 20px; }
+  .voucher-package-tabs { width: 100%; }
+  .voucher-package-tabs button { flex: 1; text-align: center; }
 }
