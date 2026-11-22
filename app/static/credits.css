@@ -294,7 +294,7 @@
   .points-settings-fields { grid-template-columns: 1fr; }
   .points-history-row { align-items: flex-start; gap: 12px; }
 }
-#voucherPackageForm.package-create-panel { display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; gap: 20px; padding: 28px; margin-bottom: 28px; }
+#voucherPackageForm.package-create-panel { display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; gap: 20px; padding: 28px; margin: 28px 0; }
 #voucherPackageForm .package-create-fields { display: grid; grid-template-columns: repeat(2, minmax(170px, 1fr)) minmax(160px, auto); align-items: end; gap: 18px; width: 100%; max-width: 980px; }
 #voucherPackageForm .package-create-fields > div { display: grid; gap: 8px; }
 #voucherPackageForm .package-create-fields input { min-height: 48px; padding-inline: 14px; }

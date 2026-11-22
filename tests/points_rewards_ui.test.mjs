@@ -9,11 +9,11 @@ const [css, style, html] = await Promise.all([
 ]);
 
 test("voucher package form has roomier spacing and responsive fields", () => {
-  assert.match(css, /#voucherPackageForm\.package-create-panel\s*\{[^}]*gap:\s*20px[^}]*padding:\s*28px/);
+  assert.match(css, /#voucherPackageForm\.package-create-panel\s*\{[^}]*gap:\s*20px[^}]*padding:\s*28px[^}]*margin:\s*28px 0/);
   assert.match(css, /#voucherPackageForm \.package-create-fields\s*\{[^}]*gap:\s*18px/);
   assert.match(css, /#voucherPackageForm \.package-create-fields input\s*\{[^}]*min-height:\s*48px/);
   assert.match(css, /@media \(max-width: 620px\)[\s\S]*?#voucherPackageForm \.package-create-fields\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/);
-  assert.match(html, /credits\.css\?v=20261122-voucher-spacing-v1/);
+  assert.match(html, /credits\.css\?v=20261122-voucher-spacing-v2/);
 });
 
 test("points reward rules are grouped and the save action is not full width", () => {
