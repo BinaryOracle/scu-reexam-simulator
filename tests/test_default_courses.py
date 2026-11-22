@@ -106,6 +106,9 @@ def test_catalog_matches_the_first_four_printed_chapters_of_the_user_pdf():
     assert referenced_ids <= question_ids
     public = {str(item['id']): item for item in catalog['leetcode_questions'] if not item.get('paid_only')}
     exercises = json.loads((directory / 'exercises.json').read_text())
+    full_statements = json.loads((directory / 'leetcode-statements.json').read_text())
+    assert set(full_statements) == {item['slug'] for item in public.values()}
+    assert all(value['statement'].strip() for value in full_statements.values())
     assert exercises.keys() == public.keys()
     for number, exercise in exercises.items():
         assert exercise['statement'].strip()
@@ -203,6 +206,34 @@ def test_pdf_question_upgrade_keeps_question_ids_submissions_and_admin_edits(cli
         assert db.execute('SELECT COUNT(*) FROM live_courses').fetchone()[0] == 1
         assert db.execute("SELECT statement FROM coding_questions WHERE remote_problem_id='target-sum'").fetchone()[0] == '管理员提供的题面'
         assert db.execute("SELECT deleted FROM coding_questions WHERE source_key='algorithm-book:leetcode:burst-balloons'").fetchone()[0] == 1
+
+
+def test_practice_question_seed_upgrades_short_statements_and_keeps_admin_edits(client):
+    from app.db import connect, initialize
+    from app.services.default_courses import PRACTICE_CONTENT_KEY
+
+    learner = login(client, 'alice')
+    with connect() as db:
+        binary_search = db.execute("""SELECT id FROM coding_questions
+            WHERE source_key='algorithm-book:leetcode:binary-search'""").fetchone()['id']
+        db.execute("UPDATE coding_questions SET statement=? WHERE id=?", (
+            '在升序数组中查找目标值 `target`，找到返回其下标，否则返回 `-1`。', binary_search))
+        db.execute("""UPDATE coding_questions SET statement='管理员自定义题面',content_version=content_version+1
+            WHERE source_key='algorithm-book:leetcode:target-sum'""")
+        db.execute("UPDATE app_settings SET value='1' WHERE key=?", (PRACTICE_CONTENT_KEY,))
+
+    initialize()
+    question = client.get(f'/api/coding/questions/{binary_search}', headers=learner).json()
+    assert len(question['statement']) > 200
+    assert 'O(log n)' in question['statement']
+    assert '提示' in question['statement']
+    assert 'O(log n)' in question['statement_html']
+    assert '<pre>' in question['statement_html']
+    with connect() as db:
+        edited = db.execute("""SELECT statement FROM coding_questions
+            WHERE source_key='algorithm-book:leetcode:target-sum'""").fetchone()[0]
+        assert edited == '管理员自定义题面'
+        assert db.execute('SELECT value FROM app_settings WHERE key=?', (PRACTICE_CONTENT_KEY,)).fetchone()[0] == '2'
 
 
 def test_pdf_upgrade_updates_only_untouched_placeholders_and_keeps_progress(client):

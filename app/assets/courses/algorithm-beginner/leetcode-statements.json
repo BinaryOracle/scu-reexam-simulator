@@ -1,0 +1,357 @@
+{
+  "two-sum": {
+    "number": "1",
+    "title": "两数之和",
+    "statement": "给定一个整数数组 `nums` 和一个整数目标值 `target`，请你在该数组中找出 **和为目标值 ***`target`*  的那 **两个** 整数，并返回它们的数组下标。\n\n你可以假设每种输入只会对应一个答案，并且你不能使用两次相同的元素。\n\n你可以按任意顺序返回答案。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [2,7,11,15], target = 9\n输出：[0,1]\n解释：因为 nums[0] + nums[1] == 9 ，返回 [0, 1] 。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [3,2,4], target = 6\n输出：[1,2]\n\n```\n\n**示例 3：**\n\n```text\n\n输入：nums = [3,3], target = 6\n输出：[0,1]\n\n```\n\n \n\n**提示：**\n\n\t\n- `2 <= nums.length <= 104`\n\n\t\n- `-109 <= nums[i] <= 109`\n\n\t\n- `-109 <= target <= 109`\n\n\t\n- **只会存在一个有效答案**\n\n \n\n**进阶：**你可以想出一个时间复杂度小于 `O(n2)` 的算法吗？"
+  },
+  "longest-palindromic-substring": {
+    "number": "5",
+    "title": "最长回文子串",
+    "statement": "给你一个字符串 `s`，找到 `s` 中最长的 回文 子串。\n\n \n\n**示例 1：**\n\n```text\n\n输入：s = \"babad\"\n输出：\"bab\"\n解释：\"aba\" 同样是符合题意的答案。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：s = \"cbbd\"\n输出：\"bb\"\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= s.length <= 1000`\n\n\t\n- `s` 仅由数字和英文字母组成"
+  },
+  "regular-expression-matching": {
+    "number": "10",
+    "title": "正则表达式匹配",
+    "statement": "给你一个字符串 `s` 和一个字符规律 `p`，请你来实现一个支持 `'.'` 和 `'*'` 的正则表达式匹配。\n\n\t\n- `'.'` 匹配任意单个字符\n\n\t\n- `'*'` 匹配零个或多个前面的那一个元素\n\n返回一个布尔值，表示匹配是否覆盖整个输入字符串（而非部分）。\n\n \n\n**示例 1：**\n\n```text\n\n输入：s = \"aa\", p = \"a\"\n输出：false\n解释：\"a\" 无法匹配 \"aa\" 整个字符串。\n\n```\n\n**示例 2:**\n\n```text\n\n输入：s = \"aa\", p = \"a*\"\n输出：true\n解释：因为 '*' 代表可以匹配零个或多个前面的那一个元素, 在这里前面的元素就是 'a'。因此，字符串 \"aa\" 可被视为 'a' 重复了一次。\n\n```\n\n**示例 3：**\n\n```text\n\n输入：s = \"ab\", p = \".*\"\n输出：true\n解释：\".*\" 表示可匹配零个或多个（'*'）任意字符（'.'）。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= s.length <= 20`\n\n\t\n- `1 <= p.length <= 20`\n\n\t\n- `s` 只包含从 `a-z` 的小写字母。\n\n\t\n- `p` 只包含从 `a-z` 的小写字母，以及字符 `.` 和 `*`。\n\n\t\n- 保证每次出现字符 `*` 时，前面都匹配到有效的字符"
+  },
+  "valid-parentheses": {
+    "number": "20",
+    "title": "有效的括号",
+    "statement": "给定一个只包括 `'('`，`')'`，`'{'`，`'}'`，`'['`，`']'` 的字符串 `s` ，判断字符串是否有效。\n\n有效字符串需满足：\n\n\t\n- 左括号必须用相同类型的右括号闭合。\n\n\t\n- 左括号必须以正确的顺序闭合。\n\n\t\n- 每个右括号都有一个对应的相同类型的左括号。\n\n \n\n**示例 1：**\n\n**输入：**s = \"()\"\n\n**输出：**true\n\n**示例 2：**\n\n**输入：**s = \"()[]{}\"\n\n**输出：**true\n\n**示例 3：**\n\n**输入：**s = \"(]\"\n\n**输出：**false\n\n**示例 4：**\n\n**输入：**s = \"([])\"\n\n**输出：**true\n\n**示例 5：**\n\n**输入：**s = \"([)]\"\n\n**输出：**false\n\n \n\n**提示：**\n\n\t\n- `1 <= s.length <= 104`\n\n\t\n- `s` 仅由括号 `'()[]{}'` 组成"
+  },
+  "generate-parentheses": {
+    "number": "22",
+    "title": "括号生成",
+    "statement": "数字 `n` 代表生成括号的对数，请你设计一个函数，用于能够生成所有可能的并且 **有效的 **括号组合。\n\n \n\n**示例 1：**\n\n```text\n\n输入：n = 3\n输出：[\"((()))\",\"(()())\",\"(())()\",\"()(())\",\"()()()\"]\n\n```\n\n**示例 2：**\n\n```text\n\n输入：n = 1\n输出：[\"()\"]\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= n <= 8`"
+  },
+  "reverse-nodes-in-k-group": {
+    "number": "25",
+    "title": "K 个一组翻转链表",
+    "statement": "给你链表的头节点 `head` ，每 `k`* *个节点一组进行翻转，请你返回修改后的链表。\n\n`k` 是一个正整数，它的值小于或等于链表的长度。如果节点总数不是 `k`* *的整数倍，那么请将最后剩余的节点保持原有顺序。\n\n你不能只是单纯的改变节点内部的值，而是需要实际进行节点交换。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2020/10/03/reverse_ex1.jpg)\n\n```text\n\n输入：head = [1,2,3,4,5], k = 2\n输出：[2,1,4,3,5]\n\n```\n\n**示例 2：**\n\n![](https://assets.leetcode.com/uploads/2020/10/03/reverse_ex2.jpg)\n\n```text\n\n输入：head = [1,2,3,4,5], k = 3\n输出：[3,2,1,4,5]\n\n```\n\n \n\n**提示：**\n\n\t\n- 链表中的节点数目为 `n`\n\n\t\n- `1 <= k <= n <= 5000`\n\n\t\n- `0 <= Node.val <= 1000`\n\n \n\n**进阶：**你可以设计一个只用 `O(1)` 额外内存空间的算法解决此问题吗？"
+  },
+  "remove-duplicates-from-sorted-array": {
+    "number": "26",
+    "title": "删除排序数组中的重复项",
+    "statement": "给你一个 **非严格递增排列** 的数组 `nums` ，请你**[ 原地](http://baike.baidu.com/item/%E5%8E%9F%E5%9C%B0%E7%AE%97%E6%B3%95)** 删除重复出现的元素，使每个元素 **只出现一次** ，返回删除后数组的新长度。元素的 **相对顺序** 应该保持 **一致** 。然后返回 `nums` 中唯一元素的个数。\n\n考虑 `nums` 的唯一元素的数量为 `k`。去重后，返回唯一元素的数量 `k`。\n\n`nums` 的前 `k` 个元素应包含 **排序后** 的唯一数字。下标 `k - 1` 之后的剩余元素可以忽略。\n\n**判题标准:**\n\n系统会用下面的代码来测试你的题解:\n\n```text\n\nint[] nums = [...]; // 输入数组\nint[] expectedNums = [...]; // 长度正确的期望答案\n\nint k = removeDuplicates(nums); // 调用\n\nassert k == expectedNums.length;\nfor (int i = 0; i < k; i++) {\n    assert nums[i] == expectedNums[i];\n}\n```\n\n如果所有断言都通过，那么您的题解将被 **通过**。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [1,1,2]\n输出：2, nums = [1,2,_]\n解释：函数应该返回新的长度 2 ，并且原数组 nums 的前两个元素被修改为 1, 2 。不需要考虑数组中超出新长度后面的元素。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [0,0,1,1,1,2,2,3,3,4]\n输出：5, nums = [0,1,2,3,4,_,_,_,_,_]\n解释：函数应该返回新的长度 5 ， 并且原数组 nums 的前五个元素被修改为 0, 1, 2, 3, 4 。不需要考虑数组中超出新长度后面的元素。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums.length <= 3 * 104`\n\n\t\n- `-100 <= nums[i] <= 100`\n\n\t\n- `nums` 已按 **非递减** 顺序排列。"
+  },
+  "find-the-index-of-the-first-occurrence-in-a-string": {
+    "number": "28",
+    "title": "实现 strStr()",
+    "statement": "给你两个字符串 `haystack` 和 `needle` ，请你在 `haystack` 字符串中找出 `needle` 字符串的第一个匹配项的下标（下标从 0 开始）。如果 `needle` 不是 `haystack` 的一部分，则返回  `-1`** **。\n\n \n\n**示例 1：**\n\n```text\n\n输入：haystack = \"sadbutsad\", needle = \"sad\"\n输出：0\n解释：\"sad\" 在下标 0 和 6 处匹配。\n第一个匹配项的下标是 0 ，所以返回 0 。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：haystack = \"leetcode\", needle = \"leeto\"\n输出：-1\n解释：\"leeto\" 没有在 \"leetcode\" 中出现，所以返回 -1 。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= haystack.length, needle.length <= 104`\n\n\t\n- `haystack` 和 `needle` 仅由小写英文字符组成"
+  },
+  "sudoku-solver": {
+    "number": "37",
+    "title": "解数独",
+    "statement": "编写一个程序，通过填充空格来解决数独问题。\n\n数独的解法需** 遵循如下规则**：\n\n\t\n- 数字 `1-9` 在每一行只能出现一次。\n\n\t\n- 数字 `1-9` 在每一列只能出现一次。\n\n\t\n- 数字 `1-9` 在每一个以粗实线分隔的 `3x3` 宫内只能出现一次。（请参考示例图）\n\n数独部分空格内已填入了数字，空白格用 `'.'` 表示。\n\n \n\n**示例 1：**\n\n![题目图片](https://assets.leetcode.cn/aliyun-lc-upload/uploads/2021/04/12/250px-sudoku-by-l2g-20050714svg.png)\n\n```text\n\n输入：board = [[\"5\",\"3\",\".\",\".\",\"7\",\".\",\".\",\".\",\".\"],[\"6\",\".\",\".\",\"1\",\"9\",\"5\",\".\",\".\",\".\"],[\".\",\"9\",\"8\",\".\",\".\",\".\",\".\",\"6\",\".\"],[\"8\",\".\",\".\",\".\",\"6\",\".\",\".\",\".\",\"3\"],[\"4\",\".\",\".\",\"8\",\".\",\"3\",\".\",\".\",\"1\"],[\"7\",\".\",\".\",\".\",\"2\",\".\",\".\",\".\",\"6\"],[\".\",\"6\",\".\",\".\",\".\",\".\",\"2\",\"8\",\".\"],[\".\",\".\",\".\",\"4\",\"1\",\"9\",\".\",\".\",\"5\"],[\".\",\".\",\".\",\".\",\"8\",\".\",\".\",\"7\",\"9\"]]\n输出：[[\"5\",\"3\",\"4\",\"6\",\"7\",\"8\",\"9\",\"1\",\"2\"],[\"6\",\"7\",\"2\",\"1\",\"9\",\"5\",\"3\",\"4\",\"8\"],[\"1\",\"9\",\"8\",\"3\",\"4\",\"2\",\"5\",\"6\",\"7\"],[\"8\",\"5\",\"9\",\"7\",\"6\",\"1\",\"4\",\"2\",\"3\"],[\"4\",\"2\",\"6\",\"8\",\"5\",\"3\",\"7\",\"9\",\"1\"],[\"7\",\"1\",\"3\",\"9\",\"2\",\"4\",\"8\",\"5\",\"6\"],[\"9\",\"6\",\"1\",\"5\",\"3\",\"7\",\"2\",\"8\",\"4\"],[\"2\",\"8\",\"7\",\"4\",\"1\",\"9\",\"6\",\"3\",\"5\"],[\"3\",\"4\",\"5\",\"2\",\"8\",\"6\",\"1\",\"7\",\"9\"]]\n解释：输入的数独如上图所示，唯一有效的解决方案如下所示：\n\n![题目图片]( https://assets.leetcode.cn/aliyun-lc-upload/uploads/2021/04/12/250px-sudoku-by-l2g-20050714_solutionsvg.png)\n\n```\n\n \n\n**提示：**\n\n\t\n- `board.length == 9`\n\n\t\n- `board[i].length == 9`\n\n\t\n- `board[i][j]` 是一位数字或者 `'.'`\n\n\t\n- 题目数据 **保证** 输入数独仅有一个解"
+  },
+  "trapping-rain-water": {
+    "number": "42",
+    "title": "接雨水",
+    "statement": "给定 `n` 个非负整数表示每个宽度为 `1` 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。\n\n \n\n**示例 1：**\n\n![题目图片](https://assets.leetcode.cn/aliyun-lc-upload/uploads/2018/10/22/rainwatertrap.png)\n\n```text\n\n输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]\n输出：6\n解释：上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。 \n\n```\n\n**示例 2：**\n\n```text\n\n输入：height = [4,2,0,3,2,5]\n输出：9\n\n```\n\n \n\n**提示：**\n\n\t\n- `n == height.length`\n\n\t\n- `1 <= n <= 2 * 104`\n\n\t\n- `0 <= height[i] <= 105`"
+  },
+  "multiply-strings": {
+    "number": "43",
+    "title": "字符串相乘",
+    "statement": "给定两个以字符串形式表示的非负整数 `num1` 和 `num2`，返回 `num1` 和 `num2` 的乘积，它们的乘积也表示为字符串形式。\n\n**注意：**不能使用任何内置的 BigInteger 库或直接将输入转换为整数。\n\n \n\n**示例 1:**\n\n```text\n\n输入: num1 = \"2\", num2 = \"3\"\n输出: \"6\"\n```\n\n**示例 2:**\n\n```text\n\n输入: num1 = \"123\", num2 = \"456\"\n输出: \"56088\"\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= num1.length, num2.length <= 200`\n\n\t\n- `num1` 和 `num2` 只能由数字组成。\n\n\t\n- `num1` 和 `num2` 都不包含任何前导零，除了数字0本身。"
+  },
+  "jump-game-ii": {
+    "number": "45",
+    "title": "跳跃游戏 II",
+    "statement": "给定一个长度为 `n` 的 **0 索引**整数数组 `nums`。初始位置在下标 0。\n\n每个元素 `nums[i]` 表示从索引 `i` 向后跳转的最大长度。换句话说，如果你在索引 `i` 处，你可以跳转到任意 `(i + j)` 处：\n\n\t\n- `0 <= j <= nums[i]` 且\n\n\t\n- `i + j < n`\n\n返回到达 `n - 1` 的最小跳跃次数。测试用例保证可以到达 `n - 1`。\n\n \n\n**示例 1:**\n\n```text\n\n输入: nums = [2,3,1,1,4]\n输出: 2\n解释: 跳到最后一个位置的最小跳跃数是 2。\n     从下标为 0 跳到下标为 1 的位置，跳 1 步，然后跳 3 步到达数组的最后一个位置。\n\n```\n\n**示例 2:**\n\n```text\n\n输入: nums = [2,3,0,1,4]\n输出: 2\n\n```\n\n \n\n**提示:**\n\n\t\n- `1 <= nums.length <= 104`\n\n\t\n- `0 <= nums[i] <= 1000`\n\n\t\n- 题目保证可以到达 `n - 1`"
+  },
+  "permutations": {
+    "number": "46",
+    "title": "全排列",
+    "statement": "给定一个不含重复数字的数组 `nums` ，返回其 *所有可能的全排列* 。你可以 **按任意顺序** 返回答案。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [1,2,3]\n输出：[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [0,1]\n输出：[[0,1],[1,0]]\n\n```\n\n**示例 3：**\n\n```text\n\n输入：nums = [1]\n输出：[[1]]\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums.length <= 6`\n\n\t\n- `-10 <= nums[i] <= 10`\n\n\t\n- `nums` 中的所有整数 **互不相同**"
+  },
+  "jump-game": {
+    "number": "55",
+    "title": "跳跃游戏",
+    "statement": "给你一个非负整数数组 `nums` ，你最初位于数组的 **第一个下标** 。数组中的每个元素代表你在该位置可以跳跃的最大长度。\n\n判断你是否能够到达最后一个下标，如果可以，返回 `true` ；否则，返回 `false` 。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [2,3,1,1,4]\n输出：true\n解释：可以先跳 1 步，从下标 0 到达下标 1, 然后再从下标 1 跳 3 步到达最后一个下标。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [3,2,1,0,4]\n输出：false\n解释：无论怎样，总会到达下标为 3 的位置。但该下标的最大跳跃长度是 0 ， 所以永远不可能到达最后一个下标。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums.length <= 104`\n\n\t\n- `0 <= nums[i] <= 105`"
+  },
+  "merge-intervals": {
+    "number": "56",
+    "title": "合并区间",
+    "statement": "以数组 `intervals` 表示若干个区间的集合，其中单个区间为 `intervals[i] = [starti, endi]` 。请你合并所有重叠的区间，并返回 *一个不重叠的区间数组，该数组需恰好覆盖输入中的所有区间* 。\n\n \n\n**示例 1：**\n\n```text\n\n输入：intervals = [[1,3],[2,6],[8,10],[15,18]]\n输出：[[1,6],[8,10],[15,18]]\n解释：区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].\n\n```\n\n**示例 2：**\n\n```text\n\n输入：intervals = [[1,4],[4,5]]\n输出：[[1,5]]\n解释：区间 [1,4] 和 [4,5] 可被视为重叠区间。\n```\n\n**示例 3：**\n\n```text\n\n输入：intervals = [[4,7],[1,4]]\n输出：[[1,7]]\n解释：区间 [1,4] 和 [4,7] 可被视为重叠区间。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= intervals.length <= 104`\n\n\t\n- `intervals[i].length == 2`\n\n\t\n- `0 <= starti <= endi <= 104`"
+  },
+  "edit-distance": {
+    "number": "72",
+    "title": "编辑距离",
+    "statement": "给你两个单词 `word1` 和 `word2`， *请返回将 `word1` 转换成 `word2` 所使用的最少操作数*  。\n\n你可以对一个单词进行如下三种操作：\n\n\t\n- 插入一个字符\n\n\t\n- 删除一个字符\n\n\t\n- 替换一个字符\n\n \n\n**示例 1：**\n\n```text\n\n输入：word1 = \"horse\", word2 = \"ros\"\n输出：3\n解释：\nhorse -> rorse (将 'h' 替换为 'r')\nrorse -> rose (删除 'r')\nrose -> ros (删除 'e')\n\n```\n\n**示例 2：**\n\n```text\n\n输入：word1 = \"intention\", word2 = \"execution\"\n输出：5\n解释：\nintention -> inention (删除 't')\ninention -> enention (将 'i' 替换为 'e')\nenention -> exention (将 'n' 替换为 'x')\nexention -> exection (将 'n' 替换为 'c')\nexection -> execution (插入 'u')\n\n```\n\n \n\n**提示：**\n\n\t\n- `0 <= word1.length, word2.length <= 500`\n\n\t\n- `word1` 和 `word2` 由小写英文字母组成"
+  },
+  "combinations": {
+    "number": "77",
+    "title": "组合",
+    "statement": "给定两个整数 `n` 和 `k`，返回范围 `[1, n]` 中所有可能的 `k` 个数的组合。\n\n你可以按 **任何顺序** 返回答案。\n\n \n\n**示例 1：**\n\n```text\n\n输入：n = 4, k = 2\n输出：\n[\n  [2,4],\n  [3,4],\n  [2,3],\n  [1,2],\n  [1,3],\n  [1,4],\n]\n```\n\n**示例 2：**\n\n```text\n\n输入：n = 1, k = 1\n输出：[[1]]\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= n <= 20`\n\n\t\n- `1 <= k <= n`"
+  },
+  "subsets": {
+    "number": "78",
+    "title": "子集",
+    "statement": "给你一个整数数组 `nums` ，数组中的元素 **互不相同** 。返回该数组所有可能的子集（幂集）。\n\n解集 **不能** 包含重复的子集。你可以按 **任意顺序** 返回解集。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [1,2,3]\n输出：[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [0]\n输出：[[],[0]]\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums.length <= 10`\n\n\t\n- `-10 <= nums[i] <= 10`\n\n\t\n- `nums` 中的所有元素 **互不相同**"
+  },
+  "remove-duplicates-from-sorted-list": {
+    "number": "83",
+    "title": "删除排序链表中的重复元素",
+    "statement": "给定一个已排序的链表的头 `head` ， *删除所有重复的元素，使每个元素只出现一次* 。返回 *已排序的链表* 。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2021/01/04/list1.jpg)\n\n```text\n\n输入：head = [1,1,2]\n输出：[1,2]\n\n```\n\n**示例 2：**\n\n![](https://assets.leetcode.com/uploads/2021/01/04/list2.jpg)\n\n```text\n\n输入：head = [1,1,2,3,3]\n输出：[1,2,3]\n\n```\n\n \n\n**提示：**\n\n\t\n- 链表中节点数目在范围 `[0, 300]` 内\n\n\t\n- `-100 <= Node.val <= 100`\n\n\t\n- 题目数据保证链表已经按升序 **排列**"
+  },
+  "reverse-linked-list-ii": {
+    "number": "92",
+    "title": "反转链表 II",
+    "statement": "给你单链表的头指针 `head` 和两个整数 `left` 和 `right` ，其中 `left <= right` 。请你反转从位置 `left` 到位置 `right` 的链表节点，返回 **反转后的链表** 。\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2021/02/19/rev2ex2.jpg)\n\n```text\n\n输入：head = [1,2,3,4,5], left = 2, right = 4\n输出：[1,4,3,2,5]\n\n```\n\n**示例 2：**\n\n```text\n\n输入：head = [5], left = 1, right = 1\n输出：[5]\n\n```\n\n \n\n**提示：**\n\n\t\n- 链表中节点数目为 `n`\n\n\t\n- `1 <= n <= 500`\n\n\t\n- `-500 <= Node.val <= 500`\n\n\t\n- `1 <= left <= right <= n`\n\n \n\n**进阶：** 你可以使用一趟扫描完成反转吗？"
+  },
+  "validate-binary-search-tree": {
+    "number": "98",
+    "title": "验证二叉搜索树",
+    "statement": "给你一个二叉树的根节点 `root` ，判断其是否是一个有效的二叉搜索树。\n\n**有效** 二叉搜索树定义如下：\n\n\t\n- 节点的左子树只包含** 严格小于 **当前节点的数。\n\n\t\n- 节点的右子树只包含 **严格大于** 当前节点的数。\n\n\t\n- 所有左子树和右子树自身必须也是二叉搜索树。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2020/12/01/tree1.jpg)\n\n```text\n\n输入：root = [2,1,3]\n输出：true\n\n```\n\n**示例 2：**\n\n![](https://assets.leetcode.com/uploads/2020/12/01/tree2.jpg)\n\n```text\n\n输入：root = [5,1,4,null,null,3,6]\n输出：false\n解释：根节点的值是 5 ，但是右子节点的值是 4 。\n\n```\n\n \n\n**提示：**\n\n\t\n- 树中节点数目范围在`[1, 104]` 内\n\n\t\n- `-231 <= Node.val <= 231 - 1`"
+  },
+  "surrounded-regions": {
+    "number": "130",
+    "title": "被围绕的区域",
+    "statement": "给你一个 `m x n` 的矩阵 `board` ，由若干字符 `'X'` 和 `'O'` 组成，**捕获** 所有 **被围绕的区域**：\n\n\t\n- **连接：**一个单元格与水平或垂直方向上相邻的单元格连接。\n\n\t\n- **区域：连接所有 **`'O'` 的单元格来形成一个区域。\n\n\t\n- **围绕：**如果一个区域中的所有 `'O'` 单元格都不在棋盘的边缘，则该区域被包围。这样的区域 **完全** 被 `'X'` 单元格包围。\n\n通过 **原地** 将输入矩阵中的所有 `'O'` 替换为 `'X'` 来 **捕获被围绕的区域**。你不需要返回任何值。\n\n \n\n**示例 1：**\n\n**输入：**board = [['X','X','X','X'],['X','O','O','X'],['X','X','O','X'],['X','O','X','X']]\n\n**输出：**[['X','X','X','X'],['X','X','X','X'],['X','X','X','X'],['X','O','X','X']]\n\n**解释：**\n\n![](https://pic.leetcode.cn/1718167191-XNjUTG-image.png)\n在上图中，底部的区域没有被捕获，因为它在 board 的边缘并且不能被围绕。\n\n**示例 2：**\n\n**输入：**board = [['X']]\n\n**输出：**[['X']]\n\n \n\n**提示：**\n\n\t\n- `m == board.length`\n\n\t\n- `n == board[i].length`\n\n\t\n- `1 <= m, n <= 200`\n\n\t\n- `board[i][j]` 为 `'X'` 或 `'O'`"
+  },
+  "linked-list-cycle": {
+    "number": "141",
+    "title": "环形链表",
+    "statement": "给你一个链表的头节点 `head` ，判断链表中是否有环。\n\n如果链表中有某个节点，可以通过连续跟踪 `next` 指针再次到达，则链表中存在环。 为了表示给定链表中的环，评测系统内部使用整数 `pos` 来表示链表尾连接到链表中的位置（索引从 0 开始）。**注意：`pos` 不作为参数进行传递 **。仅仅是为了标识链表的实际情况。\n\n*如果链表中存在环* ，则返回 `true` 。 否则，返回 `false` 。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.cn/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist.png)\n\n```text\n\n输入：head = [3,2,0,-4], pos = 1\n输出：true\n解释：链表中有一个环，其尾部连接到第二个节点。\n\n```\n\n**示例 2：**\n\n![](https://assets.leetcode.cn/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test2.png)\n\n```text\n\n输入：head = [1,2], pos = 0\n输出：true\n解释：链表中有一个环，其尾部连接到第一个节点。\n\n```\n\n**示例 3：**\n\n![](https://assets.leetcode.cn/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test3.png)\n\n```text\n\n输入：head = [1], pos = -1\n输出：false\n解释：链表中没有环。\n\n```\n\n \n\n**提示：**\n\n\t\n- 链表中节点的数目范围是 `[0, 104]`\n\n\t\n- `-105 <= Node.val <= 105`\n\n\t\n- `pos` 为 `-1` 或者链表中的一个 **有效索引** 。\n\n \n\n**进阶：**你能用 `O(1)`（即，常量）内存解决此问题吗？"
+  },
+  "linked-list-cycle-ii": {
+    "number": "142",
+    "title": "环形链表 II",
+    "statement": "给定一个链表的头节点  `head` ，返回链表开始入环的第一个节点。 *如果链表无环，则返回 `null`。*\n\n如果链表中有某个节点，可以通过连续跟踪 `next` 指针再次到达，则链表中存在环。 为了表示给定链表中的环，评测系统内部使用整数 `pos` 来表示链表尾连接到链表中的位置（**索引从 0 开始**）。如果 `pos` 是 `-1`，则在该链表中没有环。**注意：`pos` 不作为参数进行传递**，仅仅是为了标识链表的实际情况。\n\n**不允许修改 **链表。\n\n \n\n**示例 1：**\n\n![题目图片](https://assets.leetcode.com/uploads/2018/12/07/circularlinkedlist.png)\n\n```text\n\n输入：head = [3,2,0,-4], pos = 1\n输出：返回索引为 1 的链表节点\n解释：链表中有一个环，其尾部连接到第二个节点。\n\n```\n\n**示例 2：**\n\n![](https://assets.leetcode.cn/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test2.png)\n\n```text\n\n输入：head = [1,2], pos = 0\n输出：返回索引为 0 的链表节点\n解释：链表中有一个环，其尾部连接到第一个节点。\n\n```\n\n**示例 3：**\n\n![](https://assets.leetcode.cn/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test3.png)\n\n```text\n\n输入：head = [1], pos = -1\n输出：返回 null\n解释：链表中没有环。\n\n```\n\n \n\n**提示：**\n\n\t\n- 链表中节点的数目范围在范围 `[0, 104]` 内\n\n\t\n- `-105 <= Node.val <= 105`\n\n\t\n- `pos` 的值为 `-1` 或者链表中的一个有效索引\n\n \n\n**进阶：**你是否可以使用 `O(1)` 空间解决此题？"
+  },
+  "lru-cache": {
+    "number": "146",
+    "title": "LRU 缓存机制",
+    "statement": "请你设计并实现一个满足  [LRU (最近最少使用) 缓存](https://baike.baidu.com/item/LRU) 约束的数据结构。\n\n实现 `LRUCache` 类：\n\n\t\n- `LRUCache(int capacity)` 以 **正整数** 作为容量 `capacity` 初始化 LRU 缓存\n\n\t\n- `int get(int key)` 如果关键字 `key` 存在于缓存中，则返回关键字的值，否则返回 `-1` 。\n\n\t\n- `void put(int key, int value)` 如果关键字 `key` 已经存在，则变更其数据值 `value` ；如果不存在，则向缓存中插入该组 `key-value` 。如果插入操作导致关键字数量超过 `capacity` ，则应该 **逐出** 最久未使用的关键字。\n\n函数 `get` 和 `put` 必须以 `O(1)` 的平均时间复杂度运行。\n\n \n\n**示例：**\n\n```text\n\n输入\n[\"LRUCache\", \"put\", \"put\", \"get\", \"put\", \"get\", \"put\", \"get\", \"get\", \"get\"]\n[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]\n输出\n[null, null, null, 1, null, -1, null, -1, 3, 4]\n\n解释\nLRUCache lRUCache = new LRUCache(2);\nlRUCache.put(1, 1); // 缓存是 {1=1}\nlRUCache.put(2, 2); // 缓存是 {1=1, 2=2}\nlRUCache.get(1);    // 返回 1\nlRUCache.put(3, 3); // 该操作会使得关键字 2 作废，缓存是 {1=1, 3=3}\nlRUCache.get(2);    // 返回 -1 (未找到)\nlRUCache.put(4, 4); // 该操作会使得关键字 1 作废，缓存是 {4=4, 3=3}\nlRUCache.get(1);    // 返回 -1 (未找到)\nlRUCache.get(3);    // 返回 3\nlRUCache.get(4);    // 返回 4\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= capacity <= 3000`\n\n\t\n- `0 <= key <= 10000`\n\n\t\n- `0 <= value <= 105`\n\n\t\n- 最多调用 `2 * 105` 次 `get` 和 `put`"
+  },
+  "two-sum-ii-input-array-is-sorted": {
+    "number": "167",
+    "title": "两数之和 II - 输入有序数组",
+    "statement": "给你一个下标从 **1** 开始的整数数组 `numbers` ，该数组已按*** *非递减顺序排列**。\n\n请你从数组中找出满足相加之和等于目标数 `target` 的 **两个** 数。令这两个数分别是 `numbers[index1]` 和 `numbers[index2]` ，其中 `1 <= index1 < index2 <= numbers.length` 。\n\n以长度为 2 的整数数组 `[index1, index2]` 的形式返回这两个整数的下标 `index1`* *和* *`index2`。\n\n你可以假设每个输入 **只对应唯一的答案** ，而且你 **不可以** 重复使用相同的元素。\n\n你所设计的解决方案必须只使用常数级的额外空间。\n\n \n\n**示例 1：**\n\n```text\n\n输入：numbers = [2,7,11,15], target = 9\n输出：[1,2]\n解释：2 与 7 之和等于目标数 9 。因此 index1 = 1, index2 = 2 。返回 [1, 2] 。\n```\n\n**示例 2：**\n\n```text\n\n输入：numbers = [2,3,4], target = 6\n输出：[1,3]\n解释：2 与 4 之和等于目标数 6 。因此 index1 = 1, index2 = 3 。返回 [1, 3] 。\n```\n\n**示例 3：**\n\n```text\n\n输入：numbers = [-1,0], target = -1\n输出：[1,2]\n解释：-1 与 0 之和等于目标数 -1 。因此 index1 = 1, index2 = 2 。返回 [1, 2] 。\n\n```\n\n \n\n**提示：**\n\n\t\n- `2 <= numbers.length <= 3 * 104`\n\n\t\n- `-1000 <= numbers[i] <= 1000`\n\n\t\n- `numbers` 按 **非递减顺序** 排列\n\n\t\n- `-1000 <= target <= 1000`\n\n\t\n- **仅存在一个有效答案**"
+  },
+  "number-of-1-bits": {
+    "number": "191",
+    "title": "位 1 的个数",
+    "statement": "给定一个正整数 `n`，编写一个函数，获取一个正整数的二进制形式并返回其二进制表达式中 设置位 的个数（也被称为[汉明重量](https://baike.baidu.com/item/%E6%B1%89%E6%98%8E%E9%87%8D%E9%87%8F)）。\n\n \n\n**示例 1：**\n\n```text\n\n输入：n = 11\n输出：3\n解释：输入的二进制串 1011 中，共有 3 个设置位。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：n = 128\n输出：1\n解释：输入的二进制串 10000000 中，共有 1 个设置位。\n\n```\n\n**示例 3：**\n\n```text\n\n输入：n = 2147483645\n输出：30\n解释：输入的二进制串 1111111111111111111111111111101 中，共有 30 个设置位。\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= n <= 231 - 1`\n\n \n\n**进阶**：\n\n\t\n- 如果多次调用这个函数，你将如何优化你的算法？"
+  },
+  "count-primes": {
+    "number": "204",
+    "title": "计数质数",
+    "statement": "给定整数 `n` ，返回 *所有小于非负整数 `n` 的质数的数量* 。\n\n \n\n**示例 1：**\n\n```text\n\n输入：n = 10\n输出：4\n解释：小于 10 的质数一共有 4 个, 它们是 2, 3, 5, 7 。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：n = 0\n输出：0\n\n```\n\n**示例 3：**\n\n```text\n\n输入：n = 1\n输出：0\n\n```\n\n \n\n**提示：**\n\n\t\n- `0 <= n <= 5 * 106`"
+  },
+  "reverse-linked-list": {
+    "number": "206",
+    "title": "反转链表",
+    "statement": "给你单链表的头节点 `head` ，请你反转链表，并返回反转后的链表。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2021/02/19/rev1ex1.jpg)\n\n```text\n\n输入：head = [1,2,3,4,5]\n输出：[5,4,3,2,1]\n\n```\n\n**示例 2：**\n\n![](https://assets.leetcode.com/uploads/2021/02/19/rev1ex2.jpg)\n\n```text\n\n输入：head = [1,2]\n输出：[2,1]\n\n```\n\n**示例 3：**\n\n```text\n\n输入：head = []\n输出：[]\n\n```\n\n \n\n**提示：**\n\n\t\n- 链表中节点的数目范围是 `[0, 5000]`\n\n\t\n- `-5000 <= Node.val <= 5000`\n\n \n\n**进阶：**链表可以选用迭代或递归方式完成反转。你能否用两种方法解决这道题？"
+  },
+  "count-complete-tree-nodes": {
+    "number": "222",
+    "title": "完全二叉树的节点个数",
+    "statement": "给你一棵** 完全二叉树** 的根节点 `root` ，求出该树的节点个数。\n\n[完全二叉树](https://baike.baidu.com/item/%E5%AE%8C%E5%85%A8%E4%BA%8C%E5%8F%89%E6%A0%91/7773232?fr=aladdin) 的定义如下：在完全二叉树中，除了最底层节点可能没填满外，其余每层节点数都达到最大值，并且最下面一层的节点都集中在该层最左边的若干位置。若最底层为第 `h` 层（从第 0 层开始），则该层包含 `1~ 2h` 个节点。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2021/01/14/complete.jpg)\n\n```text\n\n输入：root = [1,2,3,4,5,6]\n输出：6\n\n```\n\n**示例 2：**\n\n```text\n\n输入：root = []\n输出：0\n\n```\n\n**示例 3：**\n\n```text\n\n输入：root = [1]\n输出：1\n\n```\n\n \n\n**提示：**\n\n\t\n- 树中节点的数目范围是`[0, 5 * 104]`\n\n\t\n- `0 <= Node.val <= 5 * 104`\n\n\t\n- 题目数据保证输入的树是 **完全二叉树**\n\n \n\n**进阶：**遍历树来统计节点是一种时间复杂度为 `O(n)` 的简单解决方案。你可以设计一个更快的算法吗？"
+  },
+  "implement-stack-using-queues": {
+    "number": "225",
+    "title": "用队列实现栈",
+    "statement": "请你仅使用两个队列实现一个后入先出（LIFO）的栈，并支持普通栈的全部四种操作（`push`、`top`、`pop` 和 `empty`）。\n\n实现 `MyStack` 类：\n\n\t\n- `void push(int x)` 将元素 x 压入栈顶。\n\n\t\n- `int pop()` 移除并返回栈顶元素。\n\n\t\n- `int top()` 返回栈顶元素。\n\n\t\n- `boolean empty()` 如果栈是空的，返回 `true` ；否则，返回 `false` 。\n\n \n\n**注意：**\n\n\t\n- 你只能使用队列的标准操作 —— 也就是 `push to back`、`peek/pop from front`、`size` 和 `is empty` 这些操作。\n\n\t\n- 你所使用的语言也许不支持队列。 你可以使用 list （列表）或者 deque（双端队列）来模拟一个队列 , 只要是标准的队列操作即可。\n\n \n\n**示例：**\n\n```text\n\n输入：\n[\"MyStack\", \"push\", \"push\", \"top\", \"pop\", \"empty\"]\n[[], [1], [2], [], [], []]\n输出：\n[null, null, null, 2, 2, false]\n\n解释：\nMyStack myStack = new MyStack();\nmyStack.push(1);\nmyStack.push(2);\nmyStack.top(); // 返回 2\nmyStack.pop(); // 返回 2\nmyStack.empty(); // 返回 False\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= x <= 9`\n\n\t\n- 最多调用`100` 次 `push`、`pop`、`top` 和 `empty`\n\n\t\n- 每次调用 `pop` 和 `top` 都保证栈不为空\n\n \n\n**进阶：**你能否仅用一个队列来实现栈。"
+  },
+  "power-of-two": {
+    "number": "231",
+    "title": "2 的幂",
+    "statement": "给你一个整数 `n`，请你判断该整数是否是 2 的幂次方。如果是，返回 `true` ；否则，返回 `false` 。\n\n如果存在一个整数 `x` 使得 `n == 2x` ，则认为 `n` 是 2 的幂次方。\n\n \n\n**示例 1：**\n\n```text\n\n输入：n = 1\n输出：true\n解释：20 = 1\n\n```\n\n**示例 2：**\n\n```text\n\n输入：n = 16\n输出：true\n解释：24 = 16\n\n```\n\n**示例 3：**\n\n```text\n\n输入：n = 3\n输出：false\n\n```\n\n \n\n**提示：**\n\n\t\n- `-231 <= n <= 231 - 1`\n\n \n\n**进阶：**你能够不使用循环/递归解决此问题吗？"
+  },
+  "implement-queue-using-stacks": {
+    "number": "232",
+    "title": "用栈实现队列",
+    "statement": "请你仅使用两个栈实现先入先出队列。队列应当支持一般队列支持的所有操作（`push`、`pop`、`peek`、`empty`）：\n\n实现 `MyQueue` 类：\n\n\t\n- `void push(int x)` 将元素 x 推到队列的末尾\n\n\t\n- `int pop()` 从队列的开头移除并返回元素\n\n\t\n- `int peek()` 返回队列开头的元素\n\n\t\n- `boolean empty()` 如果队列为空，返回 `true` ；否则，返回 `false`\n\n**说明：**\n\n\t\n- 你 **只能** 使用标准的栈操作 —— 也就是只有 `push to top`, `peek/pop from top`, `size`, 和 `is empty` 操作是合法的。\n\n\t\n- 你所使用的语言也许不支持栈。你可以使用 list 或者 deque（双端队列）来模拟一个栈，只要是标准的栈操作即可。\n\n \n\n**示例 1：**\n\n```text\n\n输入：\n[\"MyQueue\", \"push\", \"push\", \"peek\", \"pop\", \"empty\"]\n[[], [1], [2], [], [], []]\n输出：\n[null, null, null, 1, 1, false]\n\n解释：\nMyQueue myQueue = new MyQueue();\nmyQueue.push(1); // queue is: [1]\nmyQueue.push(2); // queue is: [1, 2] (leftmost is front of the queue)\nmyQueue.peek(); // return 1\nmyQueue.pop(); // return 1, queue is [2]\nmyQueue.empty(); // return false\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= x <= 9`\n\n\t\n- 最多调用 `100` 次 `push`、`pop`、`peek` 和 `empty`\n\n\t\n- 假设所有操作都是有效的 （例如，一个空的队列不会调用 `pop` 或者 `peek` 操作）\n\n \n\n**进阶：**\n\n\t\n- 你能否实现每个操作均摊时间复杂度为 `O(1)` 的队列？换句话说，执行 `n` 个操作的总时间复杂度为 `O(n)` ，即使其中一个操作可能花费较长时间。"
+  },
+  "palindrome-linked-list": {
+    "number": "234",
+    "title": "回文链表",
+    "statement": "给你一个单链表的头节点 `head` ，请你判断该链表是否为回文链表。如果是，返回 `true` ；否则，返回 `false` 。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2021/03/03/pal1linked-list.jpg)\n\n```text\n\n输入：head = [1,2,2,1]\n输出：true\n\n```\n\n**示例 2：**\n\n![](https://assets.leetcode.com/uploads/2021/03/03/pal2linked-list.jpg)\n\n```text\n\n输入：head = [1,2]\n输出：false\n\n```\n\n \n\n**提示：**\n\n\t\n- 链表中节点数目在范围`[1, 105]` 内\n\n\t\n- `0 <= Node.val <= 9`\n\n \n\n**进阶：**你能否用 `O(n)` 时间复杂度和 `O(1)` 空间复杂度解决此题？"
+  },
+  "sliding-window-maximum": {
+    "number": "239",
+    "title": "滑动窗口最大值",
+    "statement": "给你一个整数数组 `nums`，有一个大小为 `k`* *的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 `k` 个数字。滑动窗口每次只向右移动一位。\n\n返回 *滑动窗口中的最大值 *。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [1,3,-1,-3,5,3,6,7], k = 3\n输出：[3,3,5,5,6,7]\n解释：\n滑动窗口的位置                最大值\n---------------               -----\n[1  3  -1] -3  5  3  6  7       3\n 1 [3  -1  -3] 5  3  6  7       3\n 1  3 [-1  -3  5] 3  6  7       5\n 1  3  -1 [-3  5  3] 6  7       5\n 1  3  -1  -3 [5  3  6] 7       6\n 1  3  -1  -3  5 [3  6  7]      7\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [1], k = 1\n输出：[1]\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums.length <= 105`\n\n\t\n- `-104 <= nums[i] <= 104`\n\n\t\n- `1 <= k <= nums.length`"
+  },
+  "missing-number": {
+    "number": "268",
+    "title": "丢失的数字",
+    "statement": "给定一个包含 `[0, n]` 中 `n` 个数的数组 `nums` ，找出 `[0, n]` 这个范围内没有出现在数组中的那个数。\n\n \n\n**示例 1：**\n\n**输入：**nums = [3,0,1]\n\n**输出：**2\n\n**解释：**`n = 3`，因为有 3 个数字，所以所有的数字都在范围 `[0,3]` 内。2 是丢失的数字，因为它没有出现在 `nums` 中。\n\n**示例 2：**\n\n**输入：**nums = [0,1]\n\n**输出：**2\n\n**解释：**`n = 2`，因为有 2 个数字，所以所有的数字都在范围 `[0,2]` 内。2 是丢失的数字，因为它没有出现在 `nums` 中。\n\n**示例 3：**\n\n**输入：**nums = [9,6,4,2,3,5,7,0,1]\n\n**输出：**8\n\n**解释：**`n = 9`，因为有 9 个数字，所以所有的数字都在范围 `[0,9]` 内。8 是丢失的数字，因为它没有出现在 `nums` 中。\n\n**提示：**\n\n\t\n- `n == nums.length`\n\n\t\n- `1 <= n <= 104`\n\n\t\n- `0 <= nums[i] <= n`\n\n\t\n- `nums` 中的所有数字都 **独一无二**\n\n \n\n**进阶：**你能否实现线性时间复杂度、仅使用额外常数空间的算法解决此问题?"
+  },
+  "nim-game": {
+    "number": "292",
+    "title": "Nim 游戏",
+    "statement": "你和你的朋友，两个人一起玩 [Nim 游戏](https://baike.baidu.com/item/Nim游戏/6737105)：\n\n\t\n- 桌子上有一堆石头。\n\n\t\n- 你们轮流进行自己的回合， **你作为先手 **。\n\n\t\n- 每一回合，轮到的人拿掉 1 - 3 块石头。\n\n\t\n- 拿掉最后一块石头的人就是获胜者。\n\n假设你们每一步都是最优解。请编写一个函数，来判断你是否可以在给定石头数量为 `n` 的情况下赢得游戏。如果可以赢，返回 `true`；否则，返回 `false` 。\n\n \n\n**示例 1：**\n\n```text\n\n输入：n = 4\n输出：false \n解释：以下是可能的结果:\n1. 移除1颗石头。你的朋友移走了3块石头，包括最后一块。你的朋友赢了。\n2. 移除2个石子。你的朋友移走2块石头，包括最后一块。你的朋友赢了。\n3.你移走3颗石子。你的朋友移走了最后一块石头。你的朋友赢了。\n在所有结果中，你的朋友是赢家。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：n = 1\n输出：true\n\n```\n\n**示例 3：**\n\n```text\n\n输入：n = 2\n输出：true\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= n <= 231 - 1`"
+  },
+  "longest-increasing-subsequence": {
+    "number": "300",
+    "title": "最长递增子序列",
+    "statement": "给你一个整数数组 `nums` ，找到其中最长严格递增子序列的长度。\n\n**子序列 **是由数组派生而来的序列，删除（或不删除）数组中的元素而不改变其余元素的顺序。例如，`[3,6,2,7]` 是数组 `[0,3,1,6,2,2,7]` 的子序列。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [10,9,2,5,3,7,101,18]\n输出：4\n解释：最长递增子序列是 [2,3,7,101]，因此长度为 4 。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [0,1,0,3,2,3]\n输出：4\n\n```\n\n**示例 3：**\n\n```text\n\n输入：nums = [7,7,7,7,7,7,7]\n输出：1\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums.length <= 2500`\n\n\t\n- `-104 <= nums[i] <= 104`\n\n \n\n**进阶：**\n\n\t\n- 你能将算法的时间复杂度降低到 `O(n log(n))` 吗?"
+  },
+  "burst-balloons": {
+    "number": "312",
+    "title": "戳气球",
+    "statement": "有 `n` 个气球，编号为`0` 到 `n - 1`，每个气球上都标有一个数字，这些数字存在数组 `nums` 中。\n\n现在要求你戳破所有的气球。戳破第 `i` 个气球，你可以获得 `nums[i - 1] * nums[i] * nums[i + 1]` 枚硬币。 这里的 `i - 1` 和 `i + 1` 代表和 `i` 相邻的两个气球的序号。如果 `i - 1`或 `i + 1` 超出了数组的边界，那么就当它是一个数字为 `1` 的气球。\n\n求所能获得硬币的最大数量。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [3,1,5,8]\n输出：167\n解释：\nnums = [3,1,5,8] --> [3,5,8] --> [3,8] --> [8] --> []\ncoins =  3*1*5    +   3*5*8   +  1*3*8  + 1*8*1 = 167\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [1,5]\n输出：10\n\n```\n\n \n\n**提示：**\n\n\t\n- `n == nums.length`\n\n\t\n- `1 <= n <= 300`\n\n\t\n- `0 <= nums[i] <= 100`"
+  },
+  "bulb-switcher": {
+    "number": "319",
+    "title": "灯泡开关",
+    "statement": "初始时有 `n`* *个灯泡处于关闭状态。第一轮，你将会打开所有灯泡。接下来的第二轮，你将会每两个灯泡关闭第二个。\n\n第三轮，你每三个灯泡就切换第三个灯泡的开关（即，打开变关闭，关闭变打开）。第 `i` 轮，你每 `i` 个灯泡就切换第 `i` 个灯泡的开关。直到第 `n` 轮，你只需要切换最后一个灯泡的开关。\n\n找出并返回 `n`* *轮后有多少个亮着的灯泡。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2020/11/05/bulb.jpg)\n\n```text\n\n输入：n = 3\n输出：1 \n解释：\n初始时, 灯泡状态 [关闭, 关闭, 关闭].\n第一轮后, 灯泡状态 [开启, 开启, 开启].\n第二轮后, 灯泡状态 [开启, 关闭, 开启].\n第三轮后, 灯泡状态 [开启, 关闭, 关闭]. \n\n你应该返回 1，因为只有一个灯泡还亮着。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：n = 0\n输出：0\n\n```\n\n**示例 3：**\n\n```text\n\n输入：n = 1\n输出：1\n\n```\n\n \n\n**提示：**\n\n\t\n- `0 <= n <= 109`"
+  },
+  "russian-doll-envelopes": {
+    "number": "354",
+    "title": "俄罗斯套娃信封问题",
+    "statement": "给你一个二维整数数组 `envelopes` ，其中 `envelopes[i] = [wi, hi]` ，表示第 `i` 个信封的宽度和高度。\n\n当另一个信封的宽度和高度都比这个信封大的时候，这个信封就可以放进另一个信封里，如同俄罗斯套娃一样。\n\n请计算 **最多能有多少个** 信封能组成一组“俄罗斯套娃”信封（即可以把一个信封放到另一个信封里面）。\n\n**注意**：不允许旋转信封。\n\n \n\n**示例 1：**\n\n```text\n\n输入：envelopes = [[5,4],[6,4],[6,7],[2,3]]\n输出：3\n解释：最多信封的个数为 3, 组合为: [2,3] => [5,4] => [6,7]。\n```\n\n**示例 2：**\n\n```text\n\n输入：envelopes = [[1,1],[1,1],[1,1]]\n输出：1\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= envelopes.length <= 105`\n\n\t\n- `envelopes[i].length == 2`\n\n\t\n- `1 <= wi, hi <= 105`"
+  },
+  "design-twitter": {
+    "number": "355",
+    "title": "设计推特",
+    "statement": "设计一个简化版的推特(Twitter)，可以让用户实现发送推文，关注/取消关注其他用户，能够看见关注人（包括自己）的最近 `10` 条推文。\n\n实现 `Twitter` 类：\n\n\t\n- `Twitter()` 初始化简易版推特对象\n\n\t\n- `void postTweet(int userId, int tweetId)` 根据给定的 `tweetId` 和 `userId` 创建一条新推文。每次调用此函数都会使用一个不同的 `tweetId` 。\n\n\t\n- `List<Integer> getNewsFeed(int userId)` 检索当前用户新闻推送中最近  `10` 条推文的 ID 。新闻推送中的每一项都必须是由用户关注的人或者是用户自己发布的推文。推文必须 **按照时间顺序由最近到最远排序** 。\n\n\t\n- `void follow(int followerId, int followeeId)` ID 为 `followerId` 的用户开始关注 ID 为 `followeeId` 的用户。\n\n\t\n- `void unfollow(int followerId, int followeeId)` ID 为 `followerId` 的用户不再关注 ID 为 `followeeId` 的用户。\n\n \n\n**示例：**\n\n```text\n\n输入\n[\"Twitter\", \"postTweet\", \"getNewsFeed\", \"follow\", \"postTweet\", \"getNewsFeed\", \"unfollow\", \"getNewsFeed\"]\n[[], [1, 5], [1], [1, 2], [2, 6], [1], [1, 2], [1]]\n输出\n[null, null, [5], null, null, [6, 5], null, [5]]\n\n解释\nTwitter twitter = new Twitter();\ntwitter.postTweet(1, 5); // 用户 1 发送了一条新推文 (用户 id = 1, 推文 id = 5)\ntwitter.getNewsFeed(1);  // 用户 1 的获取推文应当返回一个列表，其中包含一个 id 为 5 的推文\ntwitter.follow(1, 2);    // 用户 1 关注了用户 2\ntwitter.postTweet(2, 6); // 用户 2 发送了一个新推文 (推文 id = 6)\ntwitter.getNewsFeed(1);  // 用户 1 的获取推文应当返回一个列表，其中包含两个推文，id 分别为 -> [6, 5] 。推文 id 6 应当在推文 id 5 之前，因为它是在 5 之后发送的\ntwitter.unfollow(1, 2);  // 用户 1 取消关注了用户 2\ntwitter.getNewsFeed(1);  // 用户 1 获取推文应当返回一个列表，其中包含一个 id 为 5 的推文。因为用户 1 已经不再关注用户 2\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= userId, followerId, followeeId <= 500`\n\n\t\n- `0 <= tweetId <= 104`\n\n\t\n- 所有推特的 ID 都互不相同\n\n\t\n- `postTweet`、`getNewsFeed`、`follow` 和 `unfollow` 方法最多调用 `3 * 104` 次\n\n\t\n- 用户不能关注自己"
+  },
+  "super-pow": {
+    "number": "372",
+    "title": "超级次方",
+    "statement": "你的任务是计算 `ab` 对 `1337` 取模，`a` 是一个正整数，`b` 是一个非常大的正整数且会以数组形式给出。\n\n \n\n**示例 1：**\n\n**输入：** a = 2, b = [3]\n\n**输出：** 8\n\n**解释：**\n\n数组 `b = [3]` 表示指数 3。因此，`a3 = 23 = 8`，所以结果为 8。\n\n**示例 2：**\n\n**输入：** a = 2, b = [1,0]\n\n**输出：** 1024\n\n**解释：**\n\n数组 `b = [1, 0]` 表示指数 10。因此，`a10 = 210 = 1024`，所以结果为 1024。\n\n**示例 3：**\n\n**输入：** a = 1, b = [4,3,3,8,5,2]\n\n**输出：** 1\n\n**解释：**\n\n数组 `b = [4, 3, 3, 8, 5, 2]` 表示一个正整数指数。由于 `a = 1`，1 的任意正整数次幂都等于 1。因此，结果为 1。\n\n \n\n**提示：**\n\n\t\n- `1 <= a <= 231 - 1`\n\n\t\n- `1 <= b.length <= 2000`\n\n\t\n- `0 <= b[i] <= 9`\n\n\t\n- `b` 不含前导 0"
+  },
+  "linked-list-random-node": {
+    "number": "382",
+    "title": "链表随机节点",
+    "statement": "给你一个单链表，随机选择链表的一个节点，并返回相应的节点值。每个节点** 被选中的概率一样** 。\n\n实现 `Solution` 类：\n\n\t\n- `Solution(ListNode head)` 使用整数数组初始化对象。\n\n\t\n- `int getRandom()` 从链表中随机选择一个节点并返回该节点的值。链表中所有节点被选中的概率相等。\n\n \n\n**示例：**\n\n![](https://assets.leetcode.com/uploads/2021/03/16/getrand-linked-list.jpg)\n\n```text\n\n输入\n[\"Solution\", \"getRandom\", \"getRandom\", \"getRandom\", \"getRandom\", \"getRandom\"]\n[[[1, 2, 3]], [], [], [], [], []]\n输出\n[null, 1, 3, 2, 2, 3]\n\n解释\nSolution solution = new Solution([1, 2, 3]);\nsolution.getRandom(); // 返回 1\nsolution.getRandom(); // 返回 3\nsolution.getRandom(); // 返回 2\nsolution.getRandom(); // 返回 2\nsolution.getRandom(); // 返回 3\n// getRandom() 方法应随机返回 1、2、3中的一个，每个元素被返回的概率相等。\n```\n\n \n\n**提示：**\n\n\t\n- 链表中的节点数在范围 `[1, 104]` 内\n\n\t\n- `-104 <= Node.val <= 104`\n\n\t\n- 至多调用 `getRandom` 方法 `104` 次\n\n \n\n**进阶：**\n\n\t\n- 如果链表非常大且长度未知，该怎么处理？\n\n\t\n- 你能否在不使用额外空间的情况下解决此问题？"
+  },
+  "is-subsequence": {
+    "number": "392",
+    "title": "判断子序列",
+    "statement": "给定字符串 **s** 和 **t** ，判断 **s** 是否为 **t** 的子序列。\n\n字符串的一个子序列是原始字符串删除一些（也可以不删除）字符而不改变剩余字符相对位置形成的新字符串。（例如，`\"ace\"`是`\"abcde\"`的一个子序列，而`\"aec\"`不是）。\n\n**进阶：**\n\n如果有大量输入的 S，称作 S1, S2, ... , Sk 其中 k >= 10亿，你需要依次检查它们是否为 T 的子序列。在这种情况下，你会怎样改变代码？\n\n**致谢：**\n\n特别感谢** **[@pbrother ](https://leetcode.com/pbrother/)添加此问题并且创建所有测试用例。\n\n \n\n**示例 1：**\n\n```text\n\n输入：s = \"abc\", t = \"ahbgdc\"\n输出：true\n\n```\n\n**示例 2：**\n\n```text\n\n输入：s = \"axc\", t = \"ahbgdc\"\n输出：false\n\n```\n\n \n\n**提示：**\n\n\t\n- `0 <= s.length <= 100`\n\n\t\n- `0 <= t.length <= 10^4`\n\n\t\n- 两个字符串都只由小写字符组成。"
+  },
+  "random-pick-index": {
+    "number": "398",
+    "title": "随机数索引",
+    "statement": "给你一个可能含有 **重复元素** 的整数数组 `nums` ，请你随机输出给定的目标数字 `target` 的索引。你可以假设给定的数字一定存在于数组中。\n\n实现 `Solution` 类：\n\n\t\n- `Solution(int[] nums)` 用数组 `nums` 初始化对象。\n\n\t\n- `int pick(int target)` 从 `nums` 中选出一个满足 `nums[i] == target` 的随机索引 `i` 。如果存在多个有效的索引，则每个索引的返回概率应当相等。\n\n \n\n**示例：**\n\n```text\n\n输入\n[\"Solution\", \"pick\", \"pick\", \"pick\"]\n[[[1, 2, 3, 3, 3]], [3], [1], [3]]\n输出\n[null, 4, 0, 2]\n\n解释\nSolution solution = new Solution([1, 2, 3, 3, 3]);\nsolution.pick(3); // 随机返回索引 2, 3 或者 4 之一。每个索引的返回概率应该相等。\nsolution.pick(1); // 返回 0 。因为只有 nums[0] 等于 1 。\nsolution.pick(3); // 随机返回索引 2, 3 或者 4 之一。每个索引的返回概率应该相等。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums.length <= 2 * 104`\n\n\t\n- `-231 <= nums[i] <= 231 - 1`\n\n\t\n- `target` 是 `nums` 中的一个整数\n\n\t\n- 最多调用 `pick` 函数 `104` 次"
+  },
+  "non-overlapping-intervals": {
+    "number": "435",
+    "title": "无重叠区间",
+    "statement": "给定一个区间的集合 `intervals` ，其中 `intervals[i] = [starti, endi]` 。返回 *需要移除区间的最小数量，使剩余区间互不重叠 *。\n\n**注意** 只在一点上接触的区间是 **不重叠的**。例如 `[1, 2]` 和 `[2, 3]` 是不重叠的。\n\n \n\n**示例 1:**\n\n```text\n\n输入: intervals = [[1,2],[2,3],[3,4],[1,3]]\n输出: 1\n解释: 移除 [1,3] 后，剩下的区间没有重叠。\n\n```\n\n**示例 2:**\n\n```text\n\n输入: intervals = [ [1,2], [1,2], [1,2] ]\n输出: 2\n解释: 你需要移除两个 [1,2] 来使剩下的区间没有重叠。\n\n```\n\n**示例 3:**\n\n```text\n\n输入: intervals = [ [1,2], [2,3] ]\n输出: 0\n解释: 你不需要移除任何区间，因为它们已经是无重叠的了。\n\n```\n\n \n\n**提示:**\n\n\t\n- `1 <= intervals.length <= 105`\n\n\t\n- `intervals[i].length == 2`\n\n\t\n- `-5 * 104 <= starti < endi <= 5 * 104`"
+  },
+  "delete-node-in-a-bst": {
+    "number": "450",
+    "title": "删除二叉搜索树中的节点",
+    "statement": "给定一个二叉搜索树的根节点 **root **和一个值 **key**，删除二叉搜索树中的 **key **对应的节点，并保证二叉搜索树的性质不变。返回二叉搜索树（有可能被更新）的根节点的引用。\n\n一般来说，删除节点可分为两个步骤：\n\n\t\n- 首先找到需要删除的节点；\n\n\t\n- 如果找到了，删除它。\n\n \n\n**示例 1:**\n\n![题目图片](https://assets.leetcode.com/uploads/2020/09/04/del_node_1.jpg)\n\n```text\n\n输入：root = [5,3,6,2,4,null,7], key = 3\n输出：[5,4,6,2,null,null,7]\n解释：给定需要删除的节点值是 3，所以我们首先找到 3 这个节点，然后删除它。\n一个正确的答案是 [5,4,6,2,null,null,7], 如下图所示。\n另一个正确答案是 [5,2,6,null,4,null,7]。\n\n![题目图片](https://assets.leetcode.com/uploads/2020/09/04/del_node_supp.jpg)\n\n```\n\n**示例 2:**\n\n```text\n\n输入: root = [5,3,6,2,4,null,7], key = 0\n输出: [5,3,6,2,4,null,7]\n解释: 二叉树不包含值为 0 的节点\n\n```\n\n**示例 3:**\n\n```text\n\n输入: root = [], key = 0\n输出: []\n```\n\n \n\n**提示:**\n\n\t\n- 节点数的范围 `[0, 104]`.\n\n\t\n- `-105 <= Node.val <= 105`\n\n\t\n- 节点值唯一\n\n\t\n- `root` 是合法的二叉搜索树\n\n\t\n- `-105 <= key <= 105`\n\n \n\n**进阶：** 要求算法时间复杂度为 O(h)，h 为树的高度。"
+  },
+  "minimum-number-of-arrows-to-burst-balloons": {
+    "number": "452",
+    "title": "用最少数量的箭引爆气球",
+    "statement": "有一些球形气球贴在一堵用 XY 平面表示的墙面上。墙面上的气球记录在整数数组 `points` ，其中`points[i] = [xstart, xend]` 表示水平直径在 `xstart` 和 `xend`之间的气球。你不知道气球的确切 y 坐标。\n\n一支弓箭可以沿着 x 轴从不同点 **完全垂直** 地射出。在坐标 `x` 处射出一支箭，若有一个气球的直径的开始和结束坐标为 `xstart`，`xend`， 且满足  `xstart ≤ x ≤ xend`，则该气球会被 **引爆** 。可以射出的弓箭的数量 **没有限制** 。 弓箭一旦被射出之后，可以无限地前进。\n\n给你一个数组 `points` ，*返回引爆所有气球所必须射出的 **最小** 弓箭数 *。\n\n \n\n**示例 1：**\n\n```text\n\n输入：points = [[10,16],[2,8],[1,6],[7,12]]\n输出：2\n解释：气球可以用2支箭来爆破:\n-在x = 6处射出箭，击破气球[2,8]和[1,6]。\n-在x = 11处发射箭，击破气球[10,16]和[7,12]。\n```\n\n**示例 2：**\n\n```text\n\n输入：points = [[1,2],[3,4],[5,6],[7,8]]\n输出：4\n解释：每个气球需要射出一支箭，总共需要4支箭。\n```\n\n**示例 3：**\n\n```text\n\n输入：points = [[1,2],[2,3],[3,4],[4,5]]\n输出：2\n解释：气球可以用2支箭来爆破:\n- 在x = 2处发射箭，击破气球[1,2]和[2,3]。\n- 在x = 4处射出箭，击破气球[3,4]和[4,5]。\n```\n\n \n\n**提示:**\n\n\t\n- `1 <= points.length <= 105`\n\n\t\n- `points[i].length == 2`\n\n\t\n- `-231 <= xstart < xend <= 231 - 1`"
+  },
+  "target-sum": {
+    "number": "494",
+    "title": "目标和",
+    "statement": "给你一个非负整数数组 `nums` 和一个整数 `target` 。\n\n向数组中的每个整数前添加 `'+'` 或 `'-'` ，然后串联起所有整数，可以构造一个 **表达式** ：\n\n\t\n- 例如，`nums = [2, 1]` ，可以在 `2` 之前添加 `'+'` ，在 `1` 之前添加 `'-'` ，然后串联起来得到表达式 `\"+2-1\"` 。\n\n返回可以通过上述方法构造的、运算结果等于 `target` 的不同 **表达式** 的数目。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [1,1,1,1,1], target = 3\n输出：5\n解释：一共有 5 种方法让最终目标和为 3 。\n-1 + 1 + 1 + 1 + 1 = 3\n+1 - 1 + 1 + 1 + 1 = 3\n+1 + 1 - 1 + 1 + 1 = 3\n+1 + 1 + 1 - 1 + 1 = 3\n+1 + 1 + 1 + 1 - 1 = 3\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [1], target = 1\n输出：1\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums.length <= 20`\n\n\t\n- `0 <= nums[i] <= 1000`\n\n\t\n- `0 <= sum(nums[i]) <= 1000`\n\n\t\n- `-1000 <= target <= 1000`"
+  },
+  "next-greater-element-i": {
+    "number": "496",
+    "title": "下一个更大元素 I",
+    "statement": "`nums1` 中数字 `x` 的 **下一个更大元素** 是指 `x` 在 `nums2` 中对应位置 **右侧** 的 **第一个** 比 `x`** **大的元素。\n\n给你两个** 没有重复元素** 的数组 `nums1` 和 `nums2` ，下标从 **0** 开始计数，其中`nums1` 是 `nums2` 的子集。\n\n对于每个 `0 <= i < nums1.length` ，找出满足 `nums1[i] == nums2[j]` 的下标 `j` ，并且在 `nums2` 确定 `nums2[j]` 的 **下一个更大元素** 。如果不存在下一个更大元素，那么本次查询的答案是 `-1` 。\n\n返回一个长度为 `nums1.length` 的数组* *`ans`* *作为答案，满足* *`ans[i]`* *是如上所述的 **下一个更大元素** 。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums1 = [4,1,2], nums2 = [1,3,4,2].\n输出：[-1,3,-1]\n解释：nums1 中每个值的下一个更大元素如下所述：\n- 4 ，用加粗斜体标识，nums2 = [1,3,4,2]。不存在下一个更大元素，所以答案是 -1 。\n- 1 ，用加粗斜体标识，nums2 = [1,3,4,2]。下一个更大元素是 3 。\n- 2 ，用加粗斜体标识，nums2 = [1,3,4,2]。不存在下一个更大元素，所以答案是 -1 。\n```\n\n**示例 2：**\n\n```text\n\n输入：nums1 = [2,4], nums2 = [1,2,3,4].\n输出：[3,-1]\n解释：nums1 中每个值的下一个更大元素如下所述：\n- 2 ，用加粗斜体标识，nums2 = [1,2,3,4]。下一个更大元素是 3 。\n- 4 ，用加粗斜体标识，nums2 = [1,2,3,4]。不存在下一个更大元素，所以答案是 -1 。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums1.length <= nums2.length <= 1000`\n\n\t\n- `0 <= nums1[i], nums2[i] <= 104`\n\n\t\n- `nums1`和`nums2`中所有整数 **互不相同**\n\n\t\n- `nums1` 中的所有整数同样出现在 `nums2` 中\n\n \n\n**进阶：**你可以设计一个时间复杂度为 `O(nums1.length + nums2.length)` 的解决方案吗？"
+  },
+  "next-greater-element-ii": {
+    "number": "503",
+    "title": "下一个更大元素 II",
+    "statement": "给定一个循环数组 `nums` （ `nums[nums.length - 1]` 的下一个元素是 `nums[0]` ），返回 *`nums` 中每个元素的 **下一个更大元素*** 。\n\n数字 `x` 的 **下一个更大的元素** 是按数组遍历顺序，这个数字之后的第一个比它更大的数，这意味着你应该循环地搜索它的下一个更大的数。如果不存在，则输出 `-1` 。\n\n \n\n**示例 1:**\n\n```text\n\n输入: nums = [1,2,1]\n输出: [2,-1,2]\n解释: 第一个 1 的下一个更大的数是 2；\n数字 2 找不到下一个更大的数； \n第二个 1 的下一个最大的数需要循环搜索，结果也是 2。\n\n```\n\n**示例 2:**\n\n```text\n\n输入: nums = [1,2,3,4,3]\n输出: [2,3,4,-1,4]\n\n```\n\n \n\n**提示:**\n\n\t\n- `1 <= nums.length <= 104`\n\n\t\n- `-109 <= nums[i] <= 109`"
+  },
+  "longest-palindromic-subsequence": {
+    "number": "516",
+    "title": "最长回文子序列",
+    "statement": "给你一个字符串 `s` ，找出其中最长的回文子序列，并返回该序列的长度。\n\n子序列定义为：不改变剩余字符顺序的情况下，删除某些字符或者不删除任何字符形成的一个序列。\n\n \n\n**示例 1：**\n\n```text\n\n输入：s = \"bbbab\"\n输出：4\n解释：一个可能的最长回文子序列为 \"bbbb\" 。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：s = \"cbbd\"\n输出：2\n解释：一个可能的最长回文子序列为 \"bb\" 。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= s.length <= 1000`\n\n\t\n- `s` 仅由小写英文字母组成"
+  },
+  "subarray-sum-equals-k": {
+    "number": "560",
+    "title": "和为 K 的子数组",
+    "statement": "给你一个整数数组 `nums` 和一个整数 `k` ，请你统计并返回 *该数组中和为 `k`** **的子数组的个数 *。\n\n子数组是数组中元素的连续非空序列。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [1,1,1], k = 2\n输出：2\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [1,2,3], k = 3\n输出：2\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= nums.length <= 2 * 104`\n\n\t\n- `-1000 <= nums[i] <= 1000`\n\n\t\n- `-107 <= k <= 107`"
+  },
+  "set-mismatch": {
+    "number": "645",
+    "title": "错误的集合",
+    "statement": "集合 `s` 包含从 `1` 到 `n` 的整数。不幸的是，因为数据错误，导致集合里面某一个数字复制成了集合里面的另外一个数字的值，导致集合 **丢失了一个数字** 并且 **有一个数字重复** 。\n\n给定一个数组 `nums` 代表了该集合发生错误后的结果。\n\n请你找出重复出现的整数，再找到丢失的整数，将它们以数组的形式返回。\n\n \n\n**示例 1：**\n\n```text\n\n输入：nums = [1,2,2,4]\n输出：[2,3]\n\n```\n\n**示例 2：**\n\n```text\n\n输入：nums = [1,1]\n输出：[1,2]\n\n```\n\n \n\n**提示：**\n\n\t\n- `2 <= nums.length <= 104`\n\n\t\n- `1 <= nums[i] <= 104`"
+  },
+  "search-in-a-binary-search-tree": {
+    "number": "700",
+    "title": "二叉搜索树中的搜索",
+    "statement": "给定二叉搜索树（BST）的根节点 `root` 和一个整数值 `val`。\n\n你需要在 BST 中找到节点值等于 `val` 的节点。 返回以该节点为根的子树。 如果节点不存在，则返回 `null` 。\n\n \n\n**示例 1:**\n\n![](https://assets.leetcode.com/uploads/2021/01/12/tree1.jpg)\n\n```text\n\n输入：root = [4,2,7,1,3], val = 2\n输出：[2,1,3]\n\n```\n\n**示例 2:**\n\n![](https://assets.leetcode.com/uploads/2021/01/12/tree2.jpg)\n\n```text\n\n输入：root = [4,2,7,1,3], val = 5\n输出：[]\n\n```\n\n \n\n**提示：**\n\n\t\n- 树中节点数在 `[1, 5000]` 范围内\n\n\t\n- `1 <= Node.val <= 107`\n\n\t\n- `root` 是二叉搜索树\n\n\t\n- `1 <= val <= 107`"
+  },
+  "insert-into-a-binary-search-tree": {
+    "number": "701",
+    "title": "二叉搜索树中的插入操作",
+    "statement": "给定二叉搜索树（BST）的根节点 `root` 和要插入树中的值 `value` ，将值插入二叉搜索树。 返回插入后二叉搜索树的根节点。 输入数据 **保证** ，新值和原始二叉搜索树中的任意节点值都不同。\n\n**注意**，可能存在多种有效的插入方式，只要树在插入后仍保持为二叉搜索树即可。 你可以返回 **任意有效的结果** 。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2020/10/05/insertbst.jpg)\n\n```text\n\n输入：root = [4,2,7,1,3], val = 5\n输出：[4,2,7,1,3,5]\n解释：另一个满足题目要求可以通过的树是：\n![](https://assets.leetcode.com/uploads/2020/10/05/bst.jpg)\n\n```\n\n**示例 2：**\n\n```text\n\n输入：root = [40,20,60,10,30,50,70], val = 25\n输出：[40,20,60,10,30,50,70,null,null,25]\n\n```\n\n**示例 3：**\n\n```text\n\n输入：root = [4,2,7,1,3,null,null,null,null,null,null], val = 5\n输出：[4,2,7,1,3,5]\n\n```\n\n \n\n**提示：**\n\n\t\n- 树中的节点数将在 `[0, 104]`的范围内。\n\n\t\n- `-108 <= Node.val <= 108`\n\n\t\n- 所有值 `Node.val` 是 **独一无二** 的。\n\n\t\n- `-108 <= val <= 108`\n\n\t\n- **保证** `val` 在原始BST中不存在。"
+  },
+  "binary-search": {
+    "number": "704",
+    "title": "二分查找",
+    "statement": "给定一个 `n` 个元素有序的（升序）整型数组 `nums` 和一个目标值 `target`  ，写一个函数搜索 `nums` 中的 `target`，如果 `target` 存在返回下标，否则返回 `-1`。\n\n你必须编写一个具有 `O(log n)` 时间复杂度的算法。\n\n**示例 1:**\n\n```text\n\n输入: nums = [-1,0,3,5,9,12], target = 9\n输出: 4\n解释: 9 出现在 nums 中并且下标为 4\n\n```\n\n**示例 2:**\n\n```text\n\n输入: nums = [-1,0,3,5,9,12], target = 2\n输出: -1\n解释: 2 不存在 nums 中因此返回 -1\n\n```\n\n \n\n**提示：**\n\n\t\n- 你可以假设 `nums` 中的所有元素是不重复的。\n\n\t\n- `n` 将在 `[1, 10000]`之间。\n\n\t\n- `nums` 的每个元素都将在 `[-9999, 9999]`之间。"
+  },
+  "flood-fill": {
+    "number": "733",
+    "title": "图像渲染",
+    "statement": "有一幅以 `m x n` 的二维整数数组表示的图画 `image` ，其中 `image[i][j]` 表示该图画的像素值大小。你也被给予三个整数 `sr` ,  `sc` 和 `color` 。你应该从像素 `image[sr][sc]` 开始对图像进行上色 **填充** 。\n\n为了完成 **上色工作**：\n\n\t\n- 从初始像素开始，将其颜色改为 `color`。\n\n\t\n- 对初始坐标的 **上下左右四个方向上** 相邻且与初始像素的原始颜色同色的像素点执行相同操作。\n\n\t\n- 通过检查与初始像素的原始颜色相同的相邻像素并修改其颜色来继续 **重复** 此过程。\n\n\t\n- 当 **没有** 其它原始颜色的相邻像素时 **停止** 操作。\n\n最后返回经过上色渲染 **修改** 后的图像 。\n\n \n\n**示例 1:**\n\n![题目图片](https://assets.leetcode.com/uploads/2021/06/01/flood1-grid.jpg)\n\n**输入：**image = [[1,1,1],[1,1,0],[1,0,1]]，sr = 1, sc = 1, color = 2\n\n**输出：**[[2,2,2],[2,2,0],[2,0,1]]\n\n**解释：**在图像的正中间，坐标 `(sr,sc)=(1,1)` （即红色像素）,在路径上所有符合条件的像素点的颜色都被更改成相同的新颜色（即蓝色像素）。\n\n注意，右下角的像素 **没有** 更改为2，因为它不是在上下左右四个方向上与初始点相连的像素点。\n\n \n\n**示例 2:**\n\n**输入：**image = [[0,0,0],[0,0,0]], sr = 0, sc = 0, color = 0\n\n**输出：**[[0,0,0],[0,0,0]]\n\n**解释：**初始像素已经用 0 着色，这与目标颜色相同。因此，不会对图像进行任何更改。\n\n \n\n**提示:**\n\n\t\n- `m == image.length`\n\n\t\n- `n == image[i].length`\n\n\t\n- `1 <= m, n <= 50`\n\n\t\n- `0 <= image[i][j], color < 216`\n\n\t\n- `0 <= sr < m`\n\n\t\n- `0 <= sc < n`"
+  },
+  "daily-temperatures": {
+    "number": "739",
+    "title": "每日温度",
+    "statement": "给定一个整数数组 `temperatures` ，表示每天的温度，返回一个数组 `answer` ，其中 `answer[i]` 是指对于第 `i` 天，下一个更高温度出现在几天后。如果气温在这之后都不会升高，请在该位置用 `0` 来代替。\n\n \n\n**示例 1:**\n\n```text\n\n输入: temperatures = [73,74,75,71,69,72,76,73]\n输出: [1,1,4,2,1,1,0,0]\n\n```\n\n**示例 2:**\n\n```text\n\n输入: temperatures = [30,40,50,60]\n输出: [1,1,1,0]\n\n```\n\n**示例 3:**\n\n```text\n\n输入: temperatures = [30,60,90]\n输出: [1,1,0]\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= temperatures.length <= 105`\n\n\t\n- `30 <= temperatures[i] <= 100`"
+  },
+  "sliding-puzzle": {
+    "number": "773",
+    "title": "滑动谜题",
+    "statement": "在一个 `2 x 3` 的板上（`board`）有 5 块砖瓦，用数字 `1~5` 来表示, 以及一块空缺用 `0` 来表示。一次 **移动** 定义为选择 `0` 与一个相邻的数字（上下左右）进行交换.\n\n最终当板 `board` 的结果是 `[[1,2,3],[4,5,0]]` 谜板被解开。\n\n给出一个谜板的初始状态 `board` ，返回最少可以通过多少次移动解开谜板，如果不能解开谜板，则返回 `-1` 。\n\n \n\n**示例 1：**\n\n![题目图片](https://assets.leetcode.com/uploads/2021/06/29/slide1-grid.jpg)\n\n```text\n\n输入：board = [[1,2,3],[4,0,5]]\n输出：1\n解释：交换 0 和 5 ，1 步完成\n\n```\n\n**示例 2:**\n\n![题目图片](https://assets.leetcode.com/uploads/2021/06/29/slide2-grid.jpg)\n\n```text\n\n输入：board = [[1,2,3],[5,4,0]]\n输出：-1\n解释：没有办法完成谜板\n\n```\n\n**示例 3:**\n\n![](https://assets.leetcode.com/uploads/2021/06/29/slide3-grid.jpg)\n\n```text\n\n输入：board = [[4,1,2],[5,0,3]]\n输出：5\n解释：\n最少完成谜板的最少移动次数是 5 ，\n一种移动路径:\n尚未移动: [[4,1,2],[5,0,3]]\n移动 1 次: [[4,1,2],[0,5,3]]\n移动 2 次: [[0,1,2],[4,5,3]]\n移动 3 次: [[1,0,2],[4,5,3]]\n移动 4 次: [[1,2,0],[4,5,3]]\n移动 5 次: [[1,2,3],[4,5,0]]\n\n```\n\n \n\n**提示：**\n\n\t\n- `board.length == 2`\n\n\t\n- `board[i].length == 3`\n\n\t\n- `0 <= board[i][j] <= 5`\n\n\t\n- `board[i][j]` 中每个值都 **不同**"
+  },
+  "exam-room": {
+    "number": "855",
+    "title": "考场就座",
+    "statement": "在考场里，有 `n` 个座位排成一行，编号为 `0` 到 `n - 1`。\n\n当学生进入考场后，他必须坐在离最近的人最远的座位上。如果有多个这样的座位，他会坐在编号最小的座位上。(另外，如果考场里没有人，那么学生就坐在 `0` 号座位上。)\n\n设计一个模拟所述考场的类。\n\n实现 `ExamRoom` 类：\n\n\t\n- `ExamRoom(int n)` 用座位的数量 `n` 初始化考场对象。\n\n\t\n- `int seat()` 返回下一个学生将会入座的座位编号。\n\n\t\n- `void leave(int p)` 指定坐在座位 `p` 的学生将离开教室。保证座位 `p` 上会有一位学生。\n\n \n\n**示例 1：**\n\n```text\n\n输入：\n[\"ExamRoom\", \"seat\", \"seat\", \"seat\", \"seat\", \"leave\", \"seat\"]\n[[10], [], [], [], [], [4], []]\n输出：\n[null, 0, 9, 4, 2, null, 5]\n解释：\nExamRoom examRoom = new ExamRoom(10);\nexamRoom.seat(); // 返回 0，房间里没有人，学生坐在 0 号座位。\nexamRoom.seat(); // 返回 9，学生最后坐在 9 号座位。\nexamRoom.seat(); // 返回 4，学生最后坐在 4 号座位。\nexamRoom.seat(); // 返回 2，学生最后坐在 2 号座位。\nexamRoom.leave(4);\nexamRoom.seat(); // 返回 5，学生最后坐在 5 号座位。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= n <= 109`\n\n\t\n- 保证有学生正坐在座位 `p` 上。\n\n\t\n- `seat` 和 `leave` 最多被调用 `104` 次。"
+  },
+  "koko-eating-bananas": {
+    "number": "875",
+    "title": "爱吃香蕉的珂珂",
+    "statement": "珂珂喜欢吃香蕉。这里有 `n` 堆香蕉，第 `i` 堆中有 `piles[i]` 根香蕉。警卫已经离开了，将在 `h` 小时后回来。\n\n珂珂可以决定她吃香蕉的速度 `k` （单位：根/小时）。每个小时，她将会选择一堆香蕉，从中吃掉 `k` 根。如果这堆香蕉少于 `k` 根，她将吃掉这堆的所有香蕉，然后这一小时内不会再吃更多的香蕉。  \n\n珂珂喜欢慢慢吃，但仍然想在警卫回来前吃掉所有的香蕉。\n\n返回她可以在 `h` 小时 **内 **吃掉所有香蕉的 **最小 **速度 `k`（`k` 为整数）。\n\n \n\n**示例 1：**\n\n**输入：**piles = [3,6,7,11], h = 8\n\n**输出：**4\n\n**解释：**\n\n以每小时 4 根香蕉的速度，珂珂吃完各堆香蕉分别需要 1、2、2 和 3 小时，总共需要 8 小时。\n\n**示例 2：**\n\n**输入：**piles = [30,11,23,4,20], h = 5\n\n**输出：**30\n\n**解释：**\n\n珂珂必须恰好在 1 小时内吃完每堆香蕉，因此她吃香蕉的最小速度必须为每小时 30 根。\n\n**示例 3：**\n\n**输入：**piles = [30,11,23,4,20], h = 6\n\n**输出：**23\n\n**解释：**\n\n以每小时 23 根香蕉的速度，珂珂吃完第一堆香蕉需要 2 小时，吃完其余每堆香蕉各需要 1 小时，总共需要 6 小时。\n\n \n\n**提示：**\n\n\t\n- `1 <= piles.length <= 104`\n\n\t\n- `piles.length <= h <= 109`\n\n\t\n- `1 <= piles[i] <= 109`"
+  },
+  "middle-of-the-linked-list": {
+    "number": "876",
+    "title": "链表的中间结点",
+    "statement": "给你单链表的头结点 `head` ，请你找出并返回链表的中间结点。\n\n如果有两个中间结点，则返回第二个中间结点。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2021/07/23/lc-midlist1.jpg)\n\n```text\n\n输入：head = [1,2,3,4,5]\n输出：[3,4,5]\n解释：链表只有一个中间结点，值为 3 。\n\n```\n\n**示例 2：**\n\n![](https://assets.leetcode.com/uploads/2021/07/23/lc-midlist2.jpg)\n\n```text\n\n输入：head = [1,2,3,4,5,6]\n输出：[4,5,6]\n解释：该链表有两个中间结点，值分别为 3 和 4 ，返回第二个结点。\n\n```\n\n \n\n**提示：**\n\n\t\n- 链表的结点数范围是 `[1, 100]`\n\n\t\n- `1 <= Node.val <= 100`"
+  },
+  "stone-game": {
+    "number": "877",
+    "title": "石子游戏",
+    "statement": "Alice 和 Bob 用几堆石子在做游戏。一共有偶数堆石子，**排成一行**；每堆都有 **正** 整数颗石子，数目为 `piles[i]` 。\n\n游戏以谁手中的石子最多来决出胜负。石子的 **总数** 是 **奇数** ，所以没有平局。\n\nAlice 和 Bob 轮流进行，**Alice 先开始** 。 每回合，玩家从行的 **开始** 或 **结束** 处取走整堆石头。 这种情况一直持续到没有更多的石子堆为止，此时手中 **石子最多** 的玩家 **获胜** 。\n\n假设 Alice 和 Bob 都发挥出最佳水平，当 Alice 赢得比赛时返回 `true` ，当 Bob 赢得比赛时返回 `false` 。\n\n \n\n**示例 1：**\n\n```text\n\n输入：piles = [5,3,4,5]\n输出：true\n解释：\nAlice 先开始，只能拿前 5 颗或后 5 颗石子 。\n假设他取了前 5 颗，这一行就变成了 [3,4,5] 。\n如果 Bob 拿走前 3 颗，那么剩下的是 [4,5]，Alice 拿走后 5 颗赢得 10 分。\n如果 Bob 拿走后 5 颗，那么剩下的是 [3,4]，Alice 拿走后 4 颗赢得 9 分。\n这表明，取前 5 颗石子对 Alice 来说是一个胜利的举动，所以返回 true 。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：piles = [3,7,2,3]\n输出：true\n\n```\n\n \n\n**提示：**\n\n\t\n- `2 <= piles.length <= 500`\n\n\t\n- `piles.length` 是 **偶数**\n\n\t\n- `1 <= piles[i] <= 500`\n\n\t\n- `sum(piles[i])` 是 **奇数**"
+  },
+  "super-egg-drop": {
+    "number": "887",
+    "title": "鸡蛋掉落",
+    "statement": "给你 `k` 枚相同的鸡蛋，并可以使用一栋从第 `1` 层到第 `n` 层共有 `n` 层楼的建筑。\n\n已知存在楼层 `f` ，满足 `0 <= f <= n` ，任何从** 高于** `f` 的楼层落下的鸡蛋都会碎，从 `f` 楼层或比它低的楼层落下的鸡蛋都不会破。\n\n每次操作，你可以取一枚没有碎的鸡蛋并把它从任一楼层 `x` 扔下（满足 `1 <= x <= n`）。如果鸡蛋碎了，你就不能再次使用它。如果某枚鸡蛋扔下后没有摔碎，则可以在之后的操作中 **重复使用** 这枚鸡蛋。\n\n请你计算并返回要确定 `f` **确切的值** 的 **最小操作次数** 是多少？\n\n \n\n**示例 1：**\n\n```text\n\n输入：k = 1, n = 2\n输出：2\n解释：\n鸡蛋从 1 楼掉落。如果它碎了，肯定能得出 f = 0 。 \n否则，鸡蛋从 2 楼掉落。如果它碎了，肯定能得出 f = 1 。 \n如果它没碎，那么肯定能得出 f = 2 。 \n因此，在最坏的情况下我们需要操作 2 次以确定 f 是多少。 \n\n```\n\n**示例 2：**\n\n```text\n\n输入：k = 2, n = 6\n输出：3\n\n```\n\n**示例 3：**\n\n```text\n\n输入：k = 3, n = 14\n输出：4\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= k <= 100`\n\n\t\n- `1 <= n <= 104`"
+  },
+  "pancake-sorting": {
+    "number": "969",
+    "title": "煎饼排序",
+    "statement": "给你一个整数数组 `arr` ，请使用 **煎饼翻转*** *完成对数组的排序。\n\n一次煎饼翻转的执行过程如下：\n\n\t\n- 选择一个整数 `k` ，`1 <= k <= arr.length`\n\n\t\n- 反转子数组 `arr[0...k-1]`（**下标从 0 开始**）\n\n例如，`arr = [3,2,1,4]` ，选择 `k = 3` 进行一次煎饼翻转，反转子数组 `[3,2,1]` ，得到 `arr = [**1**,**2**,**3**,4]` 。\n\n以数组形式返回能使 `arr` 有序的煎饼翻转操作所对应的 `k` 值序列。任何将数组排序且翻转次数在 `10 * arr.length` 范围内的有效答案都将被判断为正确。\n\n \n\n**示例 1：**\n\n```text\n\n输入：[3,2,4,1]\n输出：[4,2,4,3]\n解释：\n我们执行 4 次煎饼翻转，k 值分别为 4，2，4，和 3。\n初始状态 arr = [3, 2, 4, 1]\n第一次翻转后（k = 4）：arr = [1, 4, 2, 3]\n第二次翻转后（k = 2）：arr = [4, 1, 2, 3]\n第三次翻转后（k = 4）：arr = [3, 2, 1, 4]\n第四次翻转后（k = 3）：arr = [1, 2, 3, 4]，此时已完成排序。 \n\n```\n\n**示例 2：**\n\n```text\n\n输入：[1,2,3]\n输出：[]\n解释：\n输入已经排序，因此不需要翻转任何内容。\n请注意，其他可能的答案，如 [3，3] ，也将被判断为正确。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= arr.length <= 100`\n\n\t\n- `1 <= arr[i] <= arr.length`\n\n\t\n- `arr` 中的所有整数互不相同（即，`arr` 是从 `1` 到 `arr.length` 整数的一个排列）"
+  },
+  "interval-list-intersections": {
+    "number": "986",
+    "title": "区间列表的交集",
+    "statement": "给定两个由一些** 闭区间 **组成的列表，`firstList` 和 `secondList` ，其中 `firstList[i] = [starti, endi]` 而 `secondList[j] = [startj, endj]` 。每个区间列表都是成对 **不相交** 的，并且 **已经排序** 。\n\n返回这 **两个区间列表的交集** 。\n\n形式上，**闭区间** `[a, b]`（其中 `a <= b`）表示实数 `x` 的集合，而 `a <= x <= b` 。\n\n两个闭区间的 **交集** 是一组实数，要么为空集，要么为闭区间。例如，`[1, 3]` 和 `[2, 4]` 的交集为 `[2, 3]` 。\n\n \n\n**示例 1：**\n\n![](https://assets.leetcode.com/uploads/2019/01/30/interval1.png)\n\n```text\n\n输入：firstList = [[0,2],[5,10],[13,23],[24,25]], secondList = [[1,5],[8,12],[15,24],[25,26]]\n输出：[[1,2],[5,5],[8,10],[15,23],[24,24],[25,25]]\n\n```\n\n**示例 2：**\n\n```text\n\n输入：firstList = [[1,3],[5,9]], secondList = []\n输出：[]\n\n```\n\n**示例 3：**\n\n```text\n\n输入：firstList = [], secondList = [[4,8],[10,12]]\n输出：[]\n\n```\n\n**示例 4：**\n\n```text\n\n输入：firstList = [[1,7]], secondList = [[3,10]]\n输出：[[3,7]]\n\n```\n\n \n\n**提示：**\n\n\t\n- `0 <= firstList.length, secondList.length <= 1000`\n\n\t\n- `firstList.length + secondList.length >= 1`\n\n\t\n- `0 <= starti < endi <= 109`\n\n\t\n- `endi < starti+1`\n\n\t\n- `0 <= startj < endj <= 109 `\n\n\t\n- `endj < startj+1`"
+  },
+  "satisfiability-of-equality-equations": {
+    "number": "990",
+    "title": "等式方程的可满足性",
+    "statement": "给定一个由表示变量之间关系的字符串方程组成的数组，每个字符串方程 `equations[i]` 的长度为 `4`，并采用两种不同的形式之一：`\"a==b\"` 或 `\"a!=b\"`。在这里，a 和 b 是小写字母（不一定不同），表示单字母变量名。\n\n只有当可以将整数分配给变量名，以便满足所有给定的方程时才返回 `true`，否则返回 `false`。 \n\n \n\n**示例 1：**\n\n```text\n输入：[\"a==b\",\"b!=a\"]\n输出：false\n解释：如果我们指定，a = 1 且 b = 1，那么可以满足第一个方程，但无法满足第二个方程。没有办法分配变量同时满足这两个方程。\n\n```\n\n**示例 2：**\n\n```text\n输入：[\"b==a\",\"a==b\"]\n输出：true\n解释：我们可以指定 a = 1 且 b = 1 以满足满足这两个方程。\n\n```\n\n**示例 3：**\n\n```text\n输入：[\"a==b\",\"b==c\",\"a==c\"]\n输出：true\n\n```\n\n**示例 4：**\n\n```text\n输入：[\"a==b\",\"b!=c\",\"c==a\"]\n输出：false\n\n```\n\n**示例 5：**\n\n```text\n输入：[\"c==c\",\"b==d\",\"x!=z\"]\n输出：true\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= equations.length <= 500`\n\n\t\n- `equations[i].length == 4`\n\n\t\n- `equations[i][0]` 和 `equations[i][3]` 是小写字母\n\n\t\n- `equations[i][1]` 要么是 `'='`，要么是 `'!'`\n\n\t\n- `equations[i][2]` 是 `'='`"
+  },
+  "capacity-to-ship-packages-within-d-days": {
+    "number": "1011",
+    "title": "在 D 天内送达包裹的能力",
+    "statement": "传送带上的包裹必须在 `days` 天内从一个港口运送到另一个港口。\n\n传送带上的第 `i` 个包裹的重量为 `weights[i]`。每一天，我们都会按给出重量（`weights`）的顺序往传送带上装载包裹。我们装载的重量不会超过船的最大运载重量。\n\n返回能在 `days` 天内将传送带上的所有包裹送达的船的最低运载能力。\n\n \n\n**示例 1：**\n\n```text\n\n输入：weights = [1,2,3,4,5,6,7,8,9,10], days = 5\n输出：15\n解释：\n船舶最低载重 15 就能够在 5 天内送达所有包裹，如下所示：\n第 1 天：1, 2, 3, 4, 5\n第 2 天：6, 7\n第 3 天：8\n第 4 天：9\n第 5 天：10\n\n请注意，货物必须按照给定的顺序装运，因此使用载重能力为 14 的船舶并将包装分成 (2, 3, 4, 5), (1, 6, 7), (8), (9), (10) 是不允许的。 \n\n```\n\n**示例 2：**\n\n```text\n\n输入：weights = [3,2,2,4,1,4], days = 3\n输出：6\n解释：\n船舶最低载重 6 就能够在 3 天内送达所有包裹，如下所示：\n第 1 天：3, 2\n第 2 天：2, 4\n第 3 天：1, 4\n\n```\n\n**示例 3：**\n\n```text\n\n输入：weights = [1,2,3,1,1], days = 4\n输出：3\n解释：\n第 1 天：1\n第 2 天：2\n第 3 天：3\n第 4 天：1, 1\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= days <= weights.length <= 5 * 104`\n\n\t\n- `1 <= weights[i] <= 500`"
+  },
+  "longest-common-subsequence": {
+    "number": "1143",
+    "title": "最长公共子序列",
+    "statement": "给定两个字符串 `text1` 和 `text2`，返回这两个字符串的最长 **公共子序列** 的长度。如果不存在 **公共子序列** ，返回 `0` 。\n\n一个字符串的 **子序列*** *是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。\n\n\t\n- 例如，`\"ace\"` 是 `\"abcde\"` 的子序列，但 `\"aec\"` 不是 `\"abcde\"` 的子序列。\n\n两个字符串的 **公共子序列** 是这两个字符串所共同拥有的子序列。\n\n \n\n**示例 1：**\n\n```text\n\n输入：text1 = \"abcde\", text2 = \"ace\" \n输出：3  \n解释：最长公共子序列是 \"ace\" ，它的长度为 3 。\n\n```\n\n**示例 2：**\n\n```text\n\n输入：text1 = \"abc\", text2 = \"abc\"\n输出：3\n解释：最长公共子序列是 \"abc\" ，它的长度为 3 。\n\n```\n\n**示例 3：**\n\n```text\n\n输入：text1 = \"abc\", text2 = \"def\"\n输出：0\n解释：两个字符串没有公共子序列，返回 0 。\n\n```\n\n \n\n**提示：**\n\n\t\n- `1 <= text1.length, text2.length <= 1000`\n\n\t\n- `text1` 和 `text2` 仅由小写英文字符组成。"
+  }
+}

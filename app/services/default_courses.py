@@ -11,6 +11,7 @@ from app.config import load_config
 
 SEED_KEY = 'course_seed:algorithm-beginner'
 PRACTICE_CONTENT_KEY = 'course_exercise_seed:algorithm-beginner:pdf'
+PRACTICE_CONTENT_VERSION = 2
 PRACTICE_STAGE = 'algorithm-book'
 CONTENT_DIRECTORY = Path(__file__).resolve().parents[1] / 'assets' / 'courses' / 'algorithm-beginner'
 FIGURE = re.compile(r'(?<=\]\()figure:(p\d+-\d+\.webp)(?=\))')
@@ -69,8 +70,10 @@ def store_file(directory, content, created, suffix):
     return path.name
 
 
-def render_exercise(exercise):
-    """Render the problem summary with any examples printed in the book."""
+def render_exercise(exercise, full_statement=''):
+    """Use the cached full platform statement, falling back to the book summary."""
+    if full_statement.strip():
+        return full_statement.strip()
     lines = [exercise['statement']]
     examples = exercise.get('examples', [])
     if examples:
@@ -84,8 +87,9 @@ def render_exercise(exercise):
 
 
 def practice_questions(db, catalog):
-    """Register book exercises without downloading site content or changing edited questions."""
+    """Register cached full statements without network access or overwriting edited questions."""
     exercises = json.loads((CONTENT_DIRECTORY / 'exercises.json').read_text(encoding='utf-8'))
+    statements = json.loads((CONTENT_DIRECTORY / 'leetcode-statements.json').read_text(encoding='utf-8'))
     db.execute('''INSERT INTO coding_stages(id,title,description,position)
         SELECT ?,'算法入门课程','对应 PDF 讲义中的力扣中国区习题。',COALESCE(MAX(position),-1)+1
         FROM coding_stages WHERE true ON CONFLICT(id) DO NOTHING''', (PRACTICE_STAGE,))
@@ -107,7 +111,11 @@ def practice_questions(db, catalog):
                        'leetcode_metadata': judge['metadata'], 'occurrences': occurrences[number]}
         placeholder = f"### {title}\n\n[查看力扣中国区原题]({source_url})"
         exercise = exercises[str(number)]
-        statement = render_exercise(exercise)
+        full_statement = statements[slug]['statement']
+        if not isinstance(full_statement, str) or not full_statement.strip():
+            raise ValueError(f'力扣题面缓存为空：{slug}')
+        previous_statement = render_exercise(exercise)
+        statement = render_exercise(exercise, full_statement)
         samples = json.dumps([{'input': example['input'], 'output': example['output']}
                               for example in exercise.get('examples', []) if example.get('runnable', True)],
                              ensure_ascii=False)
@@ -118,17 +126,19 @@ def practice_questions(db, catalog):
             VALUES (?,?,?,'课程练习',?,3,?,?,?,?,?,?,'leetcode','luogu',?,'public','approved',unixepoch(),unixepoch())
             ON CONFLICT(source_key) DO UPDATE SET statement=excluded.statement,samples=excluded.samples,
                 version=coding_questions.version+1,updated=excluded.updated
-            WHERE coding_questions.version=1 AND coding_questions.deleted=0 AND coding_questions.active=1
-                AND coding_questions.statement=? AND json_array_length(coding_questions.samples)=0''',
+            WHERE coding_questions.deleted=0 AND coding_questions.active=1
+                AND coding_questions.content_version=1 AND coding_questions.statement IN (?,?)''',
             (key, PRACTICE_STAGE, title, judge['difficulty'], position, statement, samples,
              json.dumps(judge['starter_codes']), source_url, slug, json.dumps(source_info, ensure_ascii=False),
-             placeholder))
+             placeholder, previous_statement))
         row = db.execute('''SELECT q.id FROM coding_questions q JOIN coding_stages s ON s.id=q.stage_id
             WHERE q.source_key=? AND q.deleted=0 AND q.active=1 AND s.active=1 AND q.visibility='public' ''',
             (key,)).fetchone()
         if row:
             practice_ids[number] = row['id']
-    db.execute('INSERT OR IGNORE INTO app_settings(key,value) VALUES (?,?)', (PRACTICE_CONTENT_KEY, '1'))
+    db.execute('''INSERT INTO app_settings(key,value) VALUES (?,?)
+        ON CONFLICT(key) DO UPDATE SET value=excluded.value''',
+        (PRACTICE_CONTENT_KEY, str(PRACTICE_CONTENT_VERSION)))
     return practice_ids
 
 
@@ -227,7 +237,8 @@ def initialize_default_courses(db, created):
     marker = db.execute('SELECT value FROM app_settings WHERE key=?', (SEED_KEY,)).fetchone()
     previous = json.loads(marker['value']) if marker else None
     if previous and int(previous.get('version', 1)) >= catalog['version']:
-        if (not db.execute('SELECT 1 FROM app_settings WHERE key=?', (PRACTICE_CONTENT_KEY,)).fetchone()
+        practice_marker = db.execute('SELECT value FROM app_settings WHERE key=?', (PRACTICE_CONTENT_KEY,)).fetchone()
+        if ((not practice_marker or int(practice_marker['value']) < PRACTICE_CONTENT_VERSION)
                 and db.execute('SELECT 1 FROM live_courses WHERE id=?', (previous.get('course_id'),)).fetchone()):
             practice_questions(db, catalog)
         return
