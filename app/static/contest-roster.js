@@ -1,5 +1,5 @@
 /** Searchable participant selection, isolated from contest problem editing. */
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import { $, el, button } from "./ui.js?v=20261114-ui-v17";
 
 let selected = new Set();

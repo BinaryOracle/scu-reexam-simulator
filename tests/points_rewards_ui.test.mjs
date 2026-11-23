@@ -17,7 +17,7 @@ test("voucher package form has roomier spacing and responsive fields", () => {
 });
 
 test("points reward rules are grouped and the save action is not full width", () => {
-  for (const [group, label] of [["rewardInviteTitle", "邀请与签到"], ["rewardTrainingTitle", "题库投稿"], ["rewardCodingTitle", "算法投稿"], ["rewardLeaderboardTitle", "周榜奖励"]]) {
+  for (const [group, label] of [["rewardInviteTitle", "邀请与签到"], ["rewardTrainingTitle", "题库投稿"], ["rewardCodingTitle", "算法投稿"], ["rewardLeaderboardTitle", "周榜奖励"], ["rewardContestTitle", "上机考试奖励"]]) {
     assert.match(html, new RegExp(`id="${group}">${label}<`));
     assert.match(html, new RegExp(`aria-labelledby="${group}"`));
   }

@@ -1,8 +1,8 @@
-"""Run idempotent weekly settlements, including downtime recovery, in one worker."""
+"""Settle weekly boards and completed contests with downtime recovery in one worker."""
 import logging
 import threading
 from app.db import connect
-from app.services import leaderboard
+from app.services import leaderboard, contest_rewards
 
 _logger = logging.getLogger(__name__)
 _stop = threading.Event()
@@ -11,12 +11,13 @@ _thread = None
 
 def _run():
     while not _stop.is_set():
-        try:
-            with connect() as db:
-                db.execute('BEGIN IMMEDIATE')
-                leaderboard.settle_due(db)
-        except Exception:
-            _logger.exception('Weekly leaderboard settlement failed; retrying in 60 seconds')
+        for settle in (leaderboard.settle_due, contest_rewards.settle_due):
+            try:
+                with connect() as db:
+                    db.execute('BEGIN IMMEDIATE')
+                    settle(db)
+            except Exception:
+                _logger.exception('%s settlement failed; retrying in 60 seconds', settle.__module__)
         if _stop.wait(60):
             return
 

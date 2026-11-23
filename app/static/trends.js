@@ -1,5 +1,5 @@
 /** Browse current AI trend reports and edit the selected report as an administrator. */
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import { $, el, button, notify } from "./ui.js?v=20261114-ui-v17";
 
 const periods = [

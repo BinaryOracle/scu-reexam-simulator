@@ -1,5 +1,5 @@
 /** Shared question editor with debounced safe preview and authenticated image insertion. */
-import {api,state} from './api.js?v=20261114-ui-v17';
+import {api,state} from './api.js?v=20261122-session-guard-v1';
 import {el,button,confirmAction} from './ui.js?v=20261114-ui-v17';
 import {createMarkdownPreview,readMarkdownFile} from './course-markdown-model.mjs?v=20261121-v1';
 import {appendProblemStatement} from './problem-content.js?v=20261121-question-images-v1';

@@ -58,30 +58,22 @@ def test_only_admin_can_manage_users(legacy_client):
     assert all('password' not in row and 'token' not in row for row in rows)
 
 
-def test_admin_user_list_shows_referrer_and_manages_purchase_rebate(legacy_client):
+def test_admin_user_list_shows_referrer_and_structured_package_totals(legacy_client):
     from app.db import connect
     manager, alice, bob = login(legacy_client, 'manager'), login(legacy_client, 'alice'), login(legacy_client, 'bob')
     alice_id = legacy_client.get('/api/me', headers=alice).json()['id']
     bob_id = legacy_client.get('/api/me', headers=bob).json()['id']
     with connect() as db:
-        db.execute("UPDATE users SET referrer_id=? WHERE id=?", (alice_id, bob_id))
-    assert legacy_client.patch(f'/api/admin/users/{bob_id}/purchase-service', headers=alice,
-        json={'purchase_service': '套餐服务', 'rebate_redeemed': False}).status_code == 403
-    changed = legacy_client.patch(f'/api/admin/users/{bob_id}/purchase-service', headers=manager,
-        json={'purchase_service': '套餐服务', 'rebate_redeemed': False})
-    assert changed.status_code == 200
-    rows = legacy_client.get('/api/admin/users', headers=manager).json()
-    bob_row = next(row for row in rows if row['id'] == bob_id)
-    assert bob_row['referrer_name'] == 'alice'
-    assert bob_row['purchase_service'] == '套餐服务' and bob_row['rebate_redeemed'] is False
-    assert legacy_client.patch(f'/api/admin/users/{bob_id}/purchase-service', headers=manager,
-        json={'purchase_service': '项目服务', 'rebate_redeemed': True}).json()['rebate_redeemed'] is True
-    custom = legacy_client.patch(f'/api/admin/users/{bob_id}/purchase-service', headers=manager,
-        json={'purchase_service': '项目咨询服务 · 3 个月', 'rebate_redeemed': False})
-    assert custom.status_code == 200
-    assert custom.json()['purchase_service'] == '项目咨询服务 · 3 个月'
-    assert legacy_client.patch(f'/api/admin/users/{bob_id}/purchase-service', headers=manager,
-        json={'purchase_service': 'x' * 161, 'rebate_redeemed': False}).status_code == 422
+        db.execute('UPDATE users SET referrer_id=? WHERE id=?', (alice_id, bob_id))
+    package = legacy_client.post('/api/admin/service-packages', headers=manager,
+                                json={'name': '套餐服务', 'price_yuan': '100'}).json()
+    path = f'/api/admin/users/{bob_id}/package-purchases'
+    assert legacy_client.post(path, headers=alice, json={'package_id': package['id']}).status_code == 403
+    assert legacy_client.post(path, headers=manager, json={'package_id': package['id']}).status_code == 201
+    row = next(row for row in legacy_client.get('/api/admin/users', headers=manager).json() if row['id'] == bob_id)
+    assert row['referrer_name'] == 'alice'
+    assert row['purchase_total_fen'] == 10000 and row['rebate_total_fen'] == 500
+    assert row['rebate_status'] == 'pending'
 
 
 def test_account_creation_defaults_and_duplicate_validation(legacy_client):

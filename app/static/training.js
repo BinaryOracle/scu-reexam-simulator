@@ -1,5 +1,5 @@
 /** Daily practice cards, sequential review, favorites and private contributions. */
-import { api, state } from './api.js?v=20261114-ui-v17';
+import { api, state } from './api.js?v=20261122-session-guard-v1';
 import { $, el, button, emptyState, notify, confirmAction, badge } from './ui.js?v=20261114-ui-v17';
 import { selectField, pagination, questionContent, questionEditor, referenceAnswer, passageContext, questionPreview, importDialog, clearLearningMedia } from './training-ui.js?v=20261121-question-markdown-v1';
 import { mountLeaderboard } from './leaderboard.js?v=20261122-points-display-v1';

@@ -1,9 +1,11 @@
 /** Interview balances and voucher administration have no external shop API. */
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import { $, el, button, emptyState, notify, run, dateTime, badge, confirmAction } from "./ui.js?v=20261114-ui-v17";
-import { refreshAccountSettings, setupAccountSettings } from "./profile-account.js?v=20261116-ui-audit-v2";
+import { refreshAccountSettings, setupAccountSettings } from "./profile-account.js?v=20261122-profile-load-guard-v1";
 
-import { refreshTransfers } from "./credit-transfers.js?v=20261117-points-v1";
+import { refreshTransfers } from "./credit-transfers.js?v=20261122-profile-load-guard-v1";
+
+import { purchaseSummaryButton, openPurchaseDetails, rebateText } from './service-packages.js?v=20261123-packages-v2';
 
 let voucherPackage = "";
 let voucherPage = 1;
@@ -20,6 +22,7 @@ let purchaseToken = null;
 let purchaseBusy = false;
 let profileRequest = 0;
 let referralRequest = 0;
+let interviewShopRequest = 0;
 const money = value => `¥${(value / 100).toFixed(2)}`;
 const download = (text, name) => {
   const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
@@ -54,6 +57,7 @@ export async function refreshVouchers() {
   for (const key of ['invite_signup_points', 'training_checkin_points_per_week', 'coding_checkin_points_per_week', 'training_questions_per_reward', 'training_contribution_points', 'coding_questions_per_reward', 'coding_contribution_points'])
     rewardForm.elements.namedItem(key).value = settings.reward_rules[key];
   settings.reward_rules.leaderboard_rewards.forEach((value, index) => { rewardForm.elements.namedItem(`leaderboard_${index + 1}`).value = value; });
+  settings.reward_rules.contest_rewards.forEach((value, index) => { rewardForm.elements.namedItem(`contest_${index + 1}`).value = value; });
   const selected = $("voucherGeneratePackage").value;
   $("voucherGeneratePackage").replaceChildren(...settings.packages.map(item => {
     const option = el("option", `${money(item.price_fen)} / ${item.credits} 积分`); option.value = item.id; return option;
@@ -159,21 +163,24 @@ export async function refreshVouchers() {
 
 export async function refreshProfile() {
   const request = ++profileRequest, token = state.token;
+  const contributionRoot = $("profileContribution");
+  const transferRoot = $("profileTransfers");
+  contributionRoot.hidden = true;
+  transferRoot.hidden = true;
   const data = await api("/profile");
   if (request !== profileRequest || token !== state.token || !state.user) return;
   state.user.interview_credits = data.remaining;
   state.user.points = data.points;
   profilePoints = data.points;
   unitPointsCost = data.interview_points_cost;
+  $("interviewPointsShop").hidden = Boolean(data.is_admin || state.adminMode);
   $("profilePoints").textContent = `${data.points.toLocaleString("zh-CN")} 积分`;
   $("profilePointsStat").hidden = data.is_admin;
-  $("profileShopSection").hidden = data.is_admin;
   $("profilePointsHistorySection").hidden = data.is_admin;
   $("pointsProductPrice").textContent = `${unitPointsCost} 积分 / 次`;
   updatePurchaseTotal();
   renderPointsHistory(data.points_history);
   $("profileUsername").textContent = data.username;
-  refreshAccountSettings();
   $("profileLoginEmail").hidden = !state.user.email;
   $("profileLoginEmail").textContent = state.user.email ? `登录邮箱：${state.user.email}` : "";
   $("profileAllowanceLabel").textContent = data.is_admin ? "模拟面试" : "剩余模拟面试次数";
@@ -186,7 +193,6 @@ export async function refreshProfile() {
   const redemptionStats = $("profileRedemptionStats");
   const redemptionCount = $("profileRedemptionStatsCount");
   const redemptionHistory = $("profileRedemptionHistorySection");
-  const contributionRoot = $("profileContribution");
   voucherSection.hidden = Boolean(data.is_admin);
   redemptionStats.hidden = Boolean(data.is_admin);
   redemptionCount.hidden = Boolean(data.is_admin);
@@ -207,12 +213,18 @@ export async function refreshProfile() {
     }
     $("redemptionHistory").replaceChildren(list);
   }
+  try { refreshAccountSettings(); }
+  catch (error) {
+    console.error("Account settings could not be refreshed", error);
+    $("profileAccountUsername").textContent = data.username;
+  }
   try { await refreshTransfers(data, refreshProfile); }
   catch {
     if (request !== profileRequest || token !== state.token) return;
     const message = emptyState("转赠记录暂时无法加载", "余额和兑换信息已更新；请稍后重试查看转赠记录。", "◇");
     message.append(button("重新加载", () => { void refreshProfile(); }, "button secondary"));
-    $("profileTransfers").replaceChildren(message);
+    transferRoot.replaceChildren(message);
+    transferRoot.hidden = false;
   }
   try {
     const contribution = await api("/training/contribution-rewards");
@@ -234,20 +246,38 @@ export async function refreshProfile() {
       if (!contribution.grants.length) history.append(el("span", "审核通过的投稿达到规则数量后，会在这里显示奖励记录。"));
       contributionRoot.append(history);
     }
+    contributionRoot.hidden = false;
   } catch {
     if (request !== profileRequest || token !== state.token) return;
     const message = emptyState("贡献奖励信息暂时无法加载", "账户余额与兑换记录仍可正常查看。", "◇");
     message.append(button("重新加载", () => { void refreshProfile(); }, "button secondary"));
     contributionRoot.replaceChildren(message);
+    contributionRoot.hidden = false;
   }
+}
+
+export async function refreshInterviewShop() {
+  const request = ++interviewShopRequest, token = state.token;
+  const data = await api("/profile");
+  if (request !== interviewShopRequest || token !== state.token || !state.user) return;
+  state.user.interview_credits = data.remaining;
+  state.user.points = data.points;
+  profilePoints = data.points;
+  unitPointsCost = data.interview_points_cost;
+  $("interviewPointsShop").hidden = Boolean(data.is_admin || state.adminMode);
+  $("pointsProductPrice").textContent = `${unitPointsCost} 积分 / 次`;
+  updatePurchaseTotal();
+  $("interviewQuotaText").textContent = data.is_admin
+    ? "模拟面试已开通"
+    : `剩余 ${data.remaining} 次模拟面试 · 正式开始时消耗 1 次`;
 }
 
 async function renderReferrals(request, token) {
   const root = $("referralContent");
   const data = await api('/profile/referrals');
   if (request !== referralRequest || token !== state.token) return;
-  const pending = data.items.filter(item => item.purchase_service && !item.rebate_redeemed).length;
-  const redeemed = data.items.filter(item => item.purchase_service && item.rebate_redeemed).length;
+  const pending = data.items.filter(item => item.rebate_status === 'pending').length;
+  const redeemed = data.items.filter(item => item.rebate_status === 'redeemed').length;
   const stats = $('referralStats');
   const stat = (label, value, hint, tone = '') => {
     const card = el('article', '', `panel referral-stat${tone ? ` ${tone}` : ''}`);
@@ -257,14 +287,14 @@ async function renderReferrals(request, token) {
   stats.replaceChildren(
     stat('注册奖励', `${data.signup_reward_points} 积分`, '每位新用户首次注册成功'),
     stat('邀请人数', String(data.total_invited), '已通过邀请码建立关系'),
-    stat('待兑现服务', String(pending), '套餐或项目服务返利', 'pending'),
-    stat('已兑现服务', String(redeemed), '管理员确认完成兑现', 'settled'),
+    stat('待兑换返利', String(pending), '有返利等待兑换的邀请用户', 'pending'),
+    stat('已兑换返利', String(redeemed), '管理员已确认完成兑换', 'settled'),
   );
   const title = el('div', '', 'referral-content-heading');
   title.append(el('div', 'YOUR REFERRAL', 'eyebrow'), el('h2', '分享邀请，查看返利'));
   const intro = el('p', `新用户首次注册并填写邀请码后，你将获得 ${data.signup_reward_points} 积分。`);
   const details = el('div', '', 'referral-policy');
-  details.append(el('strong', '服务返利说明'), el('p', `邀请成功注册可获得 ${data.signup_reward_points} 积分；被邀请用户购买套餐服务，可获得订单金额 5% 的现金返利；购买项目服务，可获得订单金额 5% 的现金返利。返利兑现请联系微信：ZDH200212zdh。`));
+  details.append(el('strong', '服务返利说明'), el('p', `邀请成功注册可获得 ${data.signup_reward_points} 积分；被邀请用户购买套餐后，按购买时该套餐的返利比例计算现金返利；每个套餐的价格、比例与返利金额可点击购买明细查看。返利兑换请联系微信：ZDH200212zdh。`));
   const codeField = el('div', '', 'referral-share-field');
   const code = el('code', data.invite_code);
   const copyCode = button('复制邀请码', async () => {
@@ -285,13 +315,18 @@ async function renderReferrals(request, token) {
   linkField.append(el('span', '邀请链接'), linkValue, copyLink);
   const list = el('div', '', 'referral-list');
   if (!data.items.length) list.append(emptyState('还没有邀请记录', '分享邀请码或邀请链接，新用户首次注册时填写即可建立邀请关系。', '◇'));
-  else for (const item of data.items) {
+  else {
+    const head = el('div', '', 'referral-row referral-list-head');
+    head.append(el('span', '用户名'), el('span', '套餐服务'), el('span', '返利状态'));
+    list.append(head);
+  }
+  for (const item of data.items) {
     const row = el('article', '', 'referral-row');
     const identity = el('div', '', 'referral-identity');
     identity.append(el('strong', item.username), el('small', item.email || '未绑定邮箱'));
-    const serviceLabel = item.purchase_service === '套餐服务' ? '套餐服务 · 5%' : item.purchase_service === '项目服务' ? '项目服务 · 5%' : item.purchase_service || '暂无购买服务';
-    const state = item.purchase_service ? item.rebate_redeemed ? '已兑现' : '待兑现' : '—';
-    row.append(identity, el('span', serviceLabel, 'referral-service'), el('span', state, `referral-rebate-state ${item.rebate_redeemed ? 'redeemed' : item.purchase_service ? 'pending' : 'unset'}`));
+    const summary = purchaseSummaryButton(item, () => openPurchaseDetails(item));
+    summary.classList.add('referral-service');
+    row.append(identity, summary, el('span', rebateText(item.rebate_status), `referral-rebate-state ${item.rebate_status}`));
     list.append(row);
   }
   const sharing = el('div', '', 'referral-share-grid');
@@ -323,7 +358,7 @@ function updatePurchaseTotal() {
 }
 
 function renderPointsHistory(records) {
-  const labels = { redemption: "卡密兑换", checkin_reward: "每日训练连续签到", coding_checkin: "算法带刷连续签到", question_contribution: "题库贡献奖励", coding_contribution: "算法投稿奖励", leaderboard_reward: "周榜奖励", ranking_award: "周榜奖励", purchase_interview: "购买模拟面试次数", course_purchase: "课程积分购买", admin: "管理员调整" };
+  const labels = { redemption: "卡密兑换", checkin_reward: "每日训练连续签到", coding_checkin: "算法带刷连续签到", question_contribution: "题库贡献奖励", coding_contribution: "算法投稿奖励", leaderboard_reward: "周榜奖励", ranking_award: "周榜奖励", contest_reward: "上机考试排名奖励", purchase_interview: "购买模拟面试次数", course_purchase: "课程积分购买", admin: "管理员调整" };
   if (!records.length) {
     $("pointsHistory").replaceChildren(emptyState("还没有积分记录", "签到、榜单奖励和卡密兑换获得积分后，可在这里查看收支。", "◇"));
     return;
@@ -357,6 +392,7 @@ export function setupCredits() {
       const form = event.currentTarget;
       const payload = Object.fromEntries(['invite_signup_points', 'training_checkin_points_per_week', 'coding_checkin_points_per_week', 'training_questions_per_reward', 'training_contribution_points', 'coding_questions_per_reward', 'coding_contribution_points'].map(key => [key, Number(form.elements.namedItem(key).value)]));
       payload.leaderboard_rewards = [1, 2, 3].map(index => Number(form.elements.namedItem(`leaderboard_${index}`).value));
+      payload.contest_rewards = [1, 2, 3].map(index => Number(form.elements.namedItem(`contest_${index}`).value));
       await api('/admin/credit-settings', { method: 'PATCH', body: JSON.stringify(payload) });
       notify('积分奖励规则已更新，仅影响后续获得的奖励。');
       await refreshVouchers();
@@ -386,7 +422,7 @@ export function setupCredits() {
     void run(async () => {
       $("pointsPurchaseError").hidden = true;
       if (!await confirmAction(`使用 ${quantity * expectedCost} 积分购买 ${quantity} 次模拟面试。兑换成功后，次数会立即加入账户。`, { title: "确认积分购买", confirmText: "确认购买" })) return;
-      if (token !== state.token || $("profile").hidden) return;
+      if (token !== state.token || $("interview").hidden) return;
       if (purchaseToken !== token || purchaseQuantity !== quantity) purchaseRequestKey = null;
       purchaseToken = token;
       purchaseQuantity = quantity;
@@ -396,13 +432,14 @@ export function setupCredits() {
         if (token !== state.token) return;
         purchaseRequestKey = null;
         notify(result.already_purchased ? "该笔购买已完成，已更新余额。" : `购买成功，已增加 ${quantity} 次模拟面试。`);
-        try { await refreshProfile(); }
-        catch { notify("购买已成功，余额刷新失败，请重新进入个人主页查看。", "error"); }
+        try {
+          await refreshInterviewShop();
+        } catch { notify("购买已成功，余额刷新失败，请重新进入模拟面试页面查看。", "error"); }
       } catch (error) {
         if (token !== state.token) return;
         $("pointsPurchaseError").textContent = error.message;
         $("pointsPurchaseError").hidden = false;
-        if (error.status === 409) { purchaseRequestKey = null; await refreshProfile(); }
+        if (error.status === 409) { purchaseRequestKey = null; await refreshInterviewShop(); }
       }
     }, event.submitter).finally(() => {
       purchaseBusy = false;
@@ -488,7 +525,7 @@ export function setupCredits() {
       }
       try {
         await refreshProfile();
-        notify(`兑换成功，当前可用 ${result.points} 积分。可在积分购买区兑换面试次数。`);
+        notify(`兑换成功，当前可用 ${result.points} 积分。可前往模拟面试页面兑换面试次数。`);
       } catch {
         notify("兑换已成功，但余额刷新失败。请重新加载个人主页确认积分；不要重复兑换。", "error");
       }

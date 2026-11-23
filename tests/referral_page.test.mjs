@@ -33,11 +33,12 @@ test("referrals are available to regular users and omitted from admin navigation
 
 test("referral page presents dynamic rewards, service states, and responsive layout", () => {
   assert.match(credits, /data\.signup_reward_points/);
-  assert.match(credits, /套餐服务，可获得订单金额 5% 的现金返利/);
-  assert.match(credits, /套餐服务 · 5%/);
+  assert.match(credits, /按购买时该套餐的返利比例/);
+  assert.match(credits, /purchaseSummaryButton\(item/);
+  assert.match(credits, /openPurchaseDetails\(item/);
   assert.doesNotMatch(credits, /套餐服务[^\n]{0,80}10%/);
-  assert.match(credits, /待兑现服务/);
-  assert.match(credits, /已兑现服务/);
+  assert.match(credits, /待兑换返利/);
+  assert.match(credits, /已兑换返利/);
   assert.match(styles, /\.referral-overview-grid \{[^}]*repeat\(4, minmax\(0, 1fr\)\)/);
   assert.match(styles, /\.referral-share-grid \{[^}]*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(styles, /\.referral-stat > strong \{[^}]*font-size: 23px/);

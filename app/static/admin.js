@@ -1,8 +1,8 @@
 import { refreshBackupModules, setupBackups } from './admin-backups.js?v=20261122-restore-v2';
 export { refreshBackupModules };
 /** Account management UI. Backend APIs remain the source of authorization. */
-import { api, state } from "./api.js?v=20261114-ui-v17";
-import { readCreditSettings } from "./credits.js?v=20261122-referral-rewards-v2";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
+import { readCreditSettings } from "./credits.js?v=20261122-packages-v1";
 import {
   $,
   el,
@@ -12,6 +12,8 @@ import {
   notify,
   confirmAction,
 } from "./ui.js?v=20261114-ui-v17";
+
+import { purchaseSummaryButton, openPurchaseDetails, rebateText } from './service-packages.js?v=20261123-packages-v2';
 
 let accounts = [];
 let usernameTarget = null;
@@ -313,7 +315,7 @@ function renderUsers() {
       (user.email || "").toLocaleLowerCase().includes(emailQuery) &&
       (!referrerQuery || `${user.referrer_name || ""} ${user.referrer_email || ""}`.toLocaleLowerCase().includes(referrerQuery)) &&
       (roleFilter === "all" || (roleFilter === "admin" ? user.is_admin : !user.is_admin)) &&
-      (rebateFilter === "all" || (rebateFilter === "none" ? !user.purchase_service : rebateFilter === "redeemed" ? user.purchase_service && user.rebate_redeemed : user.purchase_service && !user.rebate_redeemed)) &&
+      (rebateFilter === "all" || user.rebate_status === (rebateFilter === "none" ? "unset" : rebateFilter)) &&
       (status === "all" ||
         (status === "active" ? user.is_active : !user.is_active)),
   );
@@ -331,7 +333,7 @@ function renderUsers() {
   const wrap = el("div", "", "account-table-wrap");
   const table = document.createElement("table");
   table.className = "account-table";
-  table.append(el("caption", "账号、邀请者、购买服务、面试次数与状态", "sr-only"));
+  table.append(el("caption", "账号、邀请者、套餐服务、返利、积分与状态", "sr-only"));
   const head = document.createElement("thead");
   const tr = document.createElement("tr");
   for (const text of [
@@ -340,8 +342,9 @@ function renderUsers() {
     "功能权限",
     "账号状态",
     "邀请者",
-    "购买服务 / 返利",
-    "面试次数",
+    "套餐服务",
+    "返利",
+    "积分",
     "操作",
   ]) {
     const th = el("th", text);
@@ -378,68 +381,51 @@ function renderUsers() {
     const referrer = accountCell("邀请者", "account-referrer-cell");
     referrer.append(el("span", user.referrer_name || "—", user.referrer_name ? "account-referrer-name" : "muted"));
     if (user.referrer_email) referrer.append(el("small", user.referrer_email, "account-email-address"));
-    const service = accountCell("购买服务 / 返利", "account-purchase-service-cell");
-    const serviceForm = el("form", "", "account-service-form");
-    const serviceInput = el("input", "", "account-service-input");
-    serviceInput.type = "text"; serviceInput.maxLength = 160; serviceInput.value = user.purchase_service || "";
-    serviceInput.placeholder = "输入购买服务";
-    serviceInput.setAttribute("aria-label", `${user.username} 的购买服务`);
-    const serviceSave = el("button", "保存", "text-button account-service-save");
-    serviceSave.type = "submit";
-    serviceSave.disabled = true;
-    serviceInput.addEventListener("input", () => { serviceSave.disabled = serviceInput.value.trim() === (user.purchase_service || ""); });
-    serviceForm.addEventListener("submit", async event => {
-      event.preventDefault();
-      const value = serviceInput.value.trim();
-      if (value === (user.purchase_service || "")) return;
-      serviceInput.disabled = true; serviceSave.disabled = true;
-      try {
-        const result = await api(`/admin/users/${user.id}/purchase-service`, { method: "PATCH", body: JSON.stringify({ purchase_service: value, rebate_redeemed: false }) });
-        user.purchase_service = result.purchase_service; user.rebate_redeemed = result.rebate_redeemed;
-        renderUsers(); notify("购买服务信息已更新。");
-      } catch (error) { serviceInput.disabled = false; serviceInput.value = user.purchase_service || ""; notify(error.message, "error"); }
-    });
-    serviceForm.append(serviceInput, serviceSave);
-    const statusButton = button(user.rebate_redeemed ? "已兑现" : user.purchase_service ? "待兑现" : "未填写", async () => {
-      if (!user.purchase_service) return;
-      const next = !user.rebate_redeemed;
-      if (!await confirmAction(`将「${user.username}」的${user.purchase_service}返利标记为${next ? "已兑现" : "待兑现"}。`, { title: "确认更新返利状态？", confirmText: next ? "标记已兑现" : "恢复待兑现" })) return;
-      statusButton.disabled = true;
-      try {
-        const result = await api(`/admin/users/${user.id}/purchase-service`, { method: "PATCH", body: JSON.stringify({ purchase_service: user.purchase_service, rebate_redeemed: next }) });
-        user.rebate_redeemed = result.rebate_redeemed; renderUsers(); notify("返利状态已更新。");
-      } catch (error) { statusButton.disabled = false; notify(error.message, "error"); }
-    }, `account-rebate-state ${user.rebate_redeemed ? "redeemed" : user.purchase_service ? "pending" : "unset"}`);
-    statusButton.disabled = !user.purchase_service;
-    statusButton.setAttribute("aria-pressed", String(user.rebate_redeemed));
-    service.append(serviceForm, statusButton);
+    const service = accountCell("套餐服务", "account-purchase-service-cell");
+    const rebate = accountCell("返利", "account-rebate-cell");
+    if (user.is_admin) {
+      service.append(el("span", "—", "muted"));
+      rebate.append(el("span", "—", "muted"));
+    } else {
+      service.append(purchaseSummaryButton(user, () => openPurchaseDetails(user, { manage: true, onChange: refreshUsers })));
+      const statusButton = button(rebateText(user.rebate_status), async () => {
+        const next = user.rebate_status !== "redeemed";
+        if (!await confirmAction(`将「${user.username}」当前有效购买记录的返利标记为${next ? "已兑换" : "待兑换"}。当前待兑换 ${(user.pending_rebate_fen / 100).toFixed(2)} 元，已兑换 ${(user.redeemed_rebate_fen / 100).toFixed(2)} 元；总返利 ${(user.rebate_total_fen / 100).toFixed(2)} 元。`, { title: "确认更新返利状态？", confirmText: next ? "标记已兑换" : "恢复待兑换" })) return;
+        const result = await api(`/admin/users/${user.id}/rebate`, { method: "PATCH", body: JSON.stringify({ redeemed: next }) });
+        Object.assign(user, result); renderUsers(); notify("返利状态已更新。");
+      }, `account-rebate-state ${user.rebate_status}`);
+      statusButton.disabled = user.rebate_status === "unset";
+      statusButton.setAttribute("aria-label", `${user.username} 的返利：${rebateText(user.rebate_status)}`);
+      statusButton.title = statusButton.disabled ? "没有有效购买记录或邀请者" : "点击修改返利状态";
+      rebate.append(statusButton);
+    }
     const password = accountCell("密码", "account-password-cell");
     password.append(passwordControl(user));
     const email = el("span", user.email || "未绑定邮箱", "account-email-address");
     email.title = user.email || "未绑定邮箱";
     text.append(email);
-    const credits = accountCell("面试次数", "account-credits-cell");
-    if (user.is_admin) credits.append(el("span", "已开通", "muted"));
+    const pointsCell = accountCell("积分", "account-points-cell");
+    if (user.is_admin) pointsCell.append(el("span", "无限积分", "account-unlimited-points"));
     else {
       const form = el("form", "", "inline-credit-form");
-      const input = el("input"); input.type = "number"; input.min = "0"; input.max = "1000000"; input.step = "1";
-      input.required = true; input.value = String(user.interview_credits);
-      input.setAttribute("aria-label", `${user.username} 的剩余面试次数`);
+      const input = el("input"); input.type = "number"; input.min = "0"; input.max = "1000000000"; input.step = "1";
+      input.required = true; input.value = String(user.points ?? 0);
+      input.setAttribute("aria-label", `${user.username} 的积分余额`);
       const save = el("button", "保存", "text-button"); save.type = "submit"; save.disabled = true;
-      input.addEventListener("input", () => { save.disabled = input.value === String(user.interview_credits); });
+      input.addEventListener("input", () => { save.disabled = input.value === String(user.points ?? 0); });
       form.addEventListener("submit", event => {
         event.preventDefault();
         if (!form.reportValidity()) return;
         void (async () => {
           save.disabled = true; input.disabled = true;
           try {
-            await api(`/admin/users/${user.id}`, { method: "PATCH", body: JSON.stringify({ interview_credits: Number(input.value) }) });
-            user.interview_credits = Number(input.value); notify("剩余模拟面试次数已保存。");
+            await api(`/admin/users/${user.id}`, { method: "PATCH", body: JSON.stringify({ points: Number(input.value) }) });
+            user.points = Number(input.value); notify("用户积分已保存。");
           } catch (error) { save.disabled = false; notify(error.message, "error"); }
           finally { input.disabled = false; }
         })();
       });
-      form.append(input, el("span", "次"), save); credits.append(form);
+      form.append(input, el("span", "分"), save); pointsCell.append(form);
     }
     const active = accountCell("账号状态");
     const statusControl = button(
@@ -499,7 +485,7 @@ function renderUsers() {
     );
     permissions.append(permissionGroup);
     if (user.is_admin) permissions.append(el("small", "全部功能已开通", "account-permission-note"));
-    row.append(name, password, permissions, active, referrer, service, credits, actions);
+    row.append(name, password, permissions, active, referrer, service, rebate, pointsCell, actions);
     body.append(row);
   }
   table.append(head, body);

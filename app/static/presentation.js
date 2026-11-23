@@ -1,5 +1,5 @@
 /** Private slide preview; recordings stay in the owning interview component. */
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import { el, button, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
 
 const positions = new Map();

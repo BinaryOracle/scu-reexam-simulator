@@ -1,5 +1,5 @@
 /** Shared classroom form, file and dialog primitives. */
-import {api,state} from './api.js?v=20261114-ui-v17';
+import {api,state} from './api.js?v=20261122-session-guard-v1';
 import {el,button,notify,run,confirmAction} from './ui.js?v=20261114-ui-v17';
 export {el,button,notify,confirmAction};
 export function field(label,control,hint='') {

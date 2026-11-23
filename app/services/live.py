@@ -13,10 +13,12 @@ def course(db, cid, user):
     row = db.execute('SELECT * FROM live_courses WHERE id=?', (cid,)).fetchone()
     privileged = row and (manage(row, user) or row['host_id'] == user['id'])
     enrolled = row and row['publication_status'] == 'published' and (row['access_mode'] == 'public' or db.execute(
-            '''SELECT 1 FROM live_members WHERE course_id=? AND user_id=? UNION ALL
-            SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=? UNION ALL
-            SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=? LIMIT 1''',
-            (cid, user['id'], cid, user['id'], cid, user['id'])).fetchone())
+            '''SELECT 1 WHERE EXISTS (SELECT 1 FROM live_members WHERE course_id=? AND user_id=?) OR
+            (EXISTS (SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?) AND
+             NOT EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?)) OR
+            EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?
+                AND (access_expires_at IS NULL OR access_expires_at>?))''',
+            (cid, user['id'], cid, user['id'], cid, user['id'], cid, user['id'], time.time())).fetchone())
     if not row or not (privileged or enrolled):
         raise HTTPException(404, '课程不存在或未加入课程')
     return dict(row)

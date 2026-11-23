@@ -21,12 +21,12 @@ from app.services.security import verify_password
 from app.services.password_vault import PasswordVaultError, encrypt_password
 from app.services.auth import current_user, administrator, interview_user, exam_user, issue_session, public_user
 from app.services.interviews import details, interview, active_interview, require_stage, summary, seed_answers
-from app.services.contest_scoring import submission_score
+from app.services.contest_scoring import ranked_rows
 from app.services.interview_clock import require_running, timing, timestamp
 from app.services import question_bank
 from app.services import luogu_catalog
 from app.services import leetcode_catalog, coding_platforms
-from app.services import contest_access, home_layout
+from app.services import contest_access, contest_rewards, home_layout
 from app.routes.live import router as live_router
 from app.routes.home_layout import router as home_layout_router
 from app.routes.presentations import router as presentations_router
@@ -516,7 +516,10 @@ def contest_overview(cid: int, user=Depends(exam_user)):
 def contest_ranking(cid: int, user=Depends(exam_user)):
     """Return the configured contest ranking and per-problem attempt counts."""
     with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
         contest = contest_access.require_access(db, cid, user)
+        contest_rewards.settle_due(db, contest_id=cid)
+        reward_summary = contest_rewards.summary(db, cid)
         problems = [dict(row) for row in db.execute('''SELECT problems.id,problems.title,problems.points,
             (SELECT COUNT(*) FROM submissions JOIN users ON users.id=submissions.user_id
                 WHERE problem_id=problems.id AND users.is_admin=0) AS attempt_count,
@@ -528,43 +531,11 @@ def contest_ranking(cid: int, user=Depends(exam_user)):
                 for problem in problems:
                     problem['attempt_count'] = None
                     problem['accepted_count'] = None
-            return {'visible': False, 'ranking_rule': contest['ranking_rule'], 'problems': problems, 'rows': []}
-        users = list(db.execute('''SELECT DISTINCT users.id,users.username FROM submissions
-            JOIN users ON users.id=submissions.user_id JOIN problems ON problems.id=submissions.problem_id
-            WHERE problems.contest_id=? AND users.is_admin=0''', (cid,)))
-        rows = []
-        for candidate in users:
-            per_problem = []
-            score = accepted = attempts = 0
-            first_accept = None
-            for problem in problems:
-                submissions = list(db.execute('''SELECT status,created,detail FROM submissions
-                    WHERE user_id=? AND problem_id=? ORDER BY id''', (candidate['id'], problem['id'])))
-                accepted_rows = [row for row in submissions if row['status'] == 'Accepted']
-                solved = bool(accepted_rows)
-                scored_submissions = [(submission_score(problem['points'], row['status'], row['detail']), row)
-                                      for row in submissions]
-                problem_score, best_submission = max(scored_submissions, key=lambda item: item[0], default=(0, None))
-                testcase_match = re.search(r'通过测试(?:用例|点)数\s*[:：]\s*(\d+)\s*/\s*(\d+)', best_submission['detail']) if best_submission else None
-                attempts += len(submissions)
-                accepted += int(solved)
-                score += problem_score
-                if solved:
-                    solved_at = accepted_rows[0]['created']
-                    first_accept = solved_at if first_accept is None else min(first_accept, solved_at)
-                per_problem.append({'problem_id': problem['id'], 'attempts': len(submissions),
-                    'accepted': len(accepted_rows), 'solved': solved, 'score': problem_score,
-                    'passed_cases': int(testcase_match.group(1)) if testcase_match else 0,
-                    'total_cases': int(testcase_match.group(2)) if testcase_match else 0})
-            rows.append({'user_id': candidate['id'], 'username': candidate['username'], 'score': score,
-                'accepted_count': accepted, 'attempt_count': attempts, 'first_accepted_at': first_accept,
-                'problems': per_problem})
-        if contest['ranking_rule'] == 'acm':
-            rows.sort(key=lambda item: (-item['accepted_count'], item['attempt_count'], item['first_accepted_at'] or float('inf'), item['username'].casefold()))
-        else:
-            rows.sort(key=lambda item: (-item['score'], -item['accepted_count'], item['attempt_count'], item['first_accepted_at'] or float('inf'), item['username'].casefold()))
-        for rank, row in enumerate(rows, 1): row['rank'] = rank
-        return {'visible': True, 'ranking_rule': contest['ranking_rule'], 'problems': problems, 'rows': rows}
+            return {'visible': False, 'ranking_rule': contest['ranking_rule'], 'problems': problems, 'rows': [],
+                    'rewards': {**reward_summary, 'grants': []}}
+        rows = ranked_rows(db, contest)
+        return {'visible': True, 'ranking_rule': contest['ranking_rule'], 'problems': problems, 'rows': rows,
+                'rewards': reward_summary}
 
 @app.get('/api/admin/luogu/problem-suggestions')
 def luogu_problem_suggestions(q: str = Query(min_length=1, max_length=64), user=Depends(administrator)):
@@ -620,8 +591,10 @@ def create_contest(payload: Contest, user=Depends(administrator)):
     if payload.ends <= payload.starts: raise HTTPException(400, '结束时间必须晚于开始时间')
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
-        iid = db.execute('INSERT INTO contests(title,starts,ends,judge_mode,show_ranking,ranking_rule) VALUES (?,?,?,?,?,?)',
-            (payload.title, payload.starts, payload.ends,payload.judge_mode,int(payload.show_ranking),payload.ranking_rule)).lastrowid
+        iid = db.execute('''SELECT COALESCE(MAX(id),0)+1 FROM
+            (SELECT id FROM contests UNION ALL SELECT contest_id AS id FROM contest_reward_settlements)''').fetchone()[0]
+        db.execute('INSERT INTO contests(id,title,starts,ends,judge_mode,show_ranking,ranking_rule) VALUES (?,?,?,?,?,?,?)',
+            (iid,payload.title,payload.starts,payload.ends,payload.judge_mode,int(payload.show_ranking),payload.ranking_rule))
         contest_access.set_participants(db, iid, payload.participant_ids)
         problem_ids = []
         seen = set()

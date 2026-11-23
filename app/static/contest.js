@@ -1,4 +1,4 @@
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import {
   $,
   el,
@@ -586,6 +586,12 @@ async function loadContestRanking(panel, contestId, existingSection = null) {
     summary.append(el("span", result.ranking_rule === "acm" ? "按通过题数、提交次数排序" : "按题目分值、通过题数和提交次数排序"));
     summary.append(el("strong", `${result.rows.length} 人上榜`));
     content.append(summary);
+    const awards = result.rewards;
+    const rewardText = awards.amounts.map((value, index) => `第 ${index + 1} 名 ${value} 积分`).join(" · ");
+    const awardNotice = awards.eligible
+      ? `${rewardText}。${awards.settled ? "本场奖励已结算。" : "比赛结束且评测完成后自动结算。"} 管理员不参与奖励，零分不发奖。`
+      : "本场比赛在奖励功能启用前已结束，不补发排名积分。";
+    content.append(el("p", awardNotice, "contest-ranking-message"));
     if (!result.rows.length) {
       const ended = Date.now() / 1000 > contestOverview.ends;
       content.append(el("p", ended ? "本场比赛尚无成绩记录。" : "暂无成绩。完成首次提交，争取榜上领先。", "contest-ranking-message"));
@@ -619,6 +625,8 @@ async function loadContestRanking(panel, contestId, existingSection = null) {
       }
       userIdentity.append(el("strong", row.username));
       if (row.user_id === state.user.id) userIdentity.append(el("span", "我", "contest-rank-self"));
+      const award = awards.grants.find(item => item.user_id === row.user_id);
+      if (award) userIdentity.append(el("span", `+${award.points} 积分`, "contest-rank-self"));
       username.append(userIdentity);
       tr.append(rank, username, el("td", row.score, "contest-rank-score"), el("td", `${row.accepted_count} / ${result.problems.length}`, "contest-rank-solved"));
       for (const item of row.problems) {

@@ -1,5 +1,5 @@
 /** Renders the authenticated preparation home and published announcement reader. */
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import { $, el, button, notify, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import { renderHomeBlocks } from "./home-layout.js?v=20261115-layout-v1";
 import { homeLayoutErrorMessage } from "./home-feedback.mjs?v=20261115-home-feedback-v1";

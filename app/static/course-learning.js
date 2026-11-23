@@ -1,15 +1,17 @@
-import {api,state} from './api.js?v=20261114-ui-v17';
+import {api,state} from './api.js?v=20261122-session-guard-v1';
 import {el,button,notify,run,confirmAction} from './ui.js?v=20261114-ui-v17';
 import {modal,field,input,textArea,uploadFile} from './live-ui.js?v=1';
 import {renderProblemMath} from './problem-content.js?v=20261121-question-images-v1';
 import {mountCourseReader,exitCourseReaderFullscreen} from './course-reader.mjs?v=20261121-reader-v3';
 import {courseCatalogScope} from './live-model.mjs?v=20261121-markdown-v1';
 import {mountMarkdownWorkspace} from './course-markdown-workspace.js?v=20261121-v1';
+import {closeCourseMenusOutsideClick} from './course-menu.mjs?v=20261122-course-controls-v1';
 
 let goTo=()=>{},generation=0,courseCompletionCleanup=()=>{},courseReaderCleanup=()=>{},markdownCleanup=()=>{};
 const courseProgressFlushers=new Set();
 const orderSaves=new WeakMap();
 const root=()=>document.getElementById('liveContent');
+document.addEventListener('click',event=>closeCourseMenusOutsideClick(event,[...root().querySelectorAll('details.course-menu-popover[open]')]));
 const json=body=>JSON.stringify(body);
 async function flushCourseProgress(){
   for(const flush of courseProgressFlushers){if(!await flush())return false;}
@@ -129,6 +131,7 @@ function markdownEditor(label,value,{imagePath,rows=10,maxLength,hint='',empty='
   const setMode=show=>{
     editor.hidden=show;preview.hidden=!show;
     edit.setAttribute('aria-pressed',String(!show));showPreview.setAttribute('aria-pressed',String(show));
+    edit.classList.toggle('selected',!show);showPreview.classList.toggle('selected',show);
   };
   const edit=button('编辑',()=>{setMode(false);editor.focus();},'course-markdown-mode');
   const showPreview=button('预览',async()=>{
@@ -333,8 +336,9 @@ function learnerCourseOutline(course,startLesson){
 async function renderPreview(id,turn){
   const course=await api(`/courses/public/${id}`);if(turn!==generation)return;const target=root();target.replaceChildren();const shell=el('div','','course-page-shell course-preview-shell');
   const back=button('← 返回课程广场',()=>route('/plaza'),'text-button course-back');const header=el('header','','course-preview-header');const media=el('aside','','course-preview-sidebar');media.append(courseCover(course,'course-cover course-preview-cover'));if(course.is_enrolled&&course.progress_summary?.total)media.append(courseProgressPanel(course.progress_summary));header.append(media);const copy=pageTitle(course.title);copy.append(markdownContent(course.description_html,'course-markdown-content course-description-rendered'));header.append(copy);
-  const facts=el('div','','course-preview-facts');if(hostName(course))facts.append(el('span',`主讲 · ${hostName(course)}`));facts.append(el('span',`${course.sections.length} 章 · ${course.lesson_count} 课时`));if(course.access_mode==='points')facts.append(el('span',`课程价格 · ${course.points_price} 积分`),el('span',`我的积分 · ${course.points_balance}`));
-  const actions=el('div','','course-preview-actions');if(!course.is_enrolled&&course.can_manage)actions.append(button('管理课程',()=>route(`/editor/${course.id}/content`),'button secondary'));else if(!course.is_enrolled&&course.access_mode==='public'){actions.append(el('span','公开课程可直接阅读，加入后会显示在“我的课程”。','course-muted'),button('加入我的课程',async()=>{await api(`/courses/${course.id}/enroll`,{method:'POST'});notify('课程已加入我的课程');await renderCoursePage({kind:'preview',id:course.id});},'button primary'));}else if(!course.is_enrolled&&course.access_mode==='points')actions.append(button(`使用 ${course.points_price} 积分购买`,async()=>{if(course.points_balance<course.points_price){notify('积分不足，无法购买该课程','error');return;}if(!await confirmAction(`购买“${course.title}”将扣除 ${course.points_price} 积分，购买后可永久学习。`,{title:'确认购买课程',confirmText:'确认购买'}))return;await api(`/courses/${course.id}/purchase`,{method:'POST',body:json({expected_points_price:course.points_price})});notify('课程购买成功，已加入我的课程');await renderCoursePage({kind:'preview',id:course.id});},'button primary'));else if(!course.is_enrolled&&course.access_mode==='roster')actions.append(el('span','部分小节可预览，其余内容由课程管理员指定开放。','course-muted'));
+  const accessDays=Number(course.points_access_days||0);const durationLabel=accessDays?`${accessDays} 天`:'永久';
+  const facts=el('div','','course-preview-facts');if(hostName(course))facts.append(el('span',`主讲 · ${hostName(course)}`));facts.append(el('span',`${course.sections.length} 章 · ${course.lesson_count} 课时`));if(course.access_mode==='points')facts.append(el('span',`课程价格 · ${course.points_price} 积分`),el('span',`访问期限 · ${durationLabel}`),el('span',`我的积分 · ${course.points_balance}`));
+  const actions=el('div','','course-preview-actions');if(!course.is_enrolled&&course.can_manage)actions.append(button('管理课程',()=>route(`/editor/${course.id}/content`),'button secondary'));else if(!course.is_enrolled&&course.access_mode==='public'){actions.append(el('span','公开课程可直接阅读，加入后会显示在“我的课程”。','course-muted'),button('加入我的课程',async()=>{await api(`/courses/${course.id}/enroll`,{method:'POST'});notify('课程已加入我的课程');await renderCoursePage({kind:'preview',id:course.id});},'button primary'));}else if(!course.is_enrolled&&course.access_mode==='points')actions.append(button(`使用 ${course.points_price} 积分购买`,async()=>{if(course.points_balance<course.points_price){notify('积分不足，无法购买该课程','error');return;}if(!await confirmAction(`购买“${course.title}”将扣除 ${course.points_price} 积分，获得${durationLabel}学习权限。`,{title:'确认购买课程',confirmText:'确认购买'}))return;await api(`/courses/${course.id}/purchase`,{method:'POST',body:json({expected_points_price:course.points_price})});notify('课程购买成功，已加入我的课程');await renderCoursePage({kind:'preview',id:course.id});},'button primary'));else if(!course.is_enrolled&&course.access_mode==='roster')actions.append(el('span','部分小节可预览，其余内容由课程管理员指定开放。','course-muted'));
   if(course.is_enrolled&&course.is_removed_from_library)actions.append(libraryAction(course,()=>renderCoursePage({kind:'preview',id:course.id}),'button secondary'));
   header.append(facts);if(actions.childElementCount)media.append(actions);
   const outline=learnerCourseOutline(course,async lesson=>{
@@ -400,14 +404,16 @@ function renderEditorInfo(courseId,course,target=root()){
     rows:12,maxLength:4000,hint:courseId?'支持 Markdown、公式和直接粘贴图片。':'支持 Markdown 和公式；保存草稿后可回来粘贴图片。'});
   const cover=editorCoverField(course,title);
   const access=el('select');for(const [value,label]of [['public','公开阅读'],['roster','指定成员加入'],['points','积分购买']]){const option=el('option',label);option.value=value;access.append(option);}access.value=course?.access_mode||'public';
-  const price=input(String(course?.points_price||''),'number');price.min='1';price.step='1';price.inputMode='numeric';price.hidden=access.value!=='points';const priceField=field('课程价格',price,'购买后永久解锁；修改价格不影响已购买成员。');priceField.hidden=access.value!=='points';access.addEventListener('change',()=>{priceField.hidden=access.value!=='points';});
-  const basics=el('div','','course-info-basics');basics.append(field('课程名称',title),field('访问方式',access,'公开课程可直接阅读；指定成员由管理员授权；积分课程购买后永久解锁。'),priceField);
+  const price=input(String(course?.points_price||''),'number');price.min='1';price.step='1';price.inputMode='numeric';const priceField=field('课程价格',price);priceField.hidden=access.value!=='points';
+  const duration=input(String(course?.points_access_days??0),'number');duration.min='0';duration.max='36500';duration.step='1';duration.inputMode='numeric';const durationField=field('访问期限（天）',duration,'0 表示永久，365 表示一年；购买后期限固定，不受之后修改影响。');durationField.hidden=access.value!=='points';
+  const togglePointsFields=()=>{priceField.hidden=access.value!=='points';durationField.hidden=access.value!=='points';};access.addEventListener('change',togglePointsFields);
+  const basics=el('div','','course-info-basics');basics.append(field('课程名称',title),field('访问方式',access,'公开课程可直接阅读；指定成员由管理员授权；积分课程按设置期限开放。'),priceField,durationField);
   const actions=el('div','','course-editor-actions course-info-actions');
   const cancel=button('取消',()=>route(courseId?`/editor/${courseId}/content`:'/manage'),'button secondary');
   const save=button(courseId?'保存课程信息':'保存草稿并继续',async()=>{
     if(!title.value.trim()){title.focus();throw new Error('请填写课程名称');}
     const file=cover.file;
-    const payload={title:title.value.trim(),description:description.editor.value.trim(),publication_status:course?.publication_status||'draft',access_mode:access.value,host_id:course?.host_id||state.user.id,member_ids:course?.member_ids||[]};if(access.value==='points'){if(!Number.isSafeInteger(Number(price.value))||Number(price.value)<=0){price.focus();throw new Error('请输入大于 0 的整数积分价格');}payload.points_price=Number(price.value);}
+    const payload={title:title.value.trim(),description:description.editor.value.trim(),publication_status:course?.publication_status||'draft',access_mode:access.value,host_id:course?.host_id||state.user.id,member_ids:course?.member_ids||[]};if(access.value==='points'){if(!Number.isSafeInteger(Number(price.value))||Number(price.value)<=0){price.focus();throw new Error('请输入大于 0 的整数积分价格');}if(!Number.isSafeInteger(Number(duration.value))||Number(duration.value)<0||Number(duration.value)>36500){duration.focus();throw new Error('访问期限须为 0 到 36500 的整数天');}payload.points_price=Number(price.value);payload.points_access_days=Number(duration.value);}
     if(!file&&cover.preset!=='current'){payload.cover_kind='preset';payload.cover_value=cover.preset;}
     const saved=await api(courseId?`/courses/${courseId}`:'/courses',{method:courseId?'PATCH':'POST',body:json(payload)});
     const editing=!!courseId;courseId=saved.id;
@@ -419,12 +425,13 @@ function renderEditorInfo(courseId,course,target=root()){
 }
 
 async function renderEditorPublish(course,turn,target){
-  const issues=course.publish_issues||[];const hasLive=allLessons(course).some(lesson=>lesson.items.some(item=>item.kind==='live'));const accessHelp={public:'公开课程可直接阅读。',roster:'仅分配的成员可学习，预览范围由章节和小节设置决定。',points:'用户支付课程积分后永久解锁，预览范围由章节和小节设置决定。'};const accessLabel={public:'公开阅读',roster:'指定成员加入',points:`积分购买 · ${course.points_price} 积分`};const panel=el('section','','course-editor-panel');panel.append(el('h2','发布设置'),el('p',`${accessHelp[course.access_mode]}${hasLive?' 如果包含直播课时，需要指定主持人。':''}`,'course-muted'));
+  const issues=course.publish_issues||[];const hasLive=allLessons(course).some(lesson=>lesson.items.some(item=>item.kind==='live'));const accessHelp={public:'公开课程可直接阅读。',roster:'仅分配的成员可学习，预览范围由章节和小节设置决定。',points:`用户支付课程积分后可学习 ${course.points_access_days?`${course.points_access_days} 天`:'永久'}，预览范围由章节和小节设置决定。`};const accessLabel={public:'公开阅读',roster:'指定成员加入',points:`积分购买 · ${course.points_price} 积分`};const panel=el('section','','course-editor-panel');panel.append(el('h2','学员与发布'),el('p',`${accessHelp[course.access_mode]}${hasLive?' 如果包含直播课时，需要指定主持人。':''}`,'course-muted'));
   const access=el('div','','course-editor-setting');access.append(el('span','访问方式','course-editor-setting-label'),el('strong',accessLabel[course.access_mode]));panel.append(access);
   let people=[];if(hasLive||course.access_mode==='roster'){try{const result=await api('/live/people');people=Array.isArray(result)?result:result.items||[];}catch(error){if(turn!==generation)return;const actions=el('div','','course-editor-actions');actions.append(button('重试加载',()=>renderCoursePage({kind:'editor',id:course.id,step:'publish'}),'button secondary'),deleteCourseAction(course));target.append(panel,el('p',`暂时无法读取学员和主持人列表：${error.message}`,'course-error-text'),actions);return;}}
   if(turn!==generation)return;
   if(hasLive){const host=el('select');for(const person of people){const option=el('option',person.username);option.value=person.id;host.append(option);}if(!people.some(person=>person.id===course.host_id)){const current=el('option',course.host_name||'当前主持人');current.value=course.host_id;host.append(current);}host.value=String(course.host_id);panel.append(field('课程主持人',host,'主持人可在直播课时中管理课堂。'));}
   const chosen=new Set(course.member_ids||[]);if(course.access_mode==='roster'){const roster=el('div','','course-roster');roster.append(el('strong','分配学员'));const list=el('div','','course-roster-list');people.filter(person=>person.id!==state.user.id).forEach(person=>{const label=el('label','','course-roster-person');const check=el('input');check.type='checkbox';check.checked=chosen.has(person.id);check.addEventListener('change',()=>check.checked?chosen.add(person.id):chosen.delete(person.id));label.append(check,el('span',person.username));list.append(label);});roster.append(list);panel.append(roster);}
+  const summary=course.enrollment_summary||{students:[]};const participation=el('section','','course-enrollment-summary');const participationHeading=el('div','','course-enrollment-summary-heading');participationHeading.append(el('strong','课程参与情况'));let countText='';if(course.access_mode==='public')countText=`已加入 ${summary.joined_count||0} 人`;else if(course.access_mode==='roster')countText=`已加入学习 ${summary.joined_count||0} / ${summary.assigned_count||0} 人`;else countText=`已购买 ${summary.purchased_count||0} 人`;participationHeading.append(el('span',countText,'course-chip'));participation.append(participationHeading);const studentList=el('div','','course-enrollment-students');if(summary.students?.length){summary.students.forEach(student=>{let detail='';if(course.access_mode==='roster')detail=student.started?'已开始学习':'尚未开始';else if(course.access_mode==='points')detail=student.access_expires_at?`到期 ${new Date(student.access_expires_at*1000).toLocaleDateString()}`:'永久权限';studentList.append(el('span',detail?`${student.username} · ${detail}`:student.username,'course-enrollment-student'));});}else studentList.append(el('span','暂无学员记录','course-muted'));participation.append(studentList);panel.append(participation);
   const readiness=el('aside','','course-publish-readiness');const heading=el('div','','course-readiness-heading');heading.append(el('span',issues.length?'发布准备':'发布条件','eyebrow'),el('strong',issues.length?`${issues.length} 项待完成`:'已满足发布条件'));readiness.append(heading);if(issues.length){const items=el('ul','','course-readiness-list');issues.forEach(issue=>items.append(el('li',issue)));readiness.append(items);}else readiness.append(el('p','每个课时都已有可访问内容，可以发布课程。','course-muted'));panel.append(readiness);
   const host=panel.querySelector('select');
   const payload=status=>({title:course.title,description:course.description,publication_status:status,access_mode:course.access_mode,host_id:hasLive?Number(host?.value||course.host_id):course.host_id,member_ids:course.access_mode==='roster'?[...chosen]:[]});const actions=el('div','','course-editor-actions');if(hasLive||course.access_mode==='roster')actions.append(button('保存发布设置',async()=>{await api(`/courses/${course.id}`,{method:'PATCH',body:json(payload(course.publication_status))});notify('课程设置已保存');await renderCoursePage({kind:'editor',id:course.id,step:'publish'});},'button secondary'));
@@ -451,9 +458,9 @@ async function renderCourse(id,turn,editor=false){
     if(course.can_manage){
       const controls=el('div','','course-inline-actions');
       if(section.lessons.length)controls.append(button('＋ 添加课时',()=>addLesson(course,section,editor),'button secondary'));
-      const more=el('details','','course-manage-more');more.append(el('summary','章节设置'));
+      const more=el('details','','course-manage-more course-menu-popover');more.append(el('summary','章节设置'));
       const menu=el('div','','course-manage-more-menu');
-      menu.append(button('重命名章节',()=>editSection(course,section,editor),'text-button'));
+      menu.append(button('编辑章节与预览',()=>editSection(course,section,editor),'text-button'));
       const removeSection=button('删除章节',async()=>{if(await confirmAction(`删除空章节“${section.title}”？章节中仍有课时，需先删除课时。`,{title:'删除章节？',danger:true,confirmText:'删除章节'})){await api(`/courses/sections/${section.id}`,{method:'DELETE'});await refreshManagedCourse(id,editor);}},'text-button danger');
       removeSection.disabled=section.lessons.length>0;removeSection.title=section.lessons.length?'请先删除章节内的课时':'';menu.append(removeSection);more.append(menu);controls.append(more);heading.append(controls);
     }
@@ -465,13 +472,13 @@ async function renderCourse(id,turn,editor=false){
         const drag=button('⠿',()=>{},'course-drag-handle');drag.draggable=true;drag.title='拖动调整课时顺序';drag.setAttribute('aria-label','拖动调整课时顺序');buttons.append(drag);
         const open=lesson.items.length?button('预览课时 →',()=>route(`/study/${lesson.id}`),'button secondary'):button('添加内容',()=>addLessonContent(course,lesson,editor),'button primary');buttons.append(open);
         if(lesson.items.length)buttons.append(button('＋ 添加内容',()=>addLessonContent(course,lesson,editor),'button secondary'));
-        const more=el('details','','course-lesson-more');const summary=el('summary','更多');const menu=el('div','','course-lesson-more-menu');
-        menu.append(button('重命名课时',()=>editLesson(course,lesson,editor),'text-button'));
+        const more=el('details','','course-lesson-more course-menu-popover');const summary=el('summary','更多');const menu=el('div','','course-lesson-more-menu');
+        menu.append(button('编辑课时与预览',()=>editLesson(course,lesson,editor),'text-button'));
         const removeLesson=button('删除课时',async()=>{if(await confirmAction(`删除空课时“${lesson.title}”？请先移除视频和资料；直播课次请在直播课堂中删除。`,{title:'删除课时？',danger:true,confirmText:'删除课时'})){await api(`/courses/lessons/${lesson.id}`,{method:'DELETE'});await refreshManagedCourse(id,editor);}},'text-button danger');
         removeLesson.disabled=lesson.items.length>0;removeLesson.title=lesson.items.length?'请先移除课时中的内容':'';menu.append(removeLesson);more.append(summary,menu);buttons.append(more);
       }
       else{buttons.append(button('开始学习 →',()=>route(`/study/${lesson.id}`),'button primary'));}
-      if(course.can_manage&&lesson.items.length){const contents=el('div','','course-managed-items');lesson.items.forEach((item,itemIndex)=>{const itemRow=el('div','','course-managed-item');const itemName=item.kind==='live'?item.live?.title||'直播课':item.asset?.original_name||'课程文件';itemRow.append(el('span',item.kind==='live'?'直播':item.kind==='video'?'录播':'资料','course-chip'),el('span',itemName,'course-managed-item-name'));const more=el('details','','course-item-more');more.append(el('summary','⋯'));const menu=el('div','','course-manage-more-menu');if(itemIndex>0)menu.append(button('上移内容',()=>moveItem(course,lesson,itemIndex,-1,editor),'text-button'));if(itemIndex<lesson.items.length-1)menu.append(button('下移内容',()=>moveItem(course,lesson,itemIndex,1,editor),'text-button'));if(item.asset&&isMarkdown(item.asset))menu.append(button('编辑正文',()=>editMarkdown(course,lesson,item.asset,editor),'text-button'));if(item.asset)menu.append(button('移除内容',()=>removeAsset(course,item.asset,editor),'text-button danger'));more.append(menu);itemRow.append(more);contents.append(itemRow);});details.append(contents);}
+  if(course.can_manage&&lesson.items.length){const contents=el('div','','course-managed-items');lesson.items.forEach((item,itemIndex)=>{const itemRow=el('div','','course-managed-item');const itemName=item.kind==='live'?item.live?.title||'直播课':item.asset?.original_name||'课程文件';itemRow.append(el('span',item.kind==='live'?'直播':item.kind==='video'?'录播':'资料','course-chip'),el('span',itemName,'course-managed-item-name'));const more=el('details','','course-item-more course-menu-popover');more.append(el('summary','⋯'));const menu=el('div','','course-manage-more-menu');if(itemIndex>0)menu.append(button('上移内容',()=>moveItem(course,lesson,itemIndex,-1,editor),'text-button'));if(itemIndex<lesson.items.length-1)menu.append(button('下移内容',()=>moveItem(course,lesson,itemIndex,1,editor),'text-button'));if(item.asset&&isMarkdown(item.asset))menu.append(button('编辑正文',()=>editMarkdown(course,lesson,item.asset,editor),'text-button'));if(item.asset)menu.append(button('移除内容',()=>removeAsset(course,item.asset,editor),'text-button danger'));more.append(menu);itemRow.append(more);contents.append(itemRow);});details.append(contents);}
       row.append(details,buttons);lessonList.append(row);
     });
     sectionNode.append(heading,lessonList);sections.append(sectionNode);
@@ -494,7 +501,7 @@ function addSection(course,editor=false){
 }
 
 function editSection(course,section,editor=false){
-  const {dialog,body,footer}=modal('编辑章节');const title=input(section.title);title.required=true;const preview=input('','checkbox');preview.checked=Boolean(section.preview_enabled);body.append(field('章节名称',title),field('允许本章预览',preview,'关闭后，本章内所有小节都不能在购买或加入前预览。'));
+  const {dialog,body,footer}=modal('编辑章节');dialog.classList.add('course-settings-dialog');const title=input(section.title);title.required=true;const preview=input('','checkbox');preview.checked=Boolean(section.preview_enabled);const previewField=field('允许本章预览',preview,'关闭后，本章内所有小节都不能在购买或加入前预览。');previewField.classList.add('course-preview-toggle');body.append(field('章节名称',title),previewField);
   footer.append(button('保存章节',async()=>{if(!title.value.trim())throw new Error('请填写章节名称');await api(`/courses/sections/${section.id}`,{method:'PATCH',body:json({title:title.value.trim(),position:section.position,preview_enabled:preview.checked})});dialog.close();await refreshManagedCourse(course.id,editor);},'button primary'));
 }
 
@@ -556,7 +563,7 @@ async function renderMarkdownWorkspace(lessonId,assetId,turn){
 }
 
 function editLesson(course,lesson,editor=false){
-  const {dialog,body,footer}=modal('编辑课时');const title=input(lesson.title);title.required=true;const preview=input('','checkbox');preview.checked=Boolean(lesson.preview_enabled);const description=markdownEditor('课时说明 · Markdown',lesson.description||'',{imagePath:`/courses/lessons/${lesson.id}/markdown-images`,rows:10,hint:'可写简短说明，也支持直接粘贴图片。'});body.append(field('课时名称',title),field('允许预览本小节',preview,'还需要同时开启所属章节的预览开关。'),description.container);
+  const {dialog,body,footer}=modal('编辑课时');dialog.classList.add('course-settings-dialog');const title=input(lesson.title);title.required=true;const preview=input('','checkbox');preview.checked=Boolean(lesson.preview_enabled);const previewField=field('允许预览本小节',preview,'还需要同时开启所属章节的预览开关。');previewField.classList.add('course-preview-toggle');const description=markdownEditor('课时说明 · Markdown',lesson.description||'',{imagePath:`/courses/lessons/${lesson.id}/markdown-images`,rows:10,hint:'可写简短说明，也支持直接粘贴图片。'});body.append(field('课时名称',title),previewField,description.container);
   const save=button('保存课时',async()=>{if(!title.value.trim())throw new Error('请填写课时名称');await api(`/courses/lessons/${lesson.id}`,{method:'PATCH',body:json({title:title.value.trim(),description:description.editor.value.trim(),position:lesson.position,preview_enabled:preview.checked})});dialog.close();await refreshManagedCourse(course.id,editor);},'button primary');description.bindSave(save);footer.append(save);
 }
 
@@ -628,11 +635,11 @@ function watchRecordings(entries,lesson,turn,onPlayer=()=>{}){
 
 async function renderStudy(lessonId,turn){
   courseCompletionCleanup();courseCompletionCleanup=()=>{};
-  const lesson=await api(`/courses/lessons/${lessonId}`);if(turn!==generation)return;const course=await api(`/courses/${lesson.course_id}`);if(turn!==generation)return;
+  const lesson=await api(`/courses/lessons/${lessonId}`);if(turn!==generation)return;const coursePath=lesson.preview_only?`/courses/public/${lesson.course_id}`:`/courses/${lesson.course_id}`;const course=await api(coursePath);if(turn!==generation)return;
   const lessons=allLessons(course);const index=lessons.findIndex(item=>item.id===lesson.id);const target=root();target.replaceChildren();
   const back=button('← 课程目录',()=>route(`/course/${course.id}`),'text-button course-back');const top=el('header','','course-study-heading');const lessonHeading=pageTitle(lesson.title);lessonHeading.prepend(el('span',course.title,'course-study-kicker'));if(lesson.description_html)lessonHeading.append(markdownContent(lesson.description_html,'course-markdown-content course-description-rendered'));top.append(lessonHeading);const status=el('div','','course-study-status');const progressStatus=el('span',`${course.progress_summary.completed} / ${course.progress_summary.total} 已完成`,'course-study-status-item');progressStatus.dataset.courseProgress='true';status.append(el('span',`第 ${index+1} / ${lessons.length} 课时`,'course-study-status-item'),progressStatus);top.append(status);
   const shell=el('div','','course-page-shell course-study-shell');const layout=el('div','','course-study-layout');const nav=el('aside','','course-study-nav');const navHeading=sectionTitle('本课程',`${course.progress_summary.completed}/${course.progress_summary.total} 已完成`);const navContent=el('div','','course-study-nav-content');
-  for(const section of course.sections){const group=el('section','','course-study-group');group.append(el('h3',section.title));for(const item of section.lessons){const link=button('',()=>route(`/study/${item.id}`),'course-study-link');link.classList.toggle('current',item.id===lesson.id);link.append(el('span',item.progress.completed?'✓':String(item.position+1).padStart(2,'0'),'course-study-link-number'),el('span',item.title));group.append(link);}navContent.append(group);}nav.append(navHeading,navContent);
+  for(const section of course.sections){const group=el('section','','course-study-group');group.append(el('h3',section.title));for(const item of section.lessons){const link=button('',()=>!item.locked&&route(`/study/${item.id}`),'course-study-link');link.disabled=Boolean(item.locked);link.title=item.locked?'本小节暂不可预览':item.title;link.classList.toggle('current',item.id===lesson.id);link.append(el('span',item.progress.completed?'✓':String(item.position+1).padStart(2,'0'),'course-study-link-number'),el('span',item.title));group.append(link);}navContent.append(group);}nav.append(navHeading,navContent);
   const content=el('main','','course-study-content');const completion={readingEndReached:false,videoCount:0,videosEnded:0,saving:false,saved:!!lesson.progress.completed};
   const completionNote=el('p','本小节已完成','course-completed-note');completionNote.hidden=!completion.saved;
   const maybeComplete=async()=>{
@@ -692,7 +699,7 @@ async function renderStudy(lessonId,turn){
     const previous=direction==='previous';
     const label=previous?'上一课':'下一课';
     const link=button('',()=>item&&route(`/study/${item.id}`),`button secondary course-study-${direction}`);
-    link.disabled=!item;link.title=item?`${label}：${item.title}`:previous?'已经是第一课':'已到最后一课';
+    link.disabled=!item||Boolean(item.locked);link.title=item?.locked?'本小节暂不可预览':item?`${label}：${item.title}`:previous?'已经是第一课':'已到最后一课';
     link.setAttribute('aria-label',link.title);
     const arrow=el('span',previous?'←':'→','course-study-nav-arrow');arrow.setAttribute('aria-hidden','true');
     const copy=el('span','','course-study-nav-copy');

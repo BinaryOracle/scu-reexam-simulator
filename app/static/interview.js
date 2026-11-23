@@ -4,7 +4,7 @@ import {
   releasePresentation,
   clearPresentation,
 } from "./presentation.js?v=20261115-mouse-navigation-v1";
-import { api, audioBlob, state } from "./api.js?v=20261114-ui-v17";
+import { api, audioBlob, state } from "./api.js?v=20261122-session-guard-v1";
 import {
   $,
   el,
@@ -581,8 +581,7 @@ export async function startInterview() {
   if (!allowNavigation()) return;
   state.user = await api("/me");
   if (!state.user.is_admin && state.user.interview_credits < 1) {
-    notify("模拟面试次数已用完，请在个人主页兑换卡密后再开始。", "info");
-    window.dispatchEvent(new Event("open-profile"));
+    notify("模拟面试次数已用完，可在本页使用积分购买，或前往个人主页兑换卡密。", "info");
     return;
   }
   const setup = await api("/interview-setup");

@@ -25,7 +25,7 @@ class Node {
   }
 }
 
-function fixture({ admin = false } = {}) {
+function fixture({ admin = false, rewards = { amounts: [9, 6, 3], settled: false, eligible: true, grants: [] } } = {}) {
   const records = [];
   const problems = [{ id: 10, title: '两数之和', points: 100 }];
   const rows = [
@@ -36,7 +36,7 @@ function fixture({ admin = false } = {}) {
     state: { user: { id: 7, username: 'alice', is_admin: admin } },
     contestOverview: { id: 3, ends: Date.now() / 1000 + 1000 },
     managementMode: () => admin,
-    api: async () => ({ visible: true, ranking_rule: 'score', problems, rows }),
+    api: async () => ({ visible: true, ranking_rule: 'score', problems, rows, rewards }),
     el: (...args) => new Node(...args),
     button: (text, action, className) => Object.assign(new Node('button', text, className), { action }),
     badge: () => new Node(), deadline: () => '',
@@ -76,4 +76,14 @@ test('administrator ranking retains links to every user and problem record', asy
   const problems = f.panel.findAll('.contest-records-verdict');
   assert.equal(users.length, 2);
   assert.equal(problems.length, 2);
+});
+
+test('standings show configured rewards and the actual settled receipt', async () => {
+  const f = fixture({ rewards: { amounts: [12, 8, 4], settled: true, eligible: true,
+    grants: [{ user_id: 7, username: 'alice', rank: 1, points: 12 }] } });
+  await f.render();
+  const note = f.panel.findAll('.contest-ranking-message').find(node => node.textContent.includes('第 1 名'));
+  assert.match(note.textContent, /第 1 名 12 积分 · 第 2 名 8 积分 · 第 3 名 4 积分/);
+  assert.match(note.textContent, /本场奖励已结算/);
+  assert.ok(f.panel.findAll('.contest-rank-self').some(node => node.textContent === '+12 积分'));
 });

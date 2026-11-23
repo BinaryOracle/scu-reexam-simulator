@@ -1,5 +1,5 @@
 /** Shared accessible learning forms and authenticated source images. */
-import { api, state } from './api.js?v=20261114-ui-v17';
+import { api, state } from './api.js?v=20261122-session-guard-v1';
 import { el, button, notify, confirmAction } from './ui.js?v=20261114-ui-v17';
 import {questionMarkdownEditor} from './question-markdown-editor.js?v=20261121-v1';
 import {appendProblemStatement} from './problem-content.js?v=20261121-question-images-v1';

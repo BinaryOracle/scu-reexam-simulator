@@ -1,5 +1,5 @@
 /** Transfer personal interview credits with a stable retry key and private receipts. */
-import { api, state } from './api.js?v=20261114-ui-v17';
+import { api, state } from './api.js?v=20261122-session-guard-v1';
 import { $, el, button, confirmAction, notify, dateTime, badge } from './ui.js?v=20261114-ui-v17';
 import { learningDialog, pagination } from './training-ui.js?v=20261121-question-markdown-v1';
 let generation=0,page=1;
@@ -33,6 +33,7 @@ export async function refreshTransfers(profile,refreshProfile){
     info.append(el('strong',`${item.direction==='out'?'转赠给':'收到来自'} ${item.other_username}`),el('p',dateTime(item.created)));
     row.append(info,badge(`${item.direction==='out'?'−':'+'}${item.credits} ${item.currency === 'credits' ? '次' : '积分'}`,item.direction==='out'?'gray':'green'));root.append(row);
   }pagination(root,result,async value=>{page=value;await refreshTransfers(profile,refreshProfile);});
+  root.hidden=false;
 }
 function transferDialog(profile,refreshProfile){
   const {dialog,body,footer}=learningDialog('转赠积分');dialog.classList.add('transfer-dialog');

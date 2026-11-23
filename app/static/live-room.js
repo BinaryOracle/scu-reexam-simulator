@@ -1,5 +1,5 @@
 /** LiveKit classroom lifecycle: stable media panes, moderated controls and recoverable interaction. */
-import {api,state} from './api.js?v=20261114-ui-v17';
+import {api,state} from './api.js?v=20261122-session-guard-v1';
 import {el,button,notify,confirmAction,modal,materialList,field} from './live-ui.js?v=1';
 import {elapsed,orderedMembers,recordingText} from './live-model.mjs?v=1';
 import {mountVideo} from './live-video.mjs?v=20261116-frames-v1';

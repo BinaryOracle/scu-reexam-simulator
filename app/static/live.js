@@ -1,9 +1,9 @@
 /** Live lesson detail, classroom entry, and recording playback. */
-import {api,state} from './api.js?v=20261114-ui-v17';
+import {api,state,requireAuthenticatedUser} from './api.js?v=20261122-session-guard-v1';
 import {emptyState} from './ui.js?v=20261114-ui-v17';
 import {el,button,notify,confirmAction,modal,materialList} from './live-ui.js?v=1';
 import {liveRoute,liveDate,recordingText,mayJoin,needsLessonUpdates} from './live-model.mjs?v=20261121-markdown-v1';
-import {configureCourseLearning,renderCoursePage,clearCourseLearning} from './course-learning.js?v=20261122-preview-purchase-v1';
+import {configureCourseLearning,renderCoursePage,clearCourseLearning} from './course-learning.js?v=20261122-course-purchase-duration-v1';
 import {mediaLease} from './live-devices.mjs?v=1';
 import {Classroom} from './live-room.js?v=20261116-frames-v1';
 import {writeAppRoute} from './view-route.mjs?v=20261115-navigation-v3';
@@ -63,8 +63,9 @@ function renderLesson(lesson){
 }
 function scheduleLesson(id,turn){pageTimer=setTimeout(async()=>{try{const data=await api(`/live/lessons/${id}`);if(valid(turn)&&!room){if(!document.querySelector('dialog[data-live-owned][open]')&&!root().querySelector('[data-uploading]'))renderLesson(data);if(needsLessonUpdates(data))scheduleLesson(id,turn);}}catch(error){if(valid(turn)){notify(error.message,'error');scheduleLesson(id,turn);}}},10000);}
 async function prepare(lesson){
+  const user=requireAuthenticatedUser();
   const {dialog,body,footer}=modal('准备进入课堂','入会默认关闭麦克风和摄像头。建议佩戴耳机，减少回声。');dialog.classList.add('live-prepare-dialog');
-  const preview=el('div','','live-device-preview');const avatar=el('div',state.user.username.slice(0,1).toUpperCase(),'live-avatar');const video=el('video');video.autoplay=true;video.muted=true;video.playsInline=true;video.hidden=true;preview.append(avatar,video,el('span','摄像头默认关闭'));body.append(preview);
+  const preview=el('div','','live-device-preview');const avatar=el('div',user.username.slice(0,1).toUpperCase(),'live-avatar');const video=el('video');video.autoplay=true;video.muted=true;video.playsInline=true;video.hidden=true;preview.append(avatar,video,el('span','摄像头默认关闭'));body.append(preview);
   const meter=el('div','','live-mic-meter');meter.setAttribute('role','meter');meter.setAttribute('aria-label','麦克风输入音量');meter.setAttribute('aria-valuemin','0');meter.setAttribute('aria-valuemax','100');meter.append(el('i'));
   const status=el('p','检测完成后，可在课堂中自行开启设备。','live-helper');status.setAttribute('role','status');
   const lease=mediaLease(constraints=>navigator.mediaDevices.getUserMedia(constraints));

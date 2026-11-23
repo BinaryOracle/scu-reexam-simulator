@@ -32,6 +32,7 @@ class CourseWrite(BaseModel):
     publication_status: str = Field(default='draft', pattern='^(draft|published|archived)$')
     access_mode: str = Field(default='roster', pattern='^(public|roster|points)$')
     points_price: StrictInt | None = Field(default=None, ge=0, le=100000000)
+    points_access_days: StrictInt | None = Field(default=None, ge=0, le=36500)
     host_id: StrictInt | None = Field(default=None, gt=0)
     member_ids: list[StrictInt] = Field(default_factory=list, max_length=1000)
     cover_kind: str | None = Field(default=None, pattern='^(preset|upload)$')
@@ -162,8 +163,9 @@ def _save_course(db, payload, user, course_id=None):
     if not title:
         raise HTTPException(422, '请输入课程名称')
     host_id = payload.host_id or user['id']
-    previous = db.execute('SELECT points_price FROM live_courses WHERE id=?', (course_id,)).fetchone() if course_id else None
+    previous = db.execute('SELECT points_price,points_access_days FROM live_courses WHERE id=?', (course_id,)).fetchone() if course_id else None
     price = payload.points_price if payload.points_price is not None else previous['points_price'] if previous else 0
+    access_days = payload.points_access_days if payload.points_access_days is not None else previous['points_access_days'] if previous else 0
     if payload.access_mode == 'points' and price <= 0:
         raise HTTPException(422, '积分购买课程须设置大于 0 的整数价格')
     live.validate_people(db, [host_id, *payload.member_ids], user)
@@ -196,7 +198,7 @@ def _save_course(db, payload, user, course_id=None):
             db.execute('''DELETE FROM course_self_enrollments WHERE course_id=? AND NOT EXISTS (
                 SELECT 1 FROM course_purchases p WHERE p.course_id=course_self_enrollments.course_id
                 AND p.user_id=course_self_enrollments.user_id)''', (course_id,))
-    db.execute('UPDATE live_courses SET points_price=? WHERE id=?', (price, course_id))
+    db.execute('UPDATE live_courses SET points_price=?,points_access_days=? WHERE id=?', (price, access_days, course_id))
     db.executemany('INSERT INTO live_members(course_id,user_id) VALUES (?,?)',
                    [(course_id, uid) for uid in set([host_id, *(payload.member_ids if payload.access_mode == 'roster' else [])])])
     return _course_row(db, course_id)
@@ -239,14 +241,14 @@ def catalog(scope: str = Query(default='mine', pattern='^(mine|public|managed)$'
             rows = db.execute('''SELECT DISTINCT c.*,u.username host_name FROM live_courses c
                 JOIN users u ON u.id=c.host_id LEFT JOIN live_members m ON m.course_id=c.id
                 LEFT JOIN course_self_enrollments e ON e.course_id=c.id
-                LEFT JOIN course_purchases p ON p.course_id=c.id
-                WHERE (e.user_id=? OR p.user_id=? OR (m.user_id=? AND c.host_id<>?
+                LEFT JOIN course_purchases p ON p.course_id=c.id AND (p.access_expires_at IS NULL OR p.access_expires_at>?)
+                WHERE ((e.user_id=? AND (c.access_mode='public' OR NOT EXISTS (SELECT 1 FROM course_purchases x WHERE x.course_id=c.id AND x.user_id=?))) OR p.user_id=? OR (m.user_id=? AND c.host_id<>?
                     AND NOT (?=1 AND (?=1 OR c.owner_id=?))))
                 AND c.publication_status='published'
                 AND instr(lower(c.title),lower(?))>0
                 ORDER BY COALESCE((SELECT MAX(p.updated) FROM course_progress p
                     JOIN course_lessons l ON l.id=p.lesson_id WHERE l.course_id=c.id AND p.user_id=?),0) DESC,c.id DESC''',
-                (user['id'], user['id'], user['id'], user['id'], user['is_admin'], user['is_superadmin'], user['id'],
+                (time.time(), user['id'], user['id'], user['id'], user['id'], user['id'], user['is_admin'], user['is_superadmin'], user['id'],
                  q.strip(), user['id'])).fetchall()
         else:
             rows = db.execute('''SELECT DISTINCT c.*,u.username host_name FROM live_courses c
@@ -309,6 +311,11 @@ def public_course_preview(course_id: int, user=Depends(current_user)):
                     lesson['progress'] = {'completed': progress.get(lesson['id'], False)}
             preview['progress_summary'] = courses.progress_summary(db, course_id, user['id'])
             preview['resume_lesson_id'] = courses.resume_lesson(db, course_id, user['id'])
+        else:
+            for section in preview['sections']:
+                for lesson in section['lessons']:
+                    lesson['progress'] = {'completed': False}
+            preview['progress_summary'] = {'total': preview['lesson_count'], 'completed': 0, 'percent': 0}
         return preview
 
 
@@ -464,7 +471,8 @@ def enroll(course_id: int, user=Depends(current_user)):
 def unenroll(course_id: int, user=Depends(current_user)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
-        if db.execute('SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?', (course_id, user['id'])).fetchone():
+        if db.execute('''SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?
+            AND (access_expires_at IS NULL OR access_expires_at>?)''', (course_id, user['id'], time.time())).fetchone():
             raise HTTPException(409, '已购买课程请使用移除功能，购买资格和学习进度会保留')
         course = db.execute('SELECT access_mode FROM live_courses WHERE id=?', (course_id,)).fetchone()
         enrollment = db.execute('SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?',
@@ -477,7 +485,7 @@ def unenroll(course_id: int, user=Depends(current_user)):
 
 @router.post('/{course_id}/purchase')
 def purchase_course(course_id: int, payload: CoursePurchase, user=Depends(current_user)):
-    """Debit and grant a permanent entitlement in one serialized transaction."""
+    """Debit points and grant the configured course entitlement atomically."""
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         course = db.execute('SELECT * FROM live_courses WHERE id=?', (course_id,)).fetchone()
@@ -490,8 +498,13 @@ def purchase_course(course_id: int, payload: CoursePurchase, user=Depends(curren
         if payload.expected_points_price != course['points_price']:
             raise HTTPException(409, '课程价格已更新，请刷新页面后重新确认')
         points.adjust(db, user['id'], -course['points_price'], kind='course_purchase', reference=f"课程：{course['title']}（{course_id}）")
-        db.execute('INSERT INTO course_purchases(course_id,user_id,points_paid,purchased_at) VALUES (?,?,?,?)',
-                   (course_id, user['id'], course['points_price'], time.time()))
+        purchased_at = time.time()
+        expires_at = purchased_at + course['points_access_days'] * 86400 if course['points_access_days'] else None
+        db.execute('''INSERT INTO course_purchases(course_id,user_id,points_paid,purchased_at,access_expires_at)
+            VALUES (?,?,?,?,?) ON CONFLICT(course_id,user_id) DO UPDATE SET
+            points_paid=excluded.points_paid,purchased_at=excluded.purchased_at,
+            access_expires_at=excluded.access_expires_at''',
+            (course_id, user['id'], course['points_price'], purchased_at, expires_at))
         db.execute('INSERT OR IGNORE INTO course_self_enrollments(course_id,user_id) VALUES (?,?)', (course_id, user['id']))
         db.execute('DELETE FROM course_library_hidden WHERE course_id=? AND user_id=?', (course_id, user['id']))
         return courses.course_detail(db, course_id, user)
@@ -988,8 +1001,10 @@ def playback_file(token: str):
 @router.get('/lessons/{lesson_id}')
 def get_lesson(lesson_id: int, user=Depends(current_user)):
     with connect() as db:
-        lesson, _ = courses.require_lesson(db, lesson_id, user)
-        return courses.lesson_view(db, lesson, user)
+        lesson, course = courses.require_lesson(db, lesson_id, user)
+        result = courses.lesson_view(db, lesson, user)
+        result['preview_only'] = not courses.can_access_course(db, course['id'], user)
+        return result
 
 
 @router.post('/lessons/{lesson_id}/live', status_code=201)

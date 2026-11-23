@@ -34,12 +34,13 @@ class CreditSettings(BaseModel):
     coding_questions_per_reward: StrictInt | None = Field(default=None, ge=1, le=10000)
     coding_contribution_points: StrictInt | None = Field(default=None, ge=1, le=1000000)
     leaderboard_rewards: list[StrictInt] | None = Field(default=None, min_length=3, max_length=3)
+    contest_rewards: list[StrictInt] | None = Field(default=None, min_length=3, max_length=3)
 
-    @field_validator('leaderboard_rewards')
+    @field_validator('leaderboard_rewards', 'contest_rewards')
     @classmethod
     def validate_leaderboard_rewards(cls, value):
         if value is not None and any(item < 0 or item > 1000000 for item in value):
-            raise ValueError('周榜奖励需在 0 到 1000000 积分之间')
+            raise ValueError('名次奖励需在 0 到 1000000 积分之间')
         return value
 
 
@@ -120,7 +121,13 @@ def get_settings(user=Depends(administrator)):
 @router.patch('/api/admin/credit-settings')
 def update_settings(payload: CreditSettings, user=Depends(administrator)):
     with connect() as db:
+        db.execute('BEGIN IMMEDIATE')
         changes = payload.model_dump(exclude_none=True)
+        if 'contest_rewards' in changes:
+            import json
+            from app.services import contest_rewards
+            contest_rewards.settle_due(db)
+            db.execute("UPDATE app_settings SET value=? WHERE key='contest_rewards'", (json.dumps(changes['contest_rewards']),))
         if payload.default_credits is not None:
             db.execute("UPDATE app_settings SET value=? WHERE key='default_interview_credits'", (str(payload.default_credits),))
         if payload.interview_points_cost is not None:

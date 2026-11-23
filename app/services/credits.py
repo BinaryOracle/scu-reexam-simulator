@@ -37,7 +37,7 @@ def charge_interview(db, iid, uid):
     user = db.execute('SELECT is_admin,interview_credits FROM users WHERE id=?', (uid,)).fetchone()
     if not user['is_admin']:
         if user['interview_credits'] < 1:
-            raise HTTPException(409, '模拟面试次数已用完，请在个人主页使用积分购买次数后再开始')
+            raise HTTPException(409, '模拟面试次数已用完，请在模拟面试页面使用积分购买次数后再开始')
         adjust(db, uid, user['interview_credits'] - 1, kind='interview', reference=str(iid))
     db.execute('UPDATE interviews SET credit_charged=1 WHERE id=?', (iid,))
 

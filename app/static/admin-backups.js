@@ -1,5 +1,5 @@
 /** Module downloads and explicit, validated restores for the system owner. */
-import { api, state } from './api.js?v=20261114-ui-v17';
+import { api, state } from './api.js?v=20261122-session-guard-v1';
 import { $, el, notify, confirmAction } from './ui.js?v=20261114-ui-v17';
 
 let catalog = [];

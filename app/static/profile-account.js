@@ -1,5 +1,5 @@
 /** Authenticated account settings; changing a mailbox always verifies the new address. */
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import { $, el, notify } from "./ui.js?v=20261114-ui-v17";
 
 const cooldowns = new Map();
@@ -14,14 +14,17 @@ export function clearProfilePassword() {
   control.setAttribute("aria-pressed", "false");
 }
 export function refreshAccountSettings() {
+  const user = state.user;
+  if (!user) return false;
   clearProfilePassword();
-  $("profileAccountUsername").textContent = state.user.username;
-  $("profileAccountEmail").textContent = state.user.email || "尚未绑定";
-  $("profileEditEmail").textContent = state.user.email ? "变更绑定邮箱" : "绑定邮箱";
+  $("profileAccountUsername").textContent = user.username;
+  $("profileAccountEmail").textContent = user.email || "尚未绑定";
+  $("profileEditEmail").textContent = user.email ? "变更绑定邮箱" : "绑定邮箱";
   const deleteRow = $("profileDeleteAccount").closest(".profile-delete-row");
-  deleteRow.hidden = state.user.is_superadmin;
-  $("profileDeleteAccount").hidden = state.user.is_superadmin;
+  deleteRow.hidden = user.is_superadmin;
+  $("profileDeleteAccount").hidden = user.is_superadmin;
   $("profileDeleteHint").textContent = "永久删除账号、面试录音、PPT 与练习记录，剩余次数不退回。";
+  return true;
 }
 function field(body, id, label, { type = "text", value = "", autocomplete = "off" } = {}) {
   const caption = el("label", label); caption.htmlFor = id;

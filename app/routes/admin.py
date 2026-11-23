@@ -237,16 +237,17 @@ def update_model_settings(payload: ModelSettingsUpdate):
 @router.get('/users')
 def users(actor=Depends(administrator)):
     with connect() as db:
+        db.execute('BEGIN')
         user_fields = ','.join('u.' + field for field in PUBLIC_USER_FIELDS.split(','))
+        from app.services import service_packages
+        totals = service_packages.summaries(db)
         return [{**public_user(row, admin_view=True), 'password_available': bool(row['password_ciphertext']),
-                 'referrer_name': row['referrer_name'], 'purchase_service': row['purchase_service'],
-                 'referrer_email': row['referrer_email'],
-                 'rebate_redeemed': bool(row['rebate_redeemed'])}
-                for row in db.execute(f'''SELECT {user_fields},u.password_ciphertext,u.purchase_service,u.rebate_redeemed,
+                 'referrer_name': row['referrer_name'], 'referrer_email': row['referrer_email'],
+                 'legacy_purchase_note': row['purchase_service'], **totals[row['id']]}
+                for row in db.execute(f'''SELECT {user_fields},u.password_ciphertext,u.purchase_service,
                     COALESCE(r.username,'') AS referrer_name,COALESCE(r.email,'') AS referrer_email
                     FROM users u LEFT JOIN users r ON r.id=u.referrer_id
-                    WHERE (? OR u.is_admin=0) ORDER BY u.id DESC''',
-                                      (actor['is_superadmin'],))]
+                    WHERE (? OR u.is_admin=0) ORDER BY u.id DESC''', (actor['is_superadmin'],))]
 
 
 @router.get('/contest-participants')

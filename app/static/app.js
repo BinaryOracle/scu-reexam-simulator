@@ -1,5 +1,5 @@
-import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261121-question-markdown-v1";
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261122-course-purchase-duration-v1";
+import { api, state, requireAuthenticatedUser } from "./api.js?v=20261122-session-guard-v1";
 import { $, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import {
   refreshInterviews,
@@ -9,7 +9,7 @@ import {
   hasUnsavedWork,
   pauseInterviewAudio,
   clearInterviewState,
-} from "./interview.js?v=20261116-interview-search-v1";
+} from "./interview.js?v=20261122-points-guidance-v1";
 import {
   refreshContests,
   createContest,
@@ -17,10 +17,10 @@ import {
   suspendContestWorkspace,
   setupContestCreation,
   requestJudgeSubmit,
-} from "./contest.js?v=20261122-contest-record-drilldown-v1";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, refreshBackupModules, setupAdmin } from "./admin.js?v=20261122-referral-rewards-v1";
-import { refreshProfile, refreshReferrals, refreshVouchers, setupCredits } from "./credits.js?v=20261122-referral-rewards-v4";
-import { clearProfilePassword } from "./profile-account.js?v=20261116-ui-audit-v2";
+} from "./contest.js?v=20261122-contest-rewards-v1";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, refreshBackupModules, setupAdmin } from "./admin.js?v=20261122-admin-points-v1";
+import { refreshProfile, refreshReferrals, refreshVouchers, refreshInterviewShop, setupCredits } from "./credits.js?v=20261122-packages-v1";
+import { clearProfilePassword } from "./profile-account.js?v=20261122-profile-load-guard-v1";
 
 import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261122-points-display-v1";
 import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261121-question-markdown-v1";
@@ -34,6 +34,8 @@ import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v
 import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261122-points-display-v1";
 import { refreshTrends } from "./trends.js?v=20261116-trends-admin-v1";
 
+import { refreshServicePackages } from './service-packages.js?v=20261123-packages-v2';
+
 configureCodingBridge(requestJudgeSubmit);
 
 const views = {
@@ -46,6 +48,7 @@ const views = {
   codingAdmin: { label: "带刷题库", refresh: refreshCodingAdmin },
   training: { label: "每日训练", refresh: refreshTraining },
   trainingAdmin: { label: "训练题库", refresh: refreshTrainingAdmin },
+  servicePackages: { label: "套餐管理", refresh: refreshServicePackages },
   users: { label: "用户管理", refresh: refreshUsers },
   questionBank: { label: "面试题库", refresh: refreshQuestionBank },
   vouchers: { label: "积分与卡密", refresh: refreshVouchers },
@@ -54,7 +57,11 @@ const views = {
   referrals: { label: "邀请返利", refresh: refreshReferrals },
   interview: {
     label: state.adminMode ? "面试记录" : "模拟面试",
-    refresh: refreshInterviews,
+    refresh: async () => {
+      await refreshInterviews();
+      try { await refreshInterviewShop(); }
+      catch { notify("积分购买信息暂时无法加载，请稍后刷新。", "error"); }
+    },
   },
   contest: {
     label: "上机考试",
@@ -122,27 +129,28 @@ function syncSidebarToggle() {
   control.setAttribute("aria-expanded", String(!collapsed));
 }
 
-function allowedViews() {
+function allowedViews(user = requireAuthenticatedUser()) {
   if (state.adminMode)
-    return state.user.is_admin
-      ? ["live", "users", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "homeLayoutAdmin", "vouchers", "systemSettings", "trends", "interview", "contest", "profile"]
+    return user.is_admin
+      ? ["live", "users", "servicePackages", "questionBank", "trainingAdmin", "codingAdmin", "announcementsAdmin", "homeLayoutAdmin", "vouchers", "systemSettings", "trends", "interview", "contest", "profile"]
       : ["adminDenied"];
   const views = ["home", "referrals", "training", "trends", "coding", "live", "profile"];
-  if (state.user.can_interview) views.push("interview");
-  if (state.user.can_exam) views.push("contest");
+  if (user.can_interview) views.push("interview");
+  if (user.can_exam) views.push("contest");
   return views;
 }
 function configureAccess() {
-  const allowed = allowedViews();
+  const user = requireAuthenticatedUser();
+  const allowed = allowedViews(user);
   for (const item of document.querySelectorAll("[data-view]"))
     item.hidden = !allowed.includes(item.dataset.view);
-  $("managementTools").hidden = !(state.adminMode && state.user.is_admin);
+  $("managementTools").hidden = !(state.adminMode && user.is_admin);
   $("frontendEntry").hidden = !state.adminMode;
-  $("identity").textContent = state.user.username;
-  $("avatar").textContent = state.user.username.slice(0, 1).toUpperCase();
+  $("identity").textContent = user.username;
+  $("avatar").textContent = user.username.slice(0, 1).toUpperCase();
   $("roleLabel").textContent = state.adminMode
-    ? state.user.is_admin
-      ? state.user.is_superadmin ? "超级管理员" : "后台管理员"
+    ? user.is_admin
+      ? user.is_superadmin ? "超级管理员" : "后台管理员"
       : "普通用户"
     : "用户工作台";
   return allowed;
@@ -183,6 +191,7 @@ async function show(view, force = false, { historyMode = "push", authenticatedUs
   await views[selected].refresh();
 }
 async function enterWorkspace() {
+  const sessionToken = state.token;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
@@ -213,6 +222,15 @@ async function enterWorkspace() {
   try {
     await show(route, false, { historyMode: "replace", authenticatedUser: state.user });
   } catch (error) {
+    if (state.token !== sessionToken) return;
+    if (!state.user) {
+      state.token = null;
+      sessionStorage.removeItem("token");
+      $("app").hidden = true;
+      $("login").hidden = false;
+      notify(error.message, "error");
+      return;
+    }
     notify(`工作台已恢复，但首屏内容加载失败：${error.message}。可点击当前栏目重试。`, "error");
   }
   if (!state.adminMode) void showPendingAnnouncementReminder();

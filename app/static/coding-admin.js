@@ -1,4 +1,4 @@
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import { $, el, button, badge, emptyState, notify, confirmAction, renderPagination } from "./ui.js?v=20261114-ui-v17";
 import { codingField, codingDialog, editCodingQuestion } from "./coding-form.mjs?v=20261121-reference-markdown-v1";
 import { judgePlatform } from "./judge-platforms.mjs?v=20261121-china-judge-v2";

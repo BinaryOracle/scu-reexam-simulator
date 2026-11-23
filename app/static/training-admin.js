@@ -1,5 +1,5 @@
 /** Training-only administration; submission review never lists private drafts. */
-import { api, state } from './api.js?v=20261114-ui-v17';
+import { api, state } from './api.js?v=20261122-session-guard-v1';
 import { $, el, button, emptyState, notify, badge, requestText } from './ui.js?v=20261114-ui-v17';
 import { selectField, chapterNames, pagination, questionEditor, questionPreview, clearLearningMedia } from './training-ui.js?v=20261121-question-markdown-v1';
 let listRequest=0;

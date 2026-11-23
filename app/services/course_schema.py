@@ -8,6 +8,7 @@ def initialize_course_learning(db):
         ('publication_status', "TEXT NOT NULL DEFAULT 'published' CHECK(publication_status IN ('draft','published','archived'))"),
         ('access_mode', "TEXT NOT NULL DEFAULT 'roster' CHECK(access_mode IN ('public','roster','points'))"),
         ('points_price', 'INTEGER NOT NULL DEFAULT 0 CHECK(points_price >= 0)'),
+        ('points_access_days', 'INTEGER NOT NULL DEFAULT 0 CHECK(points_access_days >= 0)'),
         ('cover_kind', "TEXT CHECK(cover_kind IN ('preset','upload'))"),
         ('cover_value', 'TEXT'),
         ('cover_asset_id', 'TEXT'),
@@ -57,7 +58,10 @@ def initialize_course_learning(db):
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         points_paid INTEGER NOT NULL CHECK(points_paid > 0),
         purchased_at REAL NOT NULL,
+        access_expires_at REAL,
         PRIMARY KEY(course_id,user_id))''')
+    if 'access_expires_at' not in {row['name'] for row in db.execute('PRAGMA table_info(course_purchases)')}:
+        db.execute('ALTER TABLE course_purchases ADD COLUMN access_expires_at REAL')
     image_schema = '''CREATE TABLE IF NOT EXISTS course_markdown_images(
         id TEXT PRIMARY KEY,
         course_id INTEGER NOT NULL REFERENCES live_courses(id) ON DELETE CASCADE,

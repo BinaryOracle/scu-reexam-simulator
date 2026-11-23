@@ -1,5 +1,5 @@
 /** Load private inline illustrations with the current session rather than public URLs. */
-import {state} from './api.js?v=20261114-ui-v17';
+import {state} from './api.js?v=20261122-session-guard-v1';
 
 export function hydrateQuestionImages(root){
   for(const image of root.querySelectorAll('img')){

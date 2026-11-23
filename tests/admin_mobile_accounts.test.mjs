@@ -8,7 +8,7 @@ const styleSource = await readFile(new URL("../app/static/style.css", import.met
 const creditsStyleSource = await readFile(new URL("../app/static/credits.css", import.meta.url), "utf8");
 
 test("mobile account cards label each field and keep actions in the same card", () => {
-  for (const label of ["用户", "邀请者", "购买服务 / 返利", "密码", "面试次数", "功能权限", "账号状态", "操作"])
+  for (const label of ["用户", "邀请者", "套餐服务", "返利", "密码", "积分", "功能权限", "账号状态", "操作"])
     assert.ok(adminSource.includes(`"${label}"`), `missing mobile label ${label}`);
   assert.match(adminSource, /text\.append\(email\)/);
   assert.match(adminSource, /text\.append\(role\)/);
@@ -20,11 +20,11 @@ test("mobile account cards label each field and keep actions in the same card", 
 });
 
 test("desktop account table keeps core columns fixed while secondary columns scroll", () => {
-  assert.match(adminSource, /"用户信息",\s*"密码",\s*"功能权限",\s*"账号状态",\s*"邀请者",\s*"购买服务 \/ 返利",\s*"面试次数",\s*"操作"/);
-  assert.match(adminSource, /row\.append\(name, password, permissions, active, referrer, service, credits, actions\)/);
+  assert.match(adminSource, /"用户信息",\s*"密码",\s*"功能权限",\s*"账号状态",\s*"邀请者",\s*"套餐服务",\s*"返利",\s*"积分",\s*"操作"/);
+  assert.match(adminSource, /row\.append\(name, password, permissions, active, referrer, service, rebate, pointsCell, actions\)/);
   assert.match(styleSource, /\.account-table th:nth-child\(-n\+4\), \.account-table td:nth-child\(-n\+4\) \{ position: sticky/);
   assert.match(styleSource, /\.account-table th:nth-child\(4\), \.account-table td:nth-child\(4\) \{ left: 555px/);
-  assert.match(styleSource, /\.account-table \{ width: 1377px; min-width: 1377px; table-layout: fixed/);
+  assert.match(styleSource, /\.account-table \{ width: 1487px; min-width: 1487px; table-layout: fixed/);
   assert.match(styleSource, /\.account-table-wrap::-webkit-scrollbar-thumb/);
   assert.doesNotMatch(creditsStyleSource, /\.account-table \{ width: 100%; table-layout: fixed/);
   assert.doesNotMatch(creditsStyleSource, /\.account-table th:last-child[\s\S]*?right: 0/);
@@ -37,18 +37,19 @@ test("account permissions are independent and report the changed permission stat
   assert.match(adminSource, /account-status-button \$\{enabled \? "active" : "inactive"\}/);
 });
 
-test("purchase service is editable text with a separate green or gray settlement control", () => {
-  assert.match(adminSource, /account-service-input/);
-  assert.match(adminSource, /serviceInput\.maxLength = 160/);
-  assert.match(adminSource, /account-service-form/);
-  assert.match(adminSource, /account-rebate-state \$\{user\.rebate_redeemed \? "redeemed" : user\.purchase_service \? "pending" : "unset"\}/);
+test("purchase totals open a shared detail reader and settlement stays in its own column", () => {
+  assert.match(adminSource, /purchaseSummaryButton\(user/);
+  assert.match(adminSource, /openPurchaseDetails\(user, \{ manage: true/);
+  assert.match(adminSource, /accountCell\("返利", "account-rebate-cell"\)/);
+  assert.match(adminSource, /account-rebate-state \$\{user\.rebate_status\}/);
+  assert.doesNotMatch(adminSource, /serviceInput|purchase-service`/);
   assert.match(styleSource, /\.account-rebate-state\.pending \{[^}]*background: #edf8f1/);
   assert.match(styleSource, /\.account-rebate-state\.redeemed \{[^}]*background: #efeeeb/);
 });
 
 test("account management toolbar and table adapt to narrow viewports", () => {
   assert.match(styleSource, /\.account-filters \{ display: grid; grid-template-columns: repeat\(6, minmax\(0, 1fr\)\) auto/);
-  assert.match(styleSource, /\.account-table \{ width: 1377px; min-width: 1377px; table-layout: fixed/);
+  assert.match(styleSource, /\.account-table \{ width: 1487px; min-width: 1487px; table-layout: fixed/);
   assert.match(styleSource, /@media \(max-width: 620px\) \{\s*\.account-toolbar \{ padding: 17px/);
 });
 

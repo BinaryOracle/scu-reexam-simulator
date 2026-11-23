@@ -124,6 +124,7 @@ def test_admin_can_configure_all_points_reward_sources_in_one_place(client):
         'coding_questions_per_reward': 4,
         'coding_contribution_points': 3,
         'leaderboard_rewards': [6, 4, 2],
+        'contest_rewards': [9, 6, 3],
     }
     training_home = client.get('/api/training/home', headers=alice).json()
     coding_home = client.get('/api/coding/home', headers=alice).json()

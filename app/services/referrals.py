@@ -1,7 +1,7 @@
 """Invitation attribution, signup rewards, and per-user referral history."""
 import secrets
 from fastapi import HTTPException
-from app.services import points
+from app.services import points, service_packages
 
 
 def _code(db):
@@ -55,18 +55,9 @@ def profile(db, uid):
     user = db.execute('SELECT username,invite_code FROM users WHERE id=?', (uid,)).fetchone()
     if not user:
         raise HTTPException(404, '账号不存在')
-    items = [{**dict(row), 'rebate_redeemed': bool(row['rebate_redeemed'])} for row in db.execute(
-        '''SELECT username,email,purchase_service,rebate_redeemed
-        FROM users WHERE referrer_id=? AND is_admin=0 ORDER BY id''', (uid,))]
+    totals = service_packages.summaries(db)
+    items = [{**dict(row), **totals[row['id']]} for row in db.execute(
+        'SELECT id,username,email FROM users WHERE referrer_id=? AND is_admin=0 ORDER BY id', (uid,))]
     return {'invite_code': user['invite_code'], 'signup_reward_points': int(db.execute(
         "SELECT value FROM app_settings WHERE key='invite_signup_points'").fetchone()[0]),
         'total_invited': len(items), 'items': items}
-
-
-def set_purchase_service(db, uid, service, redeemed):
-    """Update administrator-maintained purchase service and settlement state."""
-    exists = db.execute('SELECT id FROM users WHERE id=? AND is_admin=0', (uid,)).fetchone()
-    if not exists:
-        raise HTTPException(404, '普通用户不存在')
-    db.execute('UPDATE users SET purchase_service=?,rebate_redeemed=? WHERE id=?', (service, int(redeemed), uid))
-    return dict(purchase_service=service, rebate_redeemed=bool(redeemed))

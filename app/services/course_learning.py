@@ -41,11 +41,14 @@ def can_access_course(db, course_id, user):
         return False
     if row['access_mode'] == 'public':
         return True
-    return bool(db.execute(
-        '''SELECT 1 FROM live_members WHERE course_id=? AND user_id=? UNION ALL
-        SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=? UNION ALL
-        SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=? LIMIT 1''',
-        (course_id, user['id'], course_id, user['id'], course_id, user['id'])).fetchone())
+    return bool(db.execute('''SELECT 1 WHERE
+        EXISTS (SELECT 1 FROM live_members WHERE course_id=? AND user_id=?) OR
+        (EXISTS (SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?) AND
+         NOT EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?)) OR
+        EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?
+            AND (access_expires_at IS NULL OR access_expires_at>?))''',
+        (course_id, user['id'], course_id, user['id'], course_id, user['id'],
+         course_id, user['id'], time.time())).fetchone())
 
 
 def is_enrolled(db, course_id, user):
@@ -53,9 +56,13 @@ def is_enrolled(db, course_id, user):
     course = db.execute('SELECT * FROM live_courses WHERE id=?', (course_id,)).fetchone()
     if not course:
         return False
-    if db.execute('''SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=? UNION ALL
-        SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?''',
-                  (course_id, user['id'], course_id, user['id'])).fetchone():
+    if db.execute('''SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?
+        AND (access_expires_at IS NULL OR access_expires_at>?)''',
+                  (course_id, user['id'], time.time())).fetchone():
+        return True
+    if db.execute('''SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?
+        AND (?='public' OR NOT EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?))''',
+                  (course_id, user['id'], course['access_mode'], course_id, user['id'])).fetchone():
         return True
     return bool(course['host_id'] != user['id'] and not manage(course, user) and db.execute(
         'SELECT 1 FROM live_members WHERE course_id=? AND user_id=?', (course_id, user['id'])).fetchone())
@@ -205,13 +212,32 @@ def course_detail(db, course_id, user):
     if detail['can_manage']:
         detail['member_ids'] = [row[0] for row in db.execute(
             'SELECT user_id FROM live_members WHERE course_id=?', (course_id,))]
+        if course['access_mode'] == 'public':
+            learners = [dict(row) for row in db.execute('''SELECT u.username,e.enrolled_at FROM course_self_enrollments e
+                JOIN users u ON u.id=e.user_id WHERE e.course_id=? ORDER BY e.enrolled_at DESC,u.username''',
+                (course_id,))]
+            detail['enrollment_summary'] = {'joined_count': len(learners), 'students': learners}
+        elif course['access_mode'] == 'roster':
+            learners = [{**dict(row), 'started': bool(row['started'])} for row in db.execute('''SELECT u.username,
+                EXISTS(SELECT 1 FROM course_progress p JOIN course_lessons l ON l.id=p.lesson_id
+                    WHERE l.course_id=? AND p.user_id=u.id) AS started
+                FROM live_members m JOIN users u ON u.id=m.user_id
+                WHERE m.course_id=? AND m.user_id<>? ORDER BY u.username''',
+                (course_id, course_id, course['host_id']))]
+            detail['enrollment_summary'] = {'assigned_count': len(learners),
+                'joined_count': sum(bool(row['started']) for row in learners), 'students': learners}
+        else:
+            learners = [dict(row) for row in db.execute('''SELECT u.username,p.purchased_at,p.access_expires_at
+                FROM course_purchases p JOIN users u ON u.id=p.user_id
+                WHERE p.course_id=? ORDER BY p.purchased_at DESC,u.username''', (course_id,))]
+            detail['enrollment_summary'] = {'purchased_count': len(learners), 'students': learners}
         detail['publish_issues'] = publish_issues(db, course_id)
     return detail
 
 
 def public_preview(db, course_id, user=None):
     """Return published public course metadata without member or lesson resource data."""
-    course = db.execute('''SELECT c.id,c.title,c.description,c.access_mode,c.points_price,c.cover_kind,c.cover_value,c.cover_asset_id,u.username host_name
+    course = db.execute('''SELECT c.id,c.title,c.description,c.access_mode,c.points_price,c.points_access_days,c.cover_kind,c.cover_value,c.cover_asset_id,u.username host_name
         FROM live_courses c JOIN users u ON u.id=c.host_id
         WHERE c.id=? AND c.publication_status='published' AND (c.access_mode IN ('public','points') OR EXISTS (
             SELECT 1 FROM course_lessons l JOIN course_sections s ON s.id=l.section_id

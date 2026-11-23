@@ -156,9 +156,8 @@ def test_invite_registration_rewards_referrer_once_and_keeps_referral_history(em
         'email': 'newperson@example.com', 'code': code(messages[-1]), 'invitation_code': code_value,
     })
     assert sent.status_code == 200 and created.status_code == 200
-    assert client.patch('/api/admin/users/' + str(created.json()['id']) + '/purchase-service',
-        headers={'Authorization': 'Bearer ' + created.json()['token']},
-        json={'purchase_service': '套餐服务', 'rebate_redeemed': False}).status_code == 403
+    assert client.post('/api/admin/users/' + str(created.json()['id']) + '/package-purchases',
+        headers={'Authorization': 'Bearer ' + created.json()['token']}, json={'package_id': 1}).status_code == 403
     clock[0] += settings['resend_seconds']
     assert send(client, 'newperson@example.com').status_code == 200
     repeated = client.post('/api/auth/email/login', json={
@@ -172,15 +171,18 @@ def test_invite_registration_rewards_referrer_once_and_keeps_referral_history(em
     referrals = client.get('/api/profile/referrals', headers=headers)
     assert referrals.status_code == 200 and referrals.json()['total_invited'] == 1
     assert referrals.json()['items'][0]['username'] == 'newperson@example.com'
-    assert referrals.json()['items'][0]['purchase_service'] == ''
-    changed = client.patch('/api/admin/users/' + str(created.json()['id']) + '/purchase-service', headers=headers,
-                          json={'purchase_service': '套餐服务', 'rebate_redeemed': False})
-    assert changed.status_code == 200
-    assert client.get('/api/profile/referrals', headers=headers).json()['items'][0]['purchase_service'] == '套餐服务'
-    settled = client.patch('/api/admin/users/' + str(created.json()['id']) + '/purchase-service', headers=headers,
-                           json={'purchase_service': '套餐服务', 'rebate_redeemed': True})
-    assert settled.status_code == 200 and settled.json()['rebate_redeemed'] is True
-    assert client.get('/api/profile/referrals', headers=headers).json()['items'][0]['rebate_redeemed'] is True
+    assert referrals.json()['items'][0]['purchase_total_fen'] == 0
+    package = client.post('/api/admin/service-packages', headers=headers,
+                         json={'name': '套餐服务', 'price_yuan': '200'}).json()
+    changed = client.post('/api/admin/users/' + str(created.json()['id']) + '/package-purchases', headers=headers,
+                          json={'package_id': package['id']})
+    assert changed.status_code == 201
+    item = client.get('/api/profile/referrals', headers=headers).json()['items'][0]
+    assert item['purchase_total_fen'] == 20000 and item['rebate_total_fen'] == 1000
+    settled = client.patch('/api/admin/users/' + str(created.json()['id']) + '/rebate', headers=headers,
+                           json={'redeemed': True})
+    assert settled.status_code == 200 and settled.json()['rebate_status'] == 'redeemed'
+    assert client.get('/api/profile/referrals', headers=headers).json()['items'][0]['rebate_status'] == 'redeemed'
 
 
 def test_invalid_invitation_code_does_not_prevent_email_registration(email_client):

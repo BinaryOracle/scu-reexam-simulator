@@ -1,5 +1,5 @@
 import { testCaseFormat } from "./test-case-formats.mjs?v=20261121-local-cases-v1";
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import { $, el, button, badge, emptyState, notify, confirmAction, statusBadge, renderPagination } from "./ui.js?v=20261114-ui-v17";
 import { appendProblemStatement } from "./problem-content.js?v=20261115-resource-limits-v1";
 import { writeAppRoute } from "./view-route.mjs?v=20261115-navigation-v3";

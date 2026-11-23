@@ -7,15 +7,16 @@
     <title>知序 · 复试模拟系统</title>
     <link rel="icon" href="/static/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=0.19.1" />
-    <link rel="stylesheet" href="/static/style.css?v=20261122-reward-groups-v1" />
+    <link rel="stylesheet" href="/static/style.css?v=20261122-admin-points-v1" />
     <link rel="stylesheet" href="/static/workspace.css?v=20261121-header-grid-v13" />
     <link rel="stylesheet" href="/static/contest-focus.css?v=20261115-contest-records-v2" />
     <link rel="stylesheet" href="/static/live.css?v=20261118-course-v9" />
-    <link rel="stylesheet" href="/static/course-learning.css?v=20261122-preview-purchase-v1" />
+    <link rel="stylesheet" href="/static/course-learning.css?v=20261122-course-purchase-duration-v1" />
     <link rel="stylesheet" href="/static/coding.css?v=20261121-local-cases-v2" />
     <link rel="stylesheet" href="/static/home-layout.css?v=20261115-layout-v1" />
     <link rel="stylesheet" href="/static/training.css?v=20261121-empty-state-v2" />
     <link rel="stylesheet" href="/static/leaderboard.css?v=20261117-weekly-leaderboard-v3" />
+    <link rel="stylesheet" href="/static/service-packages.css?v=20261123-packages-v2" />
     <link rel="stylesheet" href="/static/credits.css?v=20261122-voucher-spacing-v2" />
     <link rel="stylesheet" href="/static/select-controls.css?v=20261116-v2" />
     <script>
@@ -176,6 +177,7 @@
             ><span class="nav-label">面试题库</span
             ><span class="nav-arrow" aria-hidden="true">›</span>
           </button>
+          <button type="button" class="nav-item" data-view="servicePackages" hidden><span class="nav-icon" aria-hidden="true">▦</span><span class="nav-label">套餐管理</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           <button type="button" class="nav-item" data-view="vouchers" hidden>
             <span class="nav-icon" aria-hidden="true">◇</span><span class="nav-label">卡密与积分</span><span class="nav-arrow" aria-hidden="true">›</span>
           </button>
@@ -316,7 +318,7 @@
                     id="userSearch"
                     type="search"
                     placeholder="按用户名筛选…"
-                  /><input id="userEmailSearch" type="search" placeholder="按邮箱筛选" aria-label="按邮箱筛选用户" /><input id="userReferrerSearch" type="search" placeholder="邀请者邮箱/用户名" aria-label="按邀请者筛选用户" /><select id="userRoleFilter" aria-label="按角色筛选"><option value="all">全部角色</option><option value="user">普通用户</option><option value="admin">管理员</option></select><select id="userRebateFilter" aria-label="按返利状态筛选"><option value="all">全部返利</option><option value="pending">待兑现</option><option value="redeemed">已兑现</option><option value="none">未填写</option></select
+                  /><input id="userEmailSearch" type="search" placeholder="按邮箱筛选" aria-label="按邮箱筛选用户" /><input id="userReferrerSearch" type="search" placeholder="邀请者邮箱/用户名" aria-label="按邀请者筛选用户" /><select id="userRoleFilter" aria-label="按角色筛选"><option value="all">全部角色</option><option value="user">普通用户</option><option value="admin">管理员</option></select><select id="userRebateFilter" aria-label="按返利状态筛选"><option value="all">全部返利</option><option value="pending">待兑换</option><option value="redeemed">已兑换</option><option value="none">未填写</option></select
                   /><label class="sr-only" for="userStatus">账号状态筛选</label
                   ><select id="userStatus">
                     <option value="all">全部状态</option>
@@ -340,6 +342,11 @@
             </div>
           </section>
 
+          <section id="servicePackages" aria-labelledby="servicePackagesTitle" hidden>
+            <div class="section-heading package-page-heading"><div><p class="eyebrow">PACKAGE CATALOG</p><h1 id="servicePackagesTitle">套餐管理</h1><p class="muted">统一维护套餐内容、价格与返利比例，在用户管理中登记购买。</p></div><button id="newServicePackage" class="button primary" type="button">＋ 新增套餐</button></div>
+            <div class="panel package-catalog-toolbar"><label>搜索套餐<input id="servicePackageSearch" type="search" placeholder="输入套餐名称" /></label><label>上架状态<select id="servicePackageStatus"><option value="all">全部套餐</option><option value="enabled">已启用</option><option value="disabled">已下架</option></select></label><p>下架会隐藏关联购买记录；重新启用后恢复。</p></div>
+            <div id="servicePackagesContent" aria-live="polite"></div>
+          </section>
           <section id="vouchers" aria-labelledby="vouchersTitle" hidden>
             <div class="page-heading">
               <div><div class="eyebrow">VOUCHERS &amp; POINTS</div><h1 id="vouchersTitle">卡密与积分<span class="heading-dot">.</span></h1><p class="muted">分套餐生成卡密、导出上架，独立核对兑换情况。</p></div>
@@ -390,6 +397,14 @@
                     <label>周榜第 1 名<input name="leaderboard_1" type="number" min="0" max="1000000" required /></label>
                     <label>周榜第 2 名<input name="leaderboard_2" type="number" min="0" max="1000000" required /></label>
                     <label>周榜第 3 名<input name="leaderboard_3" type="number" min="0" max="1000000" required /></label>
+                  </div>
+                </section>
+                <section class="reward-rule-group" aria-labelledby="rewardContestTitle">
+                  <div class="reward-rule-heading"><h3 id="rewardContestTitle">上机考试奖励</h3><p>比赛结束且评测完成后自动发放；管理员与零分成绩不参与，设为 0 可关闭对应名次奖励</p></div>
+                  <div class="reward-rule-fields">
+                    <label>比赛第 1 名<input name="contest_1" type="number" min="0" max="1000000" required /></label>
+                    <label>比赛第 2 名<input name="contest_2" type="number" min="0" max="1000000" required /></label>
+                    <label>比赛第 3 名<input name="contest_3" type="number" min="0" max="1000000" required /></label>
                   </div>
                 </section>
               </div>
@@ -449,18 +464,6 @@
           <section id="profile" aria-labelledby="profileTitle" hidden>
             <div class="page-heading"><div><div class="eyebrow">YOUR ACCOUNT</div><h1 id="profileTitle">个人主页<span class="heading-dot">.</span></h1><p class="muted">你好，<span id="profileUsername"></span>。在这里管理你的账号、积分与面试次数。</p><p id="profileLoginEmail" class="muted" hidden></p></div><div class="profile-heading-actions"><button id="profileBack" type="button" class="button secondary">← 返回工作台</button><button id="profileLogout" type="button" class="button secondary">退出登录</button></div></div>
             <div class="profile-stats"><article id="profilePointsStat" class="panel profile-stat profile-points-stat"><span>可用积分</span><strong id="profilePoints">—</strong><small>签到、榜单奖励与卡密兑换均存入积分</small></article><article class="panel profile-stat"><span id="profileAllowanceLabel">剩余模拟面试次数</span><strong id="profileRemaining">—</strong><small id="profileAllowanceHint">正式开始一场面试消耗 1 次</small></article><article id="profileRedemptionStats" class="panel profile-stat"><span>累计兑换套餐金额</span><strong id="profileAmount">¥0.00</strong><small>按兑换卡密标价统计</small></article><article id="profileRedemptionStatsCount" class="panel profile-stat"><span>已兑换卡密</span><strong id="profileRedeemCount">0 张</strong><small>每张卡密仅可使用一次</small></article></div>
-            <section id="profileShopSection" class="panel points-shop" aria-labelledby="pointsShopTitle">
-              <div class="points-shop-heading"><div><span class="eyebrow">POINTS STORE</span><h2 id="pointsShopTitle">积分购买</h2><p class="muted">把每一次坚持，兑换成下一次进步。</p></div><span class="points-shop-mark" aria-hidden="true">◇</span></div>
-              <div class="points-product"><div class="points-product-copy"><span class="points-product-tag">模拟面试</span><h3>再来一场，表现更从容</h3><p>兑换次数可长期保留，正式开始面试时才扣除。</p><strong id="pointsProductPrice">1 积分 / 次</strong></div>
-                <form id="pointsPurchaseForm" class="points-purchase-form"><label for="pointsPurchaseQuantity">购买次数</label><input id="pointsPurchaseQuantity" type="number" min="1" max="10000" step="1" value="1" required /><p id="pointsPurchaseTotal" class="points-purchase-total" aria-live="polite">合计 1 积分</p><button id="pointsPurchaseSubmit" type="submit" class="button primary">确认购买</button><p id="pointsPurchaseError" class="form-error" role="alert" hidden></p></form>
-              </div>
-            </section>
-            <div id="profileVoucherSection" class="panel profile-redeem"><div class="redeem-heading"><span class="redeem-symbol" aria-hidden="true">◇</span><div><h2>卡密兑换</h2><p>在联动小铺购买后，输入兑换码即可增加积分，再用积分购买模拟面试次数。</p></div></div>
-              <a id="voucherShopLink" class="button secondary voucher-shop-link" target="_blank" rel="noopener noreferrer" hidden>前往联动小铺购买 ↗</a>
-              <form id="redeemForm" class="redeem-form"><label for="redeemCode">兑换码</label><div class="redeem-input-wrap"><span aria-hidden="true">◇</span><input id="redeemCode" maxlength="100" autocomplete="off" spellcheck="false" placeholder="请输入兑换码" required /></div><p class="redeem-help">支持直接粘贴完整卡密，不区分大小写。</p><p id="redeemError" class="form-error" role="alert" hidden></p><button type="submit" class="button primary">兑换积分</button></form>
-            </div>
-            <section id="profileContribution" class="panel contribution-profile"></section>
-            <section id="profileTransfers" class="panel profile-account-settings" aria-label="面试次数转赠"></section>
             <section class="panel profile-account-settings" aria-labelledby="profileSettingsTitle">
               <div class="profile-settings-heading"><div><span class="eyebrow">ACCOUNT &amp; SECURITY</span><h2 id="profileSettingsTitle">账号与安全</h2></div><span class="profile-security-mark" aria-hidden="true">⌑</span></div>
               <div class="profile-setting-row"><div><span>登录用户名</span><strong id="profileAccountUsername"></strong><p>用于账号密码登录，可随时修改。</p></div><button id="profileEditUsername" type="button" class="button secondary">修改用户名</button></div>
@@ -468,6 +471,12 @@
               <div class="profile-setting-row"><div><span>登录密码</span><button id="profileRevealPassword" type="button" class="profile-password-toggle" aria-label="查看登录密码" aria-pressed="false"><span id="profilePasswordValue">••••••••</span><span id="profilePasswordToggleLabel">查看</span></button><p>点击密码可查看或隐藏，修改密码后需要重新登录。</p></div><button id="profileEditPassword" type="button" class="button secondary">修改密码</button></div>
               <div class="profile-setting-row profile-delete-row"><div><span>注销账号</span><p id="profileDeleteHint">永久删除账号与练习资料，请谨慎操作。</p></div><button id="profileDeleteAccount" type="button" class="text-button danger">注销当前账号</button></div>
             </section>
+            <div id="profileVoucherSection" class="panel profile-redeem"><div class="redeem-heading"><span class="redeem-symbol" aria-hidden="true">◇</span><div><h2>卡密兑换</h2><p>在联动小铺购买后，输入兑换码即可增加积分，再前往模拟面试页面购买次数。</p></div></div>
+              <a id="voucherShopLink" class="button secondary voucher-shop-link" target="_blank" rel="noopener noreferrer" hidden>前往联动小铺购买 ↗</a>
+              <form id="redeemForm" class="redeem-form"><label for="redeemCode">兑换码</label><div class="redeem-input-wrap"><span aria-hidden="true">◇</span><input id="redeemCode" maxlength="100" autocomplete="off" spellcheck="false" placeholder="请输入兑换码" required /></div><p class="redeem-help">支持直接粘贴完整卡密，不区分大小写。</p><p id="redeemError" class="form-error" role="alert" hidden></p><button type="submit" class="button primary">兑换积分</button></form>
+            </div>
+            <section id="profileContribution" class="panel contribution-profile" hidden></section>
+            <section id="profileTransfers" class="panel profile-account-settings" aria-label="面试次数转赠" hidden></section>
             <section id="profilePointsHistorySection" class="panel points-history" aria-labelledby="pointsHistoryTitle"><div class="points-shop-heading"><div><span class="eyebrow">POINTS ACTIVITY</span><h2 id="pointsHistoryTitle">积分明细</h2></div><span class="muted">最近 50 笔</span></div><div id="pointsHistory"></div></section>
             <div id="profileRedemptionHistorySection"><div class="section-heading"><h2>卡密兑换记录</h2></div><div id="redemptionHistory" class="panel"></div></div>
           </section>
@@ -566,7 +575,13 @@
               </button>
             </div>
             <div id="interviewOverview">
-              <div id="interviewQuota" class="interview-quota"><span id="interviewQuotaText">正在读取剩余次数…</span><button id="openRedeemProfile" type="button" class="text-button">兑换卡密 / 查看次数 →</button></div>
+              <div id="interviewQuota" class="interview-quota"><span id="interviewQuotaText">正在读取剩余次数…</span><button id="openRedeemProfile" type="button" class="text-button">卡密兑换 / 账户明细 →</button></div>
+              <section id="interviewPointsShop" class="panel points-shop" aria-labelledby="pointsShopTitle">
+                <div class="points-shop-heading"><div><span class="eyebrow">POINTS STORE</span><h2 id="pointsShopTitle">积分购买</h2><p class="muted">使用训练和签到获得的积分，兑换模拟面试次数。</p></div><span class="points-shop-mark" aria-hidden="true">◇</span></div>
+                <div class="points-product"><div class="points-product-copy"><span class="points-product-tag">模拟面试</span><h3>再来一场，表现更从容</h3><p>兑换次数可长期保留，正式开始面试时才扣除。</p><strong id="pointsProductPrice">1 积分 / 次</strong></div>
+                  <form id="pointsPurchaseForm" class="points-purchase-form"><label for="pointsPurchaseQuantity">购买次数</label><input id="pointsPurchaseQuantity" type="number" min="1" max="10000" step="1" value="1" required /><p id="pointsPurchaseTotal" class="points-purchase-total" aria-live="polite">合计 1 积分</p><button id="pointsPurchaseSubmit" type="submit" class="button primary">确认购买</button><p id="pointsPurchaseError" class="form-error" role="alert" hidden></p></form>
+                </div>
+              </section>
               <div class="interview-banner">
                 <div>
                   <span class="banner-label">每一次开口，都是一次进步</span>
@@ -938,6 +953,6 @@
       </form>
     </dialog>
     <dialog id="announcementDialog" class="account-dialog announcement-dialog" aria-labelledby="announcementDialogTitle"><div class="dialog-header"><div><span class="eyebrow">公告</span><h2 id="announcementDialogTitle">公告详情</h2></div><button id="closeAnnouncementDialog" type="button" class="icon-button" aria-label="关闭公告">×</button></div><div id="announcementDialogContent" class="dialog-body announcement-dialog-content"></div></dialog>
-    <script type="module" src="/static/app.js?v=20261122-points-display-v1"></script>
+    <script type="module" src="/static/app.js?v=20261122-course-purchase-duration-v1"></script>
   </body>
 </html>

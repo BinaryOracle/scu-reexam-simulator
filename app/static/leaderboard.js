@@ -1,5 +1,5 @@
 /** Weekly practice leaderboards for ordinary student accounts. */
-import { api, state } from "./api.js?v=20261114-ui-v17";
+import { api, state } from "./api.js?v=20261122-session-guard-v1";
 import { el, button, emptyState } from "./ui.js?v=20261114-ui-v17";
 
 const BOARD_DEFS = {

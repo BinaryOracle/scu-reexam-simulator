@@ -35,9 +35,9 @@ def cost(db):
 
 
 def reward_rules(db):
-    """Read centralized amounts for attendance and weekly leaderboard rewards."""
+    """Read centralized amounts for attendance, contributions and ranking rewards."""
     value = lambda key: int(db.execute('SELECT value FROM app_settings WHERE key=?', (key,)).fetchone()[0])
-    from app.services import coding_practice, contribution_rewards
+    from app.services import coding_practice, contribution_rewards, contest_rewards
     training = contribution_rewards.current_policy(db)
     coding = coding_practice.settings(db)
     return {'invite_signup_points': value('invite_signup_points'),
@@ -47,7 +47,8 @@ def reward_rules(db):
             'training_contribution_points': training['credits_per_reward'],
             'coding_questions_per_reward': coding['questions_per_reward'],
             'coding_contribution_points': coding['credits_per_reward'],
-            'leaderboard_rewards': json.loads(db.execute("SELECT value FROM app_settings WHERE key='leaderboard_rewards'").fetchone()[0])}
+            'leaderboard_rewards': json.loads(db.execute("SELECT value FROM app_settings WHERE key='leaderboard_rewards'").fetchone()[0]),
+            'contest_rewards': contest_rewards.rewards(db)}
 
 
 def leaderboard_rewards(db):
