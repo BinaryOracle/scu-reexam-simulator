@@ -1,6 +1,6 @@
 """Invitation history and administrator-managed package purchases and cash rebate state."""
 from decimal import Decimal
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Response
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, field_validator
 from app.db import connect
 from app.services.auth import administrator, current_user, managed_user
@@ -16,6 +16,7 @@ class PackageCreate(BaseModel):
     price_yuan: Decimal = Field(ge=0, le=100000000, decimal_places=2)
     rebate_percent: Decimal = Field(default=Decimal('5'), ge=0, le=100, decimal_places=2)
     enabled: StrictBool = True
+    benefits: dict = Field(default_factory=dict)
 
     @field_validator('price_yuan', 'rebate_percent', mode='before')
     @classmethod
@@ -31,8 +32,9 @@ class PackageUpdate(PackageCreate):
     price_yuan: Decimal | None = Field(default=None, ge=0, le=100000000, decimal_places=2)
     rebate_percent: Decimal | None = Field(default=None, ge=0, le=100, decimal_places=2)
     enabled: StrictBool | None = None
+    benefits: dict | None = None
 
-    @field_validator('name', 'description', 'price_yuan', 'rebate_percent', 'enabled')
+    @field_validator('name', 'description', 'price_yuan', 'rebate_percent', 'enabled', 'benefits')
     @classmethod
     def no_null_fields(cls, value):
         if value is None:
@@ -43,6 +45,7 @@ class PackageUpdate(PackageCreate):
 class PurchaseCreate(BaseModel):
     model_config = ConfigDict(extra='forbid')
     package_id: StrictInt = Field(gt=0)
+    feishu_recipient: dict | None = None
 
 
 class RebateUpdate(BaseModel):
@@ -80,14 +83,14 @@ def packages(user=Depends(administrator)):
 def create_package(payload: PackageCreate, user=Depends(administrator)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
-        return service_packages.save_package(db, None, payload.model_dump())
+        return service_packages.save_package(db, None, payload.model_dump(), user)
 
 
 @router.patch('/api/admin/service-packages/{pid}')
 def update_package(pid: int, payload: PackageUpdate, user=Depends(administrator)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
-        return service_packages.save_package(db, pid, payload.model_dump(exclude_unset=True))
+        return service_packages.save_package(db, pid, payload.model_dump(exclude_unset=True), user)
 
 
 @router.get('/api/admin/users/{uid}/package-purchases')
@@ -98,11 +101,42 @@ def user_purchases(uid: int, user=Depends(administrator)):
 
 
 @router.post('/api/admin/users/{uid}/package-purchases', status_code=201)
-def add_purchase(uid: int, payload: PurchaseCreate, user=Depends(administrator)):
+def add_purchase(uid: int, payload: PurchaseCreate, background_tasks: BackgroundTasks,
+                 user=Depends(administrator)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         _ordinary_user(db, uid, user)
-        return service_packages.add_purchase(db, uid, payload.package_id, user['id'])
+        result = service_packages.add_purchase(db, uid, payload.package_id, user['id'],
+                                               recipient=payload.feishu_recipient, actor=user)
+    background_tasks.add_task(_process_benefit_purchase, result['purchase_id'])
+    return service_packages.read_purchase(uid, result['purchase_id'])
+
+
+def _process_benefit_purchase(purchase_id):
+    """Process Feishu permissions after the local purchase transaction commits."""
+    from app.services.package_benefits import process_purchase
+    process_purchase(purchase_id)
+
+
+@router.get('/api/admin/users/{uid}/package-purchases/{purchase_id}/benefits')
+def purchase_benefits(uid: int, purchase_id: int, user=Depends(administrator)):
+    with connect() as db:
+        _ordinary_user(db, uid, user)
+        return service_packages.benefit_details(db, uid, purchase_id)
+
+
+@router.post('/api/admin/users/{uid}/package-purchases/{purchase_id}/benefits/retry', status_code=202)
+def retry_purchase_benefits(uid: int, purchase_id: int, background_tasks: BackgroundTasks,
+                            user=Depends(administrator)):
+    with connect() as db:
+        _ordinary_user(db, uid, user)
+        result = service_packages.benefit_details(db, uid, purchase_id)
+        retryable = [grant for grant in result['grants'] if grant['kind'] == 'feishu' and
+                     grant['status'] in ('pending', 'failed')]
+        if not retryable:
+            raise HTTPException(409, '沒有待處理或失敗的飛書授權')
+    background_tasks.add_task(_process_benefit_purchase, purchase_id)
+    return {'accepted': True}
 
 
 @router.delete('/api/admin/users/{uid}/package-purchases/{purchase_id}', status_code=204)

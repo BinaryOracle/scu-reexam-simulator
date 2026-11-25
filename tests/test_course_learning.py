@@ -244,7 +244,8 @@ def test_public_outline_retains_chapter_ids_and_only_the_members_own_progress(cl
     assert preview['sections'][0]['id'] == section['id']
     assert 'progress' not in preview['sections'][0]['lessons'][0]
     assert 'items' not in preview['sections'][0]['lessons'][0]
-    assert client.get(f'/api/courses/lessons/{lid}', headers=alice).status_code == 404
+    # Public courses are readable without enrollment; their outline still omits lesson media and progress.
+    assert client.get(f'/api/courses/lessons/{lid}', headers=alice).status_code == 200
     assert client.post(f'/api/courses/{cid}/enroll', headers=alice).status_code == 200
     assert client.put(f'/api/courses/lessons/{lid}/progress', headers=alice,
                       json={'position_seconds': 0, 'completed': True}).status_code == 200

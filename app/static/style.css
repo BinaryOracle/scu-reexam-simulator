@@ -3129,6 +3129,23 @@ td .badge {
   max-width: 720px;
   padding: 24px;
 }
+.feishu-admin-settings {
+  display: grid;
+  gap: 12px;
+  max-width: 720px;
+  margin-top: 20px;
+  padding: 24px;
+}
+.feishu-admin-settings h2 { margin: 6px 0; }
+.feishu-admin-settings > .muted,
+.feishu-admin-settings .field-hint,
+.feishu-admin-actions p { margin: 0; }
+.feishu-admin-settings label { margin: 2px 0 -5px; color: #74665c; font-size: 12px; }
+.feishu-admin-settings input { width: 100%; min-width: 0; margin: 0; }
+.feishu-admin-settings .field-hint { line-height: 1.75; }
+.feishu-admin-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 5px; }
+.feishu-admin-actions p { flex: 1 1 100%; color: #477562; font-size: 12px; }
+.feishu-admin-actions p.form-error { color: #a34234; }
 .luogu-origin-settings h2 {
   margin: 6px 0;
 }
@@ -5788,3 +5805,9 @@ td .badge {
   .referral-rebate-state { grid-column: 2; grid-row: 1 / span 2; }
   .account-table td:nth-child(2), .account-table td:nth-child(3) { grid-column: 1 / -1; }
 }
+.feishu-oauth-panel { display: grid; gap: 18px; max-width: 720px; margin-block: 24px; padding: 24px; }
+.feishu-oauth-panel h2 { margin: 8px 0 12px; }
+.feishu-oauth-panel p { margin: 0; line-height: 1.75; }
+.feishu-oauth-status { padding: 14px 18px; border-radius: 12px; background: var(--bg-soft, #f4f5f2); font-size: 14px; }
+.feishu-oauth-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 12px; }
+.feishu-oauth-result { max-width: 640px; margin: 12vh auto; padding: 32px; }

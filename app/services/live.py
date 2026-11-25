@@ -1,5 +1,6 @@
 """Course membership and classroom persistence shared by authenticated routes."""
 import time
+from datetime import date
 from fastapi import HTTPException
 from app.services.auth import managed_user
 from app.services import live_media as media
@@ -14,14 +15,21 @@ def course(db, cid, user):
     privileged = row and (manage(row, user) or row['host_id'] == user['id'])
     enrolled = row and row['publication_status'] == 'published' and (row['access_mode'] == 'public' or db.execute(
             '''SELECT 1 WHERE EXISTS (SELECT 1 FROM live_members WHERE course_id=? AND user_id=?) OR
+            EXISTS (SELECT 1 FROM package_course_grants WHERE course_id=? AND user_id=? AND
+                (access_start_date IS NULL OR (access_start_date<=? AND access_end_date>=?))) OR
             (EXISTS (SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?) AND
              NOT EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?)) OR
-            EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?
-                AND (access_expires_at IS NULL OR access_expires_at>?))''',
-            (cid, user['id'], cid, user['id'], cid, user['id'], cid, user['id'], time.time())).fetchone())
+            EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=? AND
+                ((access_start_date IS NOT NULL AND access_start_date<=? AND access_end_date>=?) OR
+                 (access_start_date IS NULL AND (access_expires_at IS NULL OR access_expires_at>?))))''',
+            (cid, user['id'], cid, user['id'], date.today().isoformat(), date.today().isoformat(),
+             cid, user['id'], cid, user['id'], cid, user['id'],
+             date.today().isoformat(), date.today().isoformat(), time.time())).fetchone())
     if not row or not (privileged or enrolled):
         raise HTTPException(404, '课程不存在或未加入课程')
-    return dict(row)
+    result = dict(row)
+    result.pop('points_access_days', None)
+    return result
 
 
 def lesson(db, lid, user, *, host=False, manager=False):

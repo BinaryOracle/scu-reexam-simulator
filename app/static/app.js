@@ -1,4 +1,4 @@
-import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261122-course-purchase-duration-v1";
+import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261123-course-purchase-dates-v1";
 import { api, state, requireAuthenticatedUser } from "./api.js?v=20261122-session-guard-v1";
 import { $, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import {
@@ -18,12 +18,12 @@ import {
   setupContestCreation,
   requestJudgeSubmit,
 } from "./contest.js?v=20261122-contest-rewards-v1";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshModelSettings, refreshBackupModules, setupAdmin } from "./admin.js?v=20261122-admin-points-v1";
-import { refreshProfile, refreshReferrals, refreshVouchers, refreshInterviewShop, setupCredits } from "./credits.js?v=20261122-packages-v1";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshFeishuSettings, refreshModelSettings, refreshBackupModules, setupAdmin } from "./admin.js?v=20261124-oauth-v1";
+import { refreshProfile, refreshReferrals, refreshVouchers, refreshInterviewShop, setupCredits } from "./credits.js?v=20261124-feishu-mobile-v1";
 import { clearProfilePassword } from "./profile-account.js?v=20261122-profile-load-guard-v1";
 
 import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261122-points-display-v1";
-import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261121-question-markdown-v1";
+import { refreshTrainingAdmin, clearTrainingAdmin } from "./training-admin.js?v=20261124-oauth-v1";
 
 import { clearTransfers } from "./credit-transfers.js?v=20261117-points-v1";
 import { refreshHome, refreshAnnouncementsAdmin, setupHome, showPendingAnnouncementReminder } from "./home.js?v=20261116-announcement-delete-v1";
@@ -31,10 +31,10 @@ import { refreshHomeLayoutAdmin } from "./home-layout.js?v=20261115-layout-v1";
 import { isAppRouteHash, readAppRoute, writeAppRoute, writeAppViewRoute } from "./view-route.mjs?v=20261115-navigation-v3";
 
 import { refreshCoding, clearCoding, configureCodingBridge } from "./coding.js?v=20261122-points-display-v1";
-import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261122-points-display-v1";
+import { refreshCodingAdmin, clearCodingAdmin } from "./coding-admin.js?v=20261124-oauth-v1";
 import { refreshTrends } from "./trends.js?v=20261116-trends-admin-v1";
 
-import { refreshServicePackages } from './service-packages.js?v=20261123-packages-v2';
+import { refreshServicePackages } from './service-packages.js?v=20261124-feishu-mobile-v1';
 
 configureCodingBridge(requestJudgeSubmit);
 
@@ -52,7 +52,7 @@ const views = {
   users: { label: "用户管理", refresh: refreshUsers },
   questionBank: { label: "面试题库", refresh: refreshQuestionBank },
   vouchers: { label: "积分与卡密", refresh: refreshVouchers },
-  systemSettings: { label: "系统设置", refresh: async () => { await Promise.all([refreshLuoguSettings(), refreshModelSettings(), refreshBackupModules()]); } },
+  systemSettings: { label: "系统设置", refresh: async () => { await Promise.all([refreshLuoguSettings(), refreshFeishuSettings(), refreshModelSettings(), refreshBackupModules()]); } },
   profile: { label: "个人主页", refresh: refreshProfile },
   referrals: { label: "邀请返利", refresh: refreshReferrals },
   interview: {

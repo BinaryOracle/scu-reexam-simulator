@@ -239,6 +239,10 @@ def apply_tables(db, archive):
         sql = f'INSERT INTO "{table}" ({",".join(chr(34)+c+chr(34) for c in columns)}) VALUES ({",".join("?" for _ in columns)})'
         for row in doc['rows']:
             values = {column: _decode(column, row[column]) for column in columns}
+            if table == 'app_settings':
+                from app.services.feishu_oauth import TRANSIENT_KEYS
+                if values['key'] in TRANSIENT_KEYS:
+                    continue
             if table == 'users' and values.get('password_ciphertext'):
                 values['password_ciphertext'] = _reencrypt(archive, values['password_ciphertext'], target_cipher)
             if table == 'app_settings' and values['key'] == 'ai_model_settings':
@@ -246,6 +250,11 @@ def apply_tables(db, archive):
                 for service in settings.values():
                     if service.get('api_key_encrypted'):
                         service['api_key_encrypted'] = _reencrypt(archive, service['api_key_encrypted'], target_cipher)
+                values['value'] = json.dumps(settings, ensure_ascii=False)
+            if table == 'app_settings' and values['key'] == 'feishu_credentials':
+                settings = json.loads(values['value'])
+                if settings.get('app_secret_encrypted'):
+                    settings['app_secret_encrypted'] = _reencrypt(archive, settings['app_secret_encrypted'], target_cipher)
                 values['value'] = json.dumps(settings, ensure_ascii=False)
             db.execute(sql, [values[column] for column in columns])
     for table in backups.TRANSIENT_TABLES:

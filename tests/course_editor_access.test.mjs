@@ -33,41 +33,45 @@ function editor(course=null){
   `,context);
   context.renderEditorInfo(course?.id,course,root);
   const nodes=node=>[node,...node.children.flatMap(nodes)];
-  const all=nodes(root),access=all.find(node=>node.tag==='select'),numbers=all.filter(node=>node.type==='number'),price=numbers[0],duration=numbers[1];
+  const all=nodes(root),access=all.find(node=>node.tag==='select'),numbers=all.filter(node=>node.type==='number'),dates=all.filter(node=>node.type==='date'),price=numbers[0],start=dates[0],end=dates[1];
   return {requests,access,price,priceField:all.find(node=>node.children.includes(price)),
-    duration,durationField:all.find(node=>node.children.includes(duration)),
+    start,end,dateField:all.find(node=>node.children.includes(start)),
     title:all.find(node=>node.tag==='input'&&node.type==='text'),save:all.find(node=>node.textContent===(course?'保存课程信息':'保存草稿并继续'))};
 }
 
-test('switching a new course to points exposes an editable price and saves that mode',async()=>{
+test('switching a new course to points exposes price and date-range fields',async()=>{
   const f=editor();
   assert.deepEqual(f.access.children.map(option=>option.value),['public','roster','points']);
   assert.equal(f.priceField.hidden,true);
   f.access.value='points';f.access.dispatchEvent(new Event('change'));
   assert.equal(f.priceField.hidden,false);
   assert.equal(f.price.hidden,false);
-  f.title.value='付费课程';f.price.value='25';f.duration.value='365';await f.save.action();
-  assert.equal(f.requests[0].access_mode,'points');assert.equal(f.requests[0].points_price,25);assert.equal(f.requests[0].points_access_days,365);
+  assert.equal(f.dateField.hidden,false);
+  f.title.value='付费课程';f.price.value='25';f.start.value='2026-12-01';f.end.value='2027-12-01';await f.save.action();
+  assert.equal(f.requests[0].access_mode,'points');assert.equal(f.requests[0].points_price,25);
+  assert.equal(f.requests[0].points_access_start_date,'2026-12-01');assert.equal(f.requests[0].points_access_end_date,'2027-12-01');
   f.access.value='roster';f.access.dispatchEvent(new Event('change'));
   assert.equal(f.priceField.hidden,true);
 });
 
-test('editing a paid course retains its price',async()=>{
-  const f=editor({id:7,title:'付费课程',access_mode:'points',points_price:25});
+test('editing a paid course retains its configured date range',async()=>{
+  const f=editor({id:7,title:'付费课程',access_mode:'points',points_price:25,points_access_start_date:'2026-12-01',points_access_end_date:'2027-12-01'});
   assert.equal(f.access.value,'points');assert.equal(f.price.hidden,false);assert.equal(f.priceField.hidden,false);
-  assert.equal(f.price.value,'25');assert.equal(f.duration.value,'0');await f.save.action();
-  assert.equal(f.requests[0].points_price,25);assert.equal(f.requests[0].points_access_days,0);
+  assert.equal(f.price.value,'25');assert.equal(f.start.value,'2026-12-01');assert.equal(f.end.value,'2027-12-01');await f.save.action();
+  assert.equal(f.requests[0].points_price,25);assert.equal(f.requests[0].points_access_start_date,'2026-12-01');
+  assert.equal(f.requests[0].points_access_end_date,'2027-12-01');
 });
 
 test('administrator publish view explains course participation and purchase duration',()=>{
   assert.match(source,/enrollment_summary/);
-  assert.match(source,/points_access_days/);
+  assert.match(source,/points_access_start_date/);
+  assert.match(source,/points_access_end_date/);
   assert.match(source,/已购买/);
   assert.match(source,/已加入学习/);
 });
 
 test('the document and parent imports refresh cached course access forms',()=>{
-  const version='20261122-course-purchase-duration-v1';
+  const version='20261123-course-purchase-dates-v1';
   assert.ok(read('../app/static/index.html').includes(`app.js?v=${version}`));
   assert.ok(read('../app/static/app.js').includes(`live.js?v=${version}`));
   assert.ok(read('../app/static/live.js').includes(`course-learning.js?v=${version}`));

@@ -186,3 +186,7 @@ recording_audio_bitrate = 128
 [question_media]
 directory = "data/live/question-images"
 image_max_mb = 5
+
+[feishu]
+# Only lease duration belongs in the TOML file; credentials stay in server environment variables.
+lease_seconds = 90

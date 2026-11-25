@@ -1,6 +1,7 @@
 """Package catalog and purchase snapshots; catalog availability controls reversible visibility."""
 import sqlite3
 import time
+import json
 from fastapi import HTTPException
 from app.services.announcements import render_markdown
 
@@ -24,16 +25,19 @@ def initialize(db):
         removed REAL)''')
     db.execute('''CREATE UNIQUE INDEX IF NOT EXISTS service_purchase_active
         ON service_package_purchases(user_id,package_id) WHERE removed IS NULL''')
+    from app.services.package_benefits import initialize as initialize_benefits
+    initialize_benefits(db)
 
 
 def catalog(db):
-    return [{**dict(row), 'enabled': bool(row['enabled']), 'description_html': render_markdown(row['description'])}
+    return [{**dict(row), 'benefits': json.loads(row['benefits']), 'enabled': bool(row['enabled']),
+             'description_html': render_markdown(row['description'])}
             for row in db.execute('''SELECT p.*, (SELECT COUNT(*) FROM service_package_purchases b
                 WHERE b.package_id=p.id AND b.removed IS NULL) AS purchase_count
                 FROM service_packages p ORDER BY p.id DESC''')]
 
 
-def save_package(db, pid, fields):
+def save_package(db, pid, fields, actor=None):
     if pid is not None and not db.execute('SELECT 1 FROM service_packages WHERE id=?', (pid,)).fetchone():
         raise HTTPException(404, '套餐不存在')
     values = dict(fields)
@@ -44,6 +48,17 @@ def save_package(db, pid, fields):
     for source, target in (('price_yuan', 'price_fen'), ('rebate_percent', 'rebate_basis_points')):
         if source in values:
             values[target] = int(values.pop(source) * 100)
+    if 'benefits' in values:
+        from app.services.package_benefits import Benefits, validate_courses
+        try:
+            benefits = Benefits.model_validate(values['benefits']).model_dump(mode='json')
+        except Exception as error:
+            from pydantic import ValidationError
+            if isinstance(error, ValidationError):
+                raise HTTPException(422, error.errors(include_input=False, include_context=False)) from error
+            raise
+        validate_courses(db, benefits, actor)
+        values['benefits'] = json.dumps(benefits, ensure_ascii=False)
     values['updated'] = time.time()
     if pid is None:
         values['created'] = values['updated']
@@ -87,20 +102,42 @@ def purchases(db, uid):
     return {**_summary(rows, user['referrer_id'] is not None), 'items': [
         {key: row[key] for key in ('id', 'package_id', 'package_name', 'price_fen', 'rebate_basis_points', 'created')}
         | {'rebate_fen': _rebate(row['price_fen'], row['rebate_basis_points']) if user['referrer_id'] is not None else 0,
-           'redeemed': bool(row['redeemed'])} for row in rows]}
+        'redeemed': bool(row['redeemed'])} for row in rows]}
 
 
-def add_purchase(db, uid, pid, actor_id):
+def benefit_details(db, uid, purchase_id):
+    from app.services.package_benefits import details
+    return details(db, uid, purchase_id)
+
+
+def read_purchase(uid, purchase_id):
+    from app.db import connect
+    with connect() as db:
+        result = purchases(db, uid)
+        result['items'] = [item for item in result['items'] if item['id'] == purchase_id]
+        result['benefits'] = benefit_details(db, uid, purchase_id)
+        return result
+
+
+def add_purchase(db, uid, pid, actor_id, *, recipient=None, actor=None):
     package = db.execute('SELECT * FROM service_packages WHERE id=?', (pid,)).fetchone()
     if not package or not package['enabled']:
         raise HTTPException(409, '套餐不存在或已下架，请刷新后重试')
+    benefits = json.loads(package['benefits'])
+    from app.services.package_benefits import FeishuRecipient, apply
+    if benefits['feishu_resources'] and recipient:
+        try:
+            recipient = FeishuRecipient.model_validate(recipient).model_dump()
+        except ValueError:
+            raise HTTPException(422, '请输入有效飞书邮箱或绑定手机号；非中国大陆手机号需包含 + 国际区号') from None
     try:
-        db.execute('''INSERT INTO service_package_purchases(user_id,package_id,package_name,price_fen,
+        purchase_id = db.execute('''INSERT INTO service_package_purchases(user_id,package_id,package_name,price_fen,
             rebate_basis_points,created,created_by) VALUES (?,?,?,?,?,?,?)''',
-            (uid, pid, package['name'], package['price_fen'], package['rebate_basis_points'], time.time(), actor_id))
+            (uid, pid, package['name'], package['price_fen'], package['rebate_basis_points'], time.time(), actor_id)).lastrowid
+        apply(db, purchase_id, uid, pid, benefits, recipient, actor)
     except sqlite3.IntegrityError as error:
         raise HTTPException(409, '该用户已购买此套餐，请勿重复登记') from error
-    return purchases(db, uid)
+    return {**purchases(db, uid), 'purchase_id': purchase_id}
 
 
 def remove_purchase(db, uid, purchase_id):

@@ -8,6 +8,8 @@ const packageImageUrls = new Set();
 let search = '', status = 'all';
 const pageSize = 8;
 const rateText = rate => `${Number((rate / 100).toFixed(2))}%`;
+const MODULE_LABELS = { training: '每日训练', coding: '算法带刷', interview: '模拟面试', exam: '上机考试' };
+const FEISHU_LABELS = { view: '可阅读', edit: '可编辑', full_access: '可管理' };
 
 function releasePackageImages(container = null) {
   for (const image of (container || document).querySelectorAll('img[data-package-object-url]')) {
@@ -77,7 +79,7 @@ export function purchaseSummaryButton(user, open) {
   return control;
 }
 
-/** Both admin and inviter use the same detail body; write controls are admin-only. */
+/** Administrators can enable packages and remove entries; inviters can inspect purchase details. */
 export async function openPurchaseDetails(user, { manage = false, onChange = async () => {} } = {}) {
   const { dialog, body } = dialogShell(`${user.username} · 套餐服务`, true);
   const token = state.token;
@@ -87,7 +89,9 @@ export async function openPurchaseDetails(user, { manage = false, onChange = asy
     const current = ++revision;
     body.replaceChildren(el('p', '正在加载购买明细…', 'muted'));
     try {
-      const [data, options] = await Promise.all([api(base), manage ? api('/admin/service-packages') : Promise.resolve([])]);
+      const [data, options] = await Promise.all([
+        api(base), manage ? api('/admin/service-packages') : Promise.resolve([]),
+      ]);
       if (!dialog.open || token !== state.token || current !== revision) return;
       render(data, options);
     } catch (error) {
@@ -105,7 +109,7 @@ export async function openPurchaseDetails(user, { manage = false, onChange = asy
     body.replaceChildren();
     const note = el('p', '按购买时的价格和返利比例计算；下架套餐暂不计入，重新启用后恢复。', 'package-help');
     const list = el('div', '', 'package-purchase-list');
-    if (!data.items.length) list.append(emptyState('暂无有效购买记录', manage ? '从下方选择已启用套餐，为该用户登记购买。' : '用户购买的套餐经管理员登记后，会在这里显示。', '◇'));
+    if (!data.items.length) list.append(emptyState('暂无有效套餐服务', manage ? '可在下方为该用户添加并启用套餐。' : '用户已启用的套餐服务会显示在这里。', '◇'));
     for (const item of data.items) {
       const row = el('article', '', 'package-purchase-row');
       const identity = el('div', '', 'package-purchase-name');
@@ -116,11 +120,42 @@ export async function openPurchaseDetails(user, { manage = false, onChange = asy
         el('small', rebateText(data.rebate_status === 'unset' ? 'unset' : item.redeemed ? 'redeemed' : 'pending')));
       row.append(identity, price, rate, rebate);
       if (manage) row.append(button('移除', async () => {
-        if (!await confirmAction(`移除「${item.package_name}」的购买登记后，该记录将不再计入金额与返利汇总。`, { title: '移除购买记录？', confirmText: '确认移除', danger: true })) return;
+        if (!await confirmAction(`移除「${item.package_name}」后，该记录将不再计入金额与返利汇总。已发放的模块、积分、课程等权益不会自动撤销。`, { title: '移除套餐服务记录？', confirmText: '确认移除', danger: true })) return;
         if (!dialog.open || token !== state.token) return;
         await api(`${base}/${item.id}`, { method: 'DELETE' });
-        notify('购买记录已移除。'); await changed();
+        notify('套餐服务记录已移除。'); await changed();
       }, 'text-button danger'));
+      if (manage) {
+        const authorization = el('details', '', 'package-document-authorization');
+        authorization.append(el('summary', '查看文档授权状态'));
+        const status = el('div', '', 'package-help');
+        const refresh = button('刷新状态', loadAuthorization, 'text-button');
+        const retry = button('重试文档授权', async () => {
+          await api(`${base}/${item.id}/benefits/retry`, { method: 'POST' });
+          notify('已重新提交文档授权，请稍后刷新状态。', 'info');
+          await loadAuthorization();
+        }, 'text-button');
+        retry.hidden = true;
+        authorization.append(status, refresh, retry);
+        let loaded = false;
+        async function loadAuthorization() {
+          const result = await api(`${base}/${item.id}/benefits`);
+          if (!authorization.isConnected || !dialog.open || token !== state.token) return;
+          status.replaceChildren();
+          const grants = result.grants.filter(grant => grant.kind === 'feishu');
+          if (!grants.length) status.append(el('p', '此记录没有文档授权任务。'));
+          const labels = { pending: '待处理', processing: '授权中', granted: '已授权', failed: '授权失败' };
+          for (const grant of grants) {
+            status.append(el('p', `${grant.payload.resource.name || '飞书资料'} · ${labels[grant.status] || grant.status}${grant.error ? `：${grant.error}` : ''}`));
+          }
+          retry.hidden = !grants.some(grant => ['pending', 'failed'].includes(grant.status));
+          loaded = true;
+        }
+        authorization.addEventListener('toggle', () => {
+          if (authorization.open && !loaded) void run(loadAuthorization, refresh);
+        });
+        row.append(authorization);
+      }
       list.append(row);
     }
     const total = el('footer', '', 'package-purchase-total');
@@ -133,25 +168,54 @@ export async function openPurchaseDetails(user, { manage = false, onChange = asy
       const activeIds = new Set(data.items.map(item => item.package_id));
       const available = options.filter(item => item.enabled && !activeIds.has(item.id));
       const form = el('form', '', 'package-purchase-add');
-      const label = el('label', '登记购买套餐');
-      const select = el('select'); select.required = true; select.setAttribute('aria-label', '选择购买套餐');
-      select.append(new Option(available.length ? '请选择套餐' : '暂无可登记的已启用套餐', ''));
-      for (const item of available) select.append(new Option(`${item.name} · ${packageMoney(item.price_fen)} · 返利 ${rateText(item.rebate_basis_points)}`, item.id));
+      const label = el('label', '添加套餐服务', 'package-enable-field');
+      const select = el('select'); select.required = true; select.setAttribute('aria-label', '选择并启用套餐');
+      select.append(new Option(available.length ? '请选择要启用的套餐' : '暂无可启用的套餐', ''));
+      for (const item of available) select.append(new Option(`${item.name} · ${packageMoney(item.price_fen)}`, item.id));
       label.append(select);
-      const submit = el('button', '登记购买', 'button primary'); submit.type = 'submit'; submit.disabled = !available.length;
-      form.append(label, submit);
+      const recipientType = el('select'); recipientType.setAttribute('aria-label', '飞书授权对象类型');
+      recipientType.append(new Option('飞书手机号', 'mobile'), new Option('飞书邮箱', 'email'));
+      const recipientId = el('input');
+      const recipientFields = el('div', '', 'package-recipient-fields'); recipientFields.hidden = true;
+      const typeLabel = el('label', '授权对象类型'); typeLabel.append(recipientType);
+      const idLabel = el('label', '飞书手机号'); idLabel.append(recipientId);
+      recipientFields.append(typeLabel, idLabel);
+      function syncRecipientType() {
+        const email = recipientType.value === 'email';
+        idLabel.firstChild.textContent = email ? '飞书邮箱' : '飞书手机号';
+        recipientId.type = email ? 'email' : 'tel';
+        recipientId.inputMode = email ? 'email' : 'tel';
+        if (email) recipientId.removeAttribute('pattern');
+        else recipientId.pattern = '(?:1[0-9]{10}|\\+[1-9][0-9]{6,14})';
+        recipientId.title = email ? '请输入用户绑定飞书的邮箱' : '中国大陆手机号填 11 位；其他地区需加 + 国际区号';
+        recipientId.placeholder = email ? '请输入用户绑定飞书的邮箱' : '请输入飞书绑定手机号，如 13800138000';
+        recipientId.setAttribute('aria-label', email ? '飞书邮箱' : '飞书手机号');
+      }
+      recipientType.addEventListener('change', syncRecipientType);
+      syncRecipientType();
+      select.addEventListener('change', () => {
+        const chosen = available.find(value => value.id === Number(select.value));
+        const hasFeishu = Boolean(chosen?.benefits?.feishu_resources?.length);
+        recipientFields.hidden = !hasFeishu;
+        recipientId.required = hasFeishu;
+        recipientId.disabled = recipientType.disabled = !hasFeishu;
+      });
+      recipientId.disabled = recipientType.disabled = true;
+      const hint = el('p', '启用后自动开通套餐配置的模块权限、积分和课程。飞书资料可通过绑定手机号定位用户，或使用飞书邮箱授权；手机号查询受应用通讯录范围限制。', 'package-help package-enable-hint');
+      const submit = el('button', '添加并启用套餐', 'button primary'); submit.type = 'submit'; submit.disabled = !available.length;
+      const controls = el('div', '', 'package-enable-controls'); controls.append(label, submit);
+      form.append(controls, recipientFields, hint);
       form.addEventListener('submit', event => {
         event.preventDefault();
         if (!form.reportValidity()) return;
         void run(async () => {
-          if (!await confirmAction('请确认用户已购买该套餐。此操作只登记购买与返利，不会扣除用户积分或发起支付。', { title: '确认登记购买？', confirmText: '确认登记' })) return;
+          if (!await confirmAction('确认要为该用户添加并启用所选套餐吗？系统会记录套餐服务金额与返利，并自动发放套餐配置的相关权益。', { title: '启用套餐服务？', confirmText: '确认启用' })) return;
           if (!dialog.open || token !== state.token) return;
-          await api(base, { method: 'POST', body: JSON.stringify({ package_id: Number(select.value) }) });
-          notify('购买套餐已登记。'); await changed();
+          await api(base, { method: 'POST', body: JSON.stringify({ package_id: Number(select.value), ...(recipientFields.hidden ? {} : { feishu_recipient: { member_type: recipientType.value, member_id: recipientId.value.trim() } }) }) });
+          notify(recipientFields.hidden ? '套餐服务已添加并启用，相关权益已处理。' : '套餐已启用，文档授权已提交，可在套餐明细中查看授权状态。'); await changed();
         }, submit);
       });
       body.append(form);
-      if (user.legacy_purchase_note) body.append(el('p', `历史手填备注：${user.legacy_purchase_note}（未计入金额，请按实际购买情况登记套餐）`, 'package-help package-legacy-note'));
     }
   }
   await load();
@@ -171,6 +235,35 @@ function openPackageEditor(item = null) {
   const name = input('套餐名', item?.name || '', 'text', { maxLength: 100 });
   const price = input('价格（元）', item ? (item.price_fen / 100).toFixed(2) : '', 'number', { min: '0', max: '100000000', step: '0.01' });
   const rate = input('返利比例（%）', item ? (item.rebate_basis_points / 100).toFixed(2) : '5', 'number', { min: '0', max: '100', step: '0.01' });
+  const originalBenefits = item?.benefits || {};
+  const benefitPanel = el('section', '', 'package-benefits-editor');
+  benefitPanel.append(el('h3', '购买后自动开放'), el('p', '仅影响之后登记的购买；已登记用户的权益快照不会随套餐修改而变化。', 'package-help package-benefit-intro'));
+  const moduleGrid = el('div', '', 'package-module-options');
+  const moduleInputs = {};
+  for (const [key, labelText] of Object.entries(MODULE_LABELS)) {
+    const label = el('label'); const checkbox = el('input'); checkbox.type = 'checkbox'; checkbox.checked = (originalBenefits.modules || []).includes(key);
+    checkbox.setAttribute('aria-label', labelText); moduleInputs[key] = checkbox; label.append(checkbox, el('span', labelText)); moduleGrid.append(label);
+  }
+  const giftLabel = el('label', '赠送积分', 'package-benefit-field package-gift-field'); const giftPoints = el('input'); giftPoints.type = 'number'; giftPoints.min = '0'; giftPoints.max = '1000000'; giftPoints.step = '1'; giftPoints.value = originalBenefits.gift_points || 0; giftPoints.setAttribute('aria-label', '购买套餐赠送积分'); giftLabel.append(giftPoints);
+  const courseLabel = el('div', '', 'package-benefit-field package-course-field');
+  const courseHeading = el('span', '套餐默认课程（可多选）', 'package-course-label');
+  const courseList = el('div', '', 'package-course-list'); courseList.append(el('p', '正在加载课程…', 'package-course-empty')); courseList.setAttribute('role', 'group'); courseList.setAttribute('aria-label', '套餐默认开放课程');
+  courseLabel.append(courseHeading, courseList);
+  const courseHelp = el('p', '积分课程按配置的开放起止日期授权；私域课程会加入用户课程库。选择当前管理员可管理的已发布课程。', 'package-help');
+  const resourceList = el('div', '', 'package-feishu-resources');
+  function addFeishuResource(resource = {}) {
+    const row = el('div', '', 'package-feishu-resource');
+    const title = el('input'); title.value = resource.name || ''; title.placeholder = '资料名称'; title.setAttribute('aria-label', '飞书资料名称');
+    const url = el('input'); url.value = resource.url || ''; url.placeholder = 'https://my.feishu.cn/drive/folder/...'; url.setAttribute('aria-label', '飞书文档或目录链接');
+    const perm = el('select'); perm.setAttribute('aria-label', '飞书文档权限');
+    for (const value of ['view', 'edit', 'full_access']) perm.append(new Option(FEISHU_LABELS[value], value));
+    perm.value = resource.permission || 'view';
+    row.append(title, url, perm, button('移除', () => row.remove(), 'text-button danger')); resourceList.append(row);
+  }
+  for (const resource of originalBenefits.feishu_resources || []) addFeishuResource(resource);
+  const addResource = button('添加飞书文档或目录', () => addFeishuResource(), 'button package-add-resource');
+  const feishuHelp = el('p', '启用套餐时可填写接收人的飞书绑定手机号或邮箱。手机号定位需配置飞书应用凭据、contact:user.id:readonly 权限及通讯录范围；文件夹授权要求调用身份具有管理权限。飞书分享密码不参与授权，请勿填入套餐链接。', 'package-help');
+  benefitPanel.append(moduleGrid, giftLabel, courseLabel, courseHelp, resourceList, addResource, feishuHelp);
   const markdown = el('textarea'); markdown.value = item?.description || ''; markdown.maxLength = 50000;
   markdown.rows = 10; markdown.placeholder = '## 套餐内容\n\n- 服务内容\n- 适合人群\n- 服务说明';
   markdown.setAttribute('aria-label', '套餐详情 Markdown');
@@ -215,12 +308,33 @@ function openPackageEditor(item = null) {
   const footer = el('div', '', 'package-editor-footer');
   const save = el('button', '保存套餐', 'button primary'); save.type = 'submit';
   footer.append(button('取消', () => dialog.close()), save);
-  form.append(fields, toolbar, markdown, uploadStatus, preview, help, footer);
+  form.append(fields, benefitPanel, toolbar, markdown, uploadStatus, preview, help, footer);
+  let courseOptionsLoaded = false;
+  void api('/courses?scope=managed').then(data => {
+    if (!dialog.open || token !== state.token) return;
+    const selected = new Set(originalBenefits.course_ids || []);
+    const courses = data.items.filter(course => course.publication_status === 'published');
+    courseList.replaceChildren();
+    if (!courses.length) courseList.append(el('p', '暂无已发布课程可选。', 'package-course-empty'));
+    for (const course of courses) {
+      const option = el('label', '', `package-course-option${selected.has(course.id) ? ' is-selected' : ''}`);
+      const checkbox = el('input'); checkbox.type = 'checkbox'; checkbox.value = course.id; checkbox.checked = selected.has(course.id);
+      checkbox.addEventListener('change', () => option.classList.toggle('is-selected', checkbox.checked));
+      const copy = el('span', '', 'package-course-copy');
+      const title = el('strong', course.title, 'package-course-title');
+      const access = course.access_mode === 'points'
+        ? `积分课程 · ${course.points_price} 积分 · ${course.points_access_start_date || '未设置起始日'} 至 ${course.points_access_end_date || '未设置结束日'}`
+        : '私域课程 · 加入用户课程库';
+      copy.append(title, el('small', access, 'package-course-meta'));
+      option.append(checkbox, copy); courseList.append(option);
+    }
+    courseOptionsLoaded = true;
+  }).catch(() => { courseList.replaceChildren(el('p', '课程列表暂时无法加载，请关闭后重新打开套餐编辑。', 'package-course-empty package-benefit-error')); });
   form.addEventListener('submit', event => {
     event.preventDefault(); if (!form.reportValidity()) return;
     void run(async () => {
       await api(item ? `/admin/service-packages/${item.id}` : '/admin/service-packages', {
-        method: item ? 'PATCH' : 'POST', body: JSON.stringify({ name: name.value.trim(), price_yuan: price.value, rebate_percent: rate.value, description: markdown.value }),
+        method: item ? 'PATCH' : 'POST', body: JSON.stringify({ name: name.value.trim(), price_yuan: price.value, rebate_percent: rate.value, description: markdown.value, benefits: { modules: Object.entries(moduleInputs).filter(([, checkbox]) => checkbox.checked).map(([key]) => key), gift_points: Number(giftPoints.value || 0), course_ids: courseOptionsLoaded ? [...courseList.querySelectorAll('input:checked')].map(option => Number(option.value)) : (originalBenefits.course_ids || []), feishu_resources: [...resourceList.children].map(row => ({ name: row.children[0].value.trim(), url: row.children[1].value.trim(), permission: row.children[2].value })) } }),
       });
       if (token !== state.token) return;
       if (dialog.open) dialog.close(); notify('套餐已保存。');

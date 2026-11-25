@@ -142,6 +142,8 @@ def test_restore_reencrypts_for_current_deployment_key(client):
     with connect() as db:
         db.execute("INSERT INTO app_settings VALUES ('ai_model_settings',?)",
                    (json.dumps({'asr': {'api_key_encrypted': encrypt_password('asr-secret')}}),))
+        db.execute("INSERT INTO app_settings VALUES ('feishu_credentials',?)",
+                   (json.dumps({'app_id': 'cli_backup', 'app_secret_encrypted': encrypt_password('feishu-secret')}),))
     content = export(client, owner, ['accounts', 'settings'])
     key_path = Path(load_config()['security']['password_key_file'])
     target_key = Fernet.generate_key()
@@ -153,6 +155,8 @@ def test_restore_reencrypts_for_current_deployment_key(client):
         assert decrypt_password(db.execute("SELECT password_ciphertext FROM users WHERE username='root'").fetchone()[0]) == 'root'
         config = json.loads(db.execute("SELECT value FROM app_settings WHERE key='ai_model_settings'").fetchone()[0])
         assert decrypt_password(config['asr']['api_key_encrypted']) == 'asr-secret'
+        feishu = json.loads(db.execute("SELECT value FROM app_settings WHERE key='feishu_credentials'").fetchone()[0])
+        assert decrypt_password(feishu['app_secret_encrypted']) == 'feishu-secret'
     assert root(client)
 
 

@@ -3,9 +3,12 @@ from test_course_learning import create_ready_course
 
 
 def paid_course(client, admin):
+    from datetime import date, timedelta
     course = create_ready_course(client, admin, '积分课程')
     payload = {key: course[key] for key in ('title', 'description', 'publication_status', 'host_id', 'member_ids')}
-    payload.update(access_mode='points', points_price=12)
+    payload.update(access_mode='points', points_price=12,
+                   points_access_start_date=date.today().isoformat(),
+                   points_access_end_date=(date.today() + timedelta(days=365)).isoformat())
     response = client.patch(f"/api/courses/{course['id']}", headers=admin, json=payload)
     assert response.status_code == 200, response.text
     return response.json()
@@ -121,16 +124,21 @@ def test_points_price_must_be_positive_integer(client):
         assert response.status_code == 422
 
 
-def test_paid_course_duration_is_fixed_at_purchase_and_expires_access(client):
+def test_paid_course_date_range_is_shown_and_fixed_at_purchase(client):
+    from datetime import date, timedelta
     from app.db import connect
     admin, alice = login(client, 'manager'), login(client, 'alice')
     course = create_ready_course(client, admin, '限时积分课程')
     cid = course['id']
     payload = {key: course[key] for key in ('title', 'description', 'publication_status', 'host_id', 'member_ids')}
-    payload.update(access_mode='points', points_price=12, points_access_days=30)
+    start_date = date.today().isoformat()
+    end_date = (date.today() + timedelta(days=30)).isoformat()
+    payload.update(access_mode='points', points_price=12,
+                   points_access_start_date=start_date, points_access_end_date=end_date)
     saved = client.patch(f'/api/courses/{cid}', headers=admin, json=payload)
     assert saved.status_code == 200, saved.text
-    assert saved.json()['points_access_days'] == 30
+    assert saved.json()['points_access_start_date'] == start_date
+    assert saved.json()['points_access_end_date'] == end_date
     uid = client.get('/api/me', headers=alice).json()['id']
     with connect() as db:
         db.execute('UPDATE users SET points=20 WHERE id=?', (uid,))
@@ -138,17 +146,22 @@ def test_paid_course_duration_is_fixed_at_purchase_and_expires_access(client):
                             json={'expected_points_price': 12})
     assert purchased.status_code == 200, purchased.text
     with connect() as db:
-        entitlement = db.execute('SELECT purchased_at,access_expires_at FROM course_purchases WHERE course_id=? AND user_id=?',
+        entitlement = db.execute('SELECT purchased_at,access_start_date,access_end_date FROM course_purchases WHERE course_id=? AND user_id=?',
                                  (cid, uid)).fetchone()
-        assert entitlement['access_expires_at'] == entitlement['purchased_at'] + 30 * 86400
+        assert entitlement['access_start_date'] == start_date
+        assert entitlement['access_end_date'] == end_date
 
-    payload['points_access_days'] = 7
+    payload['points_access_start_date'] = start_date
+    payload['points_access_end_date'] = (date.today() + timedelta(days=40)).isoformat()
     updated = client.patch(f'/api/courses/{cid}', headers=admin, json=payload)
     assert updated.status_code == 200, updated.text
     with connect() as db:
-        assert db.execute('SELECT access_expires_at FROM course_purchases WHERE course_id=? AND user_id=?',
-                          (cid, uid)).fetchone()[0] == entitlement['access_expires_at']
-        db.execute('UPDATE course_purchases SET access_expires_at=0 WHERE course_id=? AND user_id=?', (cid, uid))
+        unchanged = db.execute('SELECT access_start_date,access_end_date FROM course_purchases WHERE course_id=? AND user_id=?',
+                               (cid, uid)).fetchone()
+        assert unchanged['access_start_date'] == entitlement['access_start_date']
+        assert unchanged['access_end_date'] == entitlement['access_end_date']
+        db.execute('UPDATE course_purchases SET access_end_date=? WHERE course_id=? AND user_id=?',
+                   ((date.today() - timedelta(days=1)).isoformat(), cid, uid))
     assert client.get(f'/api/courses/{cid}', headers=alice).status_code == 404
     assert cid not in [row['id'] for row in client.get('/api/courses?scope=mine', headers=alice).json()['items']]
     with connect() as db:
@@ -158,10 +171,48 @@ def test_paid_course_duration_is_fixed_at_purchase_and_expires_access(client):
     assert repurchased.status_code == 200, repurchased.text
     assert repurchased.json()['is_enrolled'] is True
     with connect() as db:
-        purchase = db.execute('SELECT points_paid,access_expires_at FROM course_purchases WHERE course_id=? AND user_id=?',
+        purchase = db.execute('SELECT points_paid,access_start_date,access_end_date FROM course_purchases WHERE course_id=? AND user_id=?',
                               (cid, uid)).fetchone()
         assert purchase['points_paid'] == 12
-        assert purchase['access_expires_at'] > 0
+        assert purchase['access_start_date'] == start_date
+        assert purchase['access_end_date'] == (date.today() + timedelta(days=40)).isoformat()
+
+
+def test_paid_course_cannot_be_purchased_outside_configured_access_dates(client):
+    from datetime import date, timedelta
+    from app.db import connect
+    admin, alice = login(client, 'manager'), login(client, 'alice')
+    course = create_ready_course(client, admin, '尚未开放的积分课程')
+    cid = course['id']
+    tomorrow = date.today() + timedelta(days=1)
+    payload = {key: course[key] for key in ('title', 'description', 'publication_status', 'host_id', 'member_ids')}
+    payload.update(access_mode='points', points_price=12,
+                   points_access_start_date=tomorrow.isoformat(),
+                   points_access_end_date=(tomorrow + timedelta(days=30)).isoformat())
+    assert client.patch(f'/api/courses/{cid}', headers=admin, json=payload).status_code == 200
+    uid = client.get('/api/me', headers=alice).json()['id']
+    with connect() as db:
+        db.execute('UPDATE users SET points=20 WHERE id=?', (uid,))
+    purchase = client.post(f'/api/courses/{cid}/purchase', headers=alice,
+                           json={'expected_points_price': 12})
+    assert purchase.status_code == 409
+    assert '当前不在开放日期内' in purchase.json()['detail']
+    with connect() as db:
+        assert db.execute('SELECT points FROM users WHERE id=?', (uid,)).fetchone()[0] == 20
+        assert db.execute('SELECT COUNT(*) FROM course_purchases WHERE course_id=?', (cid,)).fetchone()[0] == 0
+
+
+def test_points_course_rejects_invalid_date_order(client):
+    from datetime import date, timedelta
+    admin = login(client, 'manager')
+    course = create_ready_course(client, admin, '日期错误课程')
+    payload = {key: course[key] for key in ('title', 'description', 'publication_status', 'host_id', 'member_ids')}
+    payload.update(access_mode='points', points_price=12,
+                   points_access_start_date=date.today().isoformat(),
+                   points_access_end_date=(date.today() - timedelta(days=1)).isoformat())
+    response = client.patch(f"/api/courses/{course['id']}", headers=admin, json=payload)
+    assert response.status_code == 422
+    assert '不能早于' in response.json()['detail']
 
 
 def test_course_management_detail_reports_participation_by_access_mode(client):
@@ -188,7 +239,10 @@ def test_course_management_detail_reports_participation_by_access_mode(client):
 
     paid = create_ready_course(client, admin, '购买参与统计')
     paid_payload = {key: paid[key] for key in ('title', 'description', 'publication_status', 'host_id', 'member_ids')}
-    paid_payload.update(access_mode='points', points_price=12)
+    from datetime import date, timedelta
+    paid_payload.update(access_mode='points', points_price=12,
+                        points_access_start_date=date.today().isoformat(),
+                        points_access_end_date=(date.today() + timedelta(days=30)).isoformat())
     assert client.patch(f"/api/courses/{paid['id']}", headers=admin, json=paid_payload).status_code == 200
     with connect() as db:
         db.execute('UPDATE users SET points=20 WHERE id=?', (uid,))

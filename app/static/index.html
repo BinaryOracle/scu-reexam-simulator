@@ -7,16 +7,16 @@
     <title>知序 · 复试模拟系统</title>
     <link rel="icon" href="/static/mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=0.19.1" />
-    <link rel="stylesheet" href="/static/style.css?v=20261122-admin-points-v1" />
+    <link rel="stylesheet" href="/static/style.css?v=20261124-oauth-v1" />
     <link rel="stylesheet" href="/static/workspace.css?v=20261121-header-grid-v13" />
     <link rel="stylesheet" href="/static/contest-focus.css?v=20261115-contest-records-v2" />
     <link rel="stylesheet" href="/static/live.css?v=20261118-course-v9" />
-    <link rel="stylesheet" href="/static/course-learning.css?v=20261122-course-purchase-duration-v1" />
+    <link rel="stylesheet" href="/static/course-learning.css?v=20261123-course-purchase-dates-v1" />
     <link rel="stylesheet" href="/static/coding.css?v=20261121-local-cases-v2" />
     <link rel="stylesheet" href="/static/home-layout.css?v=20261115-layout-v1" />
     <link rel="stylesheet" href="/static/training.css?v=20261121-empty-state-v2" />
     <link rel="stylesheet" href="/static/leaderboard.css?v=20261117-weekly-leaderboard-v3" />
-    <link rel="stylesheet" href="/static/service-packages.css?v=20261123-packages-v2" />
+    <link rel="stylesheet" href="/static/service-packages.css?v=20261124-feishu-mobile-v1" />
     <link rel="stylesheet" href="/static/credits.css?v=20261122-voucher-spacing-v2" />
     <link rel="stylesheet" href="/static/select-controls.css?v=20261116-v2" />
     <script>
@@ -433,6 +433,23 @@
               <p class="field-hint">默认地址为 http://127.0.0.1:8000/。正式部署请填写 HTTPS 网站的来源地址，不包含路径。修改后需要重新下载并加载插件。</p>
               <div class="luogu-origin-actions"><p id="luoguSettingsStatus" role="status" aria-live="polite" hidden></p><button type="submit" class="button primary">保存设置</button></div>
             </form>
+            <form id="feishuSettingsForm" class="panel feishu-admin-settings">
+              <div><span class="eyebrow">DOCUMENT ACCESS</span><h2>飞书文档授权凭证</h2><p class="muted">用于登记套餐购买后自动授予飞书文档或目录权限。App Secret 加密保存且不会回显。</p></div>
+              <label for="feishuAppId">App ID</label>
+              <input id="feishuAppId" type="text" maxlength="256" autocomplete="off" placeholder="cli_xxxxxxxxxxxxxxxx" />
+              <label for="feishuAppSecret">App Secret</label>
+              <input id="feishuAppSecret" type="password" maxlength="4096" autocomplete="new-password" placeholder="留空表示不修改已保存的 Secret" />
+              <label for="feishuRedirectUri">OAuth 回调地址</label>
+              <input id="feishuRedirectUri" type="url" maxlength="2048" autocomplete="off" placeholder="https://你的网站/api/feishu/oauth/callback" />
+              <p class="field-hint">将此地址完整添加到飞书开放平台 → 安全设置 → 重定向 URL。正式部署使用 HTTPS，本机调试可使用 127.0.0.1。</p>
+              <div class="feishu-admin-actions"><p id="feishuSettingsStatus" role="status" aria-live="polite" hidden></p><button id="clearFeishuAppSecret" type="button" class="button secondary danger">清除已保存 Secret</button><button type="submit" class="button primary">保存飞书凭证</button></div>
+            </form>
+            <section class="panel feishu-oauth-panel" aria-labelledby="feishuOAuthTitle">
+              <div><span class="eyebrow">ADMINISTRATOR CONNECTION</span><h2 id="feishuOAuthTitle">连接飞书资料管理账号</h2><p class="muted">使用有权分享资料的飞书账号完成授权，套餐启用后将以该账号的身份添加文档协作者。</p></div>
+              <p id="feishuOAuthStatus" class="feishu-oauth-status" role="status" aria-live="polite">正在读取连接状态…</p>
+              <p class="field-hint">仅申请添加云文档协作者与离线访问权限，令牌由服务端加密保存并自动续期。外部学员请使用飞书绑定邮箱，并先与资料管理员建立联系人关系。手机号查询仍受应用通讯录范围限制。</p>
+              <div class="feishu-oauth-actions"><button id="disconnectFeishuOAuth" type="button" class="button secondary danger" hidden>断开连接</button><button id="connectFeishuOAuth" type="button" class="button primary" hidden>连接飞书账号</button></div>
+            </section>
             <div class="model-settings-form">
               <div class="section-heading"><div><h2>大模型与语音服务</h2><p class="muted">修改后对后续请求立即生效。已配置的密钥以掩码显示；留空保持不变，输入新密钥即可替换。</p></div></div>
               <div class="model-compat-note"><strong>接口兼容说明</strong><span>面试与趋势分析使用 OpenAI 风格 Chat Completions；语音识别依赖音频输入及服务商参数，语音合成按所选协议调用。切换服务商时请同时确认模型名称和所需能力均受支持。</span></div>
@@ -953,6 +970,6 @@
       </form>
     </dialog>
     <dialog id="announcementDialog" class="account-dialog announcement-dialog" aria-labelledby="announcementDialogTitle"><div class="dialog-header"><div><span class="eyebrow">公告</span><h2 id="announcementDialogTitle">公告详情</h2></div><button id="closeAnnouncementDialog" type="button" class="icon-button" aria-label="关闭公告">×</button></div><div id="announcementDialogContent" class="dialog-body announcement-dialog-content"></div></dialog>
-    <script type="module" src="/static/app.js?v=20261122-course-purchase-duration-v1"></script>
+    <script type="module" src="/static/app.js?v=20261124-oauth-v1"></script>
   </body>
 </html>

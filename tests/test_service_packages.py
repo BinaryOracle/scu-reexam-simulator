@@ -86,12 +86,14 @@ def test_catalog_disable_hides_then_restores_purchases_and_settlement(client):
     assert len(client.get(path, headers=manager).json()['items']) == 1
 
 
-def test_no_inviter_has_unset_rebate_and_legacy_text_is_not_a_purchase(client):
+def test_no_inviter_has_unset_rebate_and_legacy_notes_are_not_exposed(client):
     manager = login(client, 'manager')
     from app.db import connect
     with connect() as db:
         uid = db.execute("SELECT id FROM users WHERE username='bob'").fetchone()[0]
         db.execute("UPDATE users SET purchase_service='不明金额的旧记录',rebate_redeemed=1 WHERE id=?", (uid,))
+    user = next(row for row in client.get('/api/admin/users', headers=manager).json() if row['id'] == uid)
+    assert 'legacy_purchase_note' not in user
     package = create_package(client, manager)
     path = f'/api/admin/users/{uid}/package-purchases'
     assert client.get(path, headers=manager).json()['purchase_total_fen'] == 0

@@ -1,6 +1,7 @@
 """Course visibility, enrollment, lesson ordering, and learner progress."""
 import time
 import re
+from datetime import date
 from html.parser import HTMLParser
 from html import unescape
 from fastapi import HTTPException
@@ -43,12 +44,16 @@ def can_access_course(db, course_id, user):
         return True
     return bool(db.execute('''SELECT 1 WHERE
         EXISTS (SELECT 1 FROM live_members WHERE course_id=? AND user_id=?) OR
+        EXISTS (SELECT 1 FROM package_course_grants WHERE course_id=? AND user_id=? AND
+            (access_start_date IS NULL OR (access_start_date<=? AND access_end_date>=?))) OR
         (EXISTS (SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?) AND
          NOT EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?)) OR
-        EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?
-            AND (access_expires_at IS NULL OR access_expires_at>?))''',
-        (course_id, user['id'], course_id, user['id'], course_id, user['id'],
-         course_id, user['id'], time.time())).fetchone())
+        EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=? AND
+            ((access_start_date IS NOT NULL AND access_start_date<=? AND access_end_date>=?) OR
+             (access_start_date IS NULL AND (access_expires_at IS NULL OR access_expires_at>?))))''',
+        (course_id, user['id'], course_id, user['id'], date.today().isoformat(), date.today().isoformat(),
+         course_id, user['id'], course_id, user['id'],
+         course_id, user['id'], date.today().isoformat(), date.today().isoformat(), time.time())).fetchone())
 
 
 def is_enrolled(db, course_id, user):
@@ -57,8 +62,13 @@ def is_enrolled(db, course_id, user):
     if not course:
         return False
     if db.execute('''SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?
-        AND (access_expires_at IS NULL OR access_expires_at>?)''',
-                  (course_id, user['id'], time.time())).fetchone():
+        AND ((access_start_date IS NOT NULL AND access_start_date<=? AND access_end_date>=?) OR
+             (access_start_date IS NULL AND (access_expires_at IS NULL OR access_expires_at>?)))''',
+                  (course_id, user['id'], date.today().isoformat(), date.today().isoformat(), time.time())).fetchone():
+        return True
+    if db.execute('''SELECT 1 FROM package_course_grants WHERE course_id=? AND user_id=?
+        AND (access_start_date IS NULL OR (access_start_date<=? AND access_end_date>=?))''',
+                  (course_id, user['id'], date.today().isoformat(), date.today().isoformat())).fetchone():
         return True
     if db.execute('''SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?
         AND (?='public' OR NOT EXISTS (SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?))''',
@@ -96,6 +106,15 @@ def require_lesson(db, lesson_id, user, *, manager=False):
         course = dict(db.execute('SELECT * FROM live_courses WHERE id=?', (lesson['course_id'],)).fetchone())
         return lesson, course
     course = require_access(db, lesson['course_id'], user, manager=manager)
+    return lesson, course
+
+
+def require_lesson_asset(db, lesson_id, user, *, markdown=False):
+    """Require course enrollment or explicit lesson preview before serving course files."""
+    lesson, course = require_lesson(db, lesson_id, user)
+    if not (manage(course, user) or course['host_id'] == user['id'] or can_preview_lesson(db, lesson_id) or
+            (course['access_mode'] == 'public' and not markdown) or is_enrolled(db, course['id'], user)):
+        raise HTTPException(404, '请先加入课程，或选择开放预览的课时')
     return lesson, course
 
 
@@ -197,7 +216,7 @@ def course_detail(db, course_id, user):
             'SELECT * FROM course_lessons WHERE section_id=? ORDER BY position,id', (section['id'],))]
         sections.append({**dict(section), 'lessons': lessons})
     host = db.execute('SELECT username FROM users WHERE id=?', (course['host_id'],)).fetchone()
-    detail = {key: value for key, value in course.items() if key != 'cover_asset_id'}
+    detail = {key: value for key, value in course.items() if key not in ('cover_asset_id', 'points_access_days')}
     detail.update({'host_name': host['username'],
             'description_html': render_lesson_markdown(course.get('description', '')),
             'description_summary': markdown_summary(course.get('description', '')),
@@ -227,9 +246,13 @@ def course_detail(db, course_id, user):
             detail['enrollment_summary'] = {'assigned_count': len(learners),
                 'joined_count': sum(bool(row['started']) for row in learners), 'students': learners}
         else:
-            learners = [dict(row) for row in db.execute('''SELECT u.username,p.purchased_at,p.access_expires_at
+            learners = [dict(row) for row in db.execute('''SELECT u.username,p.purchased_at,p.access_start_date,
+                    p.access_end_date,p.access_expires_at,'积分购买' AS source
                 FROM course_purchases p JOIN users u ON u.id=p.user_id
-                WHERE p.course_id=? ORDER BY p.purchased_at DESC,u.username''', (course_id,))]
+                WHERE p.course_id=? UNION ALL SELECT u.username,NULL AS purchased_at,g.access_start_date,
+                    g.access_end_date,NULL AS access_expires_at,'套餐授权' AS source
+                FROM package_course_grants g JOIN users u ON u.id=g.user_id WHERE g.course_id=?
+                ORDER BY purchased_at DESC,username''', (course_id, course_id))]
             detail['enrollment_summary'] = {'purchased_count': len(learners), 'students': learners}
         detail['publish_issues'] = publish_issues(db, course_id)
     return detail
@@ -237,7 +260,8 @@ def course_detail(db, course_id, user):
 
 def public_preview(db, course_id, user=None):
     """Return published public course metadata without member or lesson resource data."""
-    course = db.execute('''SELECT c.id,c.title,c.description,c.access_mode,c.points_price,c.points_access_days,c.cover_kind,c.cover_value,c.cover_asset_id,u.username host_name
+    course = db.execute('''SELECT c.id,c.title,c.description,c.access_mode,c.points_price,
+        c.points_access_start_date,c.points_access_end_date,c.cover_kind,c.cover_value,c.cover_asset_id,u.username host_name
         FROM live_courses c JOIN users u ON u.id=c.host_id
         WHERE c.id=? AND c.publication_status='published' AND (c.access_mode IN ('public','points') OR EXISTS (
             SELECT 1 FROM course_lessons l JOIN course_sections s ON s.id=l.section_id

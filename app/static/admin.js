@@ -13,7 +13,8 @@ import {
   confirmAction,
 } from "./ui.js?v=20261114-ui-v17";
 
-import { purchaseSummaryButton, openPurchaseDetails, rebateText } from './service-packages.js?v=20261123-packages-v2';
+import { purchaseSummaryButton, openPurchaseDetails, rebateText } from './service-packages.js?v=20261124-feishu-mobile-v1';
+import { refreshFeishuOAuth, setupFeishuOAuth } from './feishu-oauth.js?v=20261124-oauth-v1';
 
 let accounts = [];
 let usernameTarget = null;
@@ -113,6 +114,7 @@ export async function refreshQuestionBank() {
   renderQuestionBank();
 }
 let luoguSettingsRevision = 0;
+let feishuSettingsRevision = 0;
 const modelServiceMeta = {
   interview: { title: '面试多模态模型', description: '用于专家提问与整场面试点评，可结合 PPT、回答文本和录音。', tag: '面试' },
   asr: { title: '语音识别（ASR）', description: '将面试录音转写为文字，供面试记录与点评使用。', tag: '语音输入' },
@@ -127,6 +129,23 @@ export async function refreshLuoguSettings() {
   if (revision !== luoguSettingsRevision || $('luoguAppOrigin').readOnly) return;
   $('luoguAppOrigin').value = `${settings.app_origin}/`;
   $('luoguSettingsStatus').hidden = true;
+}
+export async function refreshFeishuSettings() {
+  const revision = ++feishuSettingsRevision;
+  const settings = await api('/admin/feishu-settings');
+  if (revision !== feishuSettingsRevision || $('feishuAppId').readOnly) return;
+  $('feishuAppId').value = settings.app_id || '';
+  $('feishuRedirectUri').value = settings.redirect_uri || '';
+  $('feishuAppSecret').value = '';
+  $('feishuAppSecret').placeholder = settings.app_secret_configured
+    ? '••••••••••••••••（留空保持不变）' : '请输入飞书 App Secret';
+  const status = $('feishuSettingsStatus');
+  status.textContent = settings.app_secret_configured
+    ? `凭证已配置 · 当前来源：${settings.credential_source}`
+    : `尚未配置 App Secret · 当前来源：${settings.credential_source}`;
+  status.hidden = false;
+  status.classList.remove('form-error');
+  await refreshFeishuOAuth();
 }
 let modelSettingsRevision = 0;
 function renderModelSettings(settings) {
@@ -679,6 +698,53 @@ export function setupAdmin() {
       status.hidden = false;
       status.classList.add('form-error');
     }).finally(() => { save.disabled = false; origin.readOnly = false; });
+  });
+  $("feishuAppId").addEventListener("input", () => { feishuSettingsRevision++; $("feishuSettingsStatus").hidden = true; });
+  setupFeishuOAuth();
+  $("feishuAppSecret").addEventListener("input", () => { feishuSettingsRevision++; $("feishuSettingsStatus").hidden = true; });
+  $("feishuSettingsForm").addEventListener("submit", event => {
+    event.preventDefault();
+    feishuSettingsRevision++;
+    const form = event.currentTarget;
+    const save = form.querySelector('[type="submit"]');
+    const appId = $("feishuAppId");
+    const secret = $("feishuAppSecret");
+    const status = $("feishuSettingsStatus");
+    save.disabled = true; appId.readOnly = true; secret.readOnly = true; status.hidden = true;
+    void api('/admin/feishu-settings', {
+      method: 'PATCH',
+      body: JSON.stringify({ app_id: appId.value.trim(), redirect_uri: $('feishuRedirectUri').value.trim(), ...(secret.value ? { app_secret: secret.value } : {}) }),
+    }).then(settings => {
+      appId.value = settings.app_id || '';
+      secret.value = '';
+      secret.placeholder = settings.app_secret_configured ? '••••••••••••••••（留空保持不变）' : '请输入飞书 App Secret';
+      status.textContent = settings.app_secret_configured
+        ? `飞书凭证已保存 · 当前来源：${settings.credential_source}` : 'App ID 已保存；App Secret 尚未配置。';
+      status.hidden = false; status.classList.remove('form-error');
+      notify('飞书授权凭证已保存。');
+      void refreshFeishuOAuth();
+    }).catch(error => {
+      status.textContent = error.message; status.hidden = false; status.classList.add('form-error');
+    }).finally(() => { save.disabled = false; appId.readOnly = false; secret.readOnly = false; });
+  });
+  $("clearFeishuAppSecret").addEventListener("click", async () => {
+    if (!await confirmAction('清除后台保存的飞书 App Secret 后，服务端将回退到环境变量中的 FEISHU_APP_SECRET。若环境变量也未配置，飞书文档授权将无法使用。', {
+      title: '清除飞书 App Secret？', confirmText: '清除 Secret', danger: true,
+    })) return;
+    const control = $("clearFeishuAppSecret");
+    const status = $("feishuSettingsStatus");
+    control.disabled = true; status.hidden = true;
+    try {
+      const settings = await api('/admin/feishu-settings', { method: 'PATCH', body: JSON.stringify({ clear_app_secret: true }) });
+      $("feishuAppSecret").value = '';
+      $("feishuAppSecret").placeholder = settings.app_secret_configured ? '使用环境变量中的 Secret' : '请输入飞书 App Secret';
+      status.textContent = `后台保存的 Secret 已清除 · 当前来源：${settings.credential_source}`;
+      status.hidden = false; status.classList.remove('form-error');
+      notify('后台保存的飞书 App Secret 已清除。');
+      await refreshFeishuOAuth();
+    } catch (error) {
+      status.textContent = error.message; status.hidden = false; status.classList.add('form-error');
+    } finally { control.disabled = false; }
   });
   $('closeModelServiceDialog').addEventListener('click', () => {
     if ($('modelSettingsForm').dataset.saving !== 'true') $('modelServiceDialog').close();

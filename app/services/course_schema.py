@@ -1,4 +1,5 @@
 """Course chapters, ordered lesson content, private assets, and learner progress."""
+from datetime import date, timedelta
 
 
 def initialize_course_learning(db):
@@ -9,6 +10,8 @@ def initialize_course_learning(db):
         ('access_mode', "TEXT NOT NULL DEFAULT 'roster' CHECK(access_mode IN ('public','roster','points'))"),
         ('points_price', 'INTEGER NOT NULL DEFAULT 0 CHECK(points_price >= 0)'),
         ('points_access_days', 'INTEGER NOT NULL DEFAULT 0 CHECK(points_access_days >= 0)'),
+        ('points_access_start_date', 'TEXT'),
+        ('points_access_end_date', 'TEXT'),
         ('cover_kind', "TEXT CHECK(cover_kind IN ('preset','upload'))"),
         ('cover_value', 'TEXT'),
         ('cover_asset_id', 'TEXT'),
@@ -59,9 +62,22 @@ def initialize_course_learning(db):
         points_paid INTEGER NOT NULL CHECK(points_paid > 0),
         purchased_at REAL NOT NULL,
         access_expires_at REAL,
+        access_start_date TEXT,
+        access_end_date TEXT,
         PRIMARY KEY(course_id,user_id))''')
-    if 'access_expires_at' not in {row['name'] for row in db.execute('PRAGMA table_info(course_purchases)')}:
-        db.execute('ALTER TABLE course_purchases ADD COLUMN access_expires_at REAL')
+    purchase_columns = {row['name'] for row in db.execute('PRAGMA table_info(course_purchases)')}
+    for field in ('access_expires_at', 'access_start_date', 'access_end_date'):
+        if field not in purchase_columns:
+            db.execute(f'ALTER TABLE course_purchases ADD COLUMN {field} TEXT' if field != 'access_expires_at'
+                       else 'ALTER TABLE course_purchases ADD COLUMN access_expires_at REAL')
+    today = date.today()
+    for course in db.execute('''SELECT id,points_access_days FROM live_courses
+        WHERE access_mode='points' AND (points_access_start_date IS NULL OR points_access_end_date IS NULL)''').fetchall():
+        days = course['points_access_days']
+        start = today.isoformat()
+        end = (today + timedelta(days=days - 1)).isoformat() if days else '9999-12-31'
+        db.execute('''UPDATE live_courses SET points_access_start_date=?,points_access_end_date=? WHERE id=?''',
+                   (start, end, course['id']))
     image_schema = '''CREATE TABLE IF NOT EXISTS course_markdown_images(
         id TEXT PRIMARY KEY,
         course_id INTEGER NOT NULL REFERENCES live_courses(id) ON DELETE CASCADE,

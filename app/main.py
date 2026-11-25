@@ -46,20 +46,27 @@ from app.routes.trends import router as trends_router
 from app.routes.question_markdown import router as question_markdown_router
 from app.routes.courses import router as courses_router
 from app.routes.referrals import router as referrals_router
+from app.routes.feishu_oauth import router as feishu_oauth_router
+from app.services.feishu_oauth import CallbackLogFilter
+import logging
+
+logging.getLogger('uvicorn.access').addFilter(CallbackLogFilter())
 
 initialize()
 
 
 @asynccontextmanager
 async def lifespan(app):
-    from app.services import trend_scheduler, leaderboard_scheduler
+    from app.services import trend_scheduler, leaderboard_scheduler, feishu_oauth
     trend_scheduler.start()
     leaderboard_scheduler.start()
+    feishu_oauth.start()
     try:
         yield
     finally:
         trend_scheduler.stop()
         leaderboard_scheduler.stop()
+        feishu_oauth.stop()
 
 
 app = FastAPI(title='复试模拟系统', lifespan=lifespan)
@@ -87,6 +94,7 @@ app.include_router(home_layout_router)
 app.include_router(question_markdown_router)
 app.include_router(courses_router)
 app.include_router(referrals_router)
+app.include_router(feishu_oauth_router)
 app.include_router(live_router)
 app.mount('/static', StaticFiles(directory=ROOT / 'app/static'), name='static')
 

@@ -45,6 +45,14 @@ def _email_auth_config(config):
         raise ValueError('email_auth.code_ttl_seconds 不能小于 resend_seconds')
 
 
+def _feishu_config(config):
+    """Validate retry lease settings without loading or exposing application secrets."""
+    feishu = config.setdefault('feishu', {})
+    feishu.setdefault('lease_seconds', 90)
+    if type(feishu['lease_seconds']) is not int or not 30 <= feishu['lease_seconds'] <= 300:
+        raise ValueError('feishu.lease_seconds 必须在 30 到 300 秒之间')
+
+
 def load_config():
     path = Path(os.environ.get('SCU_CONFIG', ROOT / 'config.toml'))
     if not path.exists():
@@ -62,6 +70,7 @@ def load_config():
     if type(trends['retry_interval_minutes']) is not int or not 1 <= trends['retry_interval_minutes'] <= 1440:
         raise ValueError('trends.retry_interval_minutes 必须在 1 到 1440 之间')
     _email_auth_config(config)
+    _feishu_config(config)
     _live_config(config)
     question_media = config.setdefault('question_media', {})
     question_media.setdefault('directory', str(Path(config['live']['directory']) / 'question-images'))

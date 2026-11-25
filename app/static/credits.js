@@ -5,7 +5,7 @@ import { refreshAccountSettings, setupAccountSettings } from "./profile-account.
 
 import { refreshTransfers } from "./credit-transfers.js?v=20261122-profile-load-guard-v1";
 
-import { purchaseSummaryButton, openPurchaseDetails, rebateText } from './service-packages.js?v=20261123-packages-v2';
+import { purchaseSummaryButton, openPurchaseDetails, rebateText } from './service-packages.js?v=20261124-feishu-mobile-v1';
 
 let voucherPackage = "";
 let voucherPage = 1;

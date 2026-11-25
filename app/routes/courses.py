@@ -4,6 +4,7 @@ import time
 import os
 import io
 import re
+from datetime import date
 from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
 from fastapi.responses import FileResponse, HTMLResponse
@@ -32,7 +33,8 @@ class CourseWrite(BaseModel):
     publication_status: str = Field(default='draft', pattern='^(draft|published|archived)$')
     access_mode: str = Field(default='roster', pattern='^(public|roster|points)$')
     points_price: StrictInt | None = Field(default=None, ge=0, le=100000000)
-    points_access_days: StrictInt | None = Field(default=None, ge=0, le=36500)
+    points_access_start_date: str | None = Field(default=None, pattern=r'^\d{4}-\d{2}-\d{2}$')
+    points_access_end_date: str | None = Field(default=None, pattern=r'^\d{4}-\d{2}-\d{2}$')
     host_id: StrictInt | None = Field(default=None, gt=0)
     member_ids: list[StrictInt] = Field(default_factory=list, max_length=1000)
     cover_kind: str | None = Field(default=None, pattern='^(preset|upload)$')
@@ -155,7 +157,7 @@ def cover_path(name):
 def _course_row(db, course_id):
     row = db.execute('''SELECT c.*,u.username AS host_name FROM live_courses c
         JOIN users u ON u.id=c.host_id WHERE c.id=?''', (course_id,)).fetchone()
-    return dict(row) if row else None
+    return {key: value for key, value in dict(row).items() if key != 'points_access_days'} if row else None
 
 
 def _save_course(db, payload, user, course_id=None):
@@ -163,11 +165,21 @@ def _save_course(db, payload, user, course_id=None):
     if not title:
         raise HTTPException(422, '请输入课程名称')
     host_id = payload.host_id or user['id']
-    previous = db.execute('SELECT points_price,points_access_days FROM live_courses WHERE id=?', (course_id,)).fetchone() if course_id else None
+    previous = db.execute('''SELECT points_price,points_access_start_date,points_access_end_date
+        FROM live_courses WHERE id=?''', (course_id,)).fetchone() if course_id else None
     price = payload.points_price if payload.points_price is not None else previous['points_price'] if previous else 0
-    access_days = payload.points_access_days if payload.points_access_days is not None else previous['points_access_days'] if previous else 0
+    start_date = payload.points_access_start_date if payload.points_access_start_date is not None else previous['points_access_start_date'] if previous else None
+    end_date = payload.points_access_end_date if payload.points_access_end_date is not None else previous['points_access_end_date'] if previous else None
     if payload.access_mode == 'points' and price <= 0:
         raise HTTPException(422, '积分购买课程须设置大于 0 的整数价格')
+    if payload.access_mode == 'points':
+        try:
+            start = date.fromisoformat(start_date or '')
+            end = date.fromisoformat(end_date or '')
+        except ValueError as error:
+            raise HTTPException(422, '积分课程须设置有效的访问开始日期和结束日期') from error
+        if start > end:
+            raise HTTPException(422, '访问结束日期不能早于开始日期')
     live.validate_people(db, [host_id, *payload.member_ids], user)
     if course_id is None:
         validate_markdown_images(db, None, None, payload.description)
@@ -198,7 +210,8 @@ def _save_course(db, payload, user, course_id=None):
             db.execute('''DELETE FROM course_self_enrollments WHERE course_id=? AND NOT EXISTS (
                 SELECT 1 FROM course_purchases p WHERE p.course_id=course_self_enrollments.course_id
                 AND p.user_id=course_self_enrollments.user_id)''', (course_id,))
-    db.execute('UPDATE live_courses SET points_price=?,points_access_days=? WHERE id=?', (price, access_days, course_id))
+    db.execute('''UPDATE live_courses SET points_price=?,points_access_start_date=?,points_access_end_date=?
+        WHERE id=?''', (price, start_date, end_date, course_id))
     db.executemany('INSERT INTO live_members(course_id,user_id) VALUES (?,?)',
                    [(course_id, uid) for uid in set([host_id, *(payload.member_ids if payload.access_mode == 'roster' else [])])])
     return _course_row(db, course_id)
@@ -231,7 +244,8 @@ def catalog(scope: str = Query(default='mine', pattern='^(mine|public|managed)$'
     with connect() as db:
         if scope == 'public':
             rows = db.execute('''SELECT c.id,c.title,c.description,c.publication_status,c.access_mode,
-                c.cover_kind,c.cover_value,c.cover_asset_id,c.points_price,
+                c.cover_kind,c.cover_value,c.cover_asset_id,c.points_price,c.points_access_start_date,
+                c.points_access_end_date,
                 u.username host_name FROM live_courses c JOIN users u ON u.id=c.host_id
                 WHERE c.publication_status='published' AND (c.access_mode IN ('public','points') OR EXISTS (
                     SELECT 1 FROM course_lessons l JOIN course_sections s ON s.id=l.section_id
@@ -241,14 +255,18 @@ def catalog(scope: str = Query(default='mine', pattern='^(mine|public|managed)$'
             rows = db.execute('''SELECT DISTINCT c.*,u.username host_name FROM live_courses c
                 JOIN users u ON u.id=c.host_id LEFT JOIN live_members m ON m.course_id=c.id
                 LEFT JOIN course_self_enrollments e ON e.course_id=c.id
-                LEFT JOIN course_purchases p ON p.course_id=c.id AND (p.access_expires_at IS NULL OR p.access_expires_at>?)
-                WHERE ((e.user_id=? AND (c.access_mode='public' OR NOT EXISTS (SELECT 1 FROM course_purchases x WHERE x.course_id=c.id AND x.user_id=?))) OR p.user_id=? OR (m.user_id=? AND c.host_id<>?
+            LEFT JOIN course_purchases p ON p.course_id=c.id AND
+                ((p.access_start_date IS NOT NULL AND p.access_start_date<=? AND p.access_end_date>=?) OR
+                 (p.access_start_date IS NULL AND (p.access_expires_at IS NULL OR p.access_expires_at>?)))
+            LEFT JOIN package_course_grants g ON g.course_id=c.id AND g.user_id=? AND
+                (g.access_start_date IS NULL OR (g.access_start_date<=? AND g.access_end_date>=?))
+                WHERE ((e.user_id=? AND (c.access_mode='public' OR NOT EXISTS (SELECT 1 FROM course_purchases x WHERE x.course_id=c.id AND x.user_id=?))) OR p.user_id=? OR g.user_id=? OR (m.user_id=? AND c.host_id<>?
                     AND NOT (?=1 AND (?=1 OR c.owner_id=?))))
                 AND c.publication_status='published'
                 AND instr(lower(c.title),lower(?))>0
                 ORDER BY COALESCE((SELECT MAX(p.updated) FROM course_progress p
                     JOIN course_lessons l ON l.id=p.lesson_id WHERE l.course_id=c.id AND p.user_id=?),0) DESC,c.id DESC''',
-                (time.time(), user['id'], user['id'], user['id'], user['id'], user['id'], user['is_admin'], user['is_superadmin'], user['id'],
+                (date.today().isoformat(), date.today().isoformat(), time.time(), user['id'], date.today().isoformat(), date.today().isoformat(), user['id'], user['id'], user['id'], user['id'], user['id'], user['id'], user['is_admin'], user['is_superadmin'], user['id'],
                  q.strip(), user['id'])).fetchall()
         else:
             rows = db.execute('''SELECT DISTINCT c.*,u.username host_name FROM live_courses c
@@ -270,6 +288,7 @@ def catalog(scope: str = Query(default='mine', pattern='^(mine|public|managed)$'
                 continue
             course = dict(row)
             course.pop('cover_asset_id', None)
+            course.pop('points_access_days', None)
             count = db.execute('SELECT COUNT(*) FROM course_lessons WHERE course_id=?',
                                (row['id'],)).fetchone()[0]
             kinds = [item['kind'] for item in db.execute('''SELECT DISTINCT i.kind FROM course_lesson_items i
@@ -314,7 +333,8 @@ def public_course_preview(course_id: int, user=Depends(current_user)):
         else:
             for section in preview['sections']:
                 for lesson in section['lessons']:
-                    lesson['progress'] = {'completed': False}
+                    if lesson['can_preview']:
+                        lesson['progress'] = {'completed': False}
             preview['progress_summary'] = {'total': preview['lesson_count'], 'completed': 0, 'percent': 0}
         return preview
 
@@ -471,8 +491,10 @@ def enroll(course_id: int, user=Depends(current_user)):
 def unenroll(course_id: int, user=Depends(current_user)):
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
-        if db.execute('''SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=?
-            AND (access_expires_at IS NULL OR access_expires_at>?)''', (course_id, user['id'], time.time())).fetchone():
+        if db.execute('''SELECT 1 FROM course_purchases WHERE course_id=? AND user_id=? AND
+            ((access_start_date IS NOT NULL AND access_start_date<=? AND access_end_date>=?) OR
+             (access_start_date IS NULL AND (access_expires_at IS NULL OR access_expires_at>?)))''',
+                      (course_id, user['id'], date.today().isoformat(), date.today().isoformat(), time.time())).fetchone():
             raise HTTPException(409, '已购买课程请使用移除功能，购买资格和学习进度会保留')
         course = db.execute('SELECT access_mode FROM live_courses WHERE id=?', (course_id,)).fetchone()
         enrollment = db.execute('SELECT 1 FROM course_self_enrollments WHERE course_id=? AND user_id=?',
@@ -497,14 +519,20 @@ def purchase_course(course_id: int, payload: CoursePurchase, user=Depends(curren
             raise HTTPException(409, '该课程不支持积分购买')
         if payload.expected_points_price != course['points_price']:
             raise HTTPException(409, '课程价格已更新，请刷新页面后重新确认')
+        today = date.today().isoformat()
+        start_date, end_date = course['points_access_start_date'], course['points_access_end_date']
+        if not start_date or not end_date:
+            raise HTTPException(409, '课程访问期限尚未配置，请联系管理员')
+        if not start_date <= today <= end_date:
+            raise HTTPException(409, f'课程仅允许在 {start_date} 至 {end_date} 期间访问，当前不在开放日期内')
         points.adjust(db, user['id'], -course['points_price'], kind='course_purchase', reference=f"课程：{course['title']}（{course_id}）")
         purchased_at = time.time()
-        expires_at = purchased_at + course['points_access_days'] * 86400 if course['points_access_days'] else None
-        db.execute('''INSERT INTO course_purchases(course_id,user_id,points_paid,purchased_at,access_expires_at)
-            VALUES (?,?,?,?,?) ON CONFLICT(course_id,user_id) DO UPDATE SET
+        db.execute('''INSERT INTO course_purchases(course_id,user_id,points_paid,purchased_at,access_expires_at,
+            access_start_date,access_end_date) VALUES (?,?,?, ?,NULL,?,?) ON CONFLICT(course_id,user_id) DO UPDATE SET
             points_paid=excluded.points_paid,purchased_at=excluded.purchased_at,
-            access_expires_at=excluded.access_expires_at''',
-            (course_id, user['id'], course['points_price'], purchased_at, expires_at))
+            access_expires_at=NULL,access_start_date=excluded.access_start_date,
+            access_end_date=excluded.access_end_date''',
+            (course_id, user['id'], course['points_price'], purchased_at, start_date, end_date))
         db.execute('INSERT OR IGNORE INTO course_self_enrollments(course_id,user_id) VALUES (?,?)', (course_id, user['id']))
         db.execute('DELETE FROM course_library_hidden WHERE course_id=? AND user_id=?', (course_id, user['id']))
         return courses.course_detail(db, course_id, user)
@@ -869,7 +897,7 @@ def asset_file(asset_id: int, user=Depends(current_user)):
         asset = db.execute('SELECT * FROM course_assets WHERE id=?', (asset_id,)).fetchone()
         if not asset:
             raise HTTPException(404, '课程文件不存在')
-        courses.require_lesson(db, asset['lesson_id'], user)
+        courses.require_lesson_asset(db, asset['lesson_id'], user)
         if asset['kind'] != 'document':
             raise HTTPException(404, '视频请使用课程播放器')
         path = asset_path(asset['storage_name'])
@@ -885,7 +913,7 @@ def markdown_asset(asset_id: int, user=Depends(current_user)):
         asset = db.execute('SELECT * FROM course_assets WHERE id=?', (asset_id,)).fetchone()
         if not asset:
             raise HTTPException(404, '课程资料不存在')
-        courses.require_lesson(db, asset['lesson_id'], user)
+        courses.require_lesson_asset(db, asset['lesson_id'], user, markdown=True)
         if asset['kind'] != 'document' or Path(asset['original_name']).suffix.lower() != '.md':
             raise HTTPException(404, '该课程资料不是 Markdown 文档')
         path = asset_path(asset['storage_name'])
@@ -964,7 +992,7 @@ def create_playback_ticket(asset_id: int, user=Depends(current_user)):
         asset = db.execute('SELECT * FROM course_assets WHERE id=?', (asset_id,)).fetchone()
         if not asset:
             raise HTTPException(404, '课程视频不存在')
-        courses.require_lesson(db, asset['lesson_id'], user)
+        courses.require_lesson_asset(db, asset['lesson_id'], user)
         if asset['kind'] != 'video':
             raise HTTPException(404, '该课程内容不是视频')
         path = asset_path(asset['storage_name'])

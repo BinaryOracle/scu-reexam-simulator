@@ -16,6 +16,7 @@ from app.services.security import hash_password
 from app.services.password_vault import decrypt_password, encrypt_password
 from app.services.password_vault import PasswordVaultError
 from app.services import model_settings
+from app.services import feishu_settings
 from app.services import credits, points
 from app.services.account_deletion import delete_account, remove_account_files
 from app.services.problem_content import public_problem
@@ -175,6 +176,40 @@ class ModelSettingsUpdate(BaseModel):
     trends: ModelServiceUpdate | None = None
 
 
+class FeishuSettingsUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    app_id: str | None = Field(default=None, max_length=256)
+    app_secret: str | None = Field(default=None, max_length=4096)
+    clear_app_secret: StrictBool = False
+    redirect_uri: str | None = Field(default=None, max_length=2048)
+
+    @field_validator('redirect_uri')
+    @classmethod
+    def validate_redirect(cls, value):
+        from app.services.feishu_oauth import validate_redirect_uri
+        if value is None:
+            raise ValueError('回调地址不能为空')
+        return validate_redirect_uri(value)
+
+    @field_validator('app_id', 'app_secret')
+    @classmethod
+    def validate_feishu_credential(cls, value):
+        """Reject whitespace-only and multiline credential values."""
+        if value is None:
+            return value
+        value = value.strip()
+        if any(char in value for char in ('\r', '\n', '\x00')):
+            raise ValueError('飞书凭证不能包含换行或控制字符')
+        return value
+
+    @model_validator(mode='after')
+    def validate_secret_action(self):
+        """Require one explicit action when updating the App Secret."""
+        if self.clear_app_secret and self.app_secret:
+            raise ValueError('不能同时设置和清除飞书 App Secret')
+        return self
+
+
 def find_user(db, uid):
     row = db.execute(f'SELECT {PUBLIC_USER_FIELDS} FROM users WHERE id=?', (uid,)).fetchone()
     if row is None:
@@ -194,6 +229,24 @@ def update_luogu_settings(payload: LuoguSettings):
     with connect() as db:
         db.execute("UPDATE app_settings SET value=? WHERE key='luogu_app_origin'", (payload.app_origin,))
     return {'app_origin': payload.app_origin}
+
+
+@router.get('/feishu-settings')
+def get_feishu_settings():
+    try:
+        with connect() as db:
+            return feishu_settings.public_settings(db)
+    except PasswordVaultError as error:
+        raise HTTPException(503, '密钥加密服务不可用，请管理员检查密钥文件') from error
+
+
+@router.patch('/feishu-settings')
+def update_feishu_settings(payload: FeishuSettingsUpdate):
+    try:
+        with connect() as db:
+            return feishu_settings.update(db, payload.model_dump(exclude_unset=True))
+    except PasswordVaultError as error:
+        raise HTTPException(503, '密钥加密服务不可用，请管理员检查密钥文件') from error
 
 
 @router.get('/model-settings')
@@ -242,9 +295,8 @@ def users(actor=Depends(administrator)):
         from app.services import service_packages
         totals = service_packages.summaries(db)
         return [{**public_user(row, admin_view=True), 'password_available': bool(row['password_ciphertext']),
-                 'referrer_name': row['referrer_name'], 'referrer_email': row['referrer_email'],
-                 'legacy_purchase_note': row['purchase_service'], **totals[row['id']]}
-                for row in db.execute(f'''SELECT {user_fields},u.password_ciphertext,u.purchase_service,
+                 'referrer_name': row['referrer_name'], 'referrer_email': row['referrer_email'], **totals[row['id']]}
+                for row in db.execute(f'''SELECT {user_fields},u.password_ciphertext,
                     COALESCE(r.username,'') AS referrer_name,COALESCE(r.email,'') AS referrer_email
                     FROM users u LEFT JOIN users r ON r.id=u.referrer_id
                     WHERE (? OR u.is_admin=0) ORDER BY u.id DESC''', (actor['is_superadmin'],))]
