@@ -5,18 +5,19 @@ import {SourceTextModule,SyntheticModule,createContext} from 'node:vm';
 
 async function harness(request){
   const frameJobs=[];
+  const notifications=[];
   const context=createContext({Date,JSON,Boolean,requestAnimationFrame:job=>(frameJobs.push(job),frameJobs.length),
     navigator:{mediaDevices:{getDisplayMedia(){}},userActivation:{isActive:true}}});
   const exports=(values)=>new SyntheticModule(Object.keys(values),function(){for(const [key,value]of Object.entries(values))this.setExport(key,value);},{context});
   const api=exports({api:request,state:{user:{id:1}}});
-  const ui=exports(Object.fromEntries(['el','button','notify','confirmAction','modal','materialList','field'].map(key=>[key,()=>{}])));
+  const ui=exports(Object.fromEntries(['el','button','notify','confirmAction','modal','materialList','field'].map(key=>[key,key==='notify'?(message)=>notifications.push(message):()=>{}])));
   const model=exports({elapsed:()=>'',orderedMembers:x=>x,recordingText:x=>x});
   const video=exports({mountVideo:()=>({node:{classList:{toggle(){}}},dispose(){}})});
   const module=new SourceTextModule(await readFile(new URL('../app/static/live-room.js',import.meta.url),'utf8'),{context});
   await module.link(path=>path.includes('api.js')?api:path.includes('live-ui.js')?ui:path.includes('live-video.mjs')?video:model);await module.evaluate();
   const room=Object.create(module.namespace.Classroom.prototype);
   Object.assign(room,{lesson:{id:7},after:0,lastHeartbeat:0,closed:false,
-    connection:{dataset:{}},permissions:{},like:{lastChild:{}},memberControl:{lastChild:{}},recordIndicator:{classList:{toggle(){}}},updateStageStatus(){},
+    connection:{dataset:{state:'connected'}},notifications,permissions:{},like:{lastChild:{}},memberControl:{lastChild:{}},recordIndicator:{classList:{toggle(){}}},updateStageStatus(){},
     showBanner(){},hideBanner(){},checkShareHealth(){},renderMedia(){},renderMembers(){},appendMessages(){},syncControls(){},
     flushMedia(){frameJobs.splice(0).forEach(job=>job());}});
   return room;
@@ -32,6 +33,23 @@ test('screen sharing bounds capture and encoding without capturing system audio 
   assert.equal(args[0],true);assert.equal(args[1].audio,false);
   assert.equal(args[1].resolution.width,1280);assert.equal(args[1].resolution.frameRate,15);
   assert.equal(args[2].screenShareEncoding.maxBitrate,1500000);assert.equal(args[2].simulcast,false);
+});
+
+test('a stale SFU participant is reconnected before the user retries screen sharing',async()=>{
+  const requests=[];let pickerCalls=0,reconnects=0;
+  const room=await harness(async(path)=>{
+    requests.push(path);
+    if(path.endsWith('/members/1'))throw Object.assign(new Error('课堂音视频连接已中断，正在恢复；请等待“连接正常”后重新点击共享屏幕。'),{status:409});
+    return state();
+  });
+  room.isHost=true;room.permissions={can_share:false};room.credentials={};
+  room.pollOnce=async()=>{reconnects++;room.connection.dataset.state='connected';room.reconnectNeeded=false;};
+  room.room={localParticipant:{isScreenShareEnabled:false,setScreenShareEnabled:async()=>{pickerCalls++;}}};
+
+  await room.toggleShare();
+
+  assert.equal(reconnects,1);assert.equal(pickerCalls,0);assert.equal(room.shareBusy,false);
+  assert.match(room.notifications.at(-1),/再次点击.*共享屏幕/);
 });
 
 test('polling and repeated clicks cannot open concurrent screen pickers',async()=>{

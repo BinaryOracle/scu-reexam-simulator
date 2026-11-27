@@ -11,7 +11,7 @@ let voucherPackage = "";
 let voucherPage = 1;
 let voucherRequest = 0;
 let voucherSearchTimer;
-let defaultCreditsDirty = false;
+let defaultPointsDirty = false;
 let pointsSettingsDirty = false;
 let packageOptions = [];
 let profilePoints = 0;
@@ -48,6 +48,7 @@ export async function refreshVouchers() {
   try {
   const settings = await readCreditSettings();
   if (request !== voucherRequest) return;
+  if (!defaultPointsDirty) $("defaultPoints").value = settings.default_points;
   packageOptions = settings.packages;
   if (!packageOptions.some(item => item.id === voucherPackage)) voucherPackage = packageOptions[0]?.id || "";
   $("deleteVoucherPackage").disabled = !settings.packages.some(item => item.id === voucherPackage);
@@ -79,7 +80,6 @@ export async function refreshVouchers() {
   const data = await api(`/admin/vouchers?${query}`);
   if (request !== voucherRequest) return;
   $("voucherList").removeAttribute("aria-busy");
-  if (!defaultCreditsDirty) $("defaultCredits").value = settings.default_credits;
   $("voucherCount").max = settings.max_voucher_batch;
   $("voucherMaxHint").textContent = `每批最多 ${settings.max_voucher_batch} 张；每张卡密只能兑换一次。`;
   $("voucherTotal").textContent = data.total;
@@ -358,7 +358,7 @@ function updatePurchaseTotal() {
 }
 
 function renderPointsHistory(records) {
-  const labels = { redemption: "卡密兑换", checkin_reward: "每日训练连续签到", coding_checkin: "算法带刷连续签到", question_contribution: "题库贡献奖励", coding_contribution: "算法投稿奖励", leaderboard_reward: "周榜奖励", ranking_award: "周榜奖励", contest_reward: "上机考试排名奖励", purchase_interview: "购买模拟面试次数", course_purchase: "课程积分购买", admin: "管理员调整" };
+  const labels = { initial: "新用户初始积分", admin_adjust: "管理员调整", redemption: "卡密兑换", checkin_reward: "每日训练连续签到", coding_checkin: "算法带刷连续签到", question_contribution: "题库贡献奖励", coding_contribution: "算法投稿奖励", leaderboard_reward: "周榜奖励", ranking_award: "周榜奖励", contest_reward: "上机考试排名奖励", purchase_interview: "购买模拟面试次数", course_purchase: "课程积分购买", admin: "管理员调整" };
   if (!records.length) {
     $("pointsHistory").replaceChildren(emptyState("还没有积分记录", "签到、榜单奖励和卡密兑换获得积分后，可在这里查看收支。", "◇"));
     return;
@@ -447,7 +447,7 @@ export function setupCredits() {
       updatePurchaseTotal();
     });
   });
-  $("defaultCredits").addEventListener("input", () => { defaultCreditsDirty = true; });
+  $("defaultPoints").addEventListener("input", () => { defaultPointsDirty = true; });
   $("voucherPackageForm").addEventListener("submit", event => {
     event.preventDefault();
     run(async () => {
@@ -465,13 +465,13 @@ export function setupCredits() {
       catch { notify("新套餐已添加，但列表刷新失败。请点击重新加载；不要重复添加。", "error"); }
     }, event.submitter);
   });
-  $("defaultCreditsForm").addEventListener("submit", event => {
+  $("defaultPointsForm").addEventListener("submit", event => {
     event.preventDefault();
     run(async () => {
-      const value = $("defaultCredits").value;
-      await api("/admin/credit-settings", { method: "PATCH", body: JSON.stringify({ default_credits: Number(value) }) });
-      defaultCreditsDirty = $("defaultCredits").value !== value;
-      notify("新用户默认体验次数已更新；现有用户次数保持不变。");
+      const value = $("defaultPoints").value;
+      await api("/admin/credit-settings", { method: "PATCH", body: JSON.stringify({ default_points: Number(value) }) });
+      defaultPointsDirty = $("defaultPoints").value !== value;
+      notify("新用户初始积分已更新；后台创建和邮箱注册均生效，现有用户积分不变。");
     }, event.submitter);
   });
   $("voucherGenerateForm").addEventListener("submit", event => {

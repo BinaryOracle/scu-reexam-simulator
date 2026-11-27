@@ -8,7 +8,7 @@ from .config import load_config
 from .services.security import hash_password
 from .services.password_vault import encrypt_password, initialize_key
 
-SCHEMA_VERSION = 45
+SCHEMA_VERSION = 46
 
 
 @contextmanager
@@ -159,7 +159,11 @@ def initialize():
         db.execute("""INSERT INTO app_settings(key,value) VALUES ('user_id_highwater',?)
             ON CONFLICT(key) DO UPDATE SET value=excluded.value""", (str(_user_id_highwater(db)),))
         db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('default_interview_credits',?)", (str(initial_credits),))
-        db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('default_points','0')")
+        initial_points = load_config()['credits']['default_points']
+        db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('default_points',?)", (str(initial_points),))
+        if version < 46:
+            # Older releases seeded an unused zero; upgrade the signup policy only.
+            db.execute("UPDATE app_settings SET value=? WHERE key='default_points' AND value='0'", (str(initial_points),))
         db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('interview_points_cost','1')")
         db.execute("INSERT OR IGNORE INTO app_settings(key,value) VALUES ('luogu_app_origin',?)", ('http://127.0.0.1:8000',))
         db.execute('''CREATE TABLE IF NOT EXISTS vouchers(

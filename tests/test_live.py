@@ -1,4 +1,70 @@
 from test_system import client, login
+import pytest
+
+
+def test_livekit_missing_participant_returns_reconnect_action(monkeypatch):
+    import asyncio
+    from fastapi import HTTPException
+    from livekit import api
+    from app.services import live_media as media
+
+    config = media.settings()
+    monkeypatch.setattr(media, 'settings', lambda: {
+        **config, 'url': 'wss://live.example.test', 'api_url': 'http://live.example.test'})
+    monkeypatch.setattr(media, 'credentials', lambda: ('test-key', 'test-secret'))
+
+    class FakeRoomService:
+        async def update_participant(self, request):
+            raise api.TwirpError('not_found', 'participant does not exist', status=404)
+
+    class FakeClient:
+        room = FakeRoomService()
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def aclose(self):
+            pass
+
+    monkeypatch.setattr(media.api, 'LiveKitAPI', FakeClient)
+    with pytest.raises(HTTPException) as failure:
+        asyncio.run(media.call('room', 'update_participant', api.UpdateParticipantRequest()))
+
+    assert failure.value.status_code == 409
+    assert failure.value.detail == '课堂音视频连接已中断，正在恢复；请等待“连接正常”后重新点击共享屏幕。'
+
+
+def test_livekit_missing_room_returns_actionable_error(monkeypatch):
+    import asyncio
+    from fastapi import HTTPException
+    from livekit import api
+    from app.services import live_media as media
+
+    config = media.settings()
+    monkeypatch.setattr(media, 'settings', lambda: {
+        **config, 'url': 'wss://live.example.test', 'api_url': 'http://live.example.test'})
+    monkeypatch.setattr(media, 'credentials', lambda: ('test-key', 'test-secret'))
+
+    class FakeRoomService:
+        async def delete_room(self, request):
+            raise api.TwirpError('not_found', 'requested room does not exist', status=404)
+
+    class FakeClient:
+        room = FakeRoomService()
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def aclose(self):
+            pass
+
+    monkeypatch.setattr(media.api, 'LiveKitAPI', FakeClient)
+    with pytest.raises(HTTPException) as failure:
+        asyncio.run(media.call('room', 'delete_room', api.DeleteRoomRequest(room='classroom-1')))
+
+    assert failure.value.status_code == 404
+    assert '找不到该直播房间' in failure.value.detail
+    assert 'api_url' in failure.value.detail and 'url' in failure.value.detail
 
 
 def create_course(client):

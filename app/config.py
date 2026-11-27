@@ -134,7 +134,7 @@ def load_config():
     shop = urlsplit(shop_url)
     if shop_url and (shop.scheme not in ('http', 'https') or not shop.hostname or shop.username or shop.password):
         raise ValueError('credits.shop_url 必须为 HTTP/HTTPS 商品或店铺链接，或留空隐藏购买入口')
-    for key, default, minimum, maximum in [('default_credits', 1, 0, 1000000), ('max_voucher_batch', 500, 1, 10000)]:
+    for key, default, minimum, maximum in [('default_credits', 1, 0, 1000000), ('default_points', 3, 0, 1000000), ('max_voucher_batch', 500, 1, 10000)]:
         credits.setdefault(key, default)
         if type(credits[key]) is not int or not minimum <= credits[key] <= maximum:
             raise ValueError(f'credits.{key} 必须在 {minimum} 到 {maximum} 之间')

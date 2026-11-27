@@ -10,10 +10,6 @@ ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 ADMIN_CREDITS = 999999
 
 
-def default_credits(db):
-    return int(db.execute("SELECT value FROM app_settings WHERE key='default_interview_credits'").fetchone()[0])
-
-
 def packages(db):
     return [dict(row) for row in db.execute('SELECT id,price_fen,credits FROM voucher_packages WHERE deleted=0 ORDER BY created,id')]
 

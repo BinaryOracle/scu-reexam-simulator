@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
+import { webcrypto } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 
 const sources = Object.fromEntries(await Promise.all(['training-ui', 'training-admin', 'home'].map(async name =>
   [name, (await readFile(new URL(`../app/static/${name}.js`, import.meta.url), 'utf8')).replace(/^import .*;\n/gm, '').replace(/\bexport /g, '')])));
+const browserCompat = await readFile(new URL('../app/static/browser-compat.js', import.meta.url), 'utf8');
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
 const settle = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
 
@@ -50,8 +52,10 @@ function environment(api = async () => ({})) {
   const context = vm.createContext({ document, el, button, api, state: { token: 'token', user: { is_admin: true } },
     $: id => body.querySelector(`#${id}`), notify: (...args) => notices.push(args), badge: text => el('span', text),
     emptyState: (title, description, icon = '◉') => { const node = el('div', '', 'empty-state'); node.append(el('span', icon, 'empty-icon'), el('h3', title), el('p', description)); return node; },
-    confirmAction: async (...args) => { confirmations.push(args); return confirmation; }, crypto: { randomUUID: () => 'id' },
+    questionMarkdownEditor: node => ({ node, busy: false, dispose() {} }),
+    confirmAction: async (...args) => { confirmations.push(args); return confirmation; }, crypto: { getRandomValues: bytes => webcrypto.getRandomValues(bytes) },
     URLSearchParams, URL, FormData: class { append() {} }, setTimeout, clearTimeout });
+  vm.runInContext(browserCompat, context);
   return { body, context, notices, confirmations, el, choose: value => { confirmation = value; },
     load(name) { vm.runInContext(sources[name], context); }, find: (root, text) => root.querySelectorAll('button').find(node => node.textContent === text) };
 }
@@ -74,7 +78,8 @@ for (const control of ['取消', '×', 'Escape']) test(`question ${control} pres
 
 test('question cannot be closed while its save is pending', async () => {
   const pending = deferred(), env = environment(); env.load('training-ui');
-  const { dialog, form } = editor(env, () => pending.promise);
+  const { dialog, form, question } = editor(env, () => pending.promise);
+  question.value = '待保存的题目';
   const saving = form.fire('submit');
   await dialog.fire('cancel'); await env.find(dialog, '取消').click();
   assert.equal(dialog.open, true);

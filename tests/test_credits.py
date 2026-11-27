@@ -3,22 +3,74 @@ from concurrent.futures import ThreadPoolExecutor
 from test_system import client, login
 
 
-def test_configurable_default_and_administrator_numeric_allowance(client):
+def test_configurable_initial_points_and_administrator_allowance(client):
     manager = login(client, 'manager')
     profile = client.get('/api/profile', headers=manager).json()
     assert profile['is_admin'] is True and profile['remaining'] is None
     assert client.get('/api/me', headers=manager).json()['interview_credits'] is None
-    settings = client.get('/api/admin/credit-settings', headers=manager)
-    assert settings.json()['default_credits'] == 1
-    assert client.patch('/api/admin/credit-settings', headers=manager, json={'default_credits': 4}).status_code == 200
+    settings = client.get('/api/admin/credit-settings', headers=manager).json()
+    assert settings['default_points'] == 3
+    assert 'default_credits' not in settings
+    first = client.post('/api/admin/users', headers=manager,
+        json={'username': 'default-points', 'password': 'a'}).json()
+    assert first['points'] == 3 and first['interview_credits'] == 0
+    assert client.patch('/api/admin/credit-settings', headers=manager, json={'default_points': 4}).status_code == 200
     user = client.post('/api/admin/users', headers=manager, json={'username': 'new', 'password': 'a'}).json()
-    assert user['interview_credits'] == 4
-    specified = client.post('/api/admin/users', headers=manager,
-        json={'username': 'specified', 'password': 'a', 'interview_credits': 7}).json()
-    assert specified['interview_credits'] == 7
+    assert user['points'] == 4 and user['interview_credits'] == 0
+    for value in (0, 7):
+        specified = client.post('/api/admin/users', headers=manager,
+            json={'username': f'specified-{value}', 'password': 'a', 'points': value}).json()
+        assert specified['points'] == value and specified['interview_credits'] == 0
+    existing = next(row for row in client.get('/api/admin/users', headers=manager).json() if row['id'] == first['id'])
+    assert existing['points'] == 3 and existing['interview_credits'] == 0
     assert client.patch(f"/api/admin/users/{user['id']}", headers=manager, json={'interview_credits': 2}).json()['interview_credits'] == 2
-    for invalid in (-1, True, 1.5):
-        assert client.patch('/api/admin/credit-settings', headers=manager, json={'default_credits': invalid}).status_code == 422
+    for invalid in (-1, True, 1.5, 1000001):
+        assert client.patch('/api/admin/credit-settings', headers=manager, json={'default_points': invalid}).status_code == 422
+    assert client.patch('/api/admin/credit-settings', headers=login(client, 'alice'), json={'default_points': 9}).status_code == 403
+    assert client.patch('/api/admin/credit-settings', headers=manager, json={'default_points': 0}).status_code == 200
+    zero = client.post('/api/admin/users', headers=manager, json={'username': 'zero-default', 'password': 'a'}).json()
+    assert zero['points'] == 0
+    from app.db import connect
+    with connect() as db:
+        ledger = db.execute('SELECT delta,kind FROM points_ledger WHERE user_id=?', (user['id'],)).fetchall()
+        assert [(row['delta'], row['kind']) for row in ledger] == [(4, 'initial')]
+
+
+def test_initial_points_migration_preserves_balances_and_saved_default(client):
+    from app.db import connect, initialize, SCHEMA_VERSION
+    with connect() as db:
+        db.execute("UPDATE users SET points=8,interview_credits=6 WHERE username='alice'")
+        db.execute("UPDATE app_settings SET value='0' WHERE key='default_points'")
+        db.execute('PRAGMA user_version=45')
+    initialize()
+    with connect() as db:
+        assert db.execute('PRAGMA user_version').fetchone()[0] == SCHEMA_VERSION
+        assert db.execute("SELECT value FROM app_settings WHERE key='default_points'").fetchone()[0] == '3'
+        user = db.execute("SELECT points,interview_credits FROM users WHERE username='alice'").fetchone()
+        assert tuple(user) == (8, 6)
+        db.execute("UPDATE app_settings SET value='0' WHERE key='default_points'")
+    initialize()
+    with connect() as db:
+        assert db.execute("SELECT value FROM app_settings WHERE key='default_points'").fetchone()[0] == '0'
+        db.execute("UPDATE app_settings SET value='9' WHERE key='default_points'")
+        db.execute('PRAGMA user_version=45')
+    initialize()
+    with connect() as db:
+        assert db.execute("SELECT value FROM app_settings WHERE key='default_points'").fetchone()[0] == '9'
+
+
+def test_console_user_receives_current_initial_points(client, monkeypatch):
+    from app.db import connect
+    from scripts import create_user
+    with connect() as db:
+        db.execute("UPDATE app_settings SET value='5' WHERE key='default_points'")
+    monkeypatch.setattr('sys.argv', ['create_user', 'console-student'])
+    monkeypatch.setattr(create_user, 'getpass', lambda _: 'password123')
+    create_user.main()
+    with connect() as db:
+        user = db.execute("SELECT id,points,interview_credits FROM users WHERE username='console-student'").fetchone()
+        assert (user['points'], user['interview_credits']) == (5, 0)
+        assert db.execute('SELECT delta FROM points_ledger WHERE user_id=?', (user['id'],)).fetchone()[0] == 5
 
 
 def test_administrator_start_paths_keep_999999_without_charges(client):

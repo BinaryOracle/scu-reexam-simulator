@@ -25,5 +25,5 @@ test("points reward rules are grouped and the save action is not full width", ()
   assert.match(style, /\.reward-rule-groups\s*\{[^}]*grid-template-columns:\s*repeat\(2/);
   assert.match(style, /\.reward-rules-panel \.form-footer\s*\{[^}]*justify-content:\s*flex-end/);
   assert.match(style, /\.reward-rules-panel \.form-footer \.button\s*\{[^}]*width:\s*auto/);
-  assert.match(html, /style\.css\?v=20261122-reward-groups-v1/);
+  assert.match(html, /href="\/static\/style\.css\?v=[^"]+"/);
 });

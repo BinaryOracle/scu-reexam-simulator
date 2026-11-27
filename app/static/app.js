@@ -1,4 +1,4 @@
-import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261123-course-purchase-dates-v1";
+import { refreshLive, clearLive, allowLiveNavigation, liveActive } from "./live.js?v=20261126-share-recovery-v1";
 import { api, state, requireAuthenticatedUser } from "./api.js?v=20261122-session-guard-v1";
 import { $, notify, run, confirmAction } from "./ui.js?v=20261114-ui-v17";
 import {
@@ -18,8 +18,8 @@ import {
   setupContestCreation,
   requestJudgeSubmit,
 } from "./contest.js?v=20261122-contest-rewards-v1";
-import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshFeishuSettings, refreshModelSettings, refreshBackupModules, setupAdmin } from "./admin.js?v=20261124-oauth-v1";
-import { refreshProfile, refreshReferrals, refreshVouchers, refreshInterviewShop, setupCredits } from "./credits.js?v=20261124-feishu-mobile-v1";
+import { clearVisiblePasswords, refreshUsers, refreshQuestionBank, refreshLuoguSettings, refreshFeishuSettings, refreshModelSettings, refreshBackupModules, setupAdmin } from "./admin.js?v=20261126-signup-points-v1";
+import { refreshProfile, refreshReferrals, refreshVouchers, refreshInterviewShop, setupCredits } from "./credits.js?v=20261126-signup-points-v1";
 import { clearProfilePassword } from "./profile-account.js?v=20261122-profile-load-guard-v1";
 
 import { refreshTraining, clearTraining, selectTrainingSection } from "./training.js?v=20261122-points-display-v1";

@@ -46,3 +46,10 @@ test('styles the lesson Markdown editor as a compact, clear edit-preview workspa
   assert.match(source,/edit\.classList\.toggle\('selected',!show\)/);
   assert.match(source,/showPreview\.classList\.toggle\('selected',show\)/);
 });
+
+test('lets managers resize long chapter lists and keeps lesson menus inside the visible area',()=>{
+  assert.match(styles,/\.course-management-workbench \.course-lesson-list\s*\{[^}]*resize:\s*vertical/s);
+  assert.match(styles,/\.course-menu-popover\.opens-up/);
+  assert.match(source,/fitCourseMenu\(more,menu,lessonList\)/);
+  assert.match(source,/拖动右下角调整当前章节高度/);
+});

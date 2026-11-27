@@ -14,7 +14,7 @@ from fastapi import HTTPException
 from app.config import load_config
 from app.db import connect, allocate_user_id
 from app.services.auth import issue_session, public_user
-from app.services.credits import default_credits, adjust
+from app.services import points
 from app.services.security import hash_password, verify_password
 from app.services.password_vault import encrypt_password
 
@@ -251,7 +251,7 @@ def _create_user(db, email, invitation_code=None):
         is_admin,is_superadmin,is_active,can_interview,can_exam,can_practice,can_training,can_coding,invite_code,referrer_id)
         VALUES (?,?,?,?,?,0,0,0,1,1,1,0,0,0,?,?)""",
         (uid, email, hash_password(password), encrypt_password(password), email, referrals._code(db), referrer_id))
-    adjust(db, uid, default_credits(db), kind='initial')
+    points.adjust(db, uid, points.default_points(db), kind='initial')
     referrals.record_signup_reward(db, referrer_id, uid)
     return db.execute('SELECT * FROM users WHERE id=?', (uid,)).fetchone()
 

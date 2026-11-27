@@ -88,6 +88,16 @@ function wireDragReorder(container,selector,endpoint,courseId,editor=true){
     void run(()=>saveCourseOrder(container,selector,endpoint,courseId,editor));
   });
 }
+function fitCourseMenu(details,menu,scrollArea){
+  details.addEventListener('toggle',()=>{
+    if(!details.open){details.classList.remove('opens-up');return;}
+    requestAnimationFrame(()=>{
+      const area=scrollArea.getBoundingClientRect(),anchor=details.getBoundingClientRect(),popup=menu.getBoundingClientRect();
+      const roomBelow=Math.min(area.bottom,window.innerHeight)-anchor.bottom,roomAbove=anchor.top-Math.max(area.top,0);
+      details.classList.toggle('opens-up',popup.height>roomBelow&&roomAbove>roomBelow);
+    });
+  });
+}
 function orderedRows(container,selector){return [...container.querySelectorAll(`:scope > ${selector}`)];}
 function refreshOrderControls(container,selector){
   orderedRows(container,selector).forEach((row,index)=>{
@@ -462,7 +472,7 @@ async function renderCourse(id,turn,editor=false){
   }
   const sections=el('div','','course-section-list');
   course.sections.forEach((section,index)=>{
-    const sectionNode=el('section','','course-chapter');sectionNode.dataset.orderId=section.id;const heading=el('header','','course-chapter-heading');const title=el('div','','course-chapter-title');const lessonList=el('div','','course-lesson-list');lessonList.id=`course-lessons-${section.id}`;
+    const sectionNode=el('section','','course-chapter');sectionNode.dataset.orderId=section.id;const heading=el('header','','course-chapter-heading');const title=el('div','','course-chapter-title');const lessonList=el('div','','course-lesson-list');lessonList.id=`course-lessons-${section.id}`;if(course.can_manage){lessonList.title='拖动右下角调整当前章节高度';lessonList.setAttribute('aria-label','当前章节课时列表；拖动右下角调整高度');}
     if(course.can_manage){const drag=button('⠿',()=>{},'course-drag-handle');drag.draggable=true;drag.title='拖动调整章节顺序';drag.setAttribute('aria-label','拖动调整章节顺序');title.append(drag);}
     const toggle=button('',()=>{const expanded=toggle.getAttribute('aria-expanded')==='true';toggle.setAttribute('aria-expanded',String(!expanded));lessonList.hidden=expanded;sectionNode.classList.toggle('is-collapsed',expanded);},'course-chapter-toggle');toggle.setAttribute('aria-expanded','true');toggle.setAttribute('aria-controls',lessonList.id);toggle.append(el('span',String(index+1).padStart(2,'0'),'course-order-number'),el('h2',section.title),el('span',`${section.lessons.length} 课时`,'course-muted'));title.append(toggle);heading.append(title);
     if(course.can_manage){
@@ -485,10 +495,10 @@ async function renderCourse(id,turn,editor=false){
         const more=el('details','','course-lesson-more course-menu-popover');const summary=el('summary','更多');const menu=el('div','','course-lesson-more-menu');
         menu.append(button('编辑课时与预览',()=>editLesson(course,lesson,editor),'text-button'));
         const removeLesson=button('删除课时',async()=>{if(await confirmAction(`删除空课时“${lesson.title}”？请先移除视频和资料；直播课次请在直播课堂中删除。`,{title:'删除课时？',danger:true,confirmText:'删除课时'})){await api(`/courses/lessons/${lesson.id}`,{method:'DELETE'});await refreshManagedCourse(id,editor);}},'text-button danger');
-        removeLesson.disabled=lesson.items.length>0;removeLesson.title=lesson.items.length?'请先移除课时中的内容':'';menu.append(removeLesson);more.append(summary,menu);buttons.append(more);
+        removeLesson.disabled=lesson.items.length>0;removeLesson.title=lesson.items.length?'请先移除课时中的内容':'';menu.append(removeLesson);more.append(summary,menu);fitCourseMenu(more,menu,lessonList);buttons.append(more);
       }
       else{buttons.append(button('开始学习 →',()=>route(`/study/${lesson.id}`),'button primary'));}
-  if(course.can_manage&&lesson.items.length){const contents=el('div','','course-managed-items');lesson.items.forEach((item,itemIndex)=>{const itemRow=el('div','','course-managed-item');const itemName=item.kind==='live'?item.live?.title||'直播课':item.asset?.original_name||'课程文件';itemRow.append(el('span',item.kind==='live'?'直播':item.kind==='video'?'录播':'资料','course-chip'),el('span',itemName,'course-managed-item-name'));const more=el('details','','course-item-more course-menu-popover');more.append(el('summary','⋯'));const menu=el('div','','course-manage-more-menu');if(itemIndex>0)menu.append(button('上移内容',()=>moveItem(course,lesson,itemIndex,-1,editor),'text-button'));if(itemIndex<lesson.items.length-1)menu.append(button('下移内容',()=>moveItem(course,lesson,itemIndex,1,editor),'text-button'));if(item.asset&&isMarkdown(item.asset))menu.append(button('编辑正文',()=>editMarkdown(course,lesson,item.asset,editor),'text-button'));if(item.asset)menu.append(button('移除内容',()=>removeAsset(course,item.asset,editor),'text-button danger'));more.append(menu);itemRow.append(more);contents.append(itemRow);});details.append(contents);}
+  if(course.can_manage&&lesson.items.length){const contents=el('div','','course-managed-items');lesson.items.forEach((item,itemIndex)=>{const itemRow=el('div','','course-managed-item');const itemName=item.kind==='live'?item.live?.title||'直播课':item.asset?.original_name||'课程文件';itemRow.append(el('span',item.kind==='live'?'直播':item.kind==='video'?'录播':'资料','course-chip'),el('span',itemName,'course-managed-item-name'));const more=el('details','','course-item-more course-menu-popover');more.append(el('summary','⋯'));const menu=el('div','','course-manage-more-menu');if(itemIndex>0)menu.append(button('上移内容',()=>moveItem(course,lesson,itemIndex,-1,editor),'text-button'));if(itemIndex<lesson.items.length-1)menu.append(button('下移内容',()=>moveItem(course,lesson,itemIndex,1,editor),'text-button'));if(item.asset&&isMarkdown(item.asset))menu.append(button('编辑正文',()=>editMarkdown(course,lesson,item.asset,editor),'text-button'));if(item.asset)menu.append(button('移除内容',()=>removeAsset(course,item.asset,editor),'text-button danger'));more.append(menu);fitCourseMenu(more,menu,lessonList);itemRow.append(more);contents.append(itemRow);});details.append(contents);}
       row.append(details,buttons);lessonList.append(row);
     });
     sectionNode.append(heading,lessonList);sections.append(sectionNode);

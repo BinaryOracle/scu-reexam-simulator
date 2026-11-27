@@ -715,6 +715,41 @@ def test_public_preview_is_safe_and_publishing_requires_ready_content(client):
     assert client.get(f"/api/courses/lessons/{lesson['id']}", headers=learner).status_code == 200
 
 
+def test_course_can_be_published_during_live_without_changing_live_settings(client, monkeypatch):
+    from types import SimpleNamespace
+    from app.services import live_media as media
+
+    original = media.settings
+    monkeypatch.setattr(media, 'settings', lambda: {**original(), 'url': 'wss://live.example.test',
+        'api_url': 'https://live.example.test'})
+    monkeypatch.setattr(media, 'credentials', lambda: ('test-key', 'test-secret'))
+    async def successful_call(*args):
+        return SimpleNamespace()
+    monkeypatch.setattr(media, 'call', successful_call)
+
+    admin = login(client, 'manager')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': '直播测试课程', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    section_id = course['sections'][0]['id']
+    created_live = client.post(f'/api/courses/sections/{section_id}/live', headers=admin, json={
+        'title': '直播测试', 'description': '', 'position': 0, 'starts_at': 1
+    })
+    assert created_live.status_code == 201, created_live.text
+    live_id = created_live.json()['sections'][0]['lessons'][0]['items'][0]['live_lesson_id']
+    assert client.post(f'/api/live/lessons/{live_id}/start', headers=admin).status_code == 200
+
+    payload = {key: course[key] for key in ('title', 'description', 'access_mode', 'host_id', 'member_ids')}
+    payload['publication_status'] = 'published'
+    published = client.patch(f"/api/courses/{course['id']}", headers=admin, json=payload)
+    assert published.status_code == 200, published.text
+    assert published.json()['publication_status'] == 'published'
+
+    payload['host_id'] = client.get('/api/me', headers=login(client, 'alice')).json()['id']
+    blocked = client.patch(f"/api/courses/{course['id']}", headers=admin, json=payload)
+    assert blocked.status_code == 409
+
+
 def test_roster_course_sections_and_lesson_authorization(client):
     admin, alice, bob = login(client, 'manager'), login(client, 'alice'), login(client, 'bob')
     alice_id = client.get('/api/me', headers=alice).json()['id']

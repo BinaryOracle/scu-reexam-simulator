@@ -2,7 +2,7 @@ import { refreshBackupModules, setupBackups } from './admin-backups.js?v=2026112
 export { refreshBackupModules };
 /** Account management UI. Backend APIs remain the source of authorization. */
 import { api, state } from "./api.js?v=20261122-session-guard-v1";
-import { readCreditSettings } from "./credits.js?v=20261122-packages-v1";
+import { readCreditSettings } from "./credits.js?v=20261126-signup-points-v1";
 import {
   $,
   el,
@@ -516,8 +516,8 @@ function syncAccountType() {
   const admin = $("accountTypeAdmin").checked;
   $("accountPermissions").hidden = admin;
   $("accountAdminNote").hidden = !admin;
-  $("initialCreditsField").hidden = admin;
-  $("accountCredits").disabled = admin;
+  $("initialPointsField").hidden = admin;
+  $("accountPoints").disabled = admin;
   $("trainingPermissionField").hidden = admin;
   $("codingPermissionField").hidden = admin;
   $("interviewPermissionField").hidden = admin;
@@ -529,7 +529,7 @@ async function openAccount() {
   $("accountTypeAdmin").disabled = !state.user.is_superadmin;
   $("accountTypeAdmin").closest("label").hidden = !state.user.is_superadmin;
   $("userFormError").hidden = true;
-  $("accountCredits").value = settings.default_credits;
+  $("accountPoints").value = settings.default_points;
   syncAccountType();
   $("userDialog").showModal();
 }
@@ -597,7 +597,7 @@ async function submitAccount(event) {
       password: $("accountPassword").value,
       is_admin: $("accountTypeAdmin").checked,
       email: $("accountEmail").value.trim() || null,
-      interview_credits: Number($("accountCredits").value),
+      points: $("accountTypeAdmin").checked ? 0 : Number($("accountPoints").value),
       can_training: $("accountTraining").checked,
       can_coding: $("accountCoding").checked,
       can_interview: $("accountInterview").checked,

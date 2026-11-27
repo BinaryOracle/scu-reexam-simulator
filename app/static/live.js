@@ -3,9 +3,9 @@ import {api,state,requireAuthenticatedUser} from './api.js?v=20261122-session-gu
 import {emptyState} from './ui.js?v=20261114-ui-v17';
 import {el,button,notify,confirmAction,modal,materialList} from './live-ui.js?v=1';
 import {liveRoute,liveDate,recordingText,mayJoin,needsLessonUpdates} from './live-model.mjs?v=20261121-markdown-v1';
-import {configureCourseLearning,renderCoursePage,clearCourseLearning} from './course-learning.js?v=20261123-course-purchase-dates-v1';
+import {configureCourseLearning,renderCoursePage,clearCourseLearning} from './course-learning.js?v=20261126-course-popover-resize-v1';
 import {mediaLease} from './live-devices.mjs?v=1';
-import {Classroom} from './live-room.js?v=20261116-frames-v1';
+import {Classroom} from './live-room.js?v=20261126-share-recovery-v1';
 import {writeAppRoute} from './view-route.mjs?v=20261115-navigation-v3';
 let revision=0,room=null,pageTimer=null;
 const root=()=>document.getElementById('liveContent');

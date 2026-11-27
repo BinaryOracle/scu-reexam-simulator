@@ -24,7 +24,7 @@ class VoucherBatch(BaseModel):
 
 class CreditSettings(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    default_credits: StrictInt | None = Field(default=None, ge=0, le=1000000)
+    default_points: StrictInt | None = Field(default=None, ge=0, le=1000000)
     interview_points_cost: StrictInt | None = Field(default=None, ge=1, le=1000000)
     invite_signup_points: StrictInt | None = Field(default=None, ge=0, le=1000000)
     training_checkin_points_per_week: StrictInt | None = Field(default=None, ge=0, le=1000000)
@@ -112,7 +112,7 @@ def redeem(payload: Redeem, user=Depends(current_user)):
 def get_settings(user=Depends(administrator)):
     from app.config import load_config
     with connect() as db:
-        return {'default_credits': credits.default_credits(db), 'packages': credits.packages(db),
+        return {'default_points': points.default_points(db), 'packages': credits.packages(db),
                 'interview_points_cost': points.cost(db),
                 'reward_rules': points.reward_rules(db),
                 'max_voucher_batch': load_config()['credits']['max_voucher_batch']}
@@ -128,8 +128,8 @@ def update_settings(payload: CreditSettings, user=Depends(administrator)):
             from app.services import contest_rewards
             contest_rewards.settle_due(db)
             db.execute("UPDATE app_settings SET value=? WHERE key='contest_rewards'", (json.dumps(changes['contest_rewards']),))
-        if payload.default_credits is not None:
-            db.execute("UPDATE app_settings SET value=? WHERE key='default_interview_credits'", (str(payload.default_credits),))
+        if payload.default_points is not None:
+            db.execute("UPDATE app_settings SET value=? WHERE key='default_points'", (str(payload.default_points),))
         if payload.interview_points_cost is not None:
             db.execute("UPDATE app_settings SET value=? WHERE key='interview_points_cost'", (str(payload.interview_points_cost),))
         for key in ('invite_signup_points', 'training_checkin_points_per_week', 'coding_checkin_points_per_week'):

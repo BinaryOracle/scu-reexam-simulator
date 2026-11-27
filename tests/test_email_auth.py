@@ -100,7 +100,7 @@ def test_email_creates_normal_account_with_current_default_and_single_use(email_
     from app.services.security import verify_password
     client, settings, messages, _, clock = email_client
     with connect() as db:
-        db.execute("UPDATE app_settings SET value='4' WHERE key='default_interview_credits'")
+        db.execute("UPDATE app_settings SET value='4' WHERE key='default_points'")
     sent = send(client, entered_email)
     assert sent.status_code == 200 and sent.json()['retry_after'] == settings['resend_seconds']
     value = code(messages[-1])
@@ -115,7 +115,8 @@ def test_email_creates_normal_account_with_current_default_and_single_use(email_
     assert body['is_admin'] is False and body['is_superadmin'] is False
     assert body['can_interview'] is True and body['can_exam'] is True
     assert body['can_training'] is False and body['can_coding'] is False
-    assert body['interview_credits'] == 4
+    assert body['interview_credits'] == 0
+    assert body['points'] == 4
     assert body['email'] == email
     assert body['username'] == email
     assert not {'password', 'password_ciphertext', 'code_hash'} & body.keys()
@@ -126,7 +127,7 @@ def test_email_creates_normal_account_with_current_default_and_single_use(email_
         generated = decrypt_password(user['password_ciphertext'])
         assert len(generated) >= 48 and verify_password(generated, user['password'])
         assert generated != value
-        ledger = db.execute('SELECT * FROM credit_ledger WHERE user_id=?', (body['id'],)).fetchall()
+        ledger = db.execute('SELECT * FROM points_ledger WHERE user_id=?', (body['id'],)).fetchall()
         assert len(ledger) == 1 and ledger[0]['kind'] == 'initial'
         assert ledger[0]['delta'] == 4 and ledger[0]['balance_after'] == 4
     assert login(client, value, email).status_code == 401
@@ -137,10 +138,11 @@ def test_email_creates_normal_account_with_current_default_and_single_use(email_
     assert send(client, email).status_code == 200
     again = login(client, code(messages[-1]), email)
     assert again.status_code == 200 and again.json()['id'] == body['id']
+    assert again.json()['points'] == 4
     assert again.json()['can_interview'] is False and again.json()['can_exam'] is False
     assert again.json()['can_training'] is True and again.json()['can_coding'] is True
     with connect() as db:
-        assert db.execute('SELECT COUNT(*) FROM credit_ledger WHERE user_id=?', (body['id'],)).fetchone()[0] == 1
+        assert db.execute('SELECT COUNT(*) FROM points_ledger WHERE user_id=?', (body['id'],)).fetchone()[0] == 1
 
 
 def test_invite_registration_rewards_referrer_once_and_keeps_referral_history(email_client):
@@ -364,7 +366,7 @@ def test_smtp_delivery_has_no_write_transaction_and_pending_codes_are_unusable(e
         try:
             with connect() as db:
                 db.execute('BEGIN IMMEDIATE')
-                db.execute("UPDATE app_settings SET value='2' WHERE key='default_interview_credits'")
+                db.execute("UPDATE app_settings SET value='2' WHERE key='default_points'")
             assert login(client, code(messages[-1])).status_code == 401
             assert send(client).status_code == 429
         finally:
@@ -504,7 +506,7 @@ def test_rebind_requires_auth_new_mailbox_and_preserves_identity(email_client):
     assert login(client, login_value, 'new@example.com').status_code == 401
     with connect() as db:
         assert db.execute('SELECT COUNT(*) FROM users').fetchone()[0] == 2
-        assert db.execute('SELECT COUNT(*) FROM credit_ledger WHERE user_id=?', (account['id'],)).fetchone()[0] == 1
+        assert db.execute('SELECT COUNT(*) FROM points_ledger WHERE user_id=?', (account['id'],)).fetchone()[0] == 1
 
 
 def test_rebind_is_unique_bound_to_user_and_single_use(email_client):
@@ -698,3 +700,12 @@ def test_empty_database_root_seed_respects_retained_user_id_highwater(email_clie
         root = db.execute("SELECT id FROM users WHERE username='root'").fetchone()
         assert root['id'] == 501
         assert db.execute('SELECT COUNT(*) FROM users').fetchone()[0] == 1
+
+
+def test_email_signup_receives_three_points_by_default(email_client):
+    client, _, messages, _, _ = email_client
+    assert send(client).status_code == 200
+    result = login(client, code(messages[-1]))
+    assert result.status_code == 200
+    assert result.json()['points'] == 3
+    assert result.json()['interview_credits'] == 0

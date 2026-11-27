@@ -51,9 +51,9 @@ export class Classroom {
     const event=SDK.RoomEvent;
     for(const name of [event.TrackSubscribed,event.TrackUnsubscribed,event.TrackPublished,event.TrackUnpublished,event.LocalTrackPublished,event.LocalTrackUnpublished,event.ParticipantConnected,event.ParticipantDisconnected,event.TrackMuted,event.TrackUnmuted,event.ActiveSpeakersChanged])this.room.on(name,()=>this.scheduleMediaRender());
     this.room.on(event.VideoPlaybackStatusChanged,playing=>{if(!playing){this.playbackState='blocked';this.updateStageStatus();}});
-    this.room.on(event.Reconnecting,()=>{this.connection.textContent='正在重新连接…';this.connection.dataset.state='reconnecting';this.showBanner('连接暂时中断，正在尝试恢复，请稍候。');});
-    this.room.on(event.Reconnected,()=>{this.connection.textContent='连接正常';this.connection.dataset.state='connected';this.hideBanner();void this.pollOnce().catch(error=>this.showBanner(error.message));});
-    this.room.on(event.Disconnected,()=>{if(!this.closed){this.reconnectNeeded=true;this.connection.textContent='已断开';this.showBanner('音视频连接已断开，正在尝试重新入会。');}});
+    this.room.on(event.Reconnecting,()=>{this.connection.textContent='正在重新连接…';this.connection.dataset.state='reconnecting';this.syncControls();this.showBanner('连接暂时中断，正在尝试恢复，请稍候。');});
+    this.room.on(event.Reconnected,()=>{this.connection.textContent='连接正常';this.connection.dataset.state='connected';this.syncControls();this.hideBanner();void this.pollOnce().catch(error=>this.showBanner(error.message));});
+    this.room.on(event.Disconnected,()=>{if(!this.closed){this.reconnectNeeded=true;this.connection.textContent='已断开';this.connection.dataset.state='disconnected';this.syncControls();this.showBanner('音视频连接已断开，正在尝试重新入会。');}});
     this.room.on(event.MediaDevicesError,()=>this.showBanner('无法使用设备，请检查浏览器授权和系统设备设置。'));
     this.room.on(event.AudioPlaybackStatusChanged,()=>{if(!this.room.canPlaybackAudio){this.showBanner('浏览器暂停了课堂声音。');const resume=button('点击开启声音',async()=>{await this.room.startAudio();this.hideBanner();},'button secondary live-small');this.banner.append(resume);}});
     await this.room.connect(this.credentials.url,this.credentials.token);if(this.closed){await this.room.disconnect();return;}
@@ -66,7 +66,7 @@ export class Classroom {
   togglePanel(open){this.panelOpen=open;this.sidebar.hidden=!open;this.body.classList.toggle('panel-hidden',!open);this.comment?.setAttribute('aria-pressed',String(open&&this.tab==='chat'));}
   async refreshMaterials(){const detail=await api(`/live/lessons/${this.lesson.id}`);if(this.closed)return;materialList(this.fileList,detail,{canManage:this.isHost,refresh:()=>this.refreshMaterials()});}
   syncControls(){if(!this.room)return;const local=this.room.localParticipant;const mic=Boolean(local.isMicrophoneEnabled),cam=Boolean(local.isCameraEnabled),sharing=Boolean(local.isScreenShareEnabled);
-    this.mic.disabled=!this.permissions.can_speak;this.cam.disabled=!this.permissions.can_speak;this.share.disabled=Boolean(this.shareBusy);this.mic.lastChild.textContent=mic?'关闭麦克风':'开启麦克风';this.cam.lastChild.textContent=cam?'关闭摄像头':'开启摄像头';this.share.lastChild.textContent=this.shareBusy?'正在处理共享…':sharing?'停止共享':(this.isHost||this.permissions.can_share)?'共享屏幕':this.requestShare?'取消共享申请':'申请共享';
+    this.mic.disabled=!this.permissions.can_speak;this.cam.disabled=!this.permissions.can_speak;this.share.disabled=Boolean(this.shareBusy)||this.connection.dataset.state!=='connected';this.mic.lastChild.textContent=mic?'关闭麦克风':'开启麦克风';this.cam.lastChild.textContent=cam?'关闭摄像头':'开启摄像头';this.share.lastChild.textContent=this.shareBusy?'正在处理共享…':sharing?'停止共享':(this.isHost||this.permissions.can_share)?'共享屏幕':this.requestShare?'取消共享申请':'申请共享';
     for(const [node,value]of [[this.mic,mic],[this.cam,cam],[this.share,sharing]]){node.setAttribute('aria-pressed',String(value));node.setAttribute('aria-label',node.lastChild.textContent);node.classList.toggle('is-on',value);}
     this.mic.title=this.permissions.can_speak?'开启或关闭麦克风':'请先举手，主持人授权后可以开启麦克风';this.cam.title=this.permissions.can_speak?'开启或关闭摄像头':'主持人授权发言后可以开启摄像头';
     if(this.raise){this.raise.classList.toggle('is-on',this.hand);this.raise.lastChild.textContent=this.hand?'取消举手':'举手';this.raise.setAttribute('aria-pressed',String(this.hand));}
@@ -75,13 +75,21 @@ export class Classroom {
   async toggleCamera(){try{await this.room.localParticipant.setCameraEnabled(!this.room.localParticipant.isCameraEnabled);this.syncControls();}catch(error){throw new Error('摄像头未能开启，请检查设备和浏览器授权。');}}
   async toggleShare(){
     if(this.closed||this.shareBusy)return;
+    if(this.connection.dataset.state!=='connected'){
+      this.reconnectNeeded=true;
+      await this.pollOnce();
+      if(!this.closed)notify('课堂连接已恢复，请再次点击“共享屏幕”选择窗口。');
+      return;
+    }
     this.shareBusy=true;this.syncControls();
     try{
     const local=this.room.localParticipant;
     if(local.isScreenShareEnabled){await local.setScreenShareEnabled(false);return;}
     if(!navigator.mediaDevices?.getDisplayMedia)throw new Error('当前浏览器不支持屏幕共享，请使用最新版 Chrome 或 Edge，通过本机地址或 HTTPS 打开课堂。');
     if(this.isHost&&!this.permissions.can_share){
-      await api(`/live/lessons/${this.lesson.id}/members/${state.user.id}`,{method:'PATCH',body:JSON.stringify({can_share:true})});await this.pollOnce();
+      try{await api(`/live/lessons/${this.lesson.id}/members/${state.user.id}`,{method:'PATCH',body:JSON.stringify({can_share:true})});}
+      catch(error){if(error.status!==409||!error.message.includes('课堂音视频连接已中断'))throw error;this.reconnectNeeded=true;await this.pollOnce();if(!this.closed)notify('课堂连接已恢复，请再次点击“共享屏幕”选择窗口。');return;}
+      await this.pollOnce();
       if(navigator.userActivation&&!navigator.userActivation.isActive){notify('共享已就绪，请再次点击“共享屏幕”选择窗口。');return;}
     }
     if(!this.permissions.can_share){this.requestShare=!this.requestShare;try{await this.presence();}catch(error){this.requestShare=!this.requestShare;throw error;}this.syncControls();notify(this.requestShare?'已向主持人申请共享屏幕':'已取消共享申请');return;}
@@ -111,7 +119,7 @@ export class Classroom {
     if(this.reconnectNeeded){
       this.showBanner('正在恢复课堂连接…');const credentials=await api(`/live/lessons/${this.lesson.id}/join`,{method:'POST'});if(this.closed){await api(`/live/lessons/${this.lesson.id}/leave`,{method:'POST'});return;}
       await this.room.disconnect();if(this.closed)return;await this.room.connect(credentials.url,credentials.token);if(this.closed){await this.room.disconnect();return;}
-      this.permissions=credentials;await this.presence();this.reconnectNeeded=false;this.connection.textContent='连接正常';this.connection.dataset.state='connected';this.hideBanner();this.renderMedia();return;
+      this.permissions=credentials;await this.presence();this.reconnectNeeded=false;this.connection.textContent='连接正常';this.connection.dataset.state='connected';this.hideBanner();this.syncControls();this.renderMedia();return;
     }if(this.closed)return;
     const self=result.members.find(member=>member.user_id===state.user.id);if(self){const oldSpeak=this.permissions.can_speak,oldShare=this.permissions.can_share;this.permissions=self;this.hand=Boolean(self.hand);this.requestShare=Boolean(self.request_share);
       if(!self.can_speak&&oldSpeak){await this.room.localParticipant.setMicrophoneEnabled(false);await this.room.localParticipant.setCameraEnabled(false);}

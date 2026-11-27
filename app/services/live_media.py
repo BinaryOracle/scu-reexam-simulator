@@ -1,5 +1,6 @@
 """LiveKit server SDK integration. API failures never become successful media state."""
 import json
+import logging
 import os
 import stat
 from datetime import timedelta
@@ -7,6 +8,8 @@ import aiohttp
 from fastapi import HTTPException
 from livekit import api
 from app.config import load_config
+
+logger = logging.getLogger(__name__)
 
 
 def settings():
@@ -71,8 +74,24 @@ async def call(service, method, request):
     client = api.LiveKitAPI(settings()['api_url'], key, secret, timeout=aiohttp.ClientTimeout(total=15))
     try:
         return await getattr(getattr(client, service), method)(request)
-    except (api.TwirpError, aiohttp.ClientError, TimeoutError) as error:
-        raise HTTPException(502, 'LiveKit 服务操作失败，请检查服务状态后重试') from error
+    except api.TwirpError as error:
+        logger.warning('LiveKit %s.%s failed with code=%s status=%s',
+                       service, method, error.code, error.status)
+        if error.code == 'not_found' and method == 'update_participant':
+            raise HTTPException(409, '课堂音视频连接已中断，正在恢复；请等待“连接正常”后重新点击共享屏幕。') from error
+        if error.code == 'not_found':
+            raise HTTPException(404, '找不到该直播房间，或房间已结束。请退出后重新进入；若仍失败，请管理员确认 live.api_url 与 live.url 指向同一 LiveKit 服务。') from error
+        if error.code in {'unauthenticated', 'permission_denied'}:
+            raise HTTPException(503, '直播服务鉴权失败，请联系管理员检查 LiveKit 服务端密钥和权限配置。') from error
+        if error.code in {'unavailable', 'deadline_exceeded'}:
+            raise HTTPException(503, '直播媒体服务暂时不可用，请稍后重试；若持续发生，请联系管理员检查服务状态。') from error
+        raise HTTPException(502, 'LiveKit 暂时无法完成此操作，请稍后重试；若持续发生，请联系管理员查看服务日志。') from error
+    except (aiohttp.ClientError, TimeoutError) as error:
+        if isinstance(error, TimeoutError):
+            logger.warning('LiveKit %s.%s timed out', service, method)
+            raise HTTPException(504, '连接直播媒体服务超时，请检查网络后重试。') from error
+        logger.warning('LiveKit %s.%s could not connect: %s', service, method, type(error).__name__)
+        raise HTTPException(502, '无法连接直播媒体服务，请稍后重试；若持续发生，请联系管理员检查服务状态。') from error
     finally:
         await client.aclose()
 

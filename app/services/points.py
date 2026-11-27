@@ -30,6 +30,11 @@ def initialize(db):
     db.execute('DELETE FROM voucher_packages WHERE deleted=1')
 
 
+def default_points(db):
+    """Return the current one-time signup grant, read inside account creation."""
+    return int(db.execute("SELECT value FROM app_settings WHERE key='default_points'").fetchone()[0])
+
+
 def cost(db):
     return int(db.execute("SELECT value FROM app_settings WHERE key='interview_points_cost'").fetchone()[0])
 

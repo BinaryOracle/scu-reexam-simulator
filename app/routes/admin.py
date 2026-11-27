@@ -381,7 +381,7 @@ def create_user(payload: AccountCreate, actor=Depends(administrator)):
         raise HTTPException(403, '仅超级管理员可以创建管理员')
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
-        initial = credits.ADMIN_CREDITS if payload.is_admin else payload.interview_credits if payload.interview_credits is not None else credits.default_credits(db)
+        initial = credits.ADMIN_CREDITS if payload.is_admin else payload.interview_credits if payload.interview_credits is not None else 0
         try:
             legacy_grant = payload.can_practice
             training = payload.can_training if legacy_grant is None else legacy_grant
@@ -393,8 +393,8 @@ def create_user(payload: AccountCreate, actor=Depends(administrator)):
         except sqlite3.IntegrityError as error:
             raise HTTPException(409, '用户名或邮箱已存在，请使用其他用户名或邮箱') from error
         credits.adjust(db, uid, initial, kind='initial')
-        if payload.points:
-            points.adjust(db, uid, payload.points, kind='admin_adjust')
+        initial_points = payload.points if payload.points is not None else (0 if payload.is_admin else points.default_points(db))
+        points.adjust(db, uid, initial_points, kind='initial')
         return public_user(find_user(db, uid), admin_view=True)
 
 

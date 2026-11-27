@@ -38,7 +38,8 @@ max_ip_attempts = 60 # 每个请求来源 IP 每窗口校验上限；不信任�
 
 [credits]
 shop_url = "https://wzyp.cn/shop/E1GQFV0P" # 仅跳转独立店铺，不对接支付；留空隐藏购买入口
-default_credits = 1 # 首次初始化默认次数；后台可修改后续新用户的默认值
+default_points = 3 # 新用户初始积分；初始化后在后台“积分与卡密管理”修改
+default_credits = 1 # 仅兼容旧版面试次数字段迁移，不再用于新用户发放
 max_voucher_batch = 500
 
 # 下列套餐仅在首次创建套餐表时导入；运行后请在后台新增套餐，配置不覆盖数据库。

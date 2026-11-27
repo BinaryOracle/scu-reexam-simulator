@@ -191,8 +191,22 @@ def _save_course(db, payload, user, course_id=None):
     else:
         course = courses.require_access(db, course_id, user, manager=True)
         validate_markdown_images(db, course_id, None, payload.description)
-        if db.execute("SELECT 1 FROM live_lessons WHERE course_id=? AND status='live'", (course_id,)).fetchone():
-            raise HTTPException(409, '直播期间不能修改课程主持人或成员')
+        live_active = db.execute("SELECT 1 FROM live_lessons WHERE course_id=? AND status='live'", (course_id,)).fetchone()
+        if live_active:
+            existing_members = {row['user_id'] for row in db.execute(
+                'SELECT user_id FROM live_members WHERE course_id=?', (course_id,))}
+            proposed_members = {host_id}
+            if payload.access_mode == 'roster':
+                proposed_members.update(payload.member_ids)
+            unchanged = (title == course['title'] and payload.description.strip() == course['description'] and
+                         host_id == course['host_id'] and payload.access_mode == course['access_mode'] and
+                         proposed_members == existing_members and price == course['points_price'] and
+                         start_date == course['points_access_start_date'] and
+                         end_date == course['points_access_end_date'] and payload.cover_kind is None)
+            if not unchanged or payload.publication_status != 'published':
+                raise HTTPException(409, '直播期间仅可发布课程；主持人、学员和课程信息需在结束直播后修改')
+            db.execute("UPDATE live_courses SET publication_status='published' WHERE id=?", (course_id,))
+            return _course_row(db, course_id)
         if payload.cover_kind is not None:
             cover_kind, cover_value = _preset_cover(payload)
             db.execute('''UPDATE live_courses SET title=?,description=?,host_id=?,publication_status=?,access_mode=?,
