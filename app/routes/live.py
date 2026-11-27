@@ -99,7 +99,14 @@ def save_course(db, payload, user, cid=None):
         if not store.manage(row, user):
             raise HTTPException(403, '需要课程管理权限')
         if db.execute("SELECT 1 FROM live_lessons WHERE course_id=? AND status='live'", (cid,)).fetchone():
-            raise HTTPException(409, '直播期间不能修改名单和主持人')
+            existing_members = {item[0] for item in db.execute(
+                'SELECT user_id FROM live_members WHERE course_id=?', (cid,))}
+            proposed_members = set([payload.host_id, *payload.member_ids])
+            unchanged = (payload.title.strip() == row['title'] and payload.description == row['description'] and
+                         payload.host_id == row['host_id'] and proposed_members == existing_members)
+            if not unchanged:
+                raise HTTPException(409, '直播期间不能修改课程信息、主持人或成员；如需保存，请保持当前设置不变')
+            return course_view(db, row, user)
         db.execute('UPDATE live_courses SET title=?,description=?,host_id=? WHERE id=?',
                    (payload.title.strip(), payload.description, payload.host_id, cid))
         db.execute('DELETE FROM live_members WHERE course_id=?', (cid,))

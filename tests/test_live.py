@@ -189,6 +189,21 @@ def test_people_admin_isolation_and_live_roster_freeze(client, monkeypatch):
     with __import__('app.db', fromlist=['connect']).connect() as db:
         root = db.execute("SELECT id FROM users WHERE username='root'").fetchone()[0]
     assert client.post('/api/live/courses', headers=admin, json={'title': 'bad', 'host_id': root}).status_code == 404
+    course = client.get(f'/api/live/courses/{cid}', headers=admin).json()
+    unchanged = {'title': course['title'], 'description': course['description'],
+                 'host_id': course['host_id'], 'member_ids': course['member_ids']}
+    saved = client.patch(f'/api/live/courses/{cid}', headers=admin, json=unchanged)
+    assert saved.status_code == 200, saved.text
+    assert saved.json()['host_id'] == course['host_id']
+    assert saved.json()['member_ids'] == course['member_ids']
+    alice_id = client.get('/api/me', headers=alice).json()['id']
+    bob_id = client.get('/api/me', headers=login(client, 'bob')).json()['id']
+    with __import__('app.db', fromlist=['connect']).connect() as db:
+        db.execute('INSERT INTO live_members VALUES (?,?)', (cid, bob_id))
+    changed_members = {**unchanged, 'member_ids': []}
+    assert client.patch(f'/api/live/courses/{cid}', headers=admin, json=changed_members).status_code == 409
+    changed_host = {**unchanged, 'host_id': bob_id}
+    assert client.patch(f'/api/live/courses/{cid}', headers=admin, json=changed_host).status_code == 409
     assert client.patch(f'/api/live/courses/{cid}', headers=admin,
         json={'title': 'frozen', 'host_id': client.get('/api/me', headers=alice).json()['id']}).status_code == 409
     assert client.delete(f'/api/live/lessons/{lid}', headers=admin).status_code == 409
