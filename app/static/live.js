@@ -9,12 +9,16 @@ import {Classroom} from './live-room.js?v=20261126-share-recovery-v1';
 import {writeAppRoute} from './view-route.mjs?v=20261115-navigation-v3';
 let revision=0,room=null,pageTimer=null;
 const root=()=>document.getElementById('liveContent');
+const liveRestoreKey='live-room-lesson';
+function storedLiveLesson(){try{return sessionStorage.getItem(liveRestoreKey)||'';}catch{return '';}}
+function rememberLiveLesson(id){try{sessionStorage.setItem(liveRestoreKey,String(id));}catch{}}
+function forgetLiveLesson(id){try{if(!id||sessionStorage.getItem(liveRestoreKey)===String(id))sessionStorage.removeItem(liveRestoreKey);}catch{}}
 const valid=(turn)=>turn===revision&&state.user&&!document.getElementById('live')?.hidden;
 const labels={scheduled:'待开课',live:'直播中',ended:'已结束'};
 const json=(body)=>JSON.stringify(body);
 configureCourseLearning(path=>navigate(path));
 /** Release devices and timers on logout or navigation away from the classroom. */
-export function clearLive(){revision++;root().querySelectorAll('video').forEach(player=>player.pause());clearCourseLearning();clearTimeout(pageTimer);pageTimer=null;room?.dispose();room=null;document.body.classList.remove('live-immersive');document.querySelectorAll('dialog[data-live-owned]').forEach(dialog=>dialog.close());}
+export function clearLive(){const lessonId=room?.lesson?.id;revision++;root().querySelectorAll('video').forEach(player=>player.pause());clearCourseLearning();clearTimeout(pageTimer);pageTimer=null;room?.dispose();room=null;forgetLiveLesson(lessonId);document.body.classList.remove('live-immersive');document.querySelectorAll('dialog[data-live-owned]').forEach(dialog=>dialog.close());}
 export function liveActive(){return Boolean(room);}
 export async function allowLiveNavigation(){return !room||await confirmAction('离开后将停止你的麦克风、摄像头和共享。课堂会继续进行。',{title:'离开当前课堂？',confirmText:'离开课堂'});}
 function navigate(route){writeAppRoute(`live${route}`);return refreshLive();}
@@ -32,7 +36,7 @@ export async function refreshLive(){
   if(route.kind!=='study'){clearCourseLearning();target.replaceChildren(el('p','正在准备课堂…','live-loading'));}
   try{
     if(['list','public','manage','course','study','preview','editor','markdown'].includes(route.kind)){if(valid(turn))await renderCoursePage(route);}
-    else {const data=await api(`/live/lessons/${route.id}`);if(valid(turn)){renderLesson(data);if(needsLessonUpdates(data))scheduleLesson(data.id,turn);}}
+    else {const data=await api(`/live/lessons/${route.id}`);if(valid(turn)){renderLesson(data);if(needsLessonUpdates(data))scheduleLesson(data.id,turn);if(data.status==='live'&&storedLiveLesson()===String(data.id))await joinLesson(data,{restore:true,turn});}}
   }catch(error){if(valid(turn))target.replaceChildren(emptyState('暂时无法打开课堂',error.message),button('返回课程列表',()=>navigate('')));}
   finally{if(valid(turn))target.removeAttribute('aria-busy');}
 }
@@ -74,7 +78,18 @@ async function prepare(lesson){
   const deviceActions=el('div','','live-device-actions');
   deviceActions.append(button('检测麦克风',async()=>{release();if(!navigator.mediaDevices?.getUserMedia)throw new Error('当前浏览器无法使用麦克风，请通过 HTTPS 或本机地址访问。');let acquired;try{acquired=await lease.acquire({audio:true});}catch(error){throw new Error('无法访问麦克风，请检查浏览器授权和系统输入设备。');}if(!acquired||closed)return;const AudioContext=window.AudioContext||window.webkitAudioContext;const audioContext=new AudioContext();context=audioContext;try{await audioContext.resume();}catch(error){if(!acquired.isCurrent())return;throw error;}if(!acquired.isCurrent()||closed){void audioContext.close().catch(()=>{});return;}const analyser=audioContext.createAnalyser();audioContext.createMediaStreamSource(acquired.stream).connect(analyser);const samples=new Uint8Array(analyser.fftSize);const tick=()=>{if(!context)return;analyser.getByteTimeDomainData(samples);const level=Math.min(100,Math.round(Math.sqrt(samples.reduce((sum,value)=>sum+((value-128)/128)**2,0)/samples.length)*300));meter.style.setProperty('--level',`${level}%`);meter.setAttribute('aria-valuenow',String(level));frame=requestAnimationFrame(tick);};tick();status.textContent='麦克风已连接，请说几句话，确认音量条有变化。';}),button('预览摄像头',async()=>{release();if(!navigator.mediaDevices?.getUserMedia)throw new Error('当前浏览器无法使用摄像头，请通过 HTTPS 或本机地址访问。');let acquired;try{acquired=await lease.acquire({video:true});}catch(error){throw new Error('无法访问摄像头，请检查浏览器授权。');}if(!acquired||closed)return;video.srcObject=acquired.stream;video.hidden=false;avatar.hidden=true;status.textContent='预览仅对自己可见，入会后摄像头仍保持关闭。';}));
   body.append(deviceActions,meter,status);
-  footer.append(button('进入课堂 →',async()=>{release();const turn=revision;const credentials=await api(`/live/lessons/${lesson.id}/join`,{method:'POST'});if(!dialog.isConnected||!valid(turn)){void api(`/live/lessons/${lesson.id}/leave`,{method:'POST'}).catch(()=>{});return;}dialog.close();clearTimeout(pageTimer);document.body.classList.add('live-immersive');room=new Classroom(root(),lesson,credentials,async()=>{room=null;document.body.classList.remove('live-immersive');await refreshLive();});try{await room.connect();}catch(error){room?.dispose();room=null;document.body.classList.remove('live-immersive');await refreshLive();throw error;}},'button primary'));
+  footer.append(button('进入课堂 →',async()=>{release();const turn=revision;dialog.close();await joinLesson(lesson,{turn});},'button primary'));
+}
+async function joinLesson(lesson,{restore=false,turn=revision}={}){
+  if(room||!valid(turn))return;
+  let credentials;
+  try{credentials=await api(`/live/lessons/${lesson.id}/join`,{method:'POST'});}
+  catch(error){if(restore){forgetLiveLesson(lesson.id);notify(`课堂恢复失败：${error.message}`,'error');}throw error;}
+  if(!valid(turn)){void api(`/live/lessons/${lesson.id}/leave`,{method:'POST'}).catch(()=>{});return;}
+  rememberLiveLesson(lesson.id);clearTimeout(pageTimer);document.body.classList.add('live-immersive');
+  room=new Classroom(root(),lesson,credentials,async()=>{forgetLiveLesson(lesson.id);room=null;document.body.classList.remove('live-immersive');await refreshLive();});
+  try{await room.connect();}
+  catch(error){room?.dispose({leave:true});room=null;forgetLiveLesson(lesson.id);document.body.classList.remove('live-immersive');if(restore)notify(`课堂恢复失败：${error.message}`,'error');await refreshLive();throw error;}
 }
 async function playback(record,lesson){
   const {dialog,body,footer}=modal(lesson.title,'课堂回放');dialog.classList.add('live-playback-dialog');footer.firstChild.textContent='关闭回放';

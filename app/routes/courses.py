@@ -745,6 +745,25 @@ def delete_lesson(lesson_id: int, user=Depends(administrator)):
     return {'ok': True}
 
 
+@router.delete('/lesson-items/{item_id}')
+def delete_lesson_item(item_id: int, user=Depends(administrator)):
+    """Remove one content entry from a lesson while preserving its source record."""
+    with connect() as db:
+        item = db.execute('''
+            SELECT i.*, l.course_id, l.id AS lesson_id
+            FROM course_lesson_items i
+            JOIN course_lessons l ON l.id=i.lesson_id
+            WHERE i.id=?
+        ''', (item_id,)).fetchone()
+        if not item:
+            raise HTTPException(404, '课时内容不存在')
+        courses.require_lesson(db, item['lesson_id'], user, manager=True)
+        db.execute('BEGIN IMMEDIATE')
+        db.execute('DELETE FROM course_lesson_items WHERE id=?', (item_id,))
+        courses.compact_positions(db, 'course_lesson_items', 'lesson_id', item['lesson_id'])
+        return {'ok': True}
+
+
 @router.put('/lessons/{lesson_id}/items')
 def order_items(lesson_id: int, payload: ItemOrder, user=Depends(administrator)):
     with connect() as db:

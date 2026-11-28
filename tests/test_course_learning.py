@@ -839,6 +839,33 @@ def test_live_class_is_created_as_a_course_unit_in_one_operation(client):
                           (unit['id'],)).fetchone()[0] == 1
 
 
+def test_removing_live_item_only_unlinks_course_catalog_entry(client):
+    from app.db import connect
+
+    admin, learner = login(client, 'manager'), login(client, 'alice')
+    course = client.post('/api/courses', headers=admin, json={
+        'title': '直播目录关联', 'publication_status': 'draft', 'access_mode': 'public'
+    }).json()
+    section = course['sections'][0]
+    created = client.post(f"/api/courses/sections/{section['id']}/live", headers=admin, json={
+        'title': '可移除的直播课', 'description': '保留直播课次', 'position': 0, 'starts_at': 1_800_000_000
+    })
+    assert created.status_code == 201, created.text
+    live_course = created.json()
+    item = live_course['sections'][0]['lessons'][0]['items'][0]
+    live_id = item['live']['id']
+
+    assert client.delete(f"/api/courses/lesson-items/{item['id']}", headers=learner).status_code == 403
+    removed = client.delete(f"/api/courses/lesson-items/{item['id']}", headers=admin)
+    assert removed.status_code == 200, removed.text
+
+    with connect() as db:
+        assert db.execute('SELECT 1 FROM live_lessons WHERE id=?', (live_id,)).fetchone() is not None
+        assert db.execute('SELECT 1 FROM course_lesson_items WHERE id=?', (item['id'],)).fetchone() is None
+        assert db.execute('SELECT COUNT(*) FROM course_lesson_items WHERE lesson_id=?',
+                          (live_course['sections'][0]['lessons'][0]['id'],)).fetchone()[0] == 0
+
+
 def test_private_course_assets_ticket_range_and_revoked_enrollment(client):
     from app.db import connect
     admin, bob = login(client, 'manager'), login(client, 'bob')

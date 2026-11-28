@@ -8,9 +8,14 @@ function icon(name){const box=el('span','','live-control-icon');box.setAttribute
 function control(name,label,action,extra=''){const node=button('',action,`live-control ${extra}`);node.append(icon(name),el('span',label));node.setAttribute('aria-label',label);node.title=label;return node;}
 let sdkPromise;
 function loadSDK(){if(window.LivekitClient)return Promise.resolve(window.LivekitClient);if(!sdkPromise)sdkPromise=new Promise((resolve,reject)=>{const script=el('script');script.src='/static/vendor/livekit-client-2.24.1.umd.js';script.onload=()=>resolve(window.LivekitClient);script.onerror=()=>{sdkPromise=null;script.remove();reject(new Error('课堂组件加载失败，请刷新重试。'));};document.head.append(script);});return sdkPromise;}
+function normalizedSource(value){return typeof value==='string'?value.toLowerCase().replace(/[-_\s]/g,''):'';}
+function sourceMatches(value,expected,aliases=[]){const normalized=normalizedSource(value);return normalized===normalizedSource(expected)||aliases.some(alias=>normalized===normalizedSource(alias));}
+function isScreenPublication(pub,SDK){const expected=SDK?.Track?.Source?.ScreenShare;return [pub?.source,pub?.track?.source].some(value=>sourceMatches(value,expected,['screen_share','screenshare','screen']));}
+function isCameraPublication(pub,SDK){const expected=SDK?.Track?.Source?.Camera;return [pub?.source,pub?.track?.source].some(value=>sourceMatches(value,expected,['camera']));}
+function stageKey(item){return item?`${item.person.identity}:${item.screen?'screen':'camera'}:${item.track?.sid||''}`:'';}
 export class Classroom {
   constructor(root,lesson,credentials,onExit){
-    this.root=root;this.lesson=lesson;this.credentials=credentials;this.onExit=onExit;this.closed=false;this.isHost=credentials.is_host;this.permissions={can_speak:credentials.can_speak,can_share:credentials.can_share};this.messages=new Set();this.after=0;this.members=[];this.lastState=null;this.mediaNodes=new Map();this.mountedTracks=new Map();this.audioNodes=new Map();this.created=Date.now();this.lastHeartbeat=0;this.tab='chat';this.panelOpen=true;this.hand=false;this.requestShare=false;this.build();
+    this.root=root;this.lesson=lesson;this.credentials=credentials;this.onExit=onExit;this.closed=false;this.isHost=credentials.is_host;this.permissions={can_speak:credentials.can_speak,can_share:credentials.can_share};this.messages=new Set();this.after=0;this.members=[];this.lastState=null;this.mediaNodes=new Map();this.mountedTracks=new Map();this.audioNodes=new Map();this.created=Date.now();this.lastHeartbeat=0;this.tab='chat';this.panelOpen=true;this.hand=false;this.requestShare=false;this.selectedStageKey='';this.screenTrackWaiters=new Map();this.build();
   }
   build(){
     this.shell=el('section','','live-classroom');this.root.replaceChildren(this.shell);
@@ -43,7 +48,7 @@ export class Classroom {
     footer.append(devices,interaction,panels,ending);this.shell.append(header,this.banner,this.body,footer);this.openPanel('chat');if(window.matchMedia('(max-width:800px)').matches)this.togglePanel(false);
     tabs.addEventListener('keydown',event=>{const keys=Object.keys(this.tabs);const current=keys.findIndex(key=>this.tabs[key]===event.target);if(current<0)return;let next;if(event.key==='ArrowRight')next=(current+1)%keys.length;else if(event.key==='ArrowLeft')next=(current+keys.length-1)%keys.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=keys.length-1;else return;event.preventDefault();this.openPanel(keys[next]);this.tabs[keys[next]].focus();});
     this.clockTimer=setInterval(()=>{this.clock.textContent=elapsed((Date.now()-this.created)/1000);},1000);
-    this.beforeUnload=event=>{if(!this.closed){event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',this.beforeUnload);this.pageHide=()=>this.dispose();window.addEventListener('pagehide',this.pageHide);
+    this.beforeUnload=event=>{if(!this.closed){event.preventDefault();event.returnValue='';}};window.addEventListener('beforeunload',this.beforeUnload);this.pageHide=()=>this.dispose({leave:false});window.addEventListener('pagehide',this.pageHide);
   }
   async connect(){
     const SDK=await loadSDK();if(this.closed)return;this.SDK=SDK;
@@ -153,26 +158,40 @@ export class Classroom {
     // SDK track events may fire before their publications are removed.
     this.mediaFrame=requestAnimationFrame(()=>{this.mediaFrame=null;if(!this.closed)this.renderMedia();});
   }
+  waitForScreenTrack(pub,attempt=0){
+    if(!this.screenTrackWaiters)this.screenTrackWaiters=new Map();
+    if(this.closed||pub?.track||attempt>=8)return;
+    if(this.screenTrackWaiters.has(pub))return;
+    const timer=setTimeout(()=>{this.screenTrackWaiters.delete(pub);if(this.closed)return;this.scheduleMediaRender();if(!pub.track)this.waitForScreenTrack(pub,attempt+1);},Math.min(400,50*(attempt+1)));
+    this.screenTrackWaiters.set(pub,timer);
+  }
   renderMedia(){
-    if(!this.room||this.closed)return;const participants=[this.room.localParticipant,...this.room.remoteParticipants.values()];const videos=[],audios=[];
-    for(const person of participants){for(const pub of person.trackPublications.values()){const track=pub.track;if(!track||pub.isMuted||track.mediaStreamTrack?.readyState==='ended')continue;const item={track,person,pub};if(track.kind==='video')videos.push(item);else if(person!==this.room.localParticipant)audios.push(item);}}
+    if(!this.room||this.closed)return;const participants=[this.room.localParticipant,...this.room.remoteParticipants.values()];const videos=[],audios=[];let remoteScreenPending=false;
+    for(const person of participants){for(const pub of person.trackPublications.values()){
+      const screen=isScreenPublication(pub,this.SDK),camera=isCameraPublication(pub,this.SDK);if(person!==this.room.localParticipant&&screen&&!pub.track&&pub.setSubscribed){if(!pub.__screenSubscribeRequested){pub.__screenSubscribeRequested=true;void pub.setSubscribed(true).then(()=>{this.scheduleMediaRender();this.waitForScreenTrack(pub);}).catch(()=>{pub.__screenSubscribeRequested=false;});}else this.waitForScreenTrack(pub);}
+      const track=pub.track;if(!track||pub.isMuted||track.mediaStreamTrack?.readyState==='ended'){if(person!==this.room.localParticipant&&screen&&!pub.isMuted)remoteScreenPending=true;continue;}
+      const item={track,person,pub,screen,camera};if(track.kind==='video')videos.push(item);else if(person!==this.room.localParticipant)audios.push(item);
+    }}
     const audioIds=new Set(audios.map(x=>x.track.sid));for(const [id,node]of this.audioNodes){if(!audioIds.has(id)){this.mountedTracks.get(id)?.detach(node);node.remove();this.audioNodes.delete(id);this.mountedTracks.delete(id);}}
     for(const item of audios){if(!this.audioNodes.has(item.track.sid)){const node=item.track.attach();this.audioSink.append(node);this.audioNodes.set(item.track.sid,node);this.mountedTracks.set(item.track.sid,item.track);}}
-    const source=this.SDK.Track.Source;const localScreen=videos.some(item=>item.pub.source===source.ScreenShare&&item.person===this.room.localParticipant);
+    const localScreen=videos.some(item=>item.screen&&item.person===this.room.localParticipant);
     // The sender does not decode its own desktop, avoiding a recursive classroom preview.
-    const screen=videos.find(item=>item.pub.source===source.ScreenShare&&item.person!==this.room.localParticipant);
-    const active=this.room.activeSpeakers[0];const main=screen||videos.find(item=>item.pub.source===source.Camera&&item.person===active)||videos.find(item=>item.person!==this.room.localParticipant&&item.pub.source===source.Camera)||videos.find(item=>item.pub.source===source.Camera);
-    const stageKey=main?.track.sid||'';
-    this.stageMain=main;this.localScreen=localScreen;this.stageScreen=screen;
-    if(stageKey!==this.stageKey||main?.track!==this.stageTrack){this.stagePlayback?.dispose();this.stagePlayback=null;this.stageMedia.replaceChildren();this.stageKey=stageKey;this.stageTrack=main?.track;this.playbackState='connecting';if(main){this.stagePlayback=mountVideo(main.track,this.stageMedia,{onState:value=>{this.playbackState=value;this.updateStageStatus();}});this.stageNode=this.stagePlayback.node;this.stageNode.classList.toggle('camera',!screen);}}
-    this.stageName.hidden=!main;this.stageName.textContent=main?`${main.person.name||main.person.identity}${screen?' · 正在共享屏幕':''}`:'';
+    const remoteScreens=videos.filter(item=>item.screen&&item.person!==this.room.localParticipant);const remoteScreen=remoteScreens[0];
+    const active=this.room.activeSpeakers?.[0];const activeIdentity=active?.identity||active;const selected=videos.find(item=>stageKey(item)===this.selectedStageKey);
+    const activeCamera=videos.find(item=>item.camera&&item.person!==this.room.localParticipant&&item.person.identity===activeIdentity);
+    const remoteCamera=videos.find(item=>item.camera&&item.person!==this.room.localParticipant);const localCamera=videos.find(item=>item.camera&&item.person===this.room.localParticipant);
+    const previous=this.stageMain;const previousState=previous?.track?.mediaStreamTrack?.readyState;const previousStillValid=Boolean(previous?.track&&(!previousState||previousState==='live'));
+    const main=selected||remoteScreen||activeCamera||remoteCamera||localCamera||(remoteScreenPending&&previousStillValid?previous:undefined);const currentStageKey=stageKey(main);
+    if(this.selectedStageKey&&!selected)this.selectedStageKey='';
+    this.stageMain=main;this.localScreen=localScreen;this.stageScreen=remoteScreen;this.remoteScreenPending=remoteScreenPending;
+    if(currentStageKey!==this.stageKey||main?.track!==this.stageTrack){this.stagePlayback?.dispose();this.stagePlayback=null;this.stageMedia.replaceChildren();this.stageKey=currentStageKey;this.stageTrack=main?.track;this.playbackState=main?'connecting':'unavailable';if(main){this.stagePlayback=mountVideo(main.track,this.stageMedia,{onState:value=>{this.playbackState=value;this.updateStageStatus();}});this.stageNode=this.stagePlayback.node;this.stageNode.classList.toggle('camera',!main.screen);}}
+    this.stageName.hidden=!main;this.stageName.textContent=main?`${main.person.name||main.person.identity}${main.screen?' · 正在共享屏幕':''}`:'';
     this.updateStageStatus();
-    const identities=new Set(participants.map(person=>person.identity));for(const child of [...this.strip.children])if(!identities.has(child.dataset.identity)){child._track?.detach(child.querySelector('video'));child.remove();}
-    for(const person of participants){let tile=[...this.strip.children].find(child=>child.dataset.identity===person.identity);if(!tile){tile=el('div','','live-video-tile');tile.dataset.identity=person.identity;tile.append(el('span',(person.name||person.identity).slice(0,1).toUpperCase(),'live-tile-avatar'),el('span','','live-tile-name'));this.strip.append(tile);}
-      tile.lastElementChild.textContent=`${person.name||person.identity}${person===this.room.localParticipant?'（我）':''}${person.isMicrophoneEnabled?'':' · 静音'}`;
-      const camera=videos.find(item=>item.person===person&&item.pub.source===source.Camera)?.track;
-      if(tile._track!==camera){tile._track?.detach(tile.querySelector('video'));tile.querySelector('video')?.remove();tile._track=camera;if(camera){const video=camera.attach();video.muted=true;video.playsInline=true;tile.insertBefore(video,tile.firstChild);}}
-      tile.classList.toggle('speaking',this.room.activeSpeakers.includes(person));
+    const tileItems=[];for(const person of participants){const camera=videos.find(item=>item.camera&&item.person===person);tileItems.push(camera||{person,track:null,screen:false,camera:true});if(person!==this.room.localParticipant){for(const item of remoteScreens.filter(entry=>entry.person===person))tileItems.push(item);}}
+    const tileKeys=new Set(tileItems.map(item=>stageKey(item)||`${item.person.identity}:camera:`));for(const child of [...this.strip.children])if(!tileKeys.has(child.dataset.stageKey)){child._track?.detach(child.querySelector('video'));child.remove?.();}
+    for(const item of tileItems){const key=stageKey(item)||`${item.person.identity}:camera:`;let tile=[...this.strip.children].find(child=>child.dataset?.stageKey===key||(!child.dataset?.stageKey&&child.dataset?.identity===item.person.identity));if(!tile){tile=el('div','','live-video-tile');tile.dataset.identity=item.person.identity;tile.dataset.stageKey=key;tile.setAttribute('role','button');tile.tabIndex=0;tile.append(el('span',(item.person.name||item.person.identity).slice(0,1).toUpperCase(),'live-tile-avatar'),el('span','','live-tile-name'));const select=()=>{if(this.closed)return;this.selectedStageKey=key;this.renderMedia();};tile.addEventListener('click',select);tile.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();select();}});this.strip.append(tile);}
+      const label=`${item.person.name||item.person.identity}${item.person===this.room.localParticipant?'（我）':''}${item.screen?' · 共享屏幕':''}${!item.screen&&!item.person.isMicrophoneEnabled?' · 静音':''}`;if(tile.lastElementChild)tile.lastElementChild.textContent=label;tile.setAttribute?.('aria-label',`切换主画面：${label}`);tile.setAttribute?.('aria-pressed',String(key===currentStageKey));tile.classList?.toggle('is-selected',key===currentStageKey);tile.classList?.toggle('speaking',this.room.activeSpeakers?.includes(item.person));
+      const track=item.track;if(tile._track!==track){const video=tile.querySelector?.('video');tile._track?.detach(video);video?.remove();tile._track=track;if(track){const videoNode=track.attach();videoNode.muted=true;videoNode.playsInline=true;tile.insertBefore?.(videoNode,tile.firstChild);}}
     }
     this.syncControls();
   }
@@ -187,8 +206,8 @@ export class Classroom {
       this.stageRecovery.textContent=status==='blocked'?'播放画面':'重新连接画面';
     }else{
       const failed=this.localScreen&&this.shareHealth?.failed;
-      this.stageTitle.textContent=failed?'共享画面未能发出':this.localScreen?'正在共享屏幕':this.lesson.title;
-      this.stageCaption.textContent=failed?'已尝试恢复发送。请停止共享并重新选择课件标签页；若仍失败，请检查 Chrome 的屏幕录制权限。':this.localScreen?'已开启屏幕采集，请切换到课件窗口继续讲解。结束时点击下方“停止共享”。':'等待主持人共享屏幕，或开启摄像头。';
+      this.stageTitle.textContent=failed?'共享画面未能发出':this.remoteScreenPending?'正在连接共享画面':this.localScreen?'正在共享屏幕':this.lesson.title;
+      this.stageCaption.textContent=failed?'已尝试恢复发送。请停止共享并重新选择课件标签页；若仍失败，请检查 Chrome 的屏幕录制权限。':this.remoteScreenPending?'主持人已开始共享，正在接收画面；如果长时间没有画面，请主持人停止后重新共享。':this.localScreen?'已开启屏幕采集，请切换到课件窗口继续讲解。结束时点击下方“停止共享”。':'等待主持人共享屏幕，或开启摄像头。';
     }
   }
   async recoverStage(){
@@ -200,8 +219,9 @@ export class Classroom {
   }
   async checkShareHealth(){
     if(this.closed||this.shareHealthBusy||this.shareBusy||!this.room?.localParticipant)return;
-    const local=this.room.localParticipant,source=this.SDK.Track.Source.ScreenShare;
-    const track=[...local.trackPublications.values()].find(pub=>pub.source===source)?.track;
+    const local=this.room.localParticipant;
+    const source=this.SDK.Track.Source.ScreenShare;
+    const track=[...local.trackPublications.values()].find(pub=>isScreenPublication(pub,this.SDK))?.track;
     if(!track){this.shareHealth=null;return;}
     if(this.shareHealth?.track!==track)this.shareHealth={track,since:Date.now(),retried:false,failed:false};
     const health=this.shareHealth;if(health.failed||health.sent||Date.now()-health.since<30000||!track.getSenderStats)return;
@@ -232,13 +252,13 @@ export class Classroom {
   }
   async leave(){if(!await confirmAction('离开会停止你的麦克风、摄像头和共享，课堂仍会继续。',{title:'离开当前课堂？',confirmText:'离开课堂'}))return;await this.finishExit();}
   async end(){if(!await confirmAction('所有学员将离开课堂；录制完成处理后可在课次中查看。',{title:'结束本次课堂？',danger:true,confirmText:'结束课堂'}))return;await api(`/live/lessons/${this.lesson.id}/end`,{method:'POST'});await this.finishExit();}
-  async finishExit(){if(this.closed)return;this.dispose();await this.onExit();}
-  dispose(){
+  async finishExit(){if(this.closed)return;this.dispose({leave:true});await this.onExit();}
+  dispose({leave=true}={}){
     if(this.closed)return;this.closed=true;clearTimeout(this.pollTimer);clearInterval(this.clockTimer);cancelAnimationFrame(this.mediaFrame);window.removeEventListener('beforeunload',this.beforeUnload);window.removeEventListener('pagehide',this.pageHide);
-    this.room?.disconnect(true);for(const track of this.mountedTracks.values())track.detach();this.audioNodes.clear();this.stagePlayback?.dispose();for(const tile of this.strip.children)tile._track?.detach();
+    this.room?.disconnect(true);for(const timer of this.screenTrackWaiters?.values()||[])clearTimeout(timer);this.screenTrackWaiters?.clear();for(const track of this.mountedTracks.values())track.detach();this.audioNodes.clear();this.stagePlayback?.dispose();for(const tile of this.strip.children)tile._track?.detach();
     if(document.fullscreenElement===this.shell)void document.exitFullscreen().catch(()=>{});
     // Keep a short authenticated leave request alive during document navigation.
-    if(state.token)void fetch(`/api/live/lessons/${this.lesson.id}/leave`,{method:'POST',headers:{Authorization:`Bearer ${state.token}`},keepalive:true}).catch(()=>{});
+    if(leave&&state.token)void fetch(`/api/live/lessons/${this.lesson.id}/leave`,{method:'POST',headers:{Authorization:`Bearer ${state.token}`},keepalive:true}).catch(()=>{});
     document.querySelectorAll('dialog[data-live-owned]').forEach(dialog=>dialog.close());
   }
 }
